@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Sermon Evaluation — Hebrews 3:1-6</title>
 <style>
   :root {
@@ -13,97 +13,168 @@
     --panel: #ffffff;
     --accent: #a67c2e;
     --accent-soft: #c9a55c;
-    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
     --green: #4a7c59;
-    --green-soft: #7ba886;
     --amber: #c9892e;
     --red: #a04848;
     --slider-track: #ebe5d5;
+    --cream-tint: #faf6ed;
+
+    --beat-humor: #d4a857;
+    --beat-diagnostic: #6b7a8f;
+    --beat-declarative: #4a6584;
+    --beat-reverent: #5a4a6b;
+    --beat-pastoral: #7a8f6b;
+    --beat-awe: #6b4a7a;
+    --beat-encouragement: #8aa37a;
+    --beat-convicting: #a04848;
+    --beat-doxological: #c9892e;
+    --beat-teaching: #a8a59a;
+    --beat-climactic: #4a7c59;
+    --beat-invitation: #c98a4a;
+    --beat-tender: #6b4a4a;
+    --beat-info: #8a8a82;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
   body {
     font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
-    background: var(--bg);
-    color: var(--ink);
+    font-size: 16px;
     line-height: 1.55;
-    padding: 48px 24px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
     max-width: 1100px;
     margin: 0 auto;
+    padding: 48px 24px 96px;
   }
-  .header {
-    border-bottom: 2px solid var(--ink);
-    padding-bottom: 32px;
-    margin-bottom: 40px;
+  @media (max-width: 700px) {
+    .wrap { padding: 24px 16px 64px; }
   }
+
+  /* HEADER */
   .eyebrow {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 11px;
+    font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--accent);
-    font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
   h1 {
-    font-size: 36px;
+    font-size: 42px;
+    line-height: 1.15;
     font-weight: 600;
-    line-height: 1.2;
-    margin-bottom: 8px;
-    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+    letter-spacing: -0.015em;
   }
   .subtitle {
-    font-size: 18px;
-    color: var(--ink-soft);
     font-style: italic;
-    margin-bottom: 24px;
+    color: var(--ink-soft);
+    font-size: 18px;
+    margin-bottom: 28px;
   }
-  .meta {
+  .metadata {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    padding: 14px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 32px;
     display: flex;
     flex-wrap: wrap;
     gap: 24px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    color: var(--ink-soft);
   }
-  .meta-item strong {
-    display: block;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+  .metadata strong {
     color: var(--ink);
-    margin-bottom: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 6px;
   }
-  .verdict {
+
+  /* HEADLINE LOCKUP */
+  .headline-score-lockup {
+    display: grid;
+    grid-template-columns: 260px 1fr;
     background: var(--panel);
-    border-left: 4px solid var(--accent);
-    padding: 20px 24px;
-    margin: 32px 0 48px;
-    font-size: 19px;
-    line-height: 1.5;
-    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+    box-shadow: 0 1px 0 var(--rule);
   }
-  .verdict-label {
+  @media (max-width: 700px) {
+    .headline-score-lockup { grid-template-columns: 1fr; }
+  }
+  .headline-score {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3340 100%);
+    color: #faf8f3;
+    padding: 40px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .headline-score-num {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, serif;
+    font-size: 64px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .headline-score-denom {
+    font-size: 28px;
+    color: #d8d2c2;
+    font-weight: 400;
+  }
+  .headline-band {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, serif;
+    font-size: 22px;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--accent-soft);
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(201, 165, 92, 0.3);
+    width: 80%;
+    text-align: center;
+  }
+  .headline-score-label {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 10px;
-    letter-spacing: 0.15em;
+    font-weight: 500;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--accent);
-    font-weight: 600;
-    margin-bottom: 8px;
+    color: #a8a294;
   }
+  .headline-verdict {
+    padding: 36px 36px 36px 32px;
+    border-left: 3px solid var(--accent);
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  .headline-verdict p { margin: 0 0 18px; }
+  .headline-verdict p:last-child { margin: 0; }
+  .headline-verdict strong { color: var(--ink); }
+
+  /* CATEGORY CARDS */
   .category {
     background: var(--panel);
-    box-shadow: var(--shadow);
     margin-bottom: 28px;
-    overflow: hidden;
+    box-shadow: 0 1px 0 var(--rule);
   }
   .category-header {
-    padding: 18px 28px;
+    background: linear-gradient(135deg, var(--cream-tint) 0%, var(--panel) 100%);
+    padding: 22px 28px;
     border-bottom: 1px solid var(--rule);
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    background: linear-gradient(180deg, #fafaf6 0%, #ffffff 100%);
+    flex-wrap: wrap;
+    gap: 12px;
   }
   .category-title {
     font-size: 20px;
@@ -111,715 +182,1234 @@
   }
   .category-score {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     color: var(--ink-soft);
-    font-weight: 500;
+    text-transform: uppercase;
   }
-  .criteria {
-    padding: 24px 28px;
-  }
+  .criteria { padding: 8px 28px 20px; }
+
+  /* CRITERION ROW (clickable / expandable) */
   .criterion {
-    margin-bottom: 18px;
+    border-bottom: 1px solid var(--rule);
   }
-  .criterion:last-child { margin-bottom: 0; }
-  .crit-row {
+  .criterion:last-child { border-bottom: none; }
+  .crit-button {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 18px 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
     display: grid;
-    grid-template-columns: 1fr 220px 40px;
+    grid-template-columns: 24px 1fr 220px 50px;
     gap: 16px;
     align-items: center;
-    margin-bottom: 6px;
   }
+  @media (max-width: 700px) {
+    .crit-button {
+      grid-template-columns: 24px 1fr 50px;
+      gap: 10px;
+    }
+    .crit-slider { display: none; }
+  }
+  .crit-chevron {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    transition: transform 0.2s ease;
+  }
+  .criterion.open .crit-chevron { transform: rotate(90deg); }
   .crit-name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
   }
   .crit-source {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-style: italic;
     font-size: 11px;
     color: var(--ink-soft);
-    font-style: italic;
-    margin-left: 6px;
+    margin-left: 10px;
+    letter-spacing: 0.02em;
   }
-  .slider {
+  .crit-slider {
     height: 10px;
     background: var(--slider-track);
     border-radius: 5px;
     position: relative;
-    overflow: visible;
   }
-  .slider-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .crit-slider-fill {
     height: 100%;
     border-radius: 5px;
   }
-  .slider-thumb {
+  .crit-slider-thumb {
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 16px;
-    height: 16px;
-    background: var(--panel);
-    border: 3px solid currentColor;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    background: var(--panel);
+    border: 2px solid currentColor;
   }
-  .score-1, .score-2 { color: var(--red); }
-  .score-1 .slider-fill, .score-2 .slider-fill { background: var(--red); }
-  .score-3 { color: var(--amber); }
-  .score-3 .slider-fill { background: var(--amber); }
-  .score-4, .score-5 { color: var(--green); }
-  .score-4 .slider-fill, .score-5 .slider-fill { background: var(--green); }
+  .crit-slider.score-5 { color: var(--green); }
+  .crit-slider.score-5 .crit-slider-fill { background: var(--green); width: 100%; }
+  .crit-slider.score-5 .crit-slider-thumb { left: 100%; }
+  .crit-slider.score-4 { color: var(--green); }
+  .crit-slider.score-4 .crit-slider-fill { background: var(--green); width: 80%; }
+  .crit-slider.score-4 .crit-slider-thumb { left: 80%; }
+  .crit-slider.score-3 { color: var(--amber); }
+  .crit-slider.score-3 .crit-slider-fill { background: var(--amber); width: 60%; }
+  .crit-slider.score-3 .crit-slider-thumb { left: 60%; }
+  .crit-slider.score-2 { color: var(--red); }
+  .crit-slider.score-2 .crit-slider-fill { background: var(--red); width: 40%; }
+  .crit-slider.score-2 .crit-slider-thumb { left: 40%; }
+  .crit-slider.score-1 { color: var(--red); }
+  .crit-slider.score-1 .crit-slider-fill { background: var(--red); width: 20%; }
+  .crit-slider.score-1 .crit-slider-thumb { left: 20%; }
   .crit-score {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 14px;
     font-weight: 600;
     text-align: right;
-  }
-  .narrative {
-    padding: 0 28px 24px;
-    font-size: 15px;
-    line-height: 1.6;
     color: var(--ink);
-    border-top: 1px dashed var(--rule);
-    padding-top: 20px;
   }
-  .narrative strong { color: var(--ink); font-weight: 600; }
-  .growth {
-    background: #faf6ed;
-    padding: 16px 24px;
-    margin: 16px 0 0;
-    border-left: 3px solid var(--accent-soft);
+
+  .crit-detail {
+    display: none;
+    background: var(--cream-tint);
+    border-left: 3px solid var(--accent);
+    padding: 22px 28px;
+    margin: 0 0 14px;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .criterion.open .crit-detail { display: block; }
+  .crit-detail-principle {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .crit-detail blockquote {
+    margin: 12px 0;
+    padding: 8px 0 8px 18px;
+    border-left: 2px solid var(--accent-soft);
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .crit-detail strong { color: var(--ink); }
+
+  /* SECTION HEADERS */
+  .section-eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0 0 24px;
+    letter-spacing: -0.01em;
+  }
+
+  /* WHAT'S WORKING */
+  .working-section {
+    margin-top: 48px;
+  }
+  .working-eyebrow { color: var(--green); }
+  .working-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 700px) {
+    .working-grid { grid-template-columns: 1fr; }
+  }
+  .working-card {
+    background: var(--panel);
+    border-top: 3px solid var(--green);
+    padding: 24px 26px;
+    box-shadow: 0 1px 0 var(--rule);
+  }
+  .working-card-title {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--green);
+    margin: 0 0 10px;
+  }
+  .working-card blockquote {
+    margin: 10px 0 12px;
+    padding-left: 14px;
+    border-left: 2px solid var(--accent-soft);
+    font-style: italic;
     font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .working-card p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+
+  /* WHERE IT CAN GET BETTER */
+  .growth-section {
+    margin-top: 56px;
+  }
+  .growth-eyebrow { color: var(--amber); }
+  .growth-panel {
+    background: var(--cream-tint);
+    border-left: 4px solid var(--amber);
+    padding: 28px 30px;
+    margin-bottom: 22px;
   }
   .growth-label {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 10px;
-    letter-spacing: 0.12em;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--amber);
     text-transform: uppercase;
-    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .growth-title {
+    font-size: 22px;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
   }
-  .growth-item {
-    margin-bottom: 12px;
-    line-height: 1.55;
-  }
-  .growth-item:last-child { margin-bottom: 0; }
-  .growth-item strong.label {
-    display: inline;
-    color: var(--ink);
+  .growth-principle {
+    display: inline-block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10px;
     font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #faf8f3;
+    background: var(--ink);
+    padding: 4px 10px;
+    margin-bottom: 16px;
   }
-  .heatmap-panel {
+  .growth-panel p {
+    font-size: 15.5px;
+    line-height: 1.65;
+    margin: 0 0 14px;
+  }
+  .growth-panel p:last-of-type { margin-bottom: 18px; }
+  .growth-panel blockquote {
+    margin: 14px 0;
+    padding: 10px 0 10px 18px;
+    border-left: 2px solid var(--accent-soft);
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .next-step {
     background: var(--panel);
-    box-shadow: var(--shadow);
-    margin-bottom: 28px;
-    padding: 28px;
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin-top: 18px;
   }
-  .heatmap-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+  .next-step-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
     margin-bottom: 6px;
   }
-  .heatmap-title {
-    font-size: 20px;
-    font-weight: 600;
+  .next-step-text {
+    font-size: 14.5px;
+    line-height: 1.55;
   }
-  .heatmap-caveat {
+
+  /* HEAT MAP */
+  .heatmap-section {
+    margin-top: 56px;
+    background: var(--panel);
+    padding: 32px 28px;
+    box-shadow: 0 1px 0 var(--rule);
+  }
+  .heatmap-eyebrow { color: var(--accent); }
+  .heatmap-note {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--ink-soft);
     font-style: italic;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
   }
-  .timeline {
+  .heatmap-timeline {
     display: flex;
     height: 60px;
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 14px;
-    box-shadow: inset 0 0 0 1px var(--rule);
+    margin-bottom: 20px;
+    box-shadow: 0 1px 0 var(--rule);
   }
   .beat {
-    flex-grow: 1;
-    position: relative;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    border-right: 1px solid rgba(255,255,255,.4);
+    position: relative;
+    transition: opacity 0.15s ease;
+    border-right: 1px solid rgba(255,255,255,0.15);
   }
   .beat:last-child { border-right: none; }
-  .beat:hover {
-    transform: scaleY(1.08);
-    z-index: 2;
-    box-shadow: 0 4px 12px rgba(0,0,0,.2);
-  }
-  .beat-info { background: #8a8a82; }
-  .beat-humor { background: #d4a857; }
-  .beat-diagnostic { background: #6b7a8f; }
-  .beat-declarative { background: #4a6584; }
-  .beat-reverent { background: #5a4a6b; }
-  .beat-pastoral { background: #7a8f6b; }
-  .beat-awe { background: #6b4a7a; }
-  .beat-encouragement { background: #8aa37a; }
-  .beat-convicting { background: #a04848; }
-  .beat-doxological { background: #c9892e; }
-  .beat-teaching { background: #a8a59a; }
-  .beat-climactic { background: #4a7c59; }
-  .beat-invitation { background: #c98a4a; }
-  .beat-tender { background: #6b4a4a; }
-
-  .beat-mismatch::after {
+  .beat:hover { opacity: 0.85; }
+  .beat.mismatch::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-image: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 4px,
-      rgba(255,255,255,0.35) 4px,
-      rgba(255,255,255,0.35) 8px
-    );
+    inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.35) 4px, rgba(255,255,255,0.35) 8px);
+    pointer-events: none;
   }
+  .beat.beat-humor { background: var(--beat-humor); }
+  .beat.beat-diagnostic { background: var(--beat-diagnostic); }
+  .beat.beat-declarative { background: var(--beat-declarative); }
+  .beat.beat-reverent { background: var(--beat-reverent); }
+  .beat.beat-pastoral { background: var(--beat-pastoral); }
+  .beat.beat-awe { background: var(--beat-awe); }
+  .beat.beat-encouragement { background: var(--beat-encouragement); }
+  .beat.beat-convicting { background: var(--beat-convicting); }
+  .beat.beat-doxological { background: var(--beat-doxological); }
+  .beat.beat-teaching { background: var(--beat-teaching); }
+  .beat.beat-climactic { background: var(--beat-climactic); }
+  .beat.beat-invitation { background: var(--beat-invitation); }
+  .beat.beat-tender { background: var(--beat-tender); }
+  .beat.beat-info { background: var(--beat-info); }
 
-  .legend {
+  .heatmap-detail {
+    background: var(--cream-tint);
+    border-left: 3px solid var(--accent);
+    padding: 18px 22px;
+    margin-top: 14px;
+    display: none;
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .heatmap-detail.active { display: block; }
+  .heatmap-detail-timestamp {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .heatmap-detail-label {
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .heatmap-legend {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
     display: flex;
     flex-wrap: wrap;
-    gap: 12px 18px;
-    margin-bottom: 24px;
+    gap: 14px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 11px;
     color: var(--ink-soft);
   }
-  .legend-item {
+  .heatmap-legend-item {
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .legend-swatch {
-    width: 12px; height: 12px; border-radius: 2px;
+  .heatmap-legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
   }
-  .beat-detail {
-    background: #faf6ed;
-    padding: 16px 20px;
-    border-left: 3px solid var(--accent-soft);
-    font-size: 14px;
-    line-height: 1.6;
-    min-height: 80px;
-    transition: all 0.2s ease;
-  }
-  .beat-detail strong { color: var(--ink); font-weight: 600; }
-  .beat-detail .time {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    font-weight: 600;
-    margin-bottom: 4px;
-    display: block;
-  }
-  .beat-detail .match {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 12px;
-    margin-top: 8px;
-    font-weight: 600;
-  }
-  .match-strong { color: var(--green); }
-  .match-aligned { color: var(--ink-soft); }
-  .match-mismatch { color: var(--red); }
 
-  .priorities {
-    background: var(--ink);
-    color: #f5f0e3;
-    padding: 36px 32px;
-    margin-top: 40px;
+  /* TOP 3 PRIORITIES */
+  .priorities-section {
+    margin-top: 56px;
+    background: linear-gradient(135deg, #1a2332 0%, #2a3340 100%);
+    color: #faf8f3;
+    padding: 40px 36px;
+  }
+  .priorities-eyebrow {
+    color: var(--accent-soft);
+    margin-bottom: 8px;
   }
   .priorities-title {
-    font-size: 22px;
+    font-size: 30px;
     font-weight: 600;
-    margin-bottom: 6px;
-    color: #fff;
+    margin: 0 0 8px;
+    color: #faf8f3;
   }
-  .priorities-sub {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent-soft);
-    margin-bottom: 28px;
+  .priorities-subtitle {
+    font-style: italic;
+    color: #a8a294;
+    margin-bottom: 32px;
   }
   .priority {
-    display: flex;
-    gap: 20px;
-    padding: 20px 0;
-    border-bottom: 1px solid rgba(245,240,227,.12);
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    padding: 24px 0;
+    border-top: 1px solid rgba(250, 248, 243, 0.12);
   }
-  .priority:last-child { border-bottom: none; }
+  .priority:first-of-type { border-top: 1px solid rgba(250, 248, 243, 0.18); }
   .priority-num {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 32px;
+    font-family: 'Iowan Old Style', 'Charter', Georgia, serif;
+    font-size: 52px;
     font-weight: 300;
     color: var(--accent-soft);
     line-height: 1;
-    min-width: 40px;
   }
-  .priority-body {
-    flex: 1;
-  }
-  .priority-head {
-    font-size: 17px;
+  .priority-headline {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, serif;
+    font-size: 20px;
     font-weight: 600;
-    margin-bottom: 6px;
-    color: #fff;
+    margin: 0 0 10px;
+    color: #faf8f3;
   }
   .priority-rationale {
-    font-size: 14px;
-    line-height: 1.55;
     color: #d8d2c2;
-    margin-bottom: 10px;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 14px;
   }
   .priority-step {
-    background: rgba(201, 165, 92, 0.12);
+    background: rgba(166, 124, 46, 0.12);
     border-left: 2px solid var(--accent-soft);
-    padding: 10px 14px;
-    font-size: 13px;
-    color: #ebe6d5;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #ede5d0;
   }
   .priority-step strong {
-    color: var(--accent-soft);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 10px;
-    letter-spacing: 0.12em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    display: block;
-    margin-bottom: 4px;
+    color: var(--accent-soft);
+    margin-right: 8px;
   }
 
-  .rollup {
-    background: linear-gradient(135deg, #1a2332 0%, #2a3447 100%);
-    color: #f5f0e3;
-    padding: 32px;
-    margin: 32px 0 40px;
-    box-shadow: var(--shadow);
+  /* SUGGESTED REWRITES */
+  .rewrites-section {
+    margin-top: 56px;
   }
-  .rollup-eyebrow {
+  .rewrites-eyebrow { color: var(--accent); }
+  .rewrite {
+    background: var(--panel);
+    padding: 28px 30px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 0 var(--rule);
+    border-left: 3px solid var(--accent-soft);
+  }
+  .rewrite-label {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 10px;
+    font-weight: 700;
     letter-spacing: 0.18em;
+    color: var(--accent);
     text-transform: uppercase;
-    color: var(--accent-soft);
-    font-weight: 600;
-    margin-bottom: 24px;
+    margin-bottom: 10px;
   }
-  .scores-grid {
-    display: grid;
-    grid-template-columns: 1fr 1px 1fr;
-    gap: 32px;
-    align-items: stretch;
-  }
-  .score-block {
-    text-align: center;
-  }
-  .score-label {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent-soft);
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  .score-primary {
-    font-family: 'Iowan Old Style', Georgia, serif;
-    font-size: 56px;
-    font-weight: 600;
-    line-height: 1;
-    color: #fff;
-    margin-bottom: 4px;
-    letter-spacing: -0.02em;
-  }
-  .score-primary .denom {
-    font-size: 28px;
-    color: #d8d2c2;
-    font-weight: 400;
-  }
-  .score-secondary {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 14px;
-    color: #d8d2c2;
-    margin-bottom: 16px;
-  }
-  .score-explain {
-    font-size: 12px;
-    color: #b8b2a3;
-    line-height: 1.5;
+  .rewrite-original {
+    background: var(--cream-tint);
+    border-left: 2px solid var(--red);
+    padding: 14px 18px;
+    margin: 12px 0 16px;
     font-style: italic;
-    max-width: 280px;
-    margin: 0 auto;
-  }
-  .score-divider {
-    background: rgba(245,240,227,.15);
-    width: 1px;
-  }
-  .weighted-note {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(245,240,227,.12);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 12px;
-    color: #b8b2a3;
+    color: var(--ink-soft);
+    font-size: 15px;
     line-height: 1.6;
   }
-  .weighted-note strong {
-    color: var(--accent-soft);
-    font-weight: 600;
-    letter-spacing: 0.05em;
+  .rewrite-strong {
+    border-left: 2px solid var(--green);
+    padding: 0 0 0 18px;
+    font-size: 15.5px;
+    line-height: 1.65;
+  }
+  .rewrite-strong-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 8px;
   }
 
-  @media (max-width: 720px) {
-    body { padding: 24px 16px 64px; }
-    h1 { font-size: 28px; }
-    .crit-row {
-      grid-template-columns: 1fr;
-      gap: 6px;
-    }
-    .slider { width: 100%; }
-    .crit-score { text-align: left; }
-    .timeline { height: 50px; }
-    .priority { flex-direction: column; gap: 10px; }
-    .scores-grid {
-      grid-template-columns: 1fr;
-      gap: 24px;
-    }
-    .score-divider {
-      width: 100%;
-      height: 1px;
-    }
-    .score-primary { font-size: 44px; }
+  /* METHODOLOGY */
+  .methodology {
+    margin-top: 56px;
+    background: var(--panel);
+    padding: 36px 32px;
+    border-top: 3px solid var(--ink);
+    box-shadow: 0 1px 0 var(--rule);
+  }
+  .methodology-eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .methodology-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 28px;
+    letter-spacing: -0.01em;
+  }
+  .methodology-subhead {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .methodology-how-scored {
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+  }
+  .methodology-scores-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 32px;
+    background: var(--cream-tint);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .methodology-score-block {
+    display: flex;
+    flex-direction: column;
+  }
+  .methodology-score-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .methodology-score-primary {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 44px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .methodology-denom {
+    font-size: 22px;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  .methodology-score-secondary {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .methodology-score-explain {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .methodology-score-divider {
+    width: 1px;
+    background: var(--rule);
+  }
+  @media (max-width: 700px) {
+    .methodology-scores-grid { grid-template-columns: 1fr; gap: 24px; }
+    .methodology-score-divider { display: none; }
+  }
+  .methodology-note {
+    background: var(--cream-tint);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink);
+    border-left: 3px solid var(--accent-soft);
+  }
+  .methodology-note strong {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .methodology-subtotals {
+    padding: 16px 0 0;
+  }
+  .methodology-subtotals-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .methodology-subtotals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 14px;
+  }
+  .methodology-subtotals-row.methodology-subtotals-total {
+    border-bottom: 2px solid var(--ink);
+    font-weight: 600;
+    background: var(--cream-tint);
+  }
+  .methodology-subtotals-score {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 600;
+  }
+  .methodology-conversion {
+    font-family: 'SF Mono', Consolas, Monaco, monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    background: var(--cream-tint);
+    padding: 14px 18px;
+    margin-top: 16px;
+    border-left: 2px solid var(--accent-soft);
+  }
+  .methodology-conversion strong {
+    color: var(--ink);
+    font-family: 'SF Mono', Consolas, Monaco, monospace;
+  }
+  .grading-band-table {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--rule);
+  }
+  .grading-band-row {
+    display: grid;
+    grid-template-columns: 40px 80px 160px 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13.5px;
+  }
+  @media (max-width: 700px) {
+    .grading-band-row { grid-template-columns: 30px 70px 1fr; gap: 12px; }
+    .grading-band-row .grading-band-desc { grid-column: 1 / -1; padding-top: 4px; padding-left: 100px; font-size: 12.5px; }
+  }
+  .grading-band-row.grading-band-current {
+    background: var(--cream-tint);
+    border-left: 3px solid var(--accent);
+    padding-left: 11px;
+  }
+  .grading-band-letter {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+  }
+  .grading-band-range {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  .grading-band-label {
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .grading-band-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    text-align: center;
   }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<header class="header">
-  <div class="eyebrow">Sermon Evaluation · sermon-coach</div>
-  <h1>Loyalty and Faithfulness</h1>
-  <div class="subtitle">Hebrews 3:1-6 — Grace Church, Sunday morning</div>
-  <div class="meta">
-    <div class="meta-item"><strong>Length</strong>~41 minutes</div>
-    <div class="meta-item"><strong>Preacher</strong>Chris Daukas</div>
-    <div class="meta-item"><strong>Series</strong>Hebrews</div>
-    <div class="meta-item"><strong>Mode</strong>Learning exercise (retrospective)</div>
-    <div class="meta-item"><strong>Source</strong>Transcript w/ timestamps</div>
-  </div>
-</header>
-
-<div class="verdict">
-  <div class="verdict-label">Overall Verdict</div>
-  This sermon names a real condition with warmth and gets the Jesus-greater-than-Moses argument right, but the gospel and the Fallen Condition Focus both arrive in pieces rather than land with force — the result is a faithful exposition that informs the head more than it pierces the heart it's clearly trying to reach.
+<!-- HEADER -->
+<div class="eyebrow">Sermon Evaluation · sermon-coach</div>
+<h1>Loyalty, Considering Jesus, and the House We're In</h1>
+<div class="subtitle">Hebrews 3:1–6 · Trinity Bible Church Phoenix · Sunday morning</div>
+<div class="metadata">
+  <span><strong>Length</strong> ~41 min (incl. announcements)</span>
+  <span><strong>Series</strong> Hebrews</span>
+  <span><strong>Mode</strong> Manuscript-style transcript</span>
+  <span><strong>Source</strong> Transcript only · No A/V available</span>
 </div>
 
-<!-- SCORE ROLLUP -->
-<section class="rollup">
-  <div class="rollup-eyebrow">Overall Score</div>
-  <div class="scores-grid">
-    <div class="score-block">
-      <div class="score-label">Simple Average</div>
-      <div class="score-primary">3.25<span class="denom">/5</span></div>
-      <div class="score-secondary">65 / 100</div>
-      <div class="score-explain">All 12 criteria weighted equally. The raw average of how the sermon performed across the rubric.</div>
-    </div>
-    <div class="score-divider"></div>
-    <div class="score-block">
-      <div class="score-label">Weighted Score</div>
-      <div class="score-primary">3.20<span class="denom">/5</span></div>
-      <div class="score-secondary">64 / 100</div>
-      <div class="score-explain">Fallen Condition Focus, Gospel Clarity, and Application to Present Audience each count double — they are the criteria this rubric treats as load-bearing for a sermon's effectiveness.</div>
-    </div>
+<!-- HEADLINE LOCKUP -->
+<div class="headline-score-lockup">
+  <div class="headline-score">
+    <div class="headline-score-num">69<span class="headline-score-denom">/100</span></div>
+    <div class="headline-band">Faithful</div>
+    <div class="headline-score-label">Composite · See methodology at end</div>
   </div>
-  <div class="weighted-note">
-    <strong>Read this:</strong> A 3/5 on this rubric means "adequate, present, doing the work but not striking" — not failure. The sermon is solidly in the doing-the-work range, with two strengths (4/5 in Application to Present Audience, Textual Fidelity, Christ-Centered Arc, and Ecclesial Faithfulness) and one significant weakness pulling the score down (2/5 on Fallen Condition Focus). The weighted score is almost identical to the simple average, which tells you the load-bearing criteria scored about the same as everything else — there is no hidden strength or hidden weakness once weighting is applied.
+  <div class="headline-verdict">
+    <p>You preached this passage faithfully, and the move that defines the sermon is your handling of Moses. You refused the easy preacher's trick of demolishing him to elevate Jesus, and instead let the text's own logic — good versus better, glory versus greater glory — do the work. That kind of exegetical restraint is rare, and it carried the whole middle of the sermon.</p>
+    <p><strong>The single highest-leverage change for the next sermon:</strong> name the Fallen Condition Focus as one sentence and stay anchored to it. The sermon currently runs two FCFs in parallel; tightening to one would gather everything into one place.</p>
   </div>
-</section>
+</div>
 
 <!-- CATEGORY 1 -->
 <section class="category">
   <header class="category-header">
-    <div class="category-title">1 · Text & Theology</div>
-    <div class="category-score">Average 3.7 / 5</div>
+    <div class="category-title">1 · Text &amp; Theology</div>
+    <div class="category-score">Subtotal 11 / 15 · Avg 3.7 / 5</div>
   </header>
   <div class="criteria">
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Textual fidelity & exegesis<span class="crit-source">Simeon Trust</span></div>
-        <div class="slider score-4"><div class="slider-fill" style="width:80%"></div><div class="slider-thumb" style="left:80%"></div></div>
-        <div class="crit-score">4/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Textual fidelity &amp; exegesis<span class="crit-source">Simeon Trust</span></span>
+        <span class="crit-slider score-4"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">4/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Simeon Trust · Let the text drive the sermon</div>
+        <p>This is your strongest category by score, and the Moses/Jesus reading is the reason. You refused the easy move of tearing Moses down to elevate Jesus — and you named the refusal explicitly: <em>"this is not bad versus good. this is good versus better."</em> That's exegetical discipline. The Greek work on <em>therapone</em> versus <em>doulos</em> (30:14) earns its keep — "the most noble servant" — and clarifies that the comparison isn't Moses-as-failure but Moses-as-faithful-servant-pointing-forward. The Deut 18:15 and Rom 3:21 intertextual moves are clean. The "two houses" structural read — God as builder, Jesus as son over, Moses as servant within — is what the text actually says.</p>
+        <p>What keeps this from a 5: the <em>apostolos</em> note at 20:31 is correct but brief. Hebrews makes a striking move by pairing Jesus as <em>both</em> apostle (sent from God to us) and high priest (representing us to God) in the same verse — that bidirectionality is the heart of the verse's Christology, and the sermon names both halves without quite pressing on why <em>both</em>. Five minutes on that pairing would unlock something the current pass left on the table.</p>
       </div>
     </div>
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Christ-centered / redemptive arc<span class="crit-source">Chapell</span></div>
-        <div class="slider score-4"><div class="slider-fill" style="width:80%"></div><div class="slider-thumb" style="left:80%"></div></div>
-        <div class="crit-score">4/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Christ-centered / redemptive arc<span class="crit-source">Chapell</span></span>
+        <span class="crit-slider score-4"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">4/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Chapell · The redemptive arc</div>
+        <p>The Christ-centeredness here is genuine, not bolted on. It's text-driven — the passage is about Jesus, and you preached Jesus. The courtroom climax at 12:35 — <em>"christ has swapped places with you so much so that when god picks up the gavel and he slaps it down on his desk the verdict for you is not guilty pardoned freed"</em> — is the gospel arc of the sermon and it lands. The faithful-high-priest move at 22:51-24:00 closes the loop: Jesus "didn't just bring the necessary sacrifices for us he himself became the necessary sacrifice for us."</p>
+        <p>What keeps this from 5: the redemptive arc is present but doesn't quite show how <em>this specific text's</em> unique gospel contribution (Jesus as son over the house we're in) changes anything for the listener that yesterday's sermon couldn't have. The Christology is right, but the textual fingerprint on the gospel statement could be sharper.</p>
       </div>
     </div>
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Gospel clarity<span class="crit-source">Piper / Desiring God</span></div>
-        <div class="slider score-3"><div class="slider-fill" style="width:60%"></div><div class="slider-thumb" style="left:60%"></div></div>
-        <div class="crit-score">3/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Gospel clarity<span class="crit-source">Piper / Desiring God</span></span>
+        <span class="crit-slider score-3"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">3/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Piper · Make the good news unmistakable</div>
+        <p>The gospel is unmistakably preached at minute 12 — the courtroom, the gavel, "not guilty pardoned freed" — and a non-Christian in the room understands what just happened. That's a 5-quality moment, taken on its own.</p>
+        <p>But by the closing invitation at 38:48, the gospel has compressed into a slogan: <em>"in christ alone through faith alone by grace alone — that's the password."</em> The escape-room frame around it is creative, but it turns the gospel into something the seeker has to figure out and recite — a code — rather than something being declared <em>over</em> them. The right moment for the climactic fresh statement of the gospel is the invitation itself, and the password metaphor accidentally inverts the direction: instead of "this is what God is offering you right now," it becomes "this is the right answer to type in." That's the difference between a 3 and a 4 here — not whether the gospel was preached, but whether it was preached freshly in the place that most needed it.</p>
       </div>
     </div>
-  </div>
-  <div class="narrative">
-    The Moses comparison is your best exegetical work — you resist the obvious "Moses bad, Jesus good" move and read the passage as <em>good vs. better, glory vs. greater glory</em>. The Greek note on <em>apostolos</em> earns its keep. The not-guilty verdict imagery at 12:43 is gospel preaching at its best — but it lands at minute 12 inside the identity section, then doesn't return with the same force. By the closing invitation, the gospel becomes a password ("in Christ alone through faith alone by grace alone") rather than a fresh proclamation.
-    <div class="growth">
-      <div class="growth-label">Two Growth Opportunities</div>
-      <div class="growth-item"><strong class="label">Gospel becomes a moment, not a thread.</strong> The verdict imagery does its work and exits. <strong>Practical step:</strong> mark every place in the manuscript where the gospel is named explicitly. For future sermons, state the gospel in the opening, the middle of the explanation, the application, and the close — same gospel, four different angles. The listener never gets more than 10 minutes from a fresh statement of good news.</div>
-      <div class="growth-item"><strong class="label">The biblical author's <em>therefore</em> isn't fully exploited.</strong> Hebrews argues Jesus > Moses because the readers are about to make a category mistake. <strong>Practical step:</strong> on argumentative texts, write one prep sentence: "The author is doing X <em>because</em> his readers are tempted to Y." Then make sure your sermon does the same X for the same reason.</div>
-    </div>
+
   </div>
 </section>
 
 <!-- CATEGORY 2 -->
 <section class="category">
   <header class="category-header">
-    <div class="category-title">2 · Structure & Craft</div>
-    <div class="category-score">Average 2.7 / 5 — weakest category</div>
+    <div class="category-title">2 · Structure &amp; Craft</div>
+    <div class="category-score">Subtotal 9 / 15 · Avg 3.0 / 5 — weakest category</div>
   </header>
   <div class="criteria">
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Fallen Condition Focus<span class="crit-source">Chapell</span></div>
-        <div class="slider score-2"><div class="slider-fill" style="width:40%"></div><div class="slider-thumb" style="left:40%"></div></div>
-        <div class="crit-score">2/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Fallen Condition Focus<span class="crit-source">Chapell</span></span>
+        <span class="crit-slider score-2"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">2/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Chapell · The Fallen Condition Focus</div>
+        <p>The sermon has two FCFs running in parallel and never lets one win. <strong>FCF #1</strong> is announced by the Bears illustration: <em>"we are all loyal to something… who or what will we be loyal to?"</em> (3:13). <strong>FCF #2</strong> emerges by minute 35: <em>"i wonder how many of us are choosing a life that's easier… you're just living your life and slapping a tag on the back of your car that says jesus"</em> — drift, peripheralizing Jesus, half-devotion. Those are related conditions but not the same one. Loyalty competition (Bears/Cardinals frame) is about <em>where</em> our devotion goes. Drift (the closing application) is about devotion <em>thinning</em>. The Bears illustration sets up the first and the application lands on the second, and the listener never gets one anchor.</p>
+        <p>The strongest single FCF candidate the text actually serves: <em>"We're tempted to drift toward easier loyalties when following Jesus becomes socially costly."</em> That sentence connects the Bears frame to the closing application directly. Without it, the application at 35:00 feels like a different sermon than the opening illustration.</p>
       </div>
     </div>
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Melodic line / unified theme<span class="crit-source">Simeon Trust</span></div>
-        <div class="slider score-3"><div class="slider-fill" style="width:60%"></div><div class="slider-thumb" style="left:60%"></div></div>
-        <div class="crit-score">3/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Structure: melodic line · fit · memorability<span class="crit-source">Simeon Trust · Robinson</span></span>
+        <span class="crit-slider score-4"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">4/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Simeon Trust + Robinson · Big idea, structural fit, memorability</div>
+        <p><strong>Melodic line</strong> is present and named explicitly at 6:55: <em>"keep your confidence squarely placed on jesus."</em> Every section serves it. <strong>Structural fit</strong> is real — the "two things" (identity, then considering Jesus) rises from v.1's "holy brothers… consider Jesus," not from a prior framework imposed on the text. <strong>Memorability</strong> is solid: the Bears/Cardinals frame returns, "consider Jesus" is short and repeatable, the house metaphor sticks. A listener could give the sermon's argument back on Tuesday.</p>
+        <p>What caps it at 4: the announced structure is two-point, but the sermon is actually three movements (identity → considering Jesus → Moses/Jesus comparison). The Moses comparison gets ~10 minutes and is the engine of vv.2-6, but it sits <em>beside</em> the two-point frame rather than nesting inside it. Saying "we'll see three things" — identity, considering Jesus, why Jesus is greater than Moses — would have matched what you actually preached.</p>
       </div>
     </div>
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Structure & memorability</div>
-        <div class="slider score-3"><div class="slider-fill" style="width:60%"></div><div class="slider-thumb" style="left:60%"></div></div>
-        <div class="crit-score">3/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Hard things handled<span class="crit-source">Simeon Trust workshop practice</span></span>
+        <span class="crit-slider score-3"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">3/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Simeon Trust · Let the hard thing be hard</div>
+        <p>The genuinely hard thing in this passage is the conditional in v.6: <em>"if indeed we hold fast our confidence and our boasting in our hope."</em> Hebrews has these warnings sitting right next to its strongest assurance language, and Reformed congregations especially can flinch at the "if" because it threatens the security they came to receive. You did <em>not</em> dodge it. <em>"Such a big word for only being two letters — if. If indeed."</em> (34:22) names that this matters.</p>
+        <p>What keeps this from 4: after naming the conditional, you used it as a pivot to application rather than preaching <em>through</em> the tension. You moved quickly to "i highly doubt many of you are considering turning your back" and then to the drift application. The harder pastoral move — sitting in the "if" long enough that a person who isn't sure whether they're persevering feels the weight before being given the resolution — isn't quite made. The hard thing got named, then defused into application. That's better than skipping it, but it's not the same as preaching it.</p>
       </div>
     </div>
-    <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Argumentative clarity<span class="crit-source">added for epistolary genre</span></div>
-        <div class="slider score-3"><div class="slider-fill" style="width:60%"></div><div class="slider-thumb" style="left:60%"></div></div>
-        <div class="crit-score">3/5</div>
-      </div>
-    </div>
-  </div>
-  <div class="narrative">
-    Highest-leverage place to grow. Three competing FCFs run in the sermon: <em>misplaced loyalty</em> (Bears opening), <em>cost of discipleship</em> (minute 5), and <em>drift through ease</em> (minute 35). The third is closest to what the text is actually diagnosing — but it arrives too late to anchor the sermon. Your two-point outline ("identity / consider Jesus") obscures rather than reveals the text's melodic line, which builds through seven beats: <em>consider Jesus → sent and faithful → just as Moses → but greater glory → because son not servant → and we are the house → if we hold fast.</em>
-    <div class="growth">
-      <div class="growth-label">Two Growth Opportunities</div>
-      <div class="growth-item"><strong class="label">One FCF, one sentence, present tense.</strong> Right now there are three. <strong>Practical step:</strong> before preaching this passage again, write the FCF as one sentence — "We are tempted to trade Christ for a loyalty that costs less, even when the trade is actually a downgrade." Tape it to the top of the manuscript. Test every paragraph against it. The Bears story is great but serves "misplaced loyalty" — it needs one extra sentence to serve the actual FCF.</div>
-      <div class="growth-item"><strong class="label">Structure should follow the text's argument, not topic categories.</strong> <strong>Practical step:</strong> on argumentative texts, outline the sermon as the <em>steps in the text's argument</em> rather than as topical points. The sermon length is the same; listeners feel the build instead of the categorization. Memorability comes from feeling an argument move.</div>
-    </div>
+
   </div>
 </section>
 
 <!-- CATEGORY 3 -->
 <section class="category">
   <header class="category-header">
-    <div class="category-title">3 · Application & Audience Connection</div>
-    <div class="category-score">Average 3.3 / 5</div>
+    <div class="category-title">3 · Application &amp; Audience Connection</div>
+    <div class="category-score">Subtotal 11 / 15 · Avg 3.7 / 5</div>
   </header>
   <div class="criteria">
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Application to present audience</div>
-        <div class="slider score-4"><div class="slider-fill" style="width:80%"></div><div class="slider-thumb" style="left:80%"></div></div>
-        <div class="crit-score">4/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Application to present audience<span class="crit-source">Keller</span></span>
+        <span class="crit-slider score-4"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">4/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Keller · Three audiences in one room</div>
+        <p>The cultural diagnosis is sharp and located: <em>"instead of going to the lake every weekend will make you different than the people around you especially in phoenix"</em> (5:42). The list at 5:27 — sexuality, marriage, church membership — names actual contested positions, not abstract ones. The closing image is genuinely vivid: <em>"you're just living your life and slapping a tag on the back of your car that says jesus"</em>. And the "outside the house" turn at 37:50 is real seeker-address — not a token nod to non-believers but a direct invitation: "god is inviting you into the house this morning."</p>
+        <p>What keeps it from 5: the application stays mostly in <em>diagnostic question</em> mode — "are you near to jesus? are you seeking jesus?" — rather than naming the specific drifts. You gestured at career-building, family-building, "nice trips" (35:33), which is real specificity, but you didn't quite preach the dad-checking-work-email-at-dinner level of address. Keller's three audiences (believer, doubter, seeker) are mostly addressed; doubters get the least airtime.</p>
       </div>
     </div>
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Heat Map: emotional delivery<span class="crit-source">pacing-inferred only</span></div>
-        <div class="slider score-3"><div class="slider-fill" style="width:60%"></div><div class="slider-thumb" style="left:60%"></div></div>
-        <div class="crit-score">3/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Heat Map: emotional delivery<span class="crit-source">sermon-coach</span></span>
+        <span class="crit-slider score-4"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">4/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Inferred from manuscript only · No A/V available</div>
+        <p>Inferring from textual cues: the heat map is generally well-paced. Humor opens, teaching builds, the courtroom moment climaxes naturally, the pastoral oscillation at the close (convicting → tender → invitation → pastoral) works. The "i've had this sense god wants to do something this morning" preface at 8:48 raises the stakes appropriately for what follows.</p>
+        <p>The one clear pacing mismatch is the escape-room digression at 38:23 — <em>"have you guys ever done a skateboard how many people here have done an escape room it would be awesome if there was an escape room big enough to hold all of us"</em> — which lands as casual humor inside what should be the climactic gospel invitation. The listener has just been called to a decision moment ("the door is unlocked by the key of faith") and you pivoted to escape-room ephemera before delivering the key. A delivery heat map (with audio) would say more here, but the textual signal is clear enough: the register dropped at exactly the moment it should have intensified.</p>
       </div>
     </div>
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Pastoral specificity</div>
-        <div class="slider score-3"><div class="slider-fill" style="width:60%"></div><div class="slider-thumb" style="left:60%"></div></div>
-        <div class="crit-score">3/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Pastoral specificity<span class="crit-source">Keller</span></span>
+        <span class="crit-slider score-3"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">3/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Keller · Address actual people in actual situations</div>
+        <p>Pastoral specificity flashes throughout — the insta-rage list at 12:04 (<em>"your insistence on your own way your refusal to consider other people's points of view you're smudging the truth to making yourself look a little bit better"</em>) is real Keller-style specificity, and the science-class crush line at 17:26 is vivid. Phoenix lake weekends, work email at dinner (implicit), career-building, "nice trips" — these are real referents.</p>
+        <p>What caps this at 3: the closing application reverts to diagnostic-question mode ("are you near to jesus?") rather than name-the-person specificity. The strongest pastoral specificity in your sermon is in the description of <em>sin</em> (the insta-rage list); the application could match that register. "If you're the mom who hasn't opened a Bible in six months because the soccer travel schedule won. If you're the husband who's stopped asking your wife how her walk with Jesus is going because you don't want to admit you're not in yours" — that's the move available to you here.</p>
       </div>
     </div>
-  </div>
-  <div class="narrative">
-    Where the sermon comes alive. The Bears opening is one of the strongest moves — specific, present-tense, costly-loyalty-themed. The cultural diagnosis at 5:12 ("biblical understanding of marriage... going to the lake every weekend... especially in Phoenix") is exactly the present-tense, located, named application this rubric is designed to reward. You're preaching to Phoenix in 2021, not to "the modern Christian." The weaker side: in the closing application, the specific person disappears. You list categories — <em>career, family, trips</em> — but no one is in their kitchen the way you were with the Bears.
-    <div class="growth">
-      <div class="growth-label">Two Growth Opportunities</div>
-      <div class="growth-item"><strong class="label">Show the person, don't list the categories.</strong> <strong>Practical step:</strong> before writing the application section, write one sentence: "The specific person this paragraph is for is ____." Fill the blank with someone you can see — the 38-year-old dad whose Sunday morning is now optional because club soccer went year-round. Write the application <em>to that person</em> in second person. Generalize for delivery, but keep the sketch's specificity.</div>
-      <div class="growth-item"><strong class="label">The escape-room metaphor undercuts your invitation.</strong> At 38:31 you've built for 37 minutes toward a direct question — and then you ask "how many people here have done an escape room?" <strong>Practical step:</strong> track your "weight moments" in the manuscript. Ask of each: am I about to lighten this with a metaphor or aside? If yes, ask why. Sometimes the answer is "the weight is too much and I'm rescuing the listener." The next invitation, let the question sit. 30 seconds of weighted silence does more than a clever metaphor.</div>
-    </div>
-  </div>
-</section>
 
-<!-- HEAT MAP PANEL -->
-<section class="heatmap-panel">
-  <div class="heatmap-header">
-    <div class="heatmap-title">Heat Map · Emotional Delivery</div>
-  </div>
-  <div class="heatmap-caveat">Pacing inferred from transcript timestamps. Tone, volume, and body language not assessed (audio/video not available). Diagonal stripes mark register-pacing mismatches.</div>
-
-  <div class="timeline" id="timeline">
-    <div class="beat beat-info" data-i="0" style="flex-grow:1.5"></div>
-    <div class="beat beat-humor" data-i="1" style="flex-grow:5"></div>
-    <div class="beat beat-diagnostic" data-i="2" style="flex-grow:7"></div>
-    <div class="beat beat-declarative" data-i="3" style="flex-grow:2"></div>
-    <div class="beat beat-reverent" data-i="4" style="flex-grow:4.5"></div>
-    <div class="beat beat-pastoral" data-i="5" style="flex-grow:2"></div>
-    <div class="beat beat-awe" data-i="6" style="flex-grow:9"></div>
-    <div class="beat beat-encouragement" data-i="7" style="flex-grow:7"></div>
-    <div class="beat beat-convicting beat-mismatch" data-i="8" style="flex-grow:8.5"></div>
-    <div class="beat beat-doxological" data-i="9" style="flex-grow:11"></div>
-    <div class="beat beat-teaching" data-i="10" style="flex-grow:20"></div>
-    <div class="beat beat-climactic" data-i="11" style="flex-grow:5"></div>
-    <div class="beat beat-convicting" data-i="12" style="flex-grow:6.5"></div>
-    <div class="beat beat-invitation beat-mismatch" data-i="13" style="flex-grow:4"></div>
-    <div class="beat beat-tender" data-i="14" style="flex-grow:6.5"></div>
-  </div>
-
-  <div class="legend">
-    <div class="legend-item"><div class="legend-swatch beat-humor"></div>Humor / setup</div>
-    <div class="legend-item"><div class="legend-swatch beat-diagnostic"></div>Diagnostic / cultural</div>
-    <div class="legend-item"><div class="legend-swatch beat-declarative"></div>Declarative</div>
-    <div class="legend-item"><div class="legend-swatch beat-reverent"></div>Reverent</div>
-    <div class="legend-item"><div class="legend-swatch beat-pastoral"></div>Pastoral</div>
-    <div class="legend-item"><div class="legend-swatch beat-awe"></div>Awe / weight of grace</div>
-    <div class="legend-item"><div class="legend-swatch beat-encouragement"></div>Encouragement</div>
-    <div class="legend-item"><div class="legend-swatch beat-convicting"></div>Convicting</div>
-    <div class="legend-item"><div class="legend-swatch beat-doxological"></div>Doxological</div>
-    <div class="legend-item"><div class="legend-swatch beat-teaching"></div>Teaching</div>
-    <div class="legend-item"><div class="legend-swatch beat-climactic"></div>Climactic</div>
-    <div class="legend-item"><div class="legend-swatch beat-invitation"></div>Invitation</div>
-    <div class="legend-item"><div class="legend-swatch beat-tender"></div>Tender / urgent</div>
-  </div>
-
-  <div class="beat-detail" id="beat-detail">
-    <span class="time">Hover or click a section above</span>
-    Pacing data shows you know how to slow down for weight — you do it at the verdict (12:43), at the cross (22:43-24:31), and at "we are his house" (33:30). The two register-pacing mismatches are both moments where convicting content speeds up rather than slowing: the "swirling emotions" section and the escape-room metaphor. Both share a pattern — reaching for a lighter rhetorical tool when the text asks for weight.
   </div>
 </section>
 
 <!-- CATEGORY 4 -->
 <section class="category">
   <header class="category-header">
-    <div class="category-title">4 · Ecclesial & Spiritual</div>
-    <div class="category-score">Average 3.5 / 5</div>
+    <div class="category-title">4 · Ecclesial &amp; Spiritual</div>
+    <div class="category-score">Subtotal 7 / 10 · Avg 3.5 / 5</div>
   </header>
   <div class="criteria">
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Ecclesial faithfulness<span class="crit-source">9Marks</span></div>
-        <div class="slider score-4"><div class="slider-fill" style="width:80%"></div><div class="slider-thumb" style="left:80%"></div></div>
-        <div class="crit-score">4/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Ecclesial faithfulness<span class="crit-source">9Marks</span></span>
+        <span class="crit-slider score-4"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">4/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">9Marks · Expositional preaching as the first mark</div>
+        <p>The Grove Network opening frames the church as a cooperative body — not vague "the church" but seven specific churches planting together. The "we are his house" turn at 33:30 preaches the corporate identity. The line at 5:34 — <em>"or even just regularly gathering together as the church as a membership of a body of believers instead of going to the lake every weekend"</em> — preaches church membership as identity-shaping. And at 19:43 you defended the centrality of preaching itself: "we get like 40 minutes of concentrated time together weekly in this kind of format it's important it's valuable." This is the first mark of a healthy church functioning audibly.</p>
+        <p>What caps it at 4: the corporate "we are his house" punch at 33:30 — which could have been a moment of corporate weight — pivots quickly back to individual application ("are <em>you</em> near to jesus?"). The text's emphasis on <em>we</em> as house could carry more communal weight at the application.</p>
       </div>
     </div>
+
     <div class="criterion">
-      <div class="crit-row">
-        <div class="crit-name">Expository exultation<span class="crit-source">Piper</span></div>
-        <div class="slider score-3"><div class="slider-fill" style="width:60%"></div><div class="slider-thumb" style="left:60%"></div></div>
-        <div class="crit-score">3/5</div>
+      <button class="crit-button" onclick="toggleCriterion(this)">
+        <span class="crit-chevron">▸</span>
+        <span class="crit-name">Expository exultation<span class="crit-source">Piper</span></span>
+        <span class="crit-slider score-3"><span class="crit-slider-fill"></span><span class="crit-slider-thumb"></span></span>
+        <span class="crit-score">3/5</span>
+      </button>
+      <div class="crit-detail">
+        <div class="crit-detail-principle">Piper · Preaching that explains and exults</div>
+        <p>Real exultation is here in moments. <em>"That just ah if you've never heard that before that just has to blow your mind"</em> (11:25) — affected preacher, not performing. <em>"Let that soak in this morning again you are declared fully"</em> (11:48) — the same. <em>"Consider jesus how long has it been since you've really thought and considered jesus for you"</em> (24:31) — pleading from affection, not from outline.</p>
+        <p>What caps this at 3: the bulk of the sermon runs in teaching register. The exultation visits, but it doesn't run through the bloodstream of the whole sermon. A Piper sermon where the preacher's affection visibly shapes every section is the 5; this sermon lands in the "explains carefully, exults occasionally" zone. The personal preface at 8:48 — <em>"i don't even know if i should say this but i've had this sense god wants to do something"</em> — is genuine affection but it's setup, and the sermon that follows doesn't quite maintain that emotional register.</p>
       </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHAT'S WORKING -->
+<section class="working-section">
+  <div class="eyebrow working-eyebrow">What's Working</div>
+  <h2 class="section-title">Lead with these</h2>
+  <div class="working-grid">
+
+    <div class="working-card">
+      <h3 class="working-card-title">The Moses move</h3>
+      <blockquote>"this is not bad versus good. this is good versus better. this is glory versus greater glory."</blockquote>
+      <p>Refusing to elevate Jesus by demolishing Moses is the kind of exegetical restraint that distinguishes faithful exposition from preaching by caricature. You named the temptation, rejected it, and let the text's actual comparison do the work. Keep doing this.</p>
+    </div>
+
+    <div class="working-card">
+      <h3 class="working-card-title">The courtroom gospel</h3>
+      <blockquote>"christ has swapped places with you so much so that when god picks up the gavel and he slaps it down on his desk the verdict for you is not guilty pardoned freed."</blockquote>
+      <p>This is gospel preaching at its best — concrete imagery, judicial weight, the swap made explicit, the verdict spoken. A non-Christian heard the gospel here. The fact that the rest of the sermon doesn't quite match this register is a strength signal, not a weakness signal.</p>
+    </div>
+
+    <div class="working-card">
+      <h3 class="working-card-title">The Phoenix-located diagnosis</h3>
+      <blockquote>"instead of going to the lake every weekend will make you different than the people around you especially in phoenix."</blockquote>
+      <p>Generic sermons could be preached in any city; this one couldn't. The cultural pressure is named in its actual Phoenix form — the lake, the weekend, the social expectation. This kind of locatedness gives application real traction.</p>
+    </div>
+
+    <div class="working-card">
+      <h3 class="working-card-title">The pastoral inquiry</h3>
+      <blockquote>"are you near to jesus? are you seeking jesus? do you want to know jesus?"</blockquote>
+      <p>You stopped explaining and started asking — directly. The question-form at 36:05 is the right preacher-to-people move at exactly the right moment. The body of the sermon earned this moment, and you trusted the listener enough to put the question on them rather than answering it for them.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHERE IT CAN GET BETTER -->
+<section class="growth-section">
+  <div class="eyebrow growth-eyebrow">Where It Can Get Better</div>
+  <h2 class="section-title">Three growth opportunities</h2>
+
+  <div class="growth-panel">
+    <div class="growth-label">Growth Opportunity 01</div>
+    <h3 class="growth-title">Name the FCF as one sentence and anchor every application to it</h3>
+    <span class="growth-principle">Chapell · Fallen Condition Focus</span>
+    <p>The sermon currently has two FCFs running in parallel — <em>loyalty competition</em> (Bears/Cardinals) and <em>quiet drift</em> (slapping a Jesus tag on the back of your car). They're related, but they're not the same condition. Loyalty competition asks <em>where</em> your devotion goes; drift asks whether your devotion is <em>thinning</em>. The opening illustration sets up the first; the closing application lands on the second.</p>
+    <p>This is the single highest-leverage fix for the next sermon. A clear FCF — <em>"we drift toward easier loyalties when following Jesus becomes socially costly"</em> — would unify the Bears frame with the closing application and let every paragraph between them be tested against it.</p>
+    <div class="next-step">
+      <div class="next-step-label">Next Step</div>
+      <div class="next-step-text">Before preaching next, write the FCF as one present-tense sentence at the top of your manuscript. Then read every paragraph against it. If a paragraph doesn't serve that one sentence, cut it or rewrite it until it does. Five minutes of this kind of audit catches the drift-to-loyalty oscillation before the listener has to absorb it.</div>
     </div>
   </div>
-  <div class="narrative">
-    The "gathering as church membership instead of going to the lake" line (5:34) is 9Marks-shaped at its best — costly loyalty framed without scolding. The "we are his house" pivot does real ecclesiological work. Expository exultation is mixed — the not-guilty verdict reads as genuine awe, and "Jesus never let God the Father down, never not once" lands with feeling. But across 41 minutes, the affection is intermittent. The 8:55 preface ("I've had this sense that God wants to do something") signals that you <em>want</em> to be affected, which is a tell that the affection isn't quite in the sermon itself yet.
-    <div class="growth">
-      <div class="growth-label">Two Growth Opportunities</div>
-      <div class="growth-item"><strong class="label">The 8:55 preface is doing work the sermon should do.</strong> Announcing that God wants to do something in hearts is a request the listener bring affection. The sermon should bring it to them. <strong>Practical step:</strong> when you want to write a preface like this, ask <em>what specifically</em> you sense God wants to do — then write <em>that</em> directly into the sermon at the right place. The preface is a tell that there's weight available the sermon isn't fully delivering.</div>
-      <div class="growth-item"><strong class="label">Affection peaks early and flattens through the Moses argument.</strong> Cross section (22:43-24:31) is your exultation peak; minutes 24-32 are teaching-shaped, not worship-shaped. <strong>Practical step:</strong> in extended teaching sections, write yourself a "doxological interruption" — one paragraph that pauses the argument to exult in what's just been shown. Around minute 28, after establishing Jesus's greater glory, 90 seconds on <em>what that means for worshipping him right now</em> gives the argument a heart.</div>
+
+  <div class="growth-panel">
+    <div class="growth-label">Growth Opportunity 02</div>
+    <h3 class="growth-title">Move the fresh gospel statement to the climactic moment</h3>
+    <span class="growth-principle">Piper · Gospel clarity</span>
+    <p>The gospel is preached unmistakably at minute 12 — courtroom, gavel, verdict, "not guilty pardoned freed." That's the strongest moment of the sermon. But by the closing invitation, it has compressed into a slogan-form: <em>"the password is in christ alone through faith alone by grace alone."</em></p>
+    <p>The escape-room metaphor is creative but accidentally inverts the gospel's direction. A password is something the seeker types in to gain access; the gospel is something God declares over a sinner. Same words, opposite movement. The invitation is the moment that most needed fresh proclamation, and instead it got the slogan-form.</p>
+    <div class="next-step">
+      <div class="next-step-label">Next Step</div>
+      <div class="next-step-text">Mark every place in the manuscript where the gospel is named explicitly. Aim for four moments — opening, middle of the explanation, application, and close — each one fresh, none of them a slogan. The invitation deserves the same level of concrete gospel statement as minute 12. Try: "God is opening the door right now. He's not waiting for you to type in the right password — He's the one who unlocked it, He's the one inviting you in, and the cost has already been paid by His Son."</div>
     </div>
+  </div>
+
+  <div class="growth-panel">
+    <div class="growth-label">Growth Opportunity 03</div>
+    <h3 class="growth-title">Match the specificity of your sin diagnosis in your application</h3>
+    <span class="growth-principle">Keller · Pastoral specificity</span>
+    <p>Your most specific moment of pastoral address is the description of sin at 12:04: <em>"your insta rage over the littlest things… your refusal to consider other people's points of view… you're smudging the truth to making yourself look a little bit better."</em> That's the level. By minute 36 the application has shifted to question-form: "are you near to Jesus? are you seeking Jesus?"</p>
+    <p>The questions are good — they're the right preacher-to-people move. But the address could match the specificity of the diagnosis. The listener who heard the insta-rage line could hear themselves described again at the application.</p>
+    <div class="next-step">
+      <div class="next-step-label">Next Step</div>
+      <div class="next-step-text">Before next Sunday, write three sentences that complete the phrase "If you're the [specific person in TBC's congregation] who [specific behavior]…" — the soccer-travel mom, the dad who can't stop checking work email, the college student whose science-class crush has more attention than Bible reading. Pick the two that best fit your sermon and preach to them by name (not by name-name, but by situation).</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- HEAT MAP -->
+<section class="heatmap-section">
+  <div class="eyebrow heatmap-eyebrow">Heat Map</div>
+  <h2 class="section-title">Emotional registers across 41 minutes</h2>
+  <div class="heatmap-note">Inferred from manuscript only. No A/V available, so this maps textual cues — register the language calls for, not delivered tone.</div>
+
+  <div class="heatmap-timeline">
+    <div class="beat beat-info" style="flex: 1.0" onclick="showBeat(0)" title="0:00-1:03 · Announcements"></div>
+    <div class="beat beat-humor" style="flex: 2.1" onclick="showBeat(1)" title="1:03-3:13 · Bears illustration"></div>
+    <div class="beat beat-teaching" style="flex: 1.7" onclick="showBeat(2)" title="3:13-4:55 · We're all loyal"></div>
+    <div class="beat beat-diagnostic" style="flex: 1.5" onclick="showBeat(3)" title="4:55-6:30 · Cost of Christian identity in Phoenix"></div>
+    <div class="beat beat-declarative" style="flex: 1.0" onclick="showBeat(4)" title="6:30-7:25 · Big idea + text reading"></div>
+    <div class="beat beat-reverent" style="flex: 1.3" onclick="showBeat(5)" title="7:25-8:48 · Prayer"></div>
+    <div class="beat beat-tender" style="flex: 0.9" onclick="showBeat(6)" title="8:48-9:35 · 'I've had this sense'"></div>
+    <div class="beat beat-teaching" style="flex: 1.8" onclick="showBeat(7)" title="9:35-11:25 · Identity, holiness"></div>
+    <div class="beat beat-climactic" style="flex: 1.9" onclick="showBeat(8)" title="11:25-13:21 · Courtroom gospel"></div>
+    <div class="beat beat-encouragement" style="flex: 2.4" onclick="showBeat(9)" title="13:21-15:42 · Brother-maker, heavenly calling"></div>
+    <div class="beat beat-diagnostic" style="flex: 2.8" onclick="showBeat(10)" title="17:02-19:51 · Distractions of our age"></div>
+    <div class="beat beat-teaching" style="flex: 2.4" onclick="showBeat(11)" title="19:58-22:18 · Apostolos, high priest"></div>
+    <div class="beat beat-doxological" style="flex: 2.1" onclick="showBeat(12)" title="22:18-24:31 · Jesus is faithful"></div>
+    <div class="beat beat-teaching" style="flex: 3.6" onclick="showBeat(13)" title="24:31-28:07 · Moses comparison set-up"></div>
+    <div class="beat beat-teaching" style="flex: 4.8" onclick="showBeat(14)" title="28:07-32:56 · Two houses, transfiguration"></div>
+    <div class="beat beat-declarative" style="flex: 1.3" onclick="showBeat(15)" title="33:05-34:22 · 'We are his house'"></div>
+    <div class="beat beat-convicting" style="flex: 2.1" onclick="showBeat(16)" title="34:22-36:30 · Drift, jesus on the periphery"></div>
+    <div class="beat beat-pastoral" style="flex: 1.3" onclick="showBeat(17)" title="36:30-37:50 · God wants to hold you fast"></div>
+    <div class="beat beat-invitation mismatch" style="flex: 1.7" onclick="showBeat(18)" title="37:50-39:35 · Escape-room invitation (MISMATCH)"></div>
+    <div class="beat beat-pastoral" style="flex: 0.9" onclick="showBeat(19)" title="39:35-40:24 · Search your hearts"></div>
+    <div class="beat beat-reverent" style="flex: 0.9" onclick="showBeat(20)" title="40:24-41:20 · Closing prayer"></div>
+  </div>
+
+  <div id="heatmap-detail" class="heatmap-detail"></div>
+
+  <div class="heatmap-legend">
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-info)"></div>Info</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-humor)"></div>Humor</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-teaching)"></div>Teaching</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-diagnostic)"></div>Diagnostic</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-declarative)"></div>Declarative</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-reverent)"></div>Reverent</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-tender)"></div>Tender</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-encouragement)"></div>Encouragement</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-climactic)"></div>Climactic</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-doxological)"></div>Doxological</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-convicting)"></div>Convicting</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-pastoral)"></div>Pastoral</div>
+    <div class="heatmap-legend-item"><div class="heatmap-legend-swatch" style="background:var(--beat-invitation)"></div>Invitation</div>
   </div>
 </section>
 
 <!-- TOP 3 PRIORITIES -->
-<section class="priorities">
-  <div class="priorities-title">Top 3 Priorities</div>
-  <div class="priorities-sub">For Next Sermon · Highest Leverage First</div>
+<section class="priorities-section">
+  <div class="eyebrow priorities-eyebrow">Top 3 Priorities</div>
+  <h2 class="priorities-title">The next three Sundays</h2>
+  <div class="priorities-subtitle">Ranked by leverage. Do #1 first.</div>
 
   <div class="priority">
     <div class="priority-num">01</div>
-    <div class="priority-body">
-      <div class="priority-head">One FCF, one sentence, present tense — and stay anchored</div>
-      <div class="priority-rationale">Three competing FCFs ran through this sermon. The one the text actually offers — that believers in trial are tempted to trade Christ for an older, easier loyalty that's a downgrade — is sharper than any of the three you reached for. This single change is the highest-leverage move available to you.</div>
-      <div class="priority-step"><strong>Practical Step</strong>Write the FCF as one sentence and tape it to the top of the manuscript before you draft. Read every paragraph and ask: does this serve <em>that</em> FCF? If not, cut or rewrite.</div>
+    <div>
+      <h3 class="priority-headline">Write the FCF as one sentence and anchor everything to it</h3>
+      <p class="priority-rationale">The sermon has two FCFs running in parallel — competing loyalty (Bears) and quiet drift (Jesus tag on the back of the car) — and the slippage between them costs the application real edge. One named FCF would gather everything into one place. This is the single highest-leverage change you can make.</p>
+      <div class="priority-step"><strong>Practical Step</strong> Before next Sunday, write the FCF as one present-tense sentence and tape it to the top of your manuscript. Read every paragraph against it. Cut or rewrite anything that doesn't serve it. For this sermon, the FCF that would have done the work: "We drift toward easier loyalties when following Jesus becomes socially costly."</div>
     </div>
   </div>
 
   <div class="priority">
     <div class="priority-num">02</div>
-    <div class="priority-body">
-      <div class="priority-head">Move the gospel from a moment into a thread</div>
-      <div class="priority-rationale">The not-guilty verdict imagery at 12:43 is gospel preaching at full strength. Don't let it be the only place. Three more touches of that same vividness — different angles on the same gospel — keep the listener inside the good news during the teaching sections.</div>
-      <div class="priority-step"><strong>Practical Step</strong>Mark every gospel statement in the manuscript. Aim for four — opening, mid-explanation, application, close — each one a fresh angle, not a repeat of the formula.</div>
+    <div>
+      <h3 class="priority-headline">Treat the gospel as a thread, not a moment</h3>
+      <p class="priority-rationale">The courtroom statement at minute 12 is gospel preaching at its best. Then the gospel becomes a slogan ("the password is in Christ alone, through faith alone, by grace alone") at the moment it most needed to be preached fresh. The escape-room frame accidentally inverts gospel direction — making it something the seeker types in rather than something God declares.</p>
+      <div class="priority-step"><strong>Practical Step</strong> Mark every place in the manuscript where the gospel is stated explicitly. Aim for four moments: opening, middle of explanation, application, and close. Each one fresh, none a slogan. The invitation gets the same concrete gospel as minute 12 — not the password form, the declaration form.</div>
     </div>
   </div>
 
   <div class="priority">
     <div class="priority-num">03</div>
-    <div class="priority-body">
-      <div class="priority-head">Show one specific person in your application</div>
-      <div class="priority-rationale">The Bears opening works because we see you. The closing application doesn't work as well because we don't see anyone. Sketching one specific listener before writing the application paragraph will sharpen everything that follows.</div>
-      <div class="priority-step"><strong>Practical Step</strong>Before each application paragraph, write: "The specific person this is for is ____." Fill it with someone you can see, then write to them in second person.</div>
+    <div>
+      <h3 class="priority-headline">Match the specificity of your sin diagnosis in your application</h3>
+      <p class="priority-rationale">The insta-rage list at 12:04 ("your refusal to consider other people's points of view, you're smudging the truth to make yourself look a little bit better") is your most specific moment of pastoral address. By minute 36 the application has shifted to question-form. The questions are right, but they could be paired with name-the-person specifics that match the diagnosis register.</p>
+      <div class="priority-step"><strong>Practical Step</strong> Before next Sunday, write three sentences that complete: "If you're the [specific person in our church] who [specific behavior]…" — pick two for the sermon. The soccer-travel mom, the dad checking work email at dinner, the college kid whose science-class crush has more attention than her Bible. Preach to those people by situation.</div>
     </div>
   </div>
 </section>
 
+<!-- SUGGESTED REWRITES -->
+<section class="rewrites-section">
+  <div class="eyebrow rewrites-eyebrow">Suggested Rewrites</div>
+  <h2 class="section-title">Two moments, restaged</h2>
+
+  <div class="rewrite">
+    <div class="rewrite-label">Rewrite · The closing gospel invitation</div>
+    <div class="rewrite-original">"so what is the password to get into the house of god? it's simply this — in christ alone through faith alone by grace alone. that's the password. in christ alone through faith alone by grace alone."</div>
+    <div class="rewrite-strong-label">Stronger</div>
+    <div class="rewrite-strong">
+      <p>"Maybe you're sitting here today and you've realized — you're on the outside of the house. You're not inside. And you want to be. Listen — God isn't waiting for you to type in the right password. He's not testing whether you can recite the correct theological formula. He's the One who unlocked the door. He's the One who's standing inside saying <em>come in</em>. The cost of getting in has already been paid — by His Son, on a cross, two thousand years ago. That's the gospel. Not a password you have to know. A door He's already opened. The only thing that keeps you on the outside is your unwillingness to walk through it. So walk through it. Today. Right now. Don't wait."</p>
+    </div>
+  </div>
+
+  <div class="rewrite">
+    <div class="rewrite-label">Rewrite · The closing application to drifters</div>
+    <div class="rewrite-original">"some of you are living your life in a way where jesus is pushed to the periphery he's not in those things he's been moved to the outside of those things and you're just living your life and slapping a tag on the back of your car that says jesus. be honest with yourself. are you near to jesus?"</div>
+    <div class="rewrite-strong-label">Stronger</div>
+    <div class="rewrite-strong">
+      <p>"Some of you have moved Jesus to the periphery without ever deciding to. If you're the dad whose work email gets more attention than your Bible — Jesus is on the periphery. If you're the mom whose kids' travel soccer schedule has quietly won three years' worth of Sundays — Jesus is on the periphery. If you're the college student who hasn't prayed in two months but you've been thinking about that girl in your science class every day — Jesus is on the periphery. You haven't <em>rejected</em> Him. You've just stopped considering Him. Hebrews is saying that's the same direction. Drift doesn't announce itself. It happens by accumulation. And the only way back is the same way you got in — consider Him. Not as a tag on the back of your car. As the Son of God who is over the house, who built it, who paid for you to be in it."</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- METHODOLOGY APPENDIX -->
+<section class="methodology">
+  <div class="methodology-eyebrow">Methodology · Show Your Work</div>
+  <h2 class="methodology-title">What the score means &amp; how it was calculated</h2>
+
+  <!-- GRADING BANDS FIRST: what the score means -->
+  <div class="methodology-grading">
+    <h3 class="methodology-subhead">Grading Bands</h3>
+    <p style="font-size: 13px; line-height: 1.6; color: var(--ink-soft); margin-bottom: 18px;">Letter grade derived from the <strong style="color: var(--ink);">weighted score</strong>, not the simple score. The weighted score is the more diagnostic of the two — it tells you how the sermon performed on the load-bearing criteria (FCF, gospel clarity, application). This sermon's weighted score of 67 places it in the <strong style="color: var(--accent);">C · Faithful</strong> band, near its upper edge.</p>
+    <div class="grading-band-table">
+      <div class="grading-band-row">
+        <span class="grading-band-letter">A</span>
+        <span class="grading-band-range">85–100</span>
+        <span class="grading-band-label">Exemplary</span>
+        <span class="grading-band-desc">Multiple criteria scored 5s. The kind of sermon worth studying or sharing with another preacher.</span>
+      </div>
+      <div class="grading-band-row">
+        <span class="grading-band-letter">B</span>
+        <span class="grading-band-range">70–84</span>
+        <span class="grading-band-label">Strong</span>
+        <span class="grading-band-desc">Most criteria scored 4s. The preacher is doing the work well, with maybe one weak area.</span>
+      </div>
+      <div class="grading-band-row grading-band-current">
+        <span class="grading-band-letter">C</span>
+        <span class="grading-band-range">55–69</span>
+        <span class="grading-band-label">Faithful</span>
+        <span class="grading-band-desc">Most criteria scored 3s. The sermon is faithfully doing the work — present, competent — but not yet striking. The healthy expected score for most sermons by a faithful preacher.</span>
+      </div>
+      <div class="grading-band-row">
+        <span class="grading-band-letter">D</span>
+        <span class="grading-band-range">40–54</span>
+        <span class="grading-band-label">Needs Improvement</span>
+        <span class="grading-band-desc">Multiple criteria scored 2s. Real gaps the preacher should address before next Sunday.</span>
+      </div>
+      <div class="grading-band-row">
+        <span class="grading-band-letter">F</span>
+        <span class="grading-band-range">&lt; 40</span>
+        <span class="grading-band-label">Significant Concerns</span>
+        <span class="grading-band-desc">Multiple criteria scored 1s. The sermon has issues that should be addressed before being preached again.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WAS SCORED: the math -->
+  <div class="methodology-how-scored">
+    <h3 class="methodology-subhead">How this sermon was scored</h3>
+
+    <div class="methodology-scores-grid">
+      <div class="methodology-score-block">
+        <div class="methodology-score-label">Simple Average</div>
+        <div class="methodology-score-primary">3.45<span class="methodology-denom">/5</span></div>
+        <div class="methodology-score-secondary">69 / 100</div>
+        <div class="methodology-score-explain">All 11 criteria weighted equally. The raw average of how the sermon performed across the rubric.</div>
+      </div>
+      <div class="methodology-score-divider"></div>
+      <div class="methodology-score-block">
+        <div class="methodology-score-label">Weighted Score</div>
+        <div class="methodology-score-primary">3.36<span class="methodology-denom">/5</span></div>
+        <div class="methodology-score-secondary">67 / 100</div>
+        <div class="methodology-score-explain">Fallen Condition Focus, Gospel Clarity, and Application to Present Audience each count double — they are the criteria this rubric treats as load-bearing for a sermon's effectiveness.</div>
+      </div>
+    </div>
+
+    <div class="methodology-note">
+      <strong>Read this:</strong> A 3/5 on this rubric means "adequate, present, doing the work but not striking" — not failure. This sermon lands at the top of the Faithful band with three real strengths (the Moses move, the courtroom gospel, the Phoenix-located diagnosis) and one structural weakness pulling it down (the FCF drift). The two-point gap between simple (69) and weighted (67) tells you the load-bearing criteria scored slightly below the overall average — the FCF weakness (2/5) is dragging the weighted more than the strong Application (4/5) is lifting it. This is exactly the kind of sermon where fixing the FCF in the next pass could move it cleanly into the B-Strong band.
+    </div>
+
+    <div class="methodology-subtotals">
+      <div class="methodology-subtotals-label">Category Subtotals</div>
+      <div class="methodology-subtotals-row">
+        <span>Text &amp; Theology</span>
+        <span class="methodology-subtotals-score">11 / 15</span>
+      </div>
+      <div class="methodology-subtotals-row">
+        <span>Structure &amp; Craft</span>
+        <span class="methodology-subtotals-score">9 / 15</span>
+      </div>
+      <div class="methodology-subtotals-row">
+        <span>Application &amp; Audience Connection</span>
+        <span class="methodology-subtotals-score">11 / 15</span>
+      </div>
+      <div class="methodology-subtotals-row">
+        <span>Ecclesial &amp; Spiritual</span>
+        <span class="methodology-subtotals-score">7 / 10</span>
+      </div>
+      <div class="methodology-subtotals-row methodology-subtotals-total">
+        <span>Raw Total</span>
+        <span class="methodology-subtotals-score">38 / 55</span>
+      </div>
+      <div class="methodology-conversion">
+        composite = round(raw × 100 / 55) = round(38 × 100 / 55) = <strong>69 / 100</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Sermon Evaluation · sermon-coach v3 · Generated from manuscript transcript · Quotes are direct citations from the recorded sermon
+</footer>
+
+</div>
+
 <script>
-  const beatData = [
-    { time: "0:00 – 1:03", section: "Grove Network announcement", register: "Informational / warmth", pacing: "Steady", match: "aligned", note: "Functional opening. Sets a warm tone but doesn't yet engage the text." },
-    { time: "1:03 – 3:13", section: "Bears illustration", register: "Self-deprecating humor → setup", pacing: "Slows toward punchline at 2:22", match: "strong", note: "Strong match. The pacing slows precisely where the humor needs to land. One of the strongest moves in the sermon — specific, present-tense, you in the kitchen." },
-    { time: "3:13 – 6:14", section: "Cost of loyalty / cultural pressure", register: "Diagnostic, weighty", pacing: "Lengthening sentences, slower delivery", match: "aligned", note: "Phoenix-specific cultural diagnosis at 5:12 is one of the sharpest application moves in the sermon." },
-    { time: "6:14 – 7:01", section: "Big idea stated", register: "Pivotal, declarative", pacing: "Tighter, faster", match: "aligned", note: "'Keep your confidence squarely placed on Jesus' — clean statement of the big idea." },
-    { time: "7:01 – 8:50", section: "Text read + prayer", register: "Reverent", pacing: "Slower", match: "aligned", note: "Standard reverent reading of the text. No issues." },
-    { time: "8:50 – 9:34", section: "'I have this sense' preface", register: "Pastoral urgency", pacing: "Slower, more personal", match: "strong", note: "Strong pacing match for the personal register — but this preface is a tell that the affection isn't fully in the sermon yet. See Category 4 growth opportunity." },
-    { time: "9:34 – 13:30", section: "Identity / not-guilty verdict", register: "Awe, comfort, weight of grace", pacing: "Slows at 12:43", match: "strong", note: "Peak gospel moment. 'Christ has swapped places with you... not guilty, pardoned, freed.' The slowdown is exactly right. This is where the sermon is best." },
-    { time: "13:30 – 16:30", section: "Heavenly calling / inheritance", register: "Encouragement, motivation", pacing: "Steady", match: "aligned", note: "Aligned but emotionally flat. The bitcoin/Apple stock metaphor is fine but the section coasts." },
-    { time: "16:30 – 20:05", section: "'Consider Jesus' / distractions", register: "Convicting, urgent", pacing: "Speeds up at 17:33 with list of feelings", match: "mismatch", note: "Register-pacing mismatch. The 'swirling emotions in a world filled with swirling emotions' section ironically rushes past what should slow down. Content is convicting; pacing is busy." },
-    { time: "20:05 – 24:31", section: "Who Jesus is / what he's done", register: "Doxological, weighty", pacing: "Slows at 22:43-24:31 (cross)", match: "strong", note: "Strong match. The cross section is your peak expository exultation moment in the sermon." },
-    { time: "24:31 – 32:31", section: "Jesus vs. Moses argument", register: "Teaching, comparative, building", pacing: "Steady, longer", match: "aligned", note: "Aligned, but emotionally flat for an extended stretch. The argument carries the head; a doxological interruption around minute 28 would carry the affections through." },
-    { time: "32:31 – 34:30", section: "'We are his house' + transfiguration", register: "Climactic, awe", pacing: "Slows at 33:30", match: "strong", note: "Strong match at the climactic line. 'We are his house' delivered with appropriate weight." },
-    { time: "34:30 – 37:10", section: "'If indeed' / drift application", register: "Convicting, pastoral", pacing: "Slows for direct address", match: "aligned", note: "Aligned. The drift FCF finally arrives in full — but it's late in the sermon to anchor everything that came before." },
-    { time: "37:10 – 38:48", section: "Escape room / door of faith", register: "Inviting", pacing: "Lighter, faster", match: "mismatch", note: "Register-pacing mismatch. The escape-room metaphor lightens the tone at the precise moment the sermon should be at maximum weight. You've spent 37 minutes building toward 'are you in the house?' and then introduce a fun analogy at the moment of invitation." },
-    { time: "38:48 – 41:20", section: "Final plea + prayer", register: "Tender, urgent", pacing: "Slows considerably", match: "strong", note: "Strong recovery. The final plea before prayer carries the weight the escape-room metaphor briefly let go of." }
-  ];
-
-  const detailEl = document.getElementById('beat-detail');
-  const beats = document.querySelectorAll('.beat');
-
-  function showBeat(i) {
-    const b = beatData[i];
-    const matchClass = `match-${b.match}`;
-    const matchLabel = b.match === 'strong' ? '✓ Strong match' :
-                       b.match === 'mismatch' ? '⚠ Mismatch' : 'Aligned';
-    detailEl.innerHTML = `
-      <span class="time">${b.time} · ${b.section}</span>
-      <strong>Register:</strong> ${b.register} &nbsp;·&nbsp; <strong>Pacing:</strong> ${b.pacing}
-      <div style="margin-top:8px;">${b.note}</div>
-      <div class="match ${matchClass}">${matchLabel}</div>
-    `;
+  function toggleCriterion(button) {
+    const criterion = button.parentElement;
+    criterion.classList.toggle('open');
   }
 
-  beats.forEach(beat => {
-    beat.addEventListener('mouseenter', () => showBeat(parseInt(beat.dataset.i)));
-    beat.addEventListener('click', () => showBeat(parseInt(beat.dataset.i)));
-  });
+  const beats = [
+    { ts: "0:00 – 1:03", label: "Announcements · Info register", text: "Welcome and Grove Network update. Info register, appropriate. Sets the stage; doesn't bleed into the sermon itself." },
+    { ts: "1:03 – 3:13", label: "Bears illustration · Humor", text: "The Bears-Packers loss illustration. The humor lands — \"i must fly the flag of shame over my house again this sunday.\" Self-deprecating, well-paced. The illustration earns its 2+ minutes because it's setting up the loyalty FCF." },
+    { ts: "3:13 – 4:55", label: "We're all loyal · Teaching", text: "Move from the personal illustration to the universal claim — \"we are all loyal to something, we're all loyal to someone.\" Teaching register, building the bridge from Bears to Hebrews." },
+    { ts: "4:55 – 6:30", label: "Cost of Christian identity in Phoenix · Diagnostic", text: "The cultural diagnosis: sexuality, marriage, church membership, going to the lake every weekend. Diagnostic register, locating the sermon in actual Phoenix soil. Strong work." },
+    { ts: "6:30 – 7:25", label: "Big idea + text reading · Declarative", text: "The melodic line is named — \"keep your confidence squarely placed on jesus.\" Then the text is read. Declarative register, appropriately weighty." },
+    { ts: "7:25 – 8:48", label: "Prayer · Reverent", text: "Pulpit prayer asking the Spirit to do the work. Reverent register, transitions cleanly to the body." },
+    { ts: "8:48 – 9:35", label: "'I've had this sense' · Tender", text: "Personal preface — \"i don't even know if i should say this but i've had this sense all yesterday and all today that god wants to just do something in our hearts.\" Tender register. Raises stakes for what follows. Genuine, not performative." },
+    { ts: "9:35 – 11:25", label: "Identity, holiness · Teaching", text: "Holy brothers, holy sisters. Source of our holiness is God. Teaching register, building toward the gospel statement." },
+    { ts: "11:25 – 13:21", label: "Courtroom gospel · Climactic / Convicting", text: "The courtroom moment. \"The verdict for you is not guilty pardoned freed.\" The strongest preaching moment of the sermon. Register climbs from convicting (\"the list would be long\") to climactic (\"not guilty pardoned freed\"). This is gospel preaching at its best." },
+    { ts: "13:21 – 15:42", label: "Brother-maker, heavenly calling · Encouragement", text: "Comes down from the climactic moment into the assurance and encouragement register. Brad Hambrick quote on guilt vs. shame. \"He's not ashamed to identify himself with you.\" Pastoral encouragement, well-paced." },
+    { ts: "17:02 – 19:51", label: "Distractions of our age · Diagnostic", text: "Naming the distractions that prevent considering — buzzing phones, fidgeting kids, anxiety about the week. \"It takes effort to concentrate and to deeply consider.\" Diagnostic register; transitions into a defense of preaching itself." },
+    { ts: "19:58 – 22:18", label: "Apostolos, high priest · Teaching", text: "Greek work on apostolos. High priest theme picked up. Teaching register, doing the exegetical work the passage requires." },
+    { ts: "22:18 – 24:31", label: "Jesus is faithful · Doxological", text: "\"Jesus is faithful. Jesus is faithful. That's a bedrock truth.\" The register climbs toward doxological — preacher affected by what he's preaching, not just teaching it." },
+    { ts: "24:31 – 28:07", label: "Moses comparison set-up · Teaching", text: "The exegetical refusal — \"this is not bad versus good, this is good versus better, this is glory versus greater glory.\" Teaching register, but the exegetical move is the strongest piece of textual fidelity in the sermon." },
+    { ts: "28:07 – 32:56", label: "Two houses, transfiguration · Teaching", text: "The master builder illustration and the transfiguration tie-in. Teaching register sustained for ~5 minutes. The transfiguration move at 32:23 is sharp — but the register stays didactic throughout this long stretch when at least one beat could have lifted toward awe or doxological." },
+    { ts: "33:05 – 34:22", label: "'We are his house' · Declarative", text: "\"And we are his house.\" The corporate punchline of the passage. Declarative, weighty. \"Such a big word for only being two letters — if.\" The conditional is named and not flinched at." },
+    { ts: "34:22 – 36:30", label: "Drift, jesus on the periphery · Convicting", text: "The closing application begins. \"I wonder how many of us are choosing a life that's easier… you're slapping a tag on the back of your car that says jesus.\" Convicting register, vivid imagery. Strong work — but this is where the FCF drift becomes visible. The illustration was about loyalty competition; the application is about drift." },
+    { ts: "36:30 – 37:50", label: "God wants to hold you fast · Pastoral", text: "Pastoral register — \"God wants to hold you fast, that's why the word is here.\" Appropriately tender after the convicting moment, before the seeker turn." },
+    { ts: "37:50 – 39:35", label: "Escape-room invitation · Invitation (MISMATCH)", text: "MISMATCH FLAGGED. The invitation to those outside the house — exactly the right move at exactly the right moment — pivots to a casual escape-room digression: \"have you guys ever done a skateboard, how many people here have done an escape room, it would be awesome if there was an escape room big enough.\" The register drops at the climactic moment. The gospel that follows compresses into a password slogan. This is the clearest pacing failure in the sermon." },
+    { ts: "39:35 – 40:24", label: "Search your hearts · Pastoral", text: "Pastoral close. \"Search your hearts this morning… may God sift our hearts.\" Register settles back into appropriate pastoral weight before the prayer." },
+    { ts: "40:24 – 41:20", label: "Closing prayer · Reverent", text: "Prayer asking God to keep us turned toward Him. Reverent register, appropriate close." }
+  ];
+
+  function showBeat(idx) {
+    const detail = document.getElementById('heatmap-detail');
+    const beat = beats[idx];
+    if (!beat) return;
+    detail.innerHTML = `
+      <div class="heatmap-detail-timestamp">${beat.ts}</div>
+      <div class="heatmap-detail-label">${beat.label}</div>
+      <div>${beat.text}</div>
+    `;
+    detail.classList.add('active');
+  }
 </script>
 
 </body>
