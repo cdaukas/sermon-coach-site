@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — The Sermon Coach</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+    --shadow-lift: 0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .wordmark .amp { color: var(--accent); font-weight: 400; }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  .nav-cta:hover { background: var(--ink); color: var(--bg); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 48px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    color: var(--ink);
+  }
+  .hero-sub {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 620px;
+    margin: 0 auto;
+    font-style: italic;
+  }
+
+  /* ---------- FOUNDING BANNER ---------- */
+  .founding-banner {
+    max-width: 900px;
+    margin: 0 auto 48px;
+    padding: 0 24px;
+  }
+  .founding-banner-inner {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3447 100%);
+    color: #f5f0e3;
+    padding: 28px 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .founding-badge {
+    background: var(--accent);
+    color: #1a2332;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .founding-text {
+    font-size: 15.5px;
+    line-height: 1.5;
+    color: #ebe6d5;
+  }
+  .founding-text strong { color: #fff; }
+
+  /* ---------- PRICING TIERS ---------- */
+  .tiers {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .tier {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.18s ease;
+  }
+  .tier.featured {
+    box-shadow: var(--shadow-lift);
+    border-top: 4px solid var(--accent);
+    padding-top: 32px;
+  }
+  .tier-best-for {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tier-name {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .tier-tagline {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 24px;
+    line-height: 1.5;
+    min-height: 42px;
+  }
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .price-strike {
+    font-size: 18px;
+    color: var(--ink-soft);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+  .price-now {
+    font-size: 44px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .price-now .currency {
+    font-size: 24px;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  .price-period {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .price-note {
+    font-size: 12px;
+    color: var(--accent);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 24px;
+    min-height: 18px;
+  }
+  .price-after {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 28px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .tier-features {
+    list-style: none;
+    margin-bottom: 32px;
+    flex-grow: 1;
+  }
+  .tier-features li {
+    padding: 10px 0;
+    padding-left: 24px;
+    position: relative;
+    font-size: 14.5px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--rule);
+  }
+  .tier-features li:last-child { border-bottom: none; }
+  .tier-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .tier-features li strong { color: var(--ink); font-weight: 600; }
+  .tier-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 13px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    letter-spacing: 0.02em;
+    transition: all 0.15s ease;
+    border: 1px solid var(--ink);
+    display: block;
+  }
+  .tier-cta:hover { background: var(--ink-mid); }
+  .tier.featured .tier-cta { background: var(--accent); border-color: var(--accent); }
+  .tier.featured .tier-cta:hover { background: #8a6624; border-color: #8a6624; }
+
+  /* ---------- COST EXPLAINER ---------- */
+  .explainer {
+    background: var(--accent-pale);
+    padding: 40px 32px;
+    max-width: 800px;
+    margin: 0 auto 80px;
+    border-left: 3px solid var(--accent-soft);
+  }
+  .explainer h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .explainer p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin-bottom: 14px;
+  }
+  .explainer p:last-child { margin-bottom: 0; }
+
+  /* ---------- FAQ ---------- */
+  .faq {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+  .faq-title {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .faq-title .eyebrow { margin-bottom: 16px; }
+  .faq-title h2 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--rule);
+    padding: 24px 0;
+  }
+  .faq-q {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .faq-a {
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 880px) {
+    .tiers { grid-template-columns: 1fr; max-width: 480px; }
+    .tier.featured { margin-top: 16px; }
+  }
+  @media (max-width: 720px) {
+    h1 { font-size: 34px; }
+    .hero { padding: 24px 20px 40px; }
+    .hero-sub { font-size: 17px; }
+    .nav { padding: 20px; }
+    .founding-banner-inner { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px; }
+    .founding-text { font-size: 14.5px; }
+    .price-now { font-size: 38px; }
+    .explainer { padding: 28px 24px; }
+    .faq-title h2 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="./index.html" class="wordmark">The Sermon Coach</a>
+  <a href="#tiers" class="nav-cta">View Plans</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Pricing · Pre-Launch</div>
+  <h1>Honest pricing for serious preachers.</h1>
+  <p class="hero-sub">Three tiers, no contracts, cancel anytime. Founding-member pricing for the first 25 preachers — locked in at 50% off for six months.</p>
+</header>
+
+<!-- FOUNDING MEMBER BANNER -->
+<div class="founding-banner">
+  <div class="founding-banner-inner">
+    <div class="founding-badge">Founding Members</div>
+    <div class="founding-text">
+      <strong>50% off for your first 6 months — first 25 preachers only.</strong> Founding members keep their discount through month 6, then convert to standard pricing. Lock in early, support the build, and shape what the product becomes.
+    </div>
+  </div>
+</div>
+
+<!-- TIERS -->
+<section class="tiers" id="tiers">
+
+  <!-- COACH -->
+  <div class="tier">
+    <div class="tier-name">Coach</div>
+    <div class="tier-tagline">For the solo pastor evaluating one sermon a week.</div>
+    <div class="price-row">
+      <span class="price-strike">$15</span>
+      <span class="price-now"><span class="currency">$</span>7.50</span>
+      <span class="price-period">/mo</span>
+    </div>
+    <div class="price-note">FOUNDING MEMBER · FIRST 6 MONTHS</div>
+    <div class="price-after">Then $15/month after month 6. Cancel anytime.</div>
+    <ul class="tier-features">
+      <li><strong>4 sermon evaluations</strong> per month</li>
+      <li>Full 12-criterion rubric</li>
+      <li>Simple + weighted scoring</li>
+      <li>Heat map of emotional delivery</li>
+      <li>Two growth opportunities per category</li>
+      <li>Top 3 priorities + practical steps</li>
+      <li>Suggested rewrites of weakest moments</li>
+      <li>Shareable dashboard for each evaluation</li>
+    </ul>
+    <a href="../index.html#reserve" class="tier-cta">Reserve Founding Member Spot</a>
+  </div>
+
+  <!-- COACH PLUS -->
+  <div class="tier featured">
+    <div class="tier-best-for">Most Popular</div>
+    <div class="tier-name">Coach Plus</div>
+    <div class="tier-tagline">For preachers wanting to test drafts, compare sermons, and grow faster.</div>
+    <div class="price-row">
+      <span class="price-strike">$29</span>
+      <span class="price-now"><span class="currency">$</span>14.50</span>
+      <span class="price-period">/mo</span>
+    </div>
+    <div class="price-note">FOUNDING MEMBER · FIRST 6 MONTHS</div>
+    <div class="price-after">Then $29/month after month 6. Cancel anytime.</div>
+    <ul class="tier-features">
+      <li><strong>12 evaluations</strong> per month</li>
+      <li>Everything in Coach</li>
+      <li>Compare drafts of the same sermon</li>
+      <li>Series-level analysis across multiple sermons</li>
+      <li>Sermon-over-time growth tracking</li>
+      <li>Optional rubric customization (added criteria)</li>
+      <li>Priority support — direct line to Chris</li>
+    </ul>
+    <a href="../index.html#reserve" class="tier-cta">Reserve Founding Member Spot</a>
+  </div>
+
+  <!-- COHORT -->
+  <div class="tier">
+    <div class="tier-name">Cohort</div>
+    <div class="tier-tagline">For preaching cohorts, coaching circles, and seminary classes.</div>
+    <div class="price-row">
+      <span class="price-strike">$99</span>
+      <span class="price-now"><span class="currency">$</span>49.50</span>
+      <span class="price-period">/mo</span>
+    </div>
+    <div class="price-note">FOUNDING MEMBER · FIRST 6 MONTHS</div>
+    <div class="price-after">Then $99/month after month 6. Cancel anytime.</div>
+    <ul class="tier-features">
+      <li><strong>5 seats</strong> included (additional seats $15/mo)</li>
+      <li><strong>30 pooled evaluations</strong> across all seats</li>
+      <li>Everything in Coach Plus</li>
+      <li>Facilitator dashboard — see scores across the cohort</li>
+      <li>Shared rubric for cohort consistency</li>
+      <li>Group analytics: where is the cohort growing?</li>
+      <li>Optional 1-on-1 onboarding call with Chris</li>
+    </ul>
+    <a href="../index.html#reserve" class="tier-cta">Reserve Founding Member Spot</a>
+  </div>
+
+</section>
+
+<!-- COST EXPLAINER -->
+<div class="explainer">
+  <h3>Why these prices?</h3>
+  <p>Honest answer: every sermon evaluation costs real money to run — somewhere between $0.10 and $0.20 in compute and AI costs, plus the ongoing cost of keeping the product alive. We've priced these tiers to be sustainable while still being meaningfully cheaper than the alternatives: a single Simeon Trust workshop runs $400+ once a year, in-person coaching can cost $200-500/month per pastor, and most digital tools in adjacent categories sit at $15-50/month.</p>
+  <p>Founding-member pricing is real. It's not a fake countdown or a marketing trick. The first 25 preachers who reserve a spot get 50% off for six months because they're betting on the product before there's anything to bet on. After month 6, founding members convert to standard pricing — but they keep priority support, early access to new features, and a permanent founding-member badge on their account.</p>
+</div>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="faq-title">
+    <div class="eyebrow">Common Questions</div>
+    <h2>The details, before you commit.</h2>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What counts as one evaluation?</div>
+    <div class="faq-a">Submitting one sermon — manuscript, transcript, or audio/video with transcript — and receiving the full dashboard back. You can revise and resubmit the same sermon as a new evaluation if you want to compare drafts.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What happens if I hit my monthly limit?</div>
+    <div class="faq-a">You can either upgrade to the next tier mid-month (prorated) or wait for your next billing cycle. We don't auto-charge for overages — you stay in control of your spend.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Do unused evaluations roll over?</div>
+    <div class="faq-a">No. Each month is a fresh allotment. We considered rollover but kept it simple — the tool works best when you're using it weekly on real sermons, not stockpiling credits for someday.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What if the rubric doesn't fit my tradition?</div>
+    <div class="faq-a">The base rubric is drawn from a Reformed evangelical lane — Chapell, Simeon Trust, Piper, 9Marks. If your preaching tradition is different (Pentecostal, mainline, Roman Catholic, Word of Faith), the tool may not serve you well right now. Optional rubric variants for other traditions are on the roadmap. Email Chris before subscribing if you're not sure — he'll be honest about whether it's a fit.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can I cancel anytime?</div>
+    <div class="faq-a">Yes. No contracts. Cancel from your account dashboard at any point — your subscription stays active through the end of the current billing month, then ends.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What about refunds?</div>
+    <div class="faq-a">Founding-member subscriptions come with a 30-day money-back guarantee. If The Sermon Coach isn't useful for your preaching after a month of real use, email Chris and you'll get a full refund — no friction, no defensive questions.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Who owns the evaluations I generate?</div>
+    <div class="faq-a">You do. The sermon you submit and the evaluation that comes back are yours. We don't reuse, sell, or publish your sermons or your evaluations. You can delete any evaluation from your account permanently at any time.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Will my elder board / congregation / supervisor see my scores?</div>
+    <div class="faq-a">No, unless you choose to share. Every evaluation is private to your account by default. The shareable dashboard URL is only viewable by people you send the link to.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Is this AI? Should I be worried about that?</div>
+    <div class="faq-a">Yes, the evaluation engine uses a large language model — but the rubric, the structure, the criteria, and the editorial standards are all Chris's work. The AI follows a detailed instruction protocol that took months to develop. Think of it as a rubric that runs at the speed of a tool, not a chatbot grading your sermon.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">When does this actually launch?</div>
+    <div class="faq-a">The Sermon Coach is in pre-launch. We're running concierge evaluations for early reservists while we build the real product. Public launch target: [Q1 2026]. Founding members get full access the moment the product goes live.</div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  The Sermon Coach · Built by <a href="mailto:[your-email]">Chris Daukas</a> · Phoenix, Arizona<br>
+  <a href="./index.html">Back to homepage</a>
+</footer>
+
+</body>
+</html>
