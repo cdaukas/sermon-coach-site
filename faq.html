@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — The Sermon Coach</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+    --shadow-lift: 0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .wordmark .amp { color: var(--accent); font-weight: 400; }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  .nav-cta:hover { background: var(--ink); color: var(--bg); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 48px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+  .hero-sub {
+    font-size: 19px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section-eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  /* ---------- FAQ (accordion via <details>) ---------- */
+  .faq {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+  }
+  .faq-section-header {
+    margin-top: 56px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--accent);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .faq-section-header:first-of-type { margin-top: 0; }
+
+  details.faq-item {
+    border-bottom: 1px solid var(--rule);
+    padding: 22px 0;
+  }
+  details.faq-item summary {
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    line-height: 1.4;
+    transition: color 0.15s ease;
+  }
+  details.faq-item summary::-webkit-details-marker { display: none; }
+  details.faq-item summary:hover { color: var(--accent); }
+  details.faq-item summary::after {
+    content: '+';
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--accent);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  details.faq-item[open] summary::after {
+    content: '−';
+  }
+  details.faq-item[open] summary { color: var(--accent); }
+  .faq-a {
+    font-size: 15.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin-top: 14px;
+    padding-right: 40px;
+  }
+
+  /* ---------- CTA STRIP ---------- */
+  .cta-strip {
+    max-width: 800px;
+    margin: 64px auto 0;
+    padding: 40px 24px;
+    text-align: center;
+    background: var(--accent-pale);
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+  }
+  .cta-strip h2 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+  .cta-strip p {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+  .cta-strip a {
+    display: inline-block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--bg);
+    background: var(--ink);
+    padding: 12px 28px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .cta-strip a:hover { background: var(--accent); }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    margin-top: 80px;
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px) {
+    h1 { font-size: 34px; }
+    .hero { padding: 32px 24px 48px; }
+    .hero-sub { font-size: 16px; }
+    details.faq-item summary { font-size: 16px; }
+    .faq-a { font-size: 15px; padding-right: 24px; }
+    .faq-section-header { margin-top: 40px; }
+    .cta-strip { margin-top: 48px; padding: 32px 20px; }
+    .cta-strip h2 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="./index.html" class="wordmark">The Sermon Coach</a>
+  <a href="./pricing.html" class="nav-cta">View Pricing</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Frequently Asked Questions</div>
+  <h1>Everything you might be wondering.</h1>
+  <p class="hero-sub">Honest answers to the questions preachers actually ask. If yours isn't here, email Chris directly.</p>
+</header>
+
+<!-- FAQ -->
+<section class="faq">
+
+  <!-- DATA & PRIVACY -->
+  <div class="faq-section-header">Data &amp; Privacy</div>
+
+  <details class="faq-item">
+    <summary>Should I be worried about my data?</summary>
+    <div class="faq-a">No. Your sermons stay private to your account, are never used to train AI models, and are never shared with third parties. You own your work; The Sermon Coach is just the rubric you run it through.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Who can see my evaluations?</summary>
+    <div class="faq-a">Only you. Each preacher's library is private to their account. Cohort tier members can optionally choose to share specific evaluations with their cohort, but private-by-default is the rule everywhere else.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Can I delete an evaluation?</summary>
+    <div class="faq-a">Yes. You can delete any evaluation, or delete your entire account, at any time. Deletion is permanent.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Will my sermons be used to train AI?</summary>
+    <div class="faq-a">No. The Sermon Coach uses Anthropic's Claude API with data privacy commitments that prohibit using your sermons for model training. Your preaching stays your preaching.</div>
+  </details>
+
+  <!-- PRICING & PLANS -->
+  <div class="faq-section-header">Pricing &amp; Plans</div>
+
+  <details class="faq-item">
+    <summary>What's included in the Founding Member offer?</summary>
+    <div class="faq-a">50% off for 12 months on whichever tier you choose, plus permanent Founding Member status: priority support direct from Chris, early access to new features, and a Founding Member badge on your account that doesn't expire when your discount does.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What happens after the first 12 months?</summary>
+    <div class="faq-a">Your subscription converts to standard pricing — but your Founding Member status is permanent. You keep priority support, early access, and the badge for as long as you're a subscriber.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Can I switch tiers?</summary>
+    <div class="faq-a">Yes. You can upgrade or downgrade at any time. Upgrades take effect immediately with prorated billing; downgrades take effect at your next billing cycle.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What if I hit my monthly evaluation limit?</summary>
+    <div class="faq-a">You'll see a prompt to upgrade to the next tier. Limits reset on the first of each month. Unused evaluations don't roll over — the cap is meant to encourage thoughtful selection of which sermons get the rubric treatment, not stockpiling.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Is there a free trial?</summary>
+    <div class="faq-a">Not at this time. The samples on the homepage show exactly what every evaluation looks like, and Founding Member pricing makes the first year low-risk. If you're not sure, email Chris directly and he'll run a concierge evaluation on one of your sermons so you can see the rubric on your own work before deciding.</div>
+  </details>
+
+  <!-- HOW IT WORKS -->
+  <div class="faq-section-header">How It Works</div>
+
+  <details class="faq-item">
+    <summary>What do I submit — a manuscript or audio?</summary>
+    <div class="faq-a">A manuscript. Paste the text directly or upload a .docx file. The evaluation works on the written sermon, which is how the rubric was designed. If you preach from notes rather than a full manuscript, send what you have and Chris can advise during your first concierge evaluation.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>How long does an evaluation take?</summary>
+    <div class="faq-a">A few minutes inside the product, once it's live. Concierge evaluations during pre-launch are returned within 48 hours.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What does the evaluation look like?</summary>
+    <div class="faq-a">A structured dashboard scoring your sermon against 11 criteria drawn from Chapell, Simeon Trust, Piper, 9Marks, Keller, and Robinson — with specific anchors in your sermon text, a band-level summary (Faithful, Strong, Exemplary, etc.), and an affirmation paragraph plus an improvement paragraph at the top. See the samples on the homepage for the actual format.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Will it work for my preaching style?</summary>
+    <div class="faq-a">The rubric draws from a specific Reformed evangelical tradition. It will work best for preachers who already operate inside this stream — expository, gospel-centered, text-driven. Optional rubric variants for other evangelical traditions are on the roadmap.</div>
+  </details>
+
+  <!-- COHORTS -->
+  <div class="faq-section-header">Cohorts</div>
+
+  <details class="faq-item">
+    <summary>How does the Cohort tier work?</summary>
+    <div class="faq-a">Cohort gives you 5 seats and 30 sermons per month, pooled across the group. Each member has their own private library by default, with the option to share specific evaluations with the cohort. It's built for staff teams at one church, seminary classmates, mentor-mentee pairs, or peer preaching groups.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>Can my cohort see my evaluations automatically?</summary>
+    <div class="faq-a">No. Sharing is opt-in per evaluation. You decide which ones to expose to the group and which ones stay private. This mirrors how preachers already work — share the sermon you want feedback on, keep the rest to yourself.</div>
+  </details>
+
+  <!-- ABOUT -->
+  <div class="faq-section-header">About</div>
+
+  <details class="faq-item">
+    <summary>Who built this?</summary>
+    <div class="faq-a">Dr. Christopher M. Daukas — a former church planter in Phoenix, Arizona, with 25 years of pastoral ministry experience and 14 years as a Lead Pastor. The Sermon Coach is the actual rubric Chris uses on his own preaching. Two of the sample evaluations on the homepage are of his own sermons.</div>
+  </details>
+
+  <details class="faq-item">
+    <summary>What if I have a question that isn't here?</summary>
+    <div class="faq-a">Email Chris directly at <a href="mailto:chris@sermoncoach.online" style="color: var(--accent); text-decoration: none;">chris@sermoncoach.online</a>. He reads every email.</div>
+  </details>
+
+  <!-- CTA STRIP -->
+  <div class="cta-strip">
+    <h2>Still have questions?</h2>
+    <p>Email Chris directly. He reads everything.</p>
+    <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
+  <a href="./index.html">Back to homepage</a> · <a href="./pricing.html">View pricing</a>
+</footer>
+
+</body>
+</html>
