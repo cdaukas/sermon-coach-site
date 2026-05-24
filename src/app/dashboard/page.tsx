@@ -28,8 +28,8 @@ export default async function DashboardPage() {
           className="text-xl font-semibold tracking-tight no-underline"
           style={{ fontFamily: "var(--font-serif)", color: "var(--sc-ink)" }}
         >
-          The Sermon <span style={{ color: "var(--sc-accent)" }}>&amp;</span>{" "}
-          Coach
+          The Sermon{" "}
+          <span style={{ color: "var(--sc-accent)" }}>Coach</span>
         </Link>
         <form action={signOut}>
           <button
