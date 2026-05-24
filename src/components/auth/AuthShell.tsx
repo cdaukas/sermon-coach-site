@@ -20,8 +20,8 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           className="inline-block text-xl font-semibold tracking-tight no-underline"
           style={{ fontFamily: "var(--font-serif)", color: "var(--sc-ink)" }}
         >
-          The Sermon <span style={{ color: "var(--sc-accent)" }}>&amp;</span>{" "}
-          Coach
+          The Sermon{" "}
+          <span style={{ color: "var(--sc-accent)" }}>Coach</span>
         </Link>
       </header>
 
