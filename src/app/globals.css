@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --sc-bg: #faf8f3;
+  --sc-ink: #1a2332;
+  --sc-ink-soft: #4a5568;
+  --sc-ink-mid: #2a3447;
+  --sc-rule: #d4cfc1;
+  --sc-panel: #ffffff;
+  --sc-accent: #a67c2e;
+  --sc-accent-soft: #c9a55c;
+  --sc-accent-pale: #faf6ed;
+  --sc-error: #9b2c2c;
+  --sc-error-bg: #fdf2f2;
+  --sc-success: #276749;
+  --sc-success-bg: #f0fff4;
+  --sc-shadow: 0 1px 3px rgba(26, 35, 50, 0.06), 0 1px 2px rgba(26, 35, 50, 0.04);
+  --sc-shadow-lift: 0 12px 32px rgba(26, 35, 50, 0.1),
+    0 4px 12px rgba(26, 35, 50, 0.06);
+  --font-serif: "Iowan Old Style", "Charter", Georgia, "Times New Roman", serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-sc-bg: var(--sc-bg);
+  --color-sc-ink: var(--sc-ink);
+  --color-sc-ink-soft: var(--sc-ink-soft);
+  --color-sc-ink-mid: var(--sc-ink-mid);
+  --color-sc-rule: var(--sc-rule);
+  --color-sc-panel: var(--sc-panel);
+  --color-sc-accent: var(--sc-accent);
+  --color-sc-accent-soft: var(--sc-accent-soft);
+  --color-sc-accent-pale: var(--sc-accent-pale);
+  --color-sc-error: var(--sc-error);
+  --color-sc-error-bg: var(--sc-error-bg);
+  --color-sc-success: var(--sc-success);
+  --color-sc-success-bg: var(--sc-success-bg);
+  --font-serif: var(--font-serif);
+  --font-ui: var(--font-ui);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--sc-bg);
+  color: var(--sc-ink);
+  font-family: var(--font-serif);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
