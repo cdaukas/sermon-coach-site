@@ -43,8 +43,18 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
           boxShadow: "var(--sc-shadow-lift)",
         }}
       >
+        {evaluation.status === "failed" && evaluation.error_message ? (
+          <p
+            className="mb-4 text-[15px]"
+            style={{ ...uiFont, color: "var(--sc-error)" }}
+          >
+            {evaluation.error_message}
+          </p>
+        ) : null}
         <p style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-          This evaluation is not ready yet (status: {evaluation.status}).
+          {evaluation.status === "running" || evaluation.status === "pending"
+            ? "Evaluation in progress…"
+            : `This evaluation is not ready yet (status: ${evaluation.status}).`}
         </p>
         <Link
           href={`/dashboard/sermons/${sermonId}`}

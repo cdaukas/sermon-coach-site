@@ -32,18 +32,117 @@ export const evaluationCategorySchema = z.object({
   growthItems: z.array(z.string()).optional(),
 });
 
-/** v1 subset — extended sections optional until 6.5 */
+export const evaluationHeatmapBeatSchema = z.object({
+  label: z.string(),
+  register: z.string(),
+  flex: z.number().positive().optional(),
+});
+
+export const evaluationHeatmapRowSchema = z.object({
+  time: z.string(),
+  beat: z.string(),
+  register: z.string(),
+  textSupport: z.string(),
+  notes: z.string(),
+});
+
+export const evaluationHeatmapSchema = z.object({
+  disclaimer: z.string(),
+  timeline: z.array(evaluationHeatmapBeatSchema).min(1),
+  rows: z.array(evaluationHeatmapRowSchema).min(1),
+});
+
+export const evaluationWorkingCardSchema = z.object({
+  headline: z.string(),
+  blockquote: z.string().optional(),
+  detail: z.string(),
+});
+
+export const evaluationGrowthOpportunitySchema = z.object({
+  number: z.string(),
+  headline: z.string(),
+  principleBadge: z.string(),
+  detail: z.string(),
+  nextStep: z.string(),
+});
+
+export const evaluationPrioritySchema = z.object({
+  number: z.string(),
+  headline: z.string(),
+  rationale: z.string(),
+  practicalStep: z.string(),
+});
+
+export const evaluationRewriteSchema = z.object({
+  label: z.string(),
+  headline: z.string(),
+  analysis: z.string(),
+  weak: z.string(),
+  strong: z.string(),
+});
+
+export const evaluationMethodologyBandSchema = z.object({
+  letter: z.string(),
+  range: z.string(),
+  band: z.string(),
+  meaning: z.string(),
+  isCurrent: z.boolean().optional(),
+});
+
+export const evaluationMethodologySchema = z.object({
+  summary: z.string(),
+  bands: z.array(evaluationMethodologyBandSchema).min(1),
+  simpleScore: z.number().int().min(0).max(100),
+  weightedScore: z.number().int().min(0).max(100),
+  explainer: z.string(),
+  subtotals: z.array(
+    z.object({
+      category: z.string(),
+      score: z.string(),
+    }),
+  ),
+  mathNotes: z.string(),
+});
+
+/** Stored rows: core sections required; extended sections optional (fixture / older rows). */
 export const evaluationResultSchema = z.object({
   meta: evaluationMetaSchema,
   headline: evaluationHeadlineSchema,
   categories: z.array(evaluationCategorySchema).min(1),
+  heatmap: evaluationHeatmapSchema.optional(),
+  working: z.array(evaluationWorkingCardSchema).optional(),
+  growthOpportunities: z.array(evaluationGrowthOpportunitySchema).optional(),
+  priorities: z.array(evaluationPrioritySchema).optional(),
+  rewrites: z.array(evaluationRewriteSchema).optional(),
+  methodology: evaluationMethodologySchema.optional(),
+});
+
+/** Claude tool output — all sections required. */
+export const evaluationResultStrictSchema = z.object({
+  meta: evaluationMetaSchema,
+  headline: evaluationHeadlineSchema,
+  categories: z.array(evaluationCategorySchema).min(3).max(4),
+  heatmap: evaluationHeatmapSchema,
+  working: z.array(evaluationWorkingCardSchema).min(4).max(4),
+  growthOpportunities: z.array(evaluationGrowthOpportunitySchema).min(3).max(3),
+  priorities: z.array(evaluationPrioritySchema).min(3).max(3),
+  rewrites: z.array(evaluationRewriteSchema).min(1).max(2),
+  methodology: evaluationMethodologySchema,
 });
 
 export type EvaluationResult = z.infer<typeof evaluationResultSchema>;
+export type EvaluationResultStrict = z.infer<typeof evaluationResultStrictSchema>;
 
 export function parseEvaluationResult(
   value: unknown,
 ): EvaluationResult | null {
   const parsed = evaluationResultSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+export function parseEvaluationResultStrict(
+  value: unknown,
+): EvaluationResultStrict | null {
+  const parsed = evaluationResultStrictSchema.safeParse(value);
   return parsed.success ? parsed.data : null;
 }

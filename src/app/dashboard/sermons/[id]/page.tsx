@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
+/** Long-running Claude evaluation (see STEP_6_PLAN §B). */
+export const maxDuration = 300;
 import { notFound } from "next/navigation";
 import { EvaluateStubButton } from "@/components/evaluation/EvaluateStubButton";
 import { SermonManuscript } from "@/components/dashboard/SermonManuscript";

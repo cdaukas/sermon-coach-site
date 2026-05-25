@@ -5,11 +5,11 @@ import { requestEvaluation } from "@/lib/evaluation/actions";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
-type EvaluateStubButtonProps = {
+type EvaluateButtonProps = {
   sermonId: string;
 };
 
-export function EvaluateStubButton({ sermonId }: EvaluateStubButtonProps) {
+export function EvaluateStubButton({ sermonId }: EvaluateButtonProps) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +36,7 @@ export function EvaluateStubButton({ sermonId }: EvaluateStubButtonProps) {
           color: "#faf8f3",
         }}
       >
-        {pending ? "Running stub evaluation…" : "Run evaluation (stub)"}
+        {pending ? "Evaluating…" : "Evaluate sermon"}
       </button>
       {error ? (
         <p className="mt-3 text-[13px]" style={{ ...uiFont, color: "var(--sc-error)" }}>
@@ -44,7 +44,7 @@ export function EvaluateStubButton({ sermonId }: EvaluateStubButtonProps) {
         </p>
       ) : null}
       <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-        Step 6.2: saves fixture data — no Claude API yet.
+        Usually takes a few minutes. Keep this tab open.
       </p>
     </div>
   );
