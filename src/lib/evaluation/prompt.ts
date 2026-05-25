@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const EVALUATION_PROMPT_VERSION = "v1";
+export const EVALUATION_PROMPT_VERSION = "v2";
 
 const rubricPath = join(process.cwd(), "src/lib/evaluation/rubric.md");
 
@@ -36,7 +36,7 @@ export function buildUserMessage({
 
 **Working title:** ${sermonTitle}
 
-Infer preacher name, passage, length, and preaching mode from the manuscript for \`meta\` when not stated explicitly.
+Infer preacher name, passage, length (~150 wpm from word count), and \`submission_mode\` from the manuscript for \`meta\` when not stated explicitly. Use snake_case field names from the tool schema.
 
 ---
 

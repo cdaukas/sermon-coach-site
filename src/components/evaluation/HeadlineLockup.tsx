@@ -1,13 +1,13 @@
 import type { EvaluationResult } from "@/lib/evaluation/schema";
-
-const serifFont = { fontFamily: "var(--font-serif)" };
-const uiFont = { fontFamily: "var(--font-ui)" };
+import { formatScoreBand } from "@/lib/evaluation/schema";
+import { serifFont, uiFont } from "./shared";
 
 type HeadlineLockupProps = {
-  headline: EvaluationResult["headline"];
+  scoring: EvaluationResult["scoring"];
+  verdict: EvaluationResult["verdict"];
 };
 
-export function HeadlineLockup({ headline }: HeadlineLockupProps) {
+export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
   return (
     <section
       className="mb-10 grid min-h-[280px] grid-cols-1 md:grid-cols-[280px_1fr]"
@@ -27,10 +27,10 @@ export function HeadlineLockup({ headline }: HeadlineLockupProps) {
           className="mb-3 text-[64px] leading-none tracking-tight"
           style={serifFont}
         >
-          {headline.score}
+          {scoring.composite_weighted}
         </p>
         <p className="mb-3 text-[22px] italic" style={{ color: "var(--sc-accent-soft)" }}>
-          {headline.band}
+          {formatScoreBand(scoring)}
         </p>
         <div
           className="mb-3 h-px w-10"
@@ -48,11 +48,11 @@ export function HeadlineLockup({ headline }: HeadlineLockupProps) {
         style={{ borderColor: "var(--sc-accent)" }}
       >
         <p className="mb-4 text-[17px] leading-snug" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-          {headline.strengthVerdict}
+          {verdict.affirmation_paragraph}
         </p>
         <p className="text-[17px] leading-snug" style={{ ...serifFont, color: "var(--sc-ink-soft)" }}>
           <strong style={{ color: "var(--sc-ink)" }}>Grow here: </strong>
-          {headline.improvementVerdict}
+          {verdict.improvement_sentence}
         </p>
       </div>
     </section>

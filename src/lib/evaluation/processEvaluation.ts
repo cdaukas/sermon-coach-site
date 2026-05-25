@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { formatScoreBand } from "./schema";
 import { recordEvaluationComplete } from "./quota";
 import { runEvaluation, EvaluationRunError } from "./runEvaluation";
 
@@ -54,8 +55,8 @@ export async function processEvaluationJob(
         status: "complete",
         model,
         result,
-        overall_score: result.headline.score,
-        score_band: result.headline.band,
+        overall_score: result.scoring.composite_weighted,
+        score_band: formatScoreBand(result.scoring),
         input_tokens: inputTokens,
         output_tokens: outputTokens,
         completed_at: completedAt,

@@ -20,7 +20,7 @@ export async function generateMetadata({
     return { title: "Evaluation" };
   }
 
-  return { title: `${data.evaluation.result.meta.title} — Evaluation` };
+  return { title: `${data.evaluation.result.meta.sermon_title} — Evaluation` };
 }
 
 export default async function EvaluationPage({ params }: EvaluationPageProps) {

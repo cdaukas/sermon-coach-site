@@ -8,6 +8,7 @@ import {
   EVALUATION_FIXTURE_PROMPT_VERSION,
 } from "./fixture";
 import { EVALUATION_PROMPT_VERSION } from "./prompt";
+import { formatScoreBand } from "./schema";
 import { processEvaluationJob } from "./processEvaluation";
 import {
   checkEvaluationQuota,
@@ -21,7 +22,7 @@ async function runFixtureEvaluation(
 ): Promise<RequestEvaluationResult> {
   const supabase = await createClient();
   const now = new Date().toISOString();
-  const { headline } = EVALUATION_FIXTURE;
+  const { scoring } = EVALUATION_FIXTURE;
 
   const { data: evaluation, error: insertError } = await supabase
     .from("sermon_evaluations")
@@ -30,8 +31,8 @@ async function runFixtureEvaluation(
       status: "complete",
       prompt_version: EVALUATION_FIXTURE_PROMPT_VERSION,
       result: EVALUATION_FIXTURE,
-      overall_score: headline.score,
-      score_band: headline.band,
+      overall_score: scoring.composite_weighted,
+      score_band: formatScoreBand(scoring),
       started_at: now,
       completed_at: now,
     })

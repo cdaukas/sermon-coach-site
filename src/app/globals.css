@@ -14,6 +14,11 @@
   --sc-error-bg: #fdf2f2;
   --sc-success: #276749;
   --sc-success-bg: #f0fff4;
+  --sc-green: #4a7c59;
+  --sc-green-soft: #7ba886;
+  --sc-amber: #c9892e;
+  --sc-red: #a04848;
+  --sc-cream-tint: #faf6ed;
   --sc-shadow: 0 1px 3px rgba(26, 35, 50, 0.06), 0 1px 2px rgba(26, 35, 50, 0.04);
   --sc-shadow-lift: 0 12px 32px rgba(26, 35, 50, 0.1),
     0 4px 12px rgba(26, 35, 50, 0.06);
