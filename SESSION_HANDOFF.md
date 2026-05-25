@@ -1,9 +1,10 @@
 # Session handoff — Step 6 (evaluation pipeline)
 
-**Branch:** `build/product-layer`  
+**Branch:** `build/product-layer` (pushed to `origin`)  
 **Repo:** `~/Projects/sermon-coach-site`  
 **Plan doc:** `STEP_6_PLAN.md`  
-**Last updated:** May 2026 (after chunks 6.1–6.4)
+**Canon:** `/reference/SKILL.md` (dashboard layout); `public/sermon-evaluation-tressler-2cor11-rev2.html` (visual reference)  
+**Last updated:** May 2026 (after chunks 6.1–6.5)
 
 ---
 
@@ -15,8 +16,11 @@
 | `737334c`  | 6.2   | Evaluation lib stub, fixture JSON, minimal dashboard UI |
 | `48d8e14`  | 6.3   | Anthropic SDK, `rubric.md`, `runEvaluation()`, full tool schema |
 | `79db4ab`  | 6.4   | Quota guards, async job + polling, `EvaluateButton` loading UX |
+| `92adc34`  | 6.5a  | v2 snake_case schema, all dashboard section components, full fixture |
+| `67368ac`  | 6.5b  | Align dashboard to skill canon (render-layer) |
+| `2790453`  | 6.5c  | Remove orphaned page-level `FcfSection` (FCF stays in criterion card) |
 
-Local branch was **2 commits ahead** of `origin/build/product-layer` after 6.4 (6.3 + 6.4); push when ready.
+Branch is **up to date** with `origin/build/product-layer`.
 
 ---
 
@@ -33,38 +37,65 @@ Local branch was **2 commits ahead** of `origin/build/product-layer` after 6.4 (
 
 ### 6.2 — Stub pipeline + minimal UI
 
-- `src/lib/evaluation/`: `schema.ts` (core subset), `types.ts`, `queries.ts`, `fixture.ts`, `actions.ts`
+- `src/lib/evaluation/`: `schema.ts`, `types.ts`, `queries.ts`, `fixture.ts`, `actions.ts`
 - Route: `/dashboard/sermons/[id]/evaluations/[evaluationId]`
 - Components: `EvaluationDashboard`, `HeadlineLockup`, `CategoryCard` (meta + headline + categories only)
-- Stub inserted `complete` row with `EVALUATION_FIXTURE` (`prompt_version: fixture-v1`)
 
 ### 6.3 — Real Claude integration
 
-- `@anthropic-ai/sdk`, `rubric.md`, `prompt.ts` (`EVALUATION_PROMPT_VERSION=v1`), `tool-schema.ts`, `runEvaluation.ts`
-- Extended Zod + Anthropic tool schema for **all nine** output sections (see schema below)
-- `processEvaluation.ts` added in 6.4 (Claude work moved out of sync action)
+- `@anthropic-ai/sdk`, `rubric.md`, `prompt.ts` (`EVALUATION_PROMPT_VERSION=v2`), `tool-schema.ts`, `runEvaluation.ts`
+- Zod + Anthropic tool schema for full evaluation output
+- `processEvaluation.ts` (async job; used from 6.4)
 
 ### 6.4 — Guards, async UX, polling
 
-- `quota.ts`: monthly caps (coach 3 / coach_plus 6 / cohort 30), `DEV_EVALUATION_LIMIT` override, 60s cooldown, period reset, increment on **complete** only
-- `requestEvaluation`: quota + one-active-job-per-user checks; insert `pending`; `after(processEvaluationJob)`; returns `{ evaluationId, sermonId }` (no redirect)
-- `GET /api/evaluations/[evaluationId]` for status polling
-- `EvaluateButton`: loading panel, elapsed time, usage line, polls every 3s → navigates on `complete`
+- `quota.ts`: monthly caps (coach 3 / coach_plus 6 / cohort 30), `DEV_EVALUATION_LIMIT`, 60s cooldown
+- `requestEvaluation`: quota + one-active-job-per-user; `after(processEvaluationJob)`; client polls `/api/evaluations/[id]`
+- `EvaluateButton`: loading panel, 3s poll → navigate on `complete`
 - `maxDuration = 300` on sermon detail page
-- `EvaluateStubButton` re-exports `EvaluateButton` for compatibility
+
+### 6.5 — Full dashboard UI + skill canon (render-layer)
+
+**Shipped in UI** (`EvaluationDashboard` + section components):
+
+| Area | Behavior |
+|------|----------|
+| **Headline lockup** | Band (italic, no letter grade) → `raw_total/raw_max` (55-scale) → “Composite · See methodology at end”; verdict improvement opener bold + body regular |
+| **Categories** | Four `CategoryCard`s with accordion criteria (FCF scored inside Structure & Craft) |
+| **Heat map** | Rendered **only** when `heat_map.audio_processed === true` (hidden for manuscript-only) |
+| **Lead with these** | `whats_working` cards |
+| **Where You Can Grow** | `top_priorities` only (`PrioritiesSection`); amber growth panels **not** rendered |
+| **What Improvement Looks Like** | Collapsible rewrites (`<details>`); first open |
+| **Methodology** | Single collapsible appendix (collapsed by default); `/100` composites inside |
+
+**Also:** `EVALUATION_FIXTURE` includes all sections for stub smoke test; legacy JSON normalizer in `schema-legacy.ts`.
+
+**Not deleted yet (orphaned files / schema fields):** `FcfSection.tsx`, `GrowthOpportunitiesSection.tsx` — still in repo; `fcf` and `growth_opportunities_detailed` still in v2 JSON from Claude.
 
 ---
 
-## `schema.ts` — two shapes
+## Deferred to Step 6.7 (schema + prompt cleanup)
+
+Do **not** start in 6.6 unless scope expands — tracked here and in `EvaluationDashboard.tsx` TODO.
+
+| Item | Notes |
+|------|--------|
+| **Unified “Where You Can Grow”** | Merge `growth_opportunities_detailed` + `top_priorities` into one canonical array; update Zod, `tool-schema.ts`, `rubric.md`, prompts |
+| **Stop generating hidden growth array** | Prompt/rubric should not require `growth_opportunities_detailed` once merged |
+| **Remove top-level `fcf` from schema** | FCF lives in Structure & Craft criterion only; delete `fcf` from strict tool output + `FcfSection.tsx` |
+| **Audio-conditional Claude output** | Model still emits `heat_map` for manuscripts today; optional: omit or slim beats when no audio (UI already hides) |
+| **Delete orphaned components** | `FcfSection.tsx`, `GrowthOpportunitiesSection.tsx` after schema change |
+
+---
+
+## `schema.ts` — two shapes (v2)
 
 | Export | Purpose | Sections |
 |--------|---------|----------|
-| **`evaluationResultSchema`** | Read from DB (`parseEvaluationResult`) | **Required:** `meta`, `headline`, `categories`. **Optional:** `heatmap`, `working`, `growthOpportunities`, `priorities`, `rewrites`, `methodology` — so old fixture rows (3 sections only) still parse. |
-| **`evaluationResultStrictSchema`** | Validate Claude tool output (`parseEvaluationResultStrict` in `runEvaluation.ts`) | **All nine sections required** with array length rules (e.g. 4 working cards, 3 growth panels). |
+| **`evaluationResultSchema`** | DB read (`parseEvaluationResult`) | **Required:** `meta`, `scoring`, `verdict`, `categories`. **Optional:** `heat_map`, `whats_working`, `growth_opportunities_detailed`, `top_priorities`, `rewrites`, `fcf`, `methodology_note`. Legacy headline-only rows via `schema-legacy.ts`. |
+| **`evaluationResultStrictSchema`** | Claude tool output | All sections required with length rules (4 categories, 3 growth, 3 priorities, etc.). |
 
-**UI today** only renders the three core sections (`EvaluationDashboard.tsx`). Full JSON from Claude is stored in `result` jsonb; **6.5** adds React sections for the rest.
-
-**Keep in sync:** `tool-schema.ts` JSON Schema must match `evaluationResultStrictSchema` field names (camelCase).
+**Keep in sync:** `tool-schema.ts` ↔ `evaluationResultStrictSchema` (snake_case).
 
 ---
 
@@ -76,76 +107,59 @@ Controlled by `requestEvaluation()` in `src/lib/evaluation/actions.ts`.
 
 1. No `ANTHROPIC_API_KEY` required  
 2. **No quota checks**, no cooldown, no active-job guard  
-3. Single insert: `status: complete`, `result: EVALUATION_FIXTURE`, `prompt_version: fixture-v1`  
+3. Single insert: `complete`, `result: EVALUATION_FIXTURE`, `prompt_version: fixture-v1`  
 4. **`redirect()`** immediately to evaluation page  
 5. Does **not** increment `profiles.evaluations_used_this_period`
 
 ### Real (default when stub off + API key set)
 
-1. Requires `ANTHROPIC_API_KEY` (and optional `EVALUATION_MODEL`, `DEV_EVALUATION_LIMIT`)  
-2. `checkEvaluationQuota()` + `countActiveEvaluationsForUser()` before insert  
-3. Insert `pending` row (`prompt_version: v1`)  
-4. `after()` runs `processEvaluationJob()` → `running` → Claude `runEvaluation()` → `complete` or `failed`  
-5. On **complete**: writes full `result`, tokens, scores; **`recordEvaluationComplete()`** bumps monthly counter + `last_evaluation_at`  
-6. On **failed**: `error_message` set; **no** quota increment  
-7. Action returns `{ ok: true, evaluationId, sermonId }`; client **polls** `/api/evaluations/[id]` every 3s, then `router.push` to dashboard  
+1. Requires `ANTHROPIC_API_KEY` (optional `EVALUATION_MODEL`, `DEV_EVALUATION_LIMIT`)  
+2. Quota + active-job guards → insert `pending` (`prompt_version: v2`)  
+3. `processEvaluationJob()` → Claude → `complete` / `failed`  
+4. On **complete**: full `result` jsonb, tokens, scores; quota increment  
+5. Client polls every 3s → navigates to evaluation dashboard  
 
 ---
 
 ## Environment (`.env.local`)
 
-Gitignored (`.env*` in `.gitignore`) — **hidden from sidebar**; open via **Cmd+P** → `.env.local`.
-
-Expected variables:
+Gitignored — open via **Cmd+P** → `.env.local`. Restart dev server after edits.
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...   # JWT eyJhbGci... NOT sk-ant-...
 ANTHROPIC_API_KEY=sk-ant-...
 EVALUATION_MODEL=claude-sonnet-4-6
-DEV_EVALUATION_LIMIT=99              # optional dev override for tier caps
+DEV_EVALUATION_LIMIT=99              # optional
 # EVALUATION_USE_STUB=1            # optional: force fixture path
 ```
 
-Restart `npm run dev` after any `.env.local` change.
-
 ---
 
-## What's left (`STEP_6_PLAN.md`)
+## What's left
 
 | Chunk | Work |
 |-------|------|
-| **6.5** | Full evaluation dashboard UI: heat map, working, growth opportunities, priorities, rewrites, methodology — match `public/sermon-evaluation-tressler-2cor11-rev2.html` |
-| **6.6** | Hardening: failed-state polish, token logging, optional list badge on sermon library, README env docs; confirm quota not incremented on fail |
+| **6.6** | Hardening: failed-state polish, token logging, sermon list badge, README env docs; confirm quota not incremented on fail |
+| **6.7** | Schema/prompt canon cleanup (see deferred table above) |
 
-**Suggested next commit message (6.5):** `Step 6: Complete evaluation dashboard UI`  
-**Suggested next commit message (6.6):** `Step 6: Complete evaluation dashboard UI and error handling` (per plan wording)
-
-**Explicitly out of scope for Step 6:** Stripe, shareable public URLs, audio/Whisper, version picker UI, cohort sharing, HTML blob storage.
+**Out of scope for Step 6:** Stripe, shareable public URLs, audio/Whisper pipeline, version picker UI, cohort sharing.
 
 ---
 
 ## Gotchas for the next session
 
-1. **Wrong key in wrong env line** — Pasting `ANTHROPIC_API_KEY` into `NEXT_PUBLIC_SUPABASE_ANON_KEY` breaks login with generic “Something went wrong.” Supabase anon key is a **JWT** (`eyJ...`).
+1. **Supabase anon key** — Must be JWT (`eyJ...`), not Anthropic `sk-ant-...`.
 
-2. **`.env.local` not in file tree** — Use Quick Open (`Cmd+P`) or disable “Exclude Git Ignore” in explorer.
+2. **Heat map on stub** — Fixture has `audio_processed: false` → no heat map block (expected).
 
-3. **Dashboard UI ≠ stored JSON** — Claude saves all sections; UI shows three. Don’t assume missing data until you inspect `sermon_evaluations.result` in Supabase.
+3. **Growth panels in JSON, not UI** — `growth_opportunities_detailed` still stored; only `top_priorities` shown under “Where You Can Grow.”
 
-4. **Zod strips unknown keys only on parse** — Use `evaluationResultStrictSchema` for API; `evaluationResultSchema` for DB reads. Extend both when adding fields.
+4. **FCF** — No page-level FCF block; use Structure & Craft criterion accordion. `result.fcf` may still exist in DB until 6.7.
 
-5. **Multiple dev servers** — Old `next dev` on 3002/3003 may linger; kill with `pkill -f "next dev"` and use the port shown in terminal (often **3000** after restart).
+5. **Quota** — `DEV_EVALUATION_LIMIT=99` bypasses caps; failed evals do not increment.
 
-6. **Quota testing** — `DEV_EVALUATION_LIMIT=99` bypasses tier limits; remove to test real caps. Failed evaluations do not consume quota.
-
-7. **Active evaluation constraints** — DB index: one `pending`/`running` per version; app guard: one `pending`/`running` per **user** across all sermons.
-
-8. **Manual test SQL** — RLS and partial-unique-index tests were run in Supabase SQL editor during 6.1; not committed.
-
-9. **Model ID** — Default `claude-sonnet-4-6`; if API returns model-not-found, use a dated model id from Anthropic console in `EVALUATION_MODEL`.
-
-10. **Untracked** — `EMAIL_DELIVERABILITY.md` in repo root (unrelated); do not commit unless intentional.
+6. **Untracked** — `EMAIL_DELIVERABILITY.md` (do not commit unless intentional).
 
 ---
 
@@ -154,22 +168,25 @@ Restart `npm run dev` after any `.env.local` change.
 ```
 supabase/migrations/20260525120000_profiles_and_sermon_evaluations.sql
 src/lib/evaluation/
-  rubric.md, prompt.ts, tool-schema.ts, schema.ts
+  rubric.md, prompt.ts, tool-schema.ts, schema.ts, schema-legacy.ts
   runEvaluation.ts, processEvaluation.ts, quota.ts
   actions.ts, queries.ts, fixture.ts, types.ts
 src/app/api/evaluations/[evaluationId]/route.ts
-src/app/dashboard/sermons/[id]/page.tsx          # EvaluateButton, maxDuration
 src/app/dashboard/sermons/[id]/evaluations/[evaluationId]/page.tsx
-src/components/evaluation/EvaluateButton.tsx
-public/sermon-evaluation-tressler-2cor11-rev2.html   # UI spec for 6.5
+src/components/evaluation/
+  EvaluationDashboard.tsx, HeadlineLockup.tsx, CategoryCard.tsx
+  HeatMapSection.tsx, WorkingSection.tsx, PrioritiesSection.tsx
+  RewritesSection.tsx, MethodologySection.tsx
+  FcfSection.tsx              # orphaned — remove in 6.7
+  GrowthOpportunitiesSection.tsx  # orphaned — remove in 6.7
+public/sermon-evaluation-tressler-2cor11-rev2.html
 ```
 
 ---
 
 ## Quick smoke test
 
-1. `npm run dev` → note port  
-2. Sign in at `/login`  
-3. Open a sermon → **Evaluate sermon**  
-4. Wait for loading panel → redirect to evaluation (real) or instant (stub)  
-5. Supabase: row `complete`, full `result` jsonb, `evaluations_used_this_period` incremented (real path only)
+1. `npm run dev`  
+2. Sign in → open sermon → **Evaluate sermon** (or stub)  
+3. Evaluation page: band + raw/55 lockup; categories; no heat map (manuscript); Lead with these; Where You Can Grow; collapsible rewrites; collapsed methodology; **no** standalone FCF block between rewrites and methodology  
+4. Supabase: `complete` row, full `result` jsonb (real path)
