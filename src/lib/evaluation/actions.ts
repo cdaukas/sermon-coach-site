@@ -1,5 +1,6 @@
 "use server";
 
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -7,26 +8,12 @@ import {
   EVALUATION_FIXTURE_PROMPT_VERSION,
 } from "./fixture";
 import { EVALUATION_PROMPT_VERSION } from "./prompt";
-import { EvaluationRunError, runEvaluation } from "./runEvaluation";
+import { processEvaluationJob } from "./processEvaluation";
+import {
+  checkEvaluationQuota,
+  countActiveEvaluationsForUser,
+} from "./quota";
 import type { RequestEvaluationResult } from "./types";
-
-function userSafeError(error: unknown): string {
-  if (error instanceof EvaluationRunError) {
-    if (error.code === "config") {
-      return "Evaluation is not configured. Add ANTHROPIC_API_KEY to the server environment.";
-    }
-    if (error.code === "schema" || error.code === "tool") {
-      return "We couldn't generate a valid evaluation. Please try again.";
-    }
-    return "The evaluation service is temporarily unavailable. Please try again.";
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Something went wrong running the evaluation.";
-}
 
 async function runFixtureEvaluation(
   sermonId: string,
@@ -59,6 +46,13 @@ async function runFixtureEvaluation(
   }
 
   redirect(`/dashboard/sermons/${sermonId}/evaluations/${evaluation.id}`);
+}
+
+function mapInsertError(message: string): string {
+  if (message.includes("sermon_evaluations_one_active_per_version_idx")) {
+    return "An evaluation is already running for this manuscript version.";
+  }
+  return message;
 }
 
 export async function requestEvaluation(
@@ -115,15 +109,26 @@ export async function requestEvaluation(
     };
   }
 
-  const startedAt = new Date().toISOString();
+  const quota = await checkEvaluationQuota(user.id);
+  if (!quota.ok) {
+    return { ok: false, error: quota.error };
+  }
+
+  const activeCount = await countActiveEvaluationsForUser(user.id);
+  if (activeCount > 0) {
+    return {
+      ok: false,
+      error:
+        "You already have an evaluation in progress. Wait for it to finish before starting another.",
+    };
+  }
 
   const { data: evaluation, error: insertError } = await supabase
     .from("sermon_evaluations")
     .insert({
       sermon_version_id: version.id,
-      status: "running",
+      status: "pending",
       prompt_version: EVALUATION_PROMPT_VERSION,
-      started_at: startedAt,
     })
     .select("id")
     .single();
@@ -131,49 +136,26 @@ export async function requestEvaluation(
   if (insertError || !evaluation) {
     return {
       ok: false,
-      error: insertError?.message ?? "Failed to start evaluation.",
+      error: mapInsertError(
+        insertError?.message ?? "Failed to start evaluation.",
+      ),
     };
   }
 
   const evaluationId = evaluation.id;
 
-  try {
-    const { result, model, inputTokens, outputTokens } = await runEvaluation({
-      sermonTitle: sermon.title,
-      manuscript: version.content,
-    });
-
-    const completedAt = new Date().toISOString();
-
-    const { error: updateError } = await supabase
-      .from("sermon_evaluations")
-      .update({
-        status: "complete",
-        model,
-        result,
-        overall_score: result.headline.score,
-        score_band: result.headline.band,
-        input_tokens: inputTokens,
-        output_tokens: outputTokens,
-        completed_at: completedAt,
-      })
-      .eq("id", evaluationId);
-
-    if (updateError) {
-      throw new Error(updateError.message);
+  after(async () => {
+    try {
+      await processEvaluationJob({
+        evaluationId,
+        userId: user.id,
+        sermonTitle: sermon.title,
+        manuscript: version.content,
+      });
+    } catch {
+      // Row updated to failed inside processEvaluationJob
     }
-  } catch (error) {
-    await supabase
-      .from("sermon_evaluations")
-      .update({
-        status: "failed",
-        error_message: userSafeError(error),
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", evaluationId);
+  });
 
-    return { ok: false, error: userSafeError(error) };
-  }
-
-  redirect(`/dashboard/sermons/${sermonId}/evaluations/${evaluationId}`);
+  return { ok: true, evaluationId, sermonId };
 }

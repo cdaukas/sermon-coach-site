@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { parseEvaluationResult } from "./schema";
 import type {
+  EvaluationStatus,
   EvaluationWithSermon,
   SermonEvaluationListItem,
   SermonEvaluationRow,
@@ -30,6 +31,60 @@ function mapEvaluationRow(
     created_at: row.created_at as string,
     started_at: (row.started_at as string | null) ?? null,
     completed_at: (row.completed_at as string | null) ?? null,
+  };
+}
+
+export type EvaluationStatusResponse = {
+  id: string;
+  status: EvaluationStatus;
+  errorMessage: string | null;
+  sermonId: string;
+  overallScore: number | null;
+  scoreBand: string | null;
+};
+
+export async function getEvaluationStatus(
+  evaluationId: string,
+): Promise<EvaluationStatusResponse | null> {
+  const supabase = await createClient();
+
+  const { data: row, error } = await supabase
+    .from("sermon_evaluations")
+    .select(
+      "id, status, error_message, overall_score, score_band, sermon_version_id",
+    )
+    .eq("id", evaluationId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!row) {
+    return null;
+  }
+
+  const { data: version, error: versionError } = await supabase
+    .from("sermon_versions")
+    .select("sermon_id")
+    .eq("id", row.sermon_version_id)
+    .maybeSingle();
+
+  if (versionError) {
+    throw new Error(versionError.message);
+  }
+
+  if (!version) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    status: row.status as EvaluationStatus,
+    errorMessage: row.error_message,
+    sermonId: version.sermon_id,
+    overallScore: row.overall_score,
+    scoreBand: row.score_band,
   };
 }
 
@@ -123,4 +178,36 @@ export async function listEvaluationsForSermon(
   }
 
   return data ?? [];
+}
+
+export async function sermonHasActiveEvaluation(
+  sermonId: string,
+): Promise<boolean> {
+  const supabase = await createClient();
+
+  const { data: versions, error: versionsError } = await supabase
+    .from("sermon_versions")
+    .select("id")
+    .eq("sermon_id", sermonId);
+
+  if (versionsError) {
+    throw new Error(versionsError.message);
+  }
+
+  const versionIds = (versions ?? []).map((v) => v.id);
+  if (versionIds.length === 0) {
+    return false;
+  }
+
+  const { count, error } = await supabase
+    .from("sermon_evaluations")
+    .select("id", { count: "exact", head: true })
+    .in("sermon_version_id", versionIds)
+    .in("status", ["pending", "running"]);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (count ?? 0) > 0;
 }

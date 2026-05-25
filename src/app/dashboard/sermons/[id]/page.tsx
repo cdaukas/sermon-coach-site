@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { EvaluateButton } from "@/components/evaluation/EvaluateButton";
+import { SermonManuscript } from "@/components/dashboard/SermonManuscript";
+import { getEvaluationUsage } from "@/lib/evaluation/quota";
+import {
+  listEvaluationsForSermon,
+  sermonHasActiveEvaluation,
+} from "@/lib/evaluation/queries";
+import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
 /** Long-running Claude evaluation (see STEP_6_PLAN §B). */
 export const maxDuration = 300;
-import { notFound } from "next/navigation";
-import { EvaluateStubButton } from "@/components/evaluation/EvaluateStubButton";
-import { SermonManuscript } from "@/components/dashboard/SermonManuscript";
-import { listEvaluationsForSermon } from "@/lib/evaluation/queries";
-import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -38,9 +43,16 @@ export async function generateMetadata({
 
 export default async function SermonDetailPage({ params }: SermonDetailPageProps) {
   const { id } = await params;
-  const [sermon, evaluations] = await Promise.all([
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [sermon, evaluations, usage, hasActiveEvaluation] = await Promise.all([
     getSermonWithLatestVersion(id),
     listEvaluationsForSermon(id),
+    user ? getEvaluationUsage(user.id) : Promise.resolve(null),
+    sermonHasActiveEvaluation(id),
   ]);
 
   if (!sermon?.latest_version) {
@@ -87,7 +99,11 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
 
       <SermonManuscript content={version.content} />
 
-      <EvaluateStubButton sermonId={sermon.id} />
+      <EvaluateButton
+        sermonId={sermon.id}
+        usage={usage}
+        hasActiveEvaluation={hasActiveEvaluation}
+      />
 
       {latestComplete ? (
         <p className="mt-4 text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
