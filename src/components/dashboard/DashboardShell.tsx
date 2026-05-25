@@ -17,7 +17,7 @@ type DashboardShellProps = {
 
 export function DashboardShell({ children }: DashboardShellProps) {
   return (
-    <div className="mx-auto w-full max-w-[720px] px-6 py-12">
+    <div className="mx-auto w-full max-w-[1100px] px-6 py-12">
       <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
         <Link
           href="/dashboard"

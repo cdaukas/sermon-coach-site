@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EvaluateStubButton } from "@/components/evaluation/EvaluateStubButton";
 import { SermonManuscript } from "@/components/dashboard/SermonManuscript";
+import { listEvaluationsForSermon } from "@/lib/evaluation/queries";
 import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -33,13 +35,17 @@ export async function generateMetadata({
 
 export default async function SermonDetailPage({ params }: SermonDetailPageProps) {
   const { id } = await params;
-  const sermon = await getSermonWithLatestVersion(id);
+  const [sermon, evaluations] = await Promise.all([
+    getSermonWithLatestVersion(id),
+    listEvaluationsForSermon(id),
+  ]);
 
   if (!sermon?.latest_version) {
     notFound();
   }
 
   const { latest_version: version } = sermon;
+  const latestComplete = evaluations.find((e) => e.status === "complete");
 
   return (
     <main
@@ -77,6 +83,21 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
       </div>
 
       <SermonManuscript content={version.content} />
+
+      <EvaluateStubButton sermonId={sermon.id} />
+
+      {latestComplete ? (
+        <p className="mt-4 text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+          Latest evaluation:{" "}
+          <Link
+            href={`/dashboard/sermons/${sermon.id}/evaluations/${latestComplete.id}`}
+            className="font-medium no-underline hover:underline"
+            style={{ color: "var(--sc-accent)" }}
+          >
+            {latestComplete.score_band ?? "View"} ({latestComplete.overall_score ?? "—"}/100)
+          </Link>
+        </p>
+      ) : null}
     </main>
   );
 }
