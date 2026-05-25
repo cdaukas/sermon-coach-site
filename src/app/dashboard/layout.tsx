@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default async function DashboardLayout({
       className="flex min-h-full flex-col"
       style={{ background: "var(--sc-bg)" }}
     >
-      {children}
+      <DashboardShell>{children}</DashboardShell>
     </div>
   );
 }

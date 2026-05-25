@@ -1,90 +1,54 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { SermonList } from "@/components/dashboard/SermonList";
+import { listSermons } from "@/lib/sermons/queries";
 
-async function signOut() {
-  "use server";
-
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect("/login");
-}
+const uiFont = { fontFamily: "var(--font-ui)" };
+const serifFont = { fontFamily: "var(--font-serif)" };
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login?redirectTo=/dashboard");
-  }
+  const sermons = await listSermons();
 
   return (
-    <div className="mx-auto w-full max-w-[720px] px-6 py-12">
-      <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="text-xl font-semibold tracking-tight no-underline"
-          style={{ fontFamily: "var(--font-serif)", color: "var(--sc-ink)" }}
-        >
-          The Sermon{" "}
-          <span style={{ color: "var(--sc-accent)" }}>Coach</span>
-        </Link>
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="rounded border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[var(--sc-ink)]"
+    <main
+      className="rounded px-8 py-10"
+      style={{
+        background: "var(--sc-panel)",
+        border: "1px solid var(--sc-rule)",
+        boxShadow: "var(--sc-shadow-lift)",
+      }}
+    >
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p
+            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            Dashboard
+          </p>
+          <h1
+            className="text-[32px] font-semibold leading-tight tracking-tight"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            Your sermons
+          </h1>
+        </div>
+        {sermons.length > 0 ? (
+          <Link
+            href="/dashboard/sermons/new"
+            className="rounded border px-5 py-2.5 text-[13px] font-semibold tracking-wide no-underline transition-all"
             style={{
-              fontFamily: "var(--font-ui)",
-              background: "var(--sc-panel)",
-              borderColor: "var(--sc-rule)",
-              color: "var(--sc-ink)",
+              ...uiFont,
+              background: "var(--sc-ink)",
+              color: "var(--sc-bg)",
+              borderColor: "var(--sc-ink)",
             }}
           >
-            Sign out
-          </button>
-        </form>
-      </header>
+            New sermon
+          </Link>
+        ) : null}
+      </div>
 
-      <main
-        className="rounded px-8 py-10"
-        style={{
-          background: "var(--sc-panel)",
-          border: "1px solid var(--sc-rule)",
-          boxShadow: "var(--sc-shadow-lift)",
-        }}
-      >
-        <p
-          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-          style={{
-            fontFamily: "var(--font-ui)",
-            color: "var(--sc-accent)",
-          }}
-        >
-          Dashboard
-        </p>
-        <h1
-          className="mb-4 text-[32px] font-semibold leading-tight tracking-tight"
-          style={{ fontFamily: "var(--font-serif)", color: "var(--sc-ink)" }}
-        >
-          You&apos;re signed in
-        </h1>
-        <p
-          className="text-lg leading-relaxed"
-          style={{
-            fontFamily: "var(--font-serif)",
-            color: "var(--sc-ink-soft)",
-            fontStyle: "italic",
-          }}
-        >
-          Signed in as{" "}
-          <span style={{ color: "var(--sc-ink)", fontStyle: "normal" }}>
-            {user.email}
-          </span>
-          . Your sermon library and evaluations will live here soon.
-        </p>
-      </main>
-    </div>
+      <SermonList sermons={sermons} />
+    </main>
   );
 }
