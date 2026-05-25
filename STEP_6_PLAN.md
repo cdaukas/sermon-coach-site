@@ -15,7 +15,7 @@ Step 6 is where the product becomes real: a preacher clicks **Evaluate**, waits 
 The build should stay **small and shippable** for a solo pre-launch developer:
 
 1. Store each evaluation in Postgres with clear status (`pending` → `running` → `complete` / `failed`).
-2. Run Claude **only on the server**, with the rubric in version-controlled prompt files (not in the database).
+2. Run Claude **only on the server**, with the rubric in one version-controlled markdown file (not in the database).
 3. Ask Claude for **structured JSON** (validated before save), then render with **React components** that match the sample HTML — not `dangerouslySetInnerHTML` from the model.
 4. For the long wait (20–60s+), start with a **synchronous server path + loading UI** on the sermon detail page; add polling only if Vercel timeouts force it.
 5. Enforce **basic cost controls** in the database before any API call (monthly cap stub, one in-flight evaluation per user, short cooldown).
@@ -169,7 +169,7 @@ Define a **TypeScript type + Zod schema** in `src/lib/evaluation/schema.ts` mirr
 ### Plain language
 
 - Use **Sonnet** for launch: strong enough for nuanced preaching feedback, much cheaper than Opus for monthly quotas.
-- Keep the **system prompt in the repo** (modular files), versioned with `prompt_version` on each row.
+- Keep the **system prompt in the repo** as a single readable rubric file, versioned with `prompt_version` on each row.
 - Force **JSON output** via tool use or structured outputs — do not scrape free-form HTML from the model.
 - Expect **large prompts** if the full rubric is inlined; budget **~$0.40–$1.50 per evaluation** depending on model and sermon length.
 
@@ -185,16 +185,19 @@ Define a **TypeScript type + Zod schema** in `src/lib/evaluation/schema.ts` mirr
 
 ### System prompt location
 
+**The rubric is the product.** It lives in one file you edit top to bottom like a manuscript:
+
 ```
-src/lib/evaluation/prompt/
-  index.ts          # assembles system + user messages
-  core.ts           # role, output rules, voice
-  rubric/           # per-tradition modules (chapell, simeon, piper, …)
-  output-contract.ts # JSON shape reminders
+src/lib/evaluation/rubric.md    # full system prompt: traditions, criteria, weights, voice, output rules
+src/lib/evaluation/prompt.ts    # thin loader: read rubric.md, attach JSON schema reminder, build messages
+src/lib/evaluation/schema.ts    # Zod + tool input_schema (code — not the rubric prose)
 ```
 
-- **`prompt_version`** in DB: `'v1'`, `'v1.1'` when rubric changes — not editable in Supabase UI.
+At runtime, `prompt.ts` reads `rubric.md` (e.g. `fs.readFileSync` or `import rubric from './rubric.md?raw'` depending on bundler setup) and passes it as the system message. No runtime assembly from multiple rubric fragments.
+
+- **`prompt_version`** in DB: `'v1'`, `'v1.1'` when you materially change `rubric.md` — bump the constant in `prompt.ts` to match. Not editable in Supabase UI.
 - **Not in database** for v1 (no CMS; git is source of truth).
+- When the rubric changes, old evaluations keep their stored `prompt_version` for auditability.
 
 ### Output structure
 
@@ -216,11 +219,11 @@ Pipeline:
 
 | Component | Tokens (approx) |
 |-----------|-----------------|
-| Modular rubric + instructions | 12,000–25,000 |
-| Manuscript | 8,000–18,000 |
+| `rubric.md` (full system prompt) | 12,000–25,000 |
+| Manuscript (user message) | 8,000–18,000 |
 | Model output (JSON) | 6,000–14,000 |
 
-**Implication:** Input-dominated cost. A 30k-token system prompt on every run is expensive — prefer **modular assembly** (§D) and avoid duplicating sample HTML in the prompt.
+**Implication:** Input-dominated cost. A large single-file rubric is expected — that’s the product. Keep the sample HTML **out** of the prompt (use rev2 for UI parity only); a short “quality bar” excerpt in `rubric.md` is enough if needed.
 
 **Rough cost per evaluation (May 2026 list prices, verify before launch):**
 
@@ -239,15 +242,21 @@ Add **`@anthropic-ai/sdk`** as a dependency in the chunk that introduces the API
 
 ### Plain language
 
-The rubric already exists in Chris’s head and in the sample outputs (Chapell FCF, Simeon Trust, Piper, Keller, Robinson, 9Marks). Don’t paste the entire marketing HTML into the prompt. **Build the prompt modularly** from smaller files, and use the sample evaluation as a **few-shot style reference** for tone and depth — not as the schema.
+The rubric already exists in Chris’s head and in the sample outputs (Chapell FCF, Simeon Trust, Piper, Keller, Robinson, 9Marks). **Put all of it in one markdown file** — `src/lib/evaluation/rubric.md` — that you can read and edit start to finish like a manuscript. The rubric is the product, not code structure; splitting it across `chapell.ts` / `keller.ts` modules would make the thing you care about most painful to revise.
+
+Don’t paste the entire marketing HTML sample into the prompt. Use rev2 for **layout** (React UI) and optionally a **short** quality-bar excerpt inside `rubric.md` for tone — not as the schema.
 
 ### Technical
 
-| Strategy | Maintainability |
-|----------|-----------------|
-| **One giant string** | Fast day 1, painful edits, easy to blow token budget, hard to diff. |
-| **Modular files (recommended)** | `rubric/chapell.ts`, `rubric/keller.ts`, etc. + `assembleRubric()`; each tradition ~500–1500 tokens; comment which criteria are double-weighted. |
-| **External markdown in repo** | `docs/rubric/*.md` imported at build — good for non-dev editing later. |
+| Strategy | Verdict |
+|----------|---------|
+| **Single `rubric.md` (recommended)** | One file, git-diffable, readable in the editor without jumping between modules. Loader in `prompt.ts` is ~20 lines of code. |
+| **Modular `.ts` / multi-file assembly** | **No** — optimizes for code organization, not rubric authorship. |
+| **Rubric in database / CMS** | **No for v1** — git remains source of truth; `prompt_version` on each evaluation row tracks which rubric generation produced the result. |
+
+**What goes in `rubric.md`:** role and voice; all traditions and criteria (with double-weighted markers); scoring bands and weight math instructions; heat-map and growth-opportunity rules; constraints (blockquotes from manuscript, present-tense application, etc.); pointer to structured JSON output (details enforced by tool schema in `schema.ts`).
+
+**What stays in code (`schema.ts` / tool definition):** JSON shape only — field names, required arrays, score ranges. The model gets prose instructions from `rubric.md` plus mechanical validation from the tool schema.
 
 **Output contract** (sections to match rev2 HTML):
 
@@ -360,7 +369,7 @@ Same rhythm as Step 5: **one chunk → `npm run build` → manual test gate → 
 |-------|----------------|------------------|-----------|
 | **6.1** | Migration: `profiles` (+ trigger), `sermon_evaluations`, RLS, indexes. Apply in Supabase SQL editor. | Tables exist; RLS blocks cross-user reads; unique partial index blocks two `running` rows same version. | **45–60 min** |
 | **6.2** | `src/lib/evaluation/`: types, Zod schema (subset OK), queries (`getEvaluation`, `listEvaluationsForSermon`). Stub `requestEvaluation` that inserts `complete` with **fixture JSON** (no API). | Signed-in user can trigger stub → redirect → dashboard renders fixture. | **60–90 min** |
-| **6.3** | Anthropic SDK + modular prompt files + `runEvaluation()` + tool schema. Wire into action; real API on dev only. | One real sermon → full JSON saved → scores look sane. Compare output structure to rev2 sample. | **90–120 min** |
+| **6.3** | Anthropic SDK + `rubric.md` + `prompt.ts` loader + `runEvaluation()` + tool schema. Wire into action; real API on dev only. | One real sermon → full JSON saved → scores look sane. Compare output structure to rev2 sample. | **90–120 min** |
 | **6.4** | Evaluate button + loading UX on sermon detail; `maxDuration`; quota + cooldown + one-active-job checks in action. | Double-click blocked; over-quota shows message; loading state visible 2+ min. If 504, implement poll fallback same chunk. | **60–90 min** |
 | **6.5** | React dashboard sections (headline + categories + growth + priorities first; heat map + rewrites + methodology second). | Visual side-by-side with `public/sermon-evaluation-tressler-2cor11-rev2.html`. Mobile width check. | **2–3 hrs** (split across two evenings if needed) |
 | **6.6** | Error retry, failed state UI, token logging, `prompt_version`, list badge optional, README env docs. | Force bad schema → graceful fail; retry works; quota not incremented on fail. | **60–90 min** |
@@ -388,7 +397,7 @@ Same rhythm as Step 5: **one chunk → `npm run build` → manual test gate → 
 | API surface | Server action (+ Route Handler only if timeout) |
 | Long wait v1 | Synchronous + loading UI; poll if needed |
 | Model | Sonnet 4.6 default; Opus optional later |
-| Prompt | Modular repo files + `prompt_version` |
+| Prompt | Single `rubric.md` + `prompt_version` on each row |
 | Output | Tool use / JSON schema + Zod |
 | UI | React components, new evaluation route |
 | Quota | `profiles` DB check before API; Stripe later |
@@ -411,7 +420,7 @@ Same rhythm as Step 5: **one chunk → `npm run build` → manual test gate → 
 
 - [ ] `ANTHROPIC_API_KEY` in `.env.local` (server-only, never `NEXT_PUBLIC_`)
 - [ ] Confirm Vercel plan / `maxDuration` for production (or plan for 6.4 polling)
-- [ ] Rubric source docs available to split into `src/lib/evaluation/prompt/rubric/` (even if v1 is thinner than full skill)
+- [ ] Rubric prose drafted or ported into `src/lib/evaluation/rubric.md` (v1 can start thinner than the full skill; grow in one file)
 
 ---
 
