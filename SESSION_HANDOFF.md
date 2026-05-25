@@ -19,8 +19,9 @@
 | `92adc34`  | 6.5a  | v2 snake_case schema, all dashboard section components, full fixture |
 | `67368ac`  | 6.5b  | Align dashboard to skill canon (render-layer) |
 | `2790453`  | 6.5c  | Remove orphaned page-level `FcfSection` (FCF stays in criterion card) |
+| `17b4e33`  | docs  | Prior handoff update (6.5 / 6.7 deferrals) |
 
-Branch is **up to date** with `origin/build/product-layer`.
+Branch should be pushed after each docs commit.
 
 ---
 
@@ -144,6 +145,53 @@ DEV_EVALUATION_LIMIT=99              # optional
 | **6.7** | Schema/prompt canon cleanup (see deferred table above) |
 
 **Out of scope for Step 6:** Stripe, shareable public URLs, audio/Whisper pipeline, version picker UI, cohort sharing.
+
+### 6.6 — Suggested scope (hardening only)
+
+- Failed evaluation UX on sermon detail + evaluation routes (clear `error_message`, retry path)
+- Token / model logging visibility (dev or admin-friendly)
+- Sermon library badge when latest evaluation exists (`complete` / `failed` / in progress)
+- README or env doc pass for evaluation variables
+- Confirm quota increment only on `complete` (regression check)
+- **Do not** expand into 6.7 schema/prompt work unless explicitly re-scoped
+
+---
+
+## Prompt architecture (what Claude sees today)
+
+Claude is **not** given `SKILL.md` at runtime. There is no `reference/SKILL.md` in this repo.
+
+| Layer | File | Role |
+|-------|------|------|
+| **System** | `src/lib/evaluation/rubric.md` | Loaded via `readFileSync` in `prompt.ts` → `buildSystemPrompt()` (cached in memory) |
+| **System footer** | `prompt.ts` | Hardcoded: call `submit_sermon_evaluation` once, all sections |
+| **User** | `prompt.ts` → `buildUserMessage()` | Working title + infer `meta` + full manuscript body |
+| **Output shape** | `tool-schema.ts` + `schema.ts` | Anthropic tool `submit_sermon_evaluation`; Zod strict parse in `runEvaluation.ts` |
+| **API call** | `runEvaluation.ts` | `system: buildSystemPrompt()`, `tool_choice` forced to evaluation tool |
+
+`EVALUATION_PROMPT_VERSION` is **`v2`** (`prompt.ts`); stored on `sermon_evaluations.prompt_version` for real runs.
+
+**Dashboard canon** (`/reference/SKILL.md` externally, React components locally) is **render-only** today — drift between SKILL UI rules and `rubric.md` + tool schema is expected until 6.7.
+
+---
+
+## Open sync question (6.7 or earlier)
+
+**Should evaluation instructions single-source from SKILL?**
+
+| Source today | Governs |
+|--------------|---------|
+| `rubric.md` + `tool-schema.ts` | Model behavior, JSON sections, scoring rules |
+| SKILL (external) + dashboard React | Section order, labels, conditionals, typography |
+| `SESSION_HANDOFF` / `STEP_6_PLAN` | Build tracking |
+
+Options for a future session:
+
+1. **Sync rubric → SKILL** — Copy or generate `rubric.md` from SKILL evaluation-output section; keep tool schema aligned.
+2. **Load SKILL at runtime** — `prompt.ts` reads SKILL path (or committed `reference/SKILL.md`) instead of/in addition to `rubric.md`.
+3. **Stay split** — SKILL = product/UI canon; `rubric.md` = model canon; document intentional diffs (e.g. hidden `growth_opportunities_detailed`, page-level `fcf` in JSON but not UI).
+
+Until decided, treat **6.5 render work as complete** and **prompt/schema alignment as 6.7**.
 
 ---
 
