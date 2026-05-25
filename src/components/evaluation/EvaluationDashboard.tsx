@@ -1,6 +1,5 @@
 import type { EvaluationResult } from "@/lib/evaluation/schema";
 import { CategoryCard } from "./CategoryCard";
-import { FcfSection } from "./FcfSection";
 import { HeadlineLockup } from "./HeadlineLockup";
 import { HeatMapSection } from "./HeatMapSection";
 import { MethodologySection } from "./MethodologySection";
@@ -94,8 +93,6 @@ export function EvaluationDashboard({
       {result.rewrites && result.rewrites.length > 0 ? (
         <RewritesSection rewrites={result.rewrites} />
       ) : null}
-
-      {result.fcf ? <FcfSection fcf={result.fcf} /> : null}
 
       {result.methodology_note ? (
         <MethodologySection
