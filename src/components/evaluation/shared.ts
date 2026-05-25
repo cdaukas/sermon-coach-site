@@ -3,51 +3,74 @@ export const uiFont = { fontFamily: "var(--font-ui)" };
 
 export type SectionEyebrowVariant = "green" | "amber";
 
-const BEAT_COLORS: { match: RegExp; color: string }[] = [
-  { match: /diagnostic/i, color: "#6b7a8f" },
-  { match: /teaching/i, color: "#a8a59a" },
-  { match: /reverent/i, color: "#5a4a6b" },
-  { match: /pastoral/i, color: "#7a8f6b" },
-  { match: /convicting/i, color: "#a04848" },
-  { match: /climactic/i, color: "#4a7c59" },
-  { match: /awe/i, color: "#6b4a7a" },
-  { match: /tender/i, color: "#6b4a4a" },
-  { match: /doxological/i, color: "#c9892e" },
-  { match: /declarative/i, color: "#4a6584" },
-];
+/** SKILL.md / rubric heat-map register colors (14 registers). */
+const BEAT_REGISTER_COLORS: Record<string, string> = {
+  humor: "#d4a857",
+  diagnostic: "#6b7a8f",
+  declarative: "#4a6584",
+  reverent: "#5a4a6b",
+  pastoral: "#7a8f6b",
+  awe: "#6b4a7a",
+  encouragement: "#8aa37a",
+  convicting: "#a04848",
+  doxological: "#c9892e",
+  teaching: "#a8a59a",
+  climactic: "#4a7c59",
+  invitation: "#c98a4a",
+  tender: "#6b4a4a",
+  info: "#8a8a82",
+};
 
 export function beatBackgroundColor(register: string): string {
-  const normalized = register.toLowerCase();
-  for (const { match, color } of BEAT_COLORS) {
-    if (match.test(normalized)) return color;
-  }
-  return "#6b7a8f";
+  return BEAT_REGISTER_COLORS[register.toLowerCase()] ?? "#6b7a8f";
 }
 
-export function beatHasMismatch(register: string): boolean {
-  return register.toLowerCase().includes("mismatch");
+export function beatHasMismatch(textSupports: string): boolean {
+  return textSupports === "mismatch";
 }
 
 export function textSupportTone(
-  textSupport: "strong" | "yes" | "partial" | "mismatch" | string,
+  textSupport: "strong" | "ok" | "yes" | "partial" | "mismatch" | string,
 ): "match" | "partial" {
   if (textSupport === "partial" || textSupport === "mismatch") return "partial";
   return "match";
 }
 
 export function textSupportLabel(
-  textSupport: "strong" | "yes" | "partial" | "mismatch",
+  textSupport: "strong" | "ok" | "yes" | "partial" | "mismatch" | string,
 ): string {
   switch (textSupport) {
     case "strong":
       return "✓ Strong";
+    case "ok":
+    case "yes":
+      return "✓";
     case "partial":
       return "⚠ Partial";
     case "mismatch":
-      return "⚠ Mismatch";
+      return "✗ Mismatch";
     default:
       return "✓";
   }
+}
+
+function parseClockToSeconds(clock: string): number {
+  const parts = clock.trim().split(":").map((p) => Number.parseInt(p, 10));
+  if (parts.length === 1 && !Number.isNaN(parts[0])) {
+    return parts[0] * 60;
+  }
+  const [minutes, seconds = 0] = parts;
+  if (Number.isNaN(minutes)) return 0;
+  return minutes * 60 + (Number.isNaN(seconds) ? 0 : seconds);
+}
+
+/** Duration in seconds from a beat `time_range` like "18:00–21:10". */
+export function parseBeatTimeRangeSeconds(timeRange: string): number {
+  const segments = timeRange.split(/[–—-]/).map((s) => s.trim());
+  if (segments.length < 2) return 60;
+  const start = parseClockToSeconds(segments[0]);
+  const end = parseClockToSeconds(segments[1]);
+  return Math.max(end - start, 1);
 }
 
 export function formatLengthMinutes(minutes: number): string {

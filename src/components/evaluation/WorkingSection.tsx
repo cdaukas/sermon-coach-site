@@ -1,9 +1,9 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { SectionTitle } from "./SectionTitle";
 import { serifFont } from "./shared";
 
 type WorkingSectionProps = {
-  whatsWorking: NonNullable<EvaluationResult["whats_working"]>;
+  whatsWorking: EvaluationResultStrict["whats_working"];
 };
 
 export function WorkingSection({ whatsWorking }: WorkingSectionProps) {

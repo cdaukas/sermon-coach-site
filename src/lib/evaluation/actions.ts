@@ -8,7 +8,7 @@ import {
   EVALUATION_FIXTURE_PROMPT_VERSION,
 } from "./fixture";
 import { EVALUATION_PROMPT_VERSION } from "./prompt";
-import { formatScoreBand } from "./schema";
+import { formatScoreBandStrict } from "./schema";
 import { processEvaluationJob } from "./processEvaluation";
 import {
   checkEvaluationQuota,
@@ -32,7 +32,7 @@ async function runFixtureEvaluation(
       prompt_version: EVALUATION_FIXTURE_PROMPT_VERSION,
       result: EVALUATION_FIXTURE,
       overall_score: scoring.composite_weighted,
-      score_band: formatScoreBand(scoring),
+      score_band: formatScoreBandStrict(scoring),
       started_at: now,
       completed_at: now,
     })

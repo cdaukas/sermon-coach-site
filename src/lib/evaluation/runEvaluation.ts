@@ -6,7 +6,7 @@ import {
   type EvaluationUserMessageInput,
 } from "./prompt";
 import {
-  parseEvaluationResultStrict,
+  evaluationResultStrictSchema,
   type EvaluationResultStrict,
 } from "./schema";
 import { submitSermonEvaluationTool } from "./tool-schema";
@@ -46,31 +46,17 @@ function extractToolInput(
   return block.input;
 }
 
-async function callClaude(
-  client: Anthropic,
-  model: string,
-  input: EvaluationUserMessageInput,
-  schemaError?: string,
-): Promise<Anthropic.Messages.Message> {
-  const userText = schemaError
-    ? `${buildUserMessage(input)}
-
----
-
-**Schema repair:** Your previous tool response failed validation:
-${schemaError}
-
-Call submit_sermon_evaluation again with a corrected full JSON object.`
-    : buildUserMessage(input);
-
-  return client.messages.create({
-    model,
-    max_tokens: 16_000,
-    system: buildSystemPrompt(),
-    tools: [submitSermonEvaluationTool],
-    tool_choice: { type: "tool", name: submitSermonEvaluationTool.name },
-    messages: [{ role: "user", content: userText }],
-  });
+function logSchemaFailure(toolInput: unknown, error: unknown): void {
+  console.error("[evaluation] Schema validation failed for model output.");
+  try {
+    console.error(
+      "[evaluation] Raw tool input:",
+      JSON.stringify(toolInput, null, 2),
+    );
+  } catch {
+    console.error("[evaluation] Raw tool input (non-serializable):", toolInput);
+  }
+  console.error("[evaluation] Validation error:", error);
 }
 
 export async function runEvaluation(
@@ -91,7 +77,14 @@ export async function runEvaluation(
   let response: Anthropic.Messages.Message;
 
   try {
-    response = await callClaude(client, model, input);
+    response = await client.messages.create({
+      model,
+      max_tokens: 16_000,
+      system: buildSystemPrompt(),
+      tools: [submitSermonEvaluationTool],
+      tool_choice: { type: "tool", name: submitSermonEvaluationTool.name },
+      messages: [{ role: "user", content: buildUserMessage(input) }],
+    });
   } catch {
     throw new EvaluationRunError(
       "The evaluation service is temporarily unavailable.",
@@ -99,32 +92,21 @@ export async function runEvaluation(
     );
   }
 
-  let toolInput = extractToolInput(response.content);
-  let parsed = parseEvaluationResultStrict(toolInput);
+  const toolInput = extractToolInput(response.content);
 
-  if (!parsed) {
-    const firstError = "Invalid or incomplete JSON structure.";
-    try {
-      response = await callClaude(client, model, input, firstError);
-    } catch {
-      throw new EvaluationRunError(
-        "The evaluation service is temporarily unavailable.",
-        "api",
-      );
-    }
-    toolInput = extractToolInput(response.content);
-    parsed = parseEvaluationResultStrict(toolInput);
-
-    if (!parsed) {
-      throw new EvaluationRunError(
-        "Evaluation response failed schema validation after retry.",
-        "schema",
-      );
-    }
+  let result: EvaluationResultStrict;
+  try {
+    result = evaluationResultStrictSchema.parse(toolInput);
+  } catch (error) {
+    logSchemaFailure(toolInput, error);
+    throw new EvaluationRunError(
+      "Evaluation response failed schema validation.",
+      "schema",
+    );
   }
 
   return {
-    result: parsed,
+    result,
     model: response.model,
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,

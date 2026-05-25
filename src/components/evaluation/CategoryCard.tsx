@@ -1,12 +1,20 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
+import {
+  CATEGORY_MAX_POINTS,
+  categoryAverage,
+  categorySubtotal,
+} from "@/lib/evaluation/schema";
 import { serifFont, uiFont } from "./shared";
 
 type CategoryCardProps = {
-  category: EvaluationResult["categories"][number];
+  category: EvaluationResultStrict["categories"][number];
 };
 
 export function CategoryCard({ category }: CategoryCardProps) {
-  const averageLabel = `Avg ${category.average} / 5 · ${category.subtotal}/${category.max}`;
+  const subtotal = categorySubtotal(category.criteria);
+  const max = CATEGORY_MAX_POINTS[category.number] ?? subtotal;
+  const average = categoryAverage(category.criteria);
+  const averageLabel = `Avg ${average} / 5 · ${subtotal}/${max}`;
 
   return (
     <section
@@ -37,10 +45,10 @@ export function CategoryCard({ category }: CategoryCardProps) {
 
       <div className="py-2">
         {category.criteria.map((criterion) => {
-          const preview = criterion.detail_paragraphs[0] ?? "";
+          const preview = criterion.narrative;
           return (
             <details
-              key={criterion.name}
+              key={`${criterion.id}-${criterion.name}`}
               className="group border-b last:border-b-0"
               style={{ borderColor: "var(--sc-rule)" }}
             >
@@ -50,7 +58,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
                 <div>
                   <p className="text-lg" style={{ ...serifFont, color: "var(--sc-ink)" }}>
                     {criterion.name}
-                    {criterion.weighted ? (
+                    {criterion.is_double_weighted ? (
                       <span
                         className="ml-2 text-[10px] font-semibold uppercase tracking-[0.06em]"
                         style={{ ...uiFont, color: "var(--sc-accent)" }}
@@ -63,7 +71,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
                     className="mt-1 text-[11px] font-semibold uppercase tracking-[0.06em]"
                     style={{ ...uiFont, color: "var(--sc-accent)" }}
                   >
-                    {criterion.principle_tag}
+                    {criterion.tradition_tag}
                   </p>
                 </div>
                 <p
@@ -87,15 +95,12 @@ export function CategoryCard({ category }: CategoryCardProps) {
                   background: "var(--sc-accent-pale)",
                 }}
               >
-                {criterion.detail_paragraphs.map((paragraph) => (
-                  <p
-                    key={paragraph.slice(0, 48)}
-                    className="mb-3 text-[15px] leading-relaxed last:mb-0"
-                    style={{ ...serifFont, color: "var(--sc-ink)" }}
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                <p
+                  className="mb-3 text-[15px] leading-relaxed"
+                  style={{ ...serifFont, color: "var(--sc-ink)" }}
+                >
+                  {criterion.narrative}
+                </p>
                 {criterion.anchored_quote ? (
                   <blockquote
                     className="mt-4 border-l-2 pl-4 text-[15px] italic leading-relaxed"
@@ -119,28 +124,6 @@ export function CategoryCard({ category }: CategoryCardProps) {
           );
         })}
       </div>
-
-      {category.growth_opportunities.length > 0 ? (
-        <div
-          className="border-t px-8 py-5"
-          style={{ borderColor: "var(--sc-rule)", background: "var(--sc-bg)" }}
-        >
-          <p
-            className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
-            style={{ ...uiFont, color: "var(--sc-accent)" }}
-          >
-            Category growth
-          </p>
-          <ul className="space-y-3 text-[15px]" style={{ ...serifFont, color: "var(--sc-ink-soft)" }}>
-            {category.growth_opportunities.map((item) => (
-              <li key={item.headline}>
-                <strong style={{ color: "var(--sc-ink)" }}>{item.headline}</strong>{" "}
-                {item.explanation}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
     </section>
   );
 }

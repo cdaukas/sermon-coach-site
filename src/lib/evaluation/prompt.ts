@@ -16,17 +16,17 @@ export function loadRubricMarkdown(): string {
 
 const STRUCTURAL_CONTRACT = `## STRUCTURAL CONTRACT (NON-NEGOTIABLE)
 
-1. Score exactly 11 criteria in a 3+3+3+2 layout across the four canonical categories (Text & Theology, Structure & Craft, Application & Audience Connection, Ecclesial & Spiritual). Use the canonical criterion names from the rubric.
+1. Score exactly 11 criteria in a 3+3+3+2 layout across the four canonical categories (Text & Theology, Structure & Craft, Application & Audience Connection, Ecclesial & Spiritual). Use the canonical criterion names from the rubric. Each criterion object: \`id\` (1–11), \`name\` (enum), \`category\` (1–4), \`tradition_tag\`, \`score\` (1–5), \`narrative\` (2–4 sentences with at least one direct sermon quote), optional \`anchored_quote\`. Do not submit category subtotals — the app computes them.
 
-2. Split \`verdict\` into \`affirmation_paragraph\` (~50–60 words, ONE named strength, no direct sermon quotes) and \`improvement_sentence\` (~15–20 words, one short sentence — headline pointer, not explanation). \`top_priorities[0]\` must match \`improvement_sentence\` in substance.
+2. Split \`verdict\` into \`affirmation\` (~50–60 words, ONE named strength, no direct sermon quotes) and \`improvement\` (~15–20 words, one short sentence — headline pointer, not explanation). \`top_priorities[0]\` must match \`verdict.improvement\` in substance. Do not return a single concatenated verdict string.
 
-3. Category dashboards are diagnostic only. Do not put prescriptive growth footers in per-criterion narratives. Leave each \`categories[].growth_opportunities\` empty (\`[]\`). All prescriptive work goes in \`top_priorities\` (length exactly 3) and \`growth_opportunities_detailed\` (length exactly 3).
+3. Category dashboards are diagnostic only. Do not put prescriptive growth footers in per-criterion narratives. Do not include \`growth_opportunities\` or any per-category growth array — that field is not in the schema. All prescriptive work goes in \`top_priorities\` only (length exactly 3; each item needs \`rank\`, \`headline\`, \`principle_tag\`, \`rationale\`, \`practical_step\`).
 
-4. If audio of the preached sermon was provided, populate \`heat_map\` with \`audio_processed: true\` and full beat-by-beat data. On manuscript-only (no audio), return the required \`heat_map\` stub: \`audio_processed: false\`, a \`warning_note\` that delivery was not assessed, \`total_minutes\` from the estimate, and \`beats\` satisfying the tool schema minimum — do not add manuscript-inferred timeline rows.
+4. Set \`meta.audio_available\` from whether audio/video of the preached sermon was supplied. When \`audio_available\` is true, populate \`heat_map\` with full beat-by-beat data (\`beats\` with \`time_range\`, \`beat_label\`, \`register\`, \`text_supports\`, \`notes\`; optional \`total_minutes\`). When false (manuscript-only), set \`heat_map\` to \`null\` — no stub object, no manuscript-inferred timeline rows. Criterion #8 still scores in the rubric; its \`narrative\` carries delivery diagnostics in prose.
 
-5. Lock section titles: "Lead with these", "Where You Can Grow", "What Improvement Looks Like". No alternatives or editorial garnish.
+5. Lock section titles: "Lead with these", "Where You Can Grow", "What Improvement Looks Like". No alternatives or editorial garnish. JSON field names (\`whats_working\`, \`top_priorities\`, \`rewrites\`) describe content; titles are render-layer only.
 
-6. Return JSON matching \`submit_sermon_evaluation\` exactly: required fields \`meta\`, \`scoring\`, \`verdict\`, \`categories\` (four items, each with \`criteria\` and \`growth_opportunities\`), \`heat_map\`, \`whats_working\` (3–5 cards), \`growth_opportunities_detailed\` (exactly 3), \`top_priorities\` (exactly 3), \`rewrites\` (1–2), \`fcf\`, \`methodology_note\`. \`verdict\` is an object with separate \`affirmation_paragraph\` and \`improvement_sentence\` strings, not one concatenated verdict.
+6. Return JSON matching \`submit_sermon_evaluation\` exactly. Top-level keys (all required): \`meta\`, \`scoring\`, \`verdict\`, \`categories\`, \`heat_map\`, \`whats_working\` (3–5 cards), \`top_priorities\` (exactly 3), \`rewrites\` (1–2). \`meta\` includes \`audio_available\`. \`scoring\` includes \`composite_simple\`, \`composite_weighted\`, \`band\`, \`raw_total\`, \`raw_max\` (55) — no letter grade, no \`diagnostic_gap\`. \`categories\` is four items (3+3+3+2 criteria); each has \`id\`, \`name\`, \`number\`, \`criteria\` only. \`verdict\` is \`{ affirmation, improvement }\`. Do not include \`fcf\`, \`growth_opportunities_detailed\`, \`methodology_note\`, or per-category \`growth_opportunities\`.
 
 Schema validation will reject responses that violate this contract. Call \`submit_sermon_evaluation\` once with the complete object.`;
 
@@ -52,7 +52,7 @@ export function buildUserMessage({
 
 **Working title:** ${sermonTitle}
 
-Infer preacher name, passage, length (~150 wpm from word count), and \`submission_mode\` from the manuscript for \`meta\` when not stated explicitly. Use snake_case field names from the tool schema.
+Infer preacher name, passage, length (~150 wpm from word count), and \`submission_mode\` (\`manuscript\` or \`transcript\`) from the manuscript for \`meta\` when not stated explicitly. Set \`meta.audio_available\` to \`false\` when only a manuscript is provided (no preached audio/video). Use snake_case field names from the tool schema.
 
 ---
 

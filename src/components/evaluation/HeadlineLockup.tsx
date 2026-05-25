@@ -1,13 +1,13 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { serifFont, splitVerdictImprovement, uiFont } from "./shared";
 
 type HeadlineLockupProps = {
-  scoring: EvaluationResult["scoring"];
-  verdict: EvaluationResult["verdict"];
+  scoring: EvaluationResultStrict["scoring"];
+  verdict: EvaluationResultStrict["verdict"];
 };
 
 export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
-  const { opener, body } = splitVerdictImprovement(verdict.improvement_sentence);
+  const { opener, body } = splitVerdictImprovement(verdict.improvement);
 
   return (
     <section
@@ -52,7 +52,7 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
         style={{ borderColor: "var(--sc-accent)" }}
       >
         <p className="mb-4 text-[17px] leading-snug" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-          {verdict.affirmation_paragraph}
+          {verdict.affirmation}
         </p>
         <p className="text-[17px] leading-snug" style={{ ...serifFont, color: "var(--sc-ink-soft)" }}>
           <strong style={{ color: "var(--sc-ink)", fontWeight: 600 }}>{opener}</strong> {body}

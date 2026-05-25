@@ -1,8 +1,8 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { serifFont, uiFont } from "./shared";
 
 type PrioritiesSectionProps = {
-  topPriorities: NonNullable<EvaluationResult["top_priorities"]>;
+  topPriorities: EvaluationResultStrict["top_priorities"];
 };
 
 export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
@@ -47,11 +47,17 @@ export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
             </p>
             <div>
               <h3
-                className="mb-2.5 text-xl leading-snug"
+                className="mb-1 text-xl leading-snug"
                 style={{ ...serifFont, color: "#faf8f3" }}
               >
                 {priority.headline}
               </h3>
+              <p
+                className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
+                style={{ ...uiFont, color: "var(--sc-accent-soft)" }}
+              >
+                {priority.principle_tag}
+              </p>
               <p
                 className="mb-3.5 text-[14px] leading-relaxed"
                 style={{ color: "rgba(250,248,243,0.75)" }}

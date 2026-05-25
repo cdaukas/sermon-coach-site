@@ -1,7 +1,7 @@
-import type { EvaluationResult } from "./schema";
+import type { EvaluationResultStrict } from "./schema";
 
-/** Static payload for stub evaluations — no Anthropic call */
-export const EVALUATION_FIXTURE: EvaluationResult = {
+/** Static payload for stub evaluations — SCHEMA_SPEC v2 strict shape */
+export const EVALUATION_FIXTURE: EvaluationResultStrict = {
   meta: {
     sermon_title: "Boasting That Sounds Like Defeat",
     scripture_reference: "2 Corinthians 11:16–33",
@@ -10,20 +10,19 @@ export const EVALUATION_FIXTURE: EvaluationResult = {
     estimated_length_minutes: 40,
     series_name: null,
     submission_mode: "manuscript",
+    audio_available: false,
   },
   scoring: {
-    composite_simple: 73,
-    composite_weighted: 74,
+    composite_simple: 40,
+    composite_weighted: 39,
     band: "Strong",
-    letter: "B",
-    diagnostic_gap: 1,
     raw_total: 40,
     raw_max: 55,
   },
   verdict: {
-    affirmation_paragraph:
+    affirmation:
       "The central paradox — boasting in weakness — lands with clarity and stays tethered to the text. Listeners leave knowing what Paul is doing and why it matters for them.",
-    improvement_sentence:
+    improvement:
       "The single highest-leverage change for the next sermon: name the fallen condition as one present-tense sentence at the introduction, application turn, and gospel landing so the middle movements stay anchored.",
   },
   categories: [
@@ -31,41 +30,45 @@ export const EVALUATION_FIXTURE: EvaluationResult = {
       id: "text_and_theology",
       name: "Text & Theology",
       number: 1,
-      subtotal: 12,
-      max: 15,
-      average: 3.8,
       criteria: [
         {
-          name: "Faithful handling of the text",
-          source: "Chapell",
-          principle_tag: "Chapell · FCF",
+          id: 1,
+          name: "Textual fidelity & exegesis",
+          category: 1,
+          tradition_tag: "Simeon Trust",
           score: 4,
-          weighted: true,
-          detail_paragraphs: [
+          narrative:
             "The sermon names Paul's foolish-boasting frame and keeps the hardship list tied to apostolic legitimacy rather than generic suffering.",
-          ],
           anchored_quote: {
             text: "Paul is not asking you to perform weakness — he is displaying what Christ's power looks like when strength is refused.",
             approximate_location: "closing",
           },
+          is_double_weighted: false,
         },
         {
-          name: "Context and structure",
-          source: "Simeon Trust",
-          principle_tag: "Simeon Trust · Context",
+          id: 2,
+          name: "Christ-centered / redemptive arc",
+          category: 1,
+          tradition_tag: "Chapell",
           score: 4,
-          weighted: false,
-          detail_paragraphs: [
-            "The contrast with the super-apostles is present; the hearer understands why the catalog of trials belongs here.",
-          ],
+          narrative:
+            "The contrast with the super-apostles stays Christward — weakness is displayed as the shape of apostolic legitimacy, not moralism.",
           anchored_quote: null,
+          is_double_weighted: false,
         },
-      ],
-      growth_opportunities: [
         {
-          headline: "Name the rhetorical sting earlier.",
-          explanation:
-            "Surface v. 19–21 in the introduction so the foolish-speech turn feels inevitable.",
+          id: 3,
+          name: "Gospel clarity",
+          category: 1,
+          tradition_tag: "Piper",
+          score: 4,
+          narrative:
+            "The closing invitation makes grace audible: sinful weakness borne to the grave and back, not generic trust-more faith.",
+          anchored_quote: {
+            text: "Fall into the arms of the one who bore your sinful weakness all the way into the grave and back again.",
+            approximate_location: "closing",
+          },
+          is_double_weighted: true,
         },
       ],
     },
@@ -73,48 +76,85 @@ export const EVALUATION_FIXTURE: EvaluationResult = {
       id: "structure_and_craft",
       name: "Structure & Craft",
       number: 2,
-      subtotal: 10,
-      max: 15,
-      average: 3.5,
       criteria: [
         {
-          name: "Big idea / melodic line",
-          source: "Robinson",
-          principle_tag: "Robinson · Big Idea",
-          score: 4,
-          weighted: false,
-          detail_paragraphs: [
-            "Each movement has a clear headline; transitions are mostly signposted.",
-          ],
+          id: 4,
+          name: "Fallen Condition Focus",
+          category: 2,
+          tradition_tag: "Chapell",
+          score: 3,
+          narrative:
+            "The sermon implies a fallen condition — drawn to visible strength, ashamed of weakness — but never states it as one portable sentence at structural seams.",
           anchored_quote: null,
+          is_double_weighted: true,
+        },
+        {
+          id: 5,
+          name: "Structure",
+          category: 2,
+          tradition_tag: "Simeon Trust",
+          score: 4,
+          narrative:
+            "Each movement has a clear headline and the catalog of trials feels inevitable once the rhetorical game is named.",
+          anchored_quote: null,
+          is_double_weighted: false,
+        },
+        {
+          id: 6,
+          name: "Hard things handled",
+          category: 2,
+          tradition_tag: "Simeon Trust",
+          score: 3,
+          narrative:
+            "Paul's irony is not softened, though the hardest rhetorical sting in vv. 19–21 could surface earlier.",
+          anchored_quote: {
+            text: "He's going to play the game. Let's boast — I can boast according to the flesh too.",
+            approximate_location: "mid-sermon",
+          },
+          is_double_weighted: false,
         },
       ],
-      growth_opportunities: [],
     },
     {
       id: "application_and_audience",
-      name: "Application & Audience",
+      name: "Application & Audience Connection",
       number: 3,
-      subtotal: 10,
-      max: 15,
-      average: 3.4,
       criteria: [
         {
+          id: 7,
           name: "Application to present audience",
-          source: "Keller",
-          principle_tag: "Keller · Three Audiences",
+          category: 3,
+          tradition_tag: "Keller",
           score: 3,
-          weighted: true,
-          detail_paragraphs: [
-            "Hearers are told to boast in weakness but given few worked examples of what that looks like Monday morning.",
-          ],
-          anchored_quote: null,
+          narrative:
+            "Hearers are told to boast in weakness but given few worked examples of what that looks like Monday morning; the 'voices in your life' question stays outward.",
+          anchored_quote: {
+            text: "Is there a voice in your life filled with swagger — the celebrity pastor, the politician?",
+            approximate_location: "application",
+          },
+          is_double_weighted: true,
         },
-      ],
-      growth_opportunities: [
         {
-          headline: "Add one concrete scene.",
-          explanation: "Script one negative and one positive example under three minutes each.",
+          id: 8,
+          name: "Heat Map: emotional delivery",
+          category: 3,
+          tradition_tag: "Simeon Trust",
+          score: 3,
+          narrative:
+            "Manuscript-only: the emotional arc is designed (irony, catalog, doxological landing) but delivery cannot be assessed without audio.",
+          anchored_quote: null,
+          is_double_weighted: false,
+        },
+        {
+          id: 9,
+          name: "Pastoral specificity",
+          category: 3,
+          tradition_tag: "Keller",
+          score: 4,
+          narrative:
+            "The swagger question names recognizable categories of influence, even when it does not yet turn inward.",
+          anchored_quote: null,
+          is_double_weighted: false,
         },
       ],
     },
@@ -122,59 +162,33 @@ export const EVALUATION_FIXTURE: EvaluationResult = {
       id: "ecclesial_and_spiritual",
       name: "Ecclesial & Spiritual",
       number: 4,
-      subtotal: 8,
-      max: 10,
-      average: 4,
       criteria: [
         {
-          name: "Pastoral tone",
-          source: "9Marks",
-          principle_tag: "9Marks · Tone",
+          id: 10,
+          name: "Ecclesial faithfulness",
+          category: 4,
+          tradition_tag: "9Marks",
           score: 4,
-          weighted: false,
-          detail_paragraphs: [
-            "The closing invitation nudges toward trust in Christ's sufficiency without moralizing weakness as performance.",
-          ],
+          narrative:
+            "The sermon functions expositionally — the church hears the Word applied to congregational life, not a detached lecture.",
           anchored_quote: null,
+          is_double_weighted: false,
+        },
+        {
+          id: 11,
+          name: "Expository exultation",
+          category: 4,
+          tradition_tag: "Piper",
+          score: 4,
+          narrative:
+            "The closing invitation nudges toward trust in Christ's sufficiency without moralizing weakness as performance.",
+          anchored_quote: null,
+          is_double_weighted: false,
         },
       ],
-      growth_opportunities: [],
     },
   ],
-  heat_map: {
-    audio_processed: false,
-    warning_note: "⚠ Inferred from manuscript — audio not processed",
-    total_minutes: 40,
-    beats: [
-      {
-        time_start_seconds: 0,
-        time_end_seconds: 780,
-        time_display: "0:00–13:00",
-        label: "Context and irony setup",
-        register: "teaching",
-        text_supports: "yes",
-        notes: "Front-loaded but clear",
-      },
-      {
-        time_start_seconds: 980,
-        time_end_seconds: 1080,
-        time_display: "16:20–18:00",
-        label: "Voices in your life",
-        register: "convicting",
-        text_supports: "partial",
-        notes: "Asked outward more than inward",
-      },
-      {
-        time_start_seconds: 2145,
-        time_end_seconds: 2400,
-        time_display: "35:45–40:00",
-        label: "Gospel landing",
-        register: "doxological",
-        text_supports: "strong",
-        notes: "Compressed but exact",
-      },
-    ],
-  },
+  heat_map: null,
   whats_working: [
     {
       headline: "The exegetical refusal to soften Paul's irony",
@@ -202,57 +216,29 @@ export const EVALUATION_FIXTURE: EvaluationResult = {
       explanation: "Invitation grammar is exact — sinful weakness, not abstraction.",
     },
   ],
-  growth_opportunities_detailed: [
-    {
-      number: 1,
-      headline: "Name the FCF as one sentence at the seams",
-      principle_badge: "Chapell · Fallen Condition Focus",
-      diagnosis_paragraphs: [
-        "The sermon has a clear fallen condition but never states it as one portable sentence at structural seams.",
-      ],
-      next_step:
-        "Write the FCF on a 3×5 card and re-read it after every major section.",
-    },
-    {
-      number: 2,
-      headline: "Press application inward, not only outward",
-      principle_badge: "Keller · Three Audiences",
-      diagnosis_paragraphs: [
-        "The middle application warns about other people's swagger more than putting the listener's own voice on the hook.",
-      ],
-      next_step:
-        "Write the application in two halves — outward identification, then inward confession.",
-    },
-    {
-      number: 3,
-      headline: "Plant the gospel earlier",
-      principle_badge: "Piper · Expository Exultation",
-      diagnosis_paragraphs: [
-        "The clearest gospel sentence arrives very late; grace could be the air the sermon breathes earlier.",
-      ],
-      next_step: "Add one short gospel sentence around the 12–15 minute mark.",
-    },
-  ],
   top_priorities: [
     {
       rank: 1,
       headline: "Write the FCF as one sentence and place it at three structural seams.",
+      principle_tag: "Chapell · Fallen Condition Focus",
       rationale:
-        "High diagnostic leverage — double-weighted — and the sermon already implies the FCF without naming it.",
+        "The sermon already implies the FCF without naming it; stating it once at introduction, application, and gospel landing would anchor the middle movements.",
       practical_step:
         "Tape the sentence to the top of the manuscript and re-read after every major section.",
     },
     {
       rank: 2,
       headline: "Turn application from outward diagnosis to inward confession.",
+      principle_tag: "Keller · Application to present audience",
       rationale:
-        "The current question keeps the listener safe as a critic of other voices.",
+        "The current question keeps the listener safe as a critic of other voices rather than examining their own.",
       practical_step:
         "Script outward then inward questions before preaching the application block.",
     },
     {
       rank: 3,
       headline: "Add one concrete Monday-morning scene.",
+      principle_tag: "Keller · Pastoral specificity",
       rationale: "Boast in weakness stays general without embodied examples.",
       practical_step:
         "Script one negative and one positive example under three minutes each.",
@@ -269,16 +255,6 @@ export const EVALUATION_FIXTURE: EvaluationResult = {
         "Is there a voice filled with swagger? And harder: whose voice are you when people hear your week?",
     },
   ],
-  fcf: {
-    named_in_sermon: false,
-    implied_fcf:
-      "We are drawn to visible strength and ashamed of weakness, and Christians are not immune.",
-    placement_notes: null,
-  },
-  methodology_note: {
-    diagnostic_summary:
-      "Weighted score exceeds simple by 1 point — load-bearing criteria (FCF, gospel, application) slightly outperform supporting ones.",
-  },
 };
 
-export const EVALUATION_FIXTURE_PROMPT_VERSION = "fixture-v2";
+export const EVALUATION_FIXTURE_PROMPT_VERSION = "fixture-v3";

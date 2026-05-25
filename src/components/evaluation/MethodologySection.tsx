@@ -1,26 +1,66 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
-import { formatScoreBand } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
+import {
+  CATEGORY_MAX_POINTS,
+  categorySubtotal,
+  deriveLetterFromWeighted,
+  diagnosticGap,
+  formatScoreBandStrict,
+} from "@/lib/evaluation/schema";
 import { serifFont, uiFont } from "./shared";
 
 const GRADING_BANDS = [
-  { letter: "A", range: "85–100", band: "Exemplary", meaning: "Multiple 5s. Worth studying." },
-  { letter: "B", range: "70–84", band: "Strong", meaning: "Most 4s. Doing the work well." },
-  { letter: "C", range: "55–69", band: "Faithful", meaning: "Most 3s. Faithfully doing the work." },
-  { letter: "D", range: "40–54", band: "Needs Improvement", meaning: "Multiple 2s. Real gaps." },
-  { letter: "F", range: "<40", band: "Significant Concerns", meaning: "Multiple 1s." },
+  {
+    letter: "A",
+    range: "47–55",
+    band: "Exemplary",
+    meaning: "Multiple criteria scored 5s. Worth studying or sharing.",
+  },
+  {
+    letter: "B",
+    range: "39–46",
+    band: "Strong",
+    meaning: "Most criteria scored 4s. Doing the work well.",
+  },
+  {
+    letter: "C",
+    range: "30–38",
+    band: "Faithful",
+    meaning: "Most criteria scored 3s. Faithfully doing the work.",
+  },
+  {
+    letter: "D",
+    range: "22–29",
+    band: "Needs Improvement",
+    meaning: "Multiple criteria scored 2s. Real gaps to address.",
+  },
+  {
+    letter: "F",
+    range: "<22",
+    band: "Significant Concerns",
+    meaning: "Multiple criteria scored 1s. Address before preaching again.",
+  },
 ] as const;
 
 type MethodologySectionProps = {
-  scoring: EvaluationResult["scoring"];
-  categories: EvaluationResult["categories"];
-  methodologyNote: NonNullable<EvaluationResult["methodology_note"]>;
+  scoring: EvaluationResultStrict["scoring"];
+  categories: EvaluationResultStrict["categories"];
 };
 
-export function MethodologySection({
-  scoring,
-  categories,
-  methodologyNote,
-}: MethodologySectionProps) {
+function methodologyGapNote(simple: number, weighted: number): string {
+  const gap = diagnosticGap(simple, weighted);
+  if (gap === 0) {
+    return "Simple and weighted composites match — load-bearing criteria (FCF, gospel clarity, application) scored in line with the rest.";
+  }
+  if (gap > 0) {
+    return `Weighted exceeds simple by ${gap} point${gap === 1 ? "" : "s"} — load-bearing criteria outperformed supporting ones.`;
+  }
+  return `Weighted trails simple by ${Math.abs(gap)} point${Math.abs(gap) === 1 ? "" : "s"} — supporting criteria outscored load-bearing ones.`;
+}
+
+export function MethodologySection({ scoring, categories }: MethodologySectionProps) {
+  const currentLetter = deriveLetterFromWeighted(scoring.composite_weighted);
+  const gap = diagnosticGap(scoring.composite_simple, scoring.composite_weighted);
+
   return (
     <details
       className="group mt-14 border-t-[3px]"
@@ -69,8 +109,8 @@ export function MethodologySection({
           className="mb-5 text-[14px] leading-relaxed"
           style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
         >
-          Weighted score of <strong>{scoring.composite_weighted}</strong>/100 places this sermon in{" "}
-          <strong>{formatScoreBand(scoring)}</strong>.
+          Weighted score of <strong>{scoring.composite_weighted}</strong>/55 places this sermon in{" "}
+          <strong>{formatScoreBandStrict(scoring)}</strong>.
         </p>
 
         <div className="-mx-2 mb-8 overflow-x-auto">
@@ -94,7 +134,7 @@ export function MethodologySection({
             <tbody>
               {GRADING_BANDS.map((band) => {
                 const isCurrent =
-                  band.letter === scoring.letter && band.band === scoring.band;
+                  band.letter === currentLetter && band.band === scoring.band;
                 return (
                   <tr
                     key={band.letter}
@@ -151,7 +191,7 @@ export function MethodologySection({
         >
           <div>
             <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-              {scoring.composite_simple}/100
+              {scoring.composite_simple}/55
             </p>
             <p
               className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
@@ -162,7 +202,7 @@ export function MethodologySection({
           </div>
           <div>
             <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-              {scoring.composite_weighted}/100
+              {scoring.composite_weighted}/55
             </p>
             <p
               className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
@@ -176,7 +216,7 @@ export function MethodologySection({
           className="mb-6 text-[14px] leading-relaxed"
           style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
         >
-          {methodologyNote.diagnostic_summary}
+          {methodologyGapNote(scoring.composite_simple, scoring.composite_weighted)}
         </p>
         <p
           className="mb-4 text-[13px]"
@@ -184,8 +224,8 @@ export function MethodologySection({
         >
           Diagnostic gap (weighted − simple):{" "}
           <strong style={{ color: "var(--sc-ink)" }}>
-            {scoring.diagnostic_gap > 0 ? "+" : ""}
-            {scoring.diagnostic_gap}
+            {gap > 0 ? "+" : ""}
+            {gap}
           </strong>
           {" · "}
           Raw total: {scoring.raw_total}/{scoring.raw_max}
@@ -193,19 +233,23 @@ export function MethodologySection({
 
         <table className="w-full max-w-md border-collapse text-[13px]">
           <tbody>
-            {categories.map((row) => (
-              <tr key={row.id} style={{ ...serifFont, color: "var(--sc-ink)" }}>
-                <td className="border-b py-2 pr-4" style={{ borderColor: "var(--sc-rule)" }}>
-                  {row.name}
-                </td>
-                <td
-                  className="border-b py-2 text-right font-medium"
-                  style={{ borderColor: "var(--sc-rule)" }}
-                >
-                  {row.subtotal} / {row.max}
-                </td>
-              </tr>
-            ))}
+            {categories.map((row) => {
+              const subtotal = categorySubtotal(row.criteria);
+              const max = CATEGORY_MAX_POINTS[row.number] ?? subtotal;
+              return (
+                <tr key={row.id} style={{ ...serifFont, color: "var(--sc-ink)" }}>
+                  <td className="border-b py-2 pr-4" style={{ borderColor: "var(--sc-rule)" }}>
+                    {row.name}
+                  </td>
+                  <td
+                    className="border-b py-2 text-right font-medium"
+                    style={{ borderColor: "var(--sc-rule)" }}
+                  >
+                    {subtotal} / {max}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

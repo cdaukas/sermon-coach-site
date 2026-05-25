@@ -1,7 +1,8 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import {
   beatBackgroundColor,
   beatHasMismatch,
+  parseBeatTimeRangeSeconds,
   serifFont,
   textSupportLabel,
   textSupportTone,
@@ -9,15 +10,18 @@ import {
 } from "./shared";
 
 type HeatMapSectionProps = {
-  heatMap: NonNullable<EvaluationResult["heat_map"]>;
+  heatMap: NonNullable<EvaluationResultStrict["heat_map"]>;
+  fallbackTotalMinutes: number;
 };
 
-export function HeatMapSection({ heatMap }: HeatMapSectionProps) {
+export function HeatMapSection({ heatMap, fallbackTotalMinutes }: HeatMapSectionProps) {
+  const beatDurations = heatMap.beats.map((beat) => parseBeatTimeRangeSeconds(beat.time_range));
   const totalSeconds = Math.max(
-    heatMap.beats.reduce((max, b) => Math.max(max, b.time_end_seconds), 0),
-    heatMap.total_minutes * 60,
+    beatDurations.reduce((sum, d) => sum + d, 0),
+    (heatMap.total_minutes ?? fallbackTotalMinutes) * 60,
     1,
   );
+  const totalMinutes = heatMap.total_minutes ?? fallbackTotalMinutes;
 
   return (
     <section
@@ -28,34 +32,26 @@ export function HeatMapSection({ heatMap }: HeatMapSectionProps) {
       }}
     >
       <h2
-        className="mb-1.5 text-[22px] font-normal"
+        className="mb-5 text-[22px] font-normal"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
         Heat Map · Emotional Beats
       </h2>
-      {heatMap.warning_note ? (
-        <p
-          className="mb-5 text-[11px] font-semibold uppercase tracking-[0.08em]"
-          style={{ ...uiFont, color: "var(--sc-amber)" }}
-        >
-          {heatMap.warning_note}
-        </p>
-      ) : null}
 
       <div className="mb-3 flex h-[60px] overflow-hidden rounded">
-        {heatMap.beats.map((beat) => {
-          const duration = Math.max(beat.time_end_seconds - beat.time_start_seconds, 1);
+        {heatMap.beats.map((beat, index) => {
+          const duration = beatDurations[index] ?? 60;
           return (
             <div
-              key={`${beat.time_display}-${beat.label}`}
-              title={beat.label}
+              key={`${beat.time_range}-${beat.beat_label}`}
+              title={beat.beat_label}
               className="relative min-w-[4px] transition-[filter] hover:brightness-110"
               style={{
                 flex: duration / totalSeconds,
                 background: beatBackgroundColor(beat.register),
               }}
             >
-              {beat.text_supports === "mismatch" || beatHasMismatch(beat.register) ? (
+              {beatHasMismatch(beat.text_supports) ? (
                 <span
                   className="pointer-events-none absolute inset-0"
                   style={{
@@ -73,7 +69,7 @@ export function HeatMapSection({ heatMap }: HeatMapSectionProps) {
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
         <span>0:00</span>
-        <span>~{heatMap.total_minutes}:00</span>
+        <span>~{totalMinutes}:00</span>
       </div>
 
       <div className="-mx-2 overflow-x-auto">
@@ -99,20 +95,20 @@ export function HeatMapSection({ heatMap }: HeatMapSectionProps) {
               const tone = textSupportTone(row.text_supports);
               return (
                 <tr
-                  key={`${row.time_display}-${row.label}`}
+                  key={`${row.time_range}-${row.beat_label}`}
                   style={{ ...uiFont, color: "var(--sc-ink)" }}
                 >
                   <td
                     className="border-b px-3 py-2.5 align-top"
                     style={{ borderColor: "var(--sc-rule)" }}
                   >
-                    {row.time_display}
+                    {row.time_range}
                   </td>
                   <td
                     className="border-b px-3 py-2.5 align-top"
                     style={{ borderColor: "var(--sc-rule)" }}
                   >
-                    {row.label}
+                    {row.beat_label}
                   </td>
                   <td
                     className="border-b px-3 py-2.5 align-top capitalize"

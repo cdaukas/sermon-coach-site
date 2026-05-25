@@ -1,9 +1,9 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { SectionTitle } from "./SectionTitle";
 import { serifFont, uiFont } from "./shared";
 
 type RewritesSectionProps = {
-  rewrites: NonNullable<EvaluationResult["rewrites"]>;
+  rewrites: EvaluationResultStrict["rewrites"];
 };
 
 export function RewritesSection({ rewrites }: RewritesSectionProps) {

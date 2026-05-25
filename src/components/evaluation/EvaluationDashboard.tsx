@@ -1,4 +1,4 @@
-import type { EvaluationResult } from "@/lib/evaluation/schema";
+import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { CategoryCard } from "./CategoryCard";
 import { HeadlineLockup } from "./HeadlineLockup";
 import { HeatMapSection } from "./HeatMapSection";
@@ -9,7 +9,7 @@ import { formatLengthMinutes, serifFont, uiFont } from "./shared";
 import { WorkingSection } from "./WorkingSection";
 
 type EvaluationDashboardProps = {
-  result: EvaluationResult;
+  result: EvaluationResultStrict;
   sermonTitle: string;
 };
 
@@ -18,7 +18,7 @@ export function EvaluationDashboard({
   sermonTitle,
 }: EvaluationDashboardProps) {
   const { meta } = result;
-  const showHeatMap = result.heat_map?.audio_processed === true;
+  const showHeatMap = meta.audio_available && result.heat_map !== null;
 
   return (
     <article>
@@ -75,32 +75,20 @@ export function EvaluationDashboard({
         <CategoryCard key={category.id} category={category} />
       ))}
 
-      {showHeatMap ? <HeatMapSection heatMap={result.heat_map!} /> : null}
-
-      {result.whats_working && result.whats_working.length > 0 ? (
-        <WorkingSection whatsWorking={result.whats_working} />
-      ) : null}
-
-      {/*
-        TODO(step-6+): Merge growth_opportunities_detailed + top_priorities into one
-        canonical "where_you_can_grow" schema; stop generating the hidden array in prompt/rubric.
-        Until then, growth_opportunities_detailed is produced but not rendered.
-      */}
-      {result.top_priorities && result.top_priorities.length > 0 ? (
-        <PrioritiesSection topPriorities={result.top_priorities} />
-      ) : null}
-
-      {result.rewrites && result.rewrites.length > 0 ? (
-        <RewritesSection rewrites={result.rewrites} />
-      ) : null}
-
-      {result.methodology_note ? (
-        <MethodologySection
-          scoring={result.scoring}
-          categories={result.categories}
-          methodologyNote={result.methodology_note}
+      {showHeatMap && result.heat_map ? (
+        <HeatMapSection
+          heatMap={result.heat_map}
+          fallbackTotalMinutes={meta.estimated_length_minutes}
         />
       ) : null}
+
+      <WorkingSection whatsWorking={result.whats_working} />
+
+      <PrioritiesSection topPriorities={result.top_priorities} />
+
+      <RewritesSection rewrites={result.rewrites} />
+
+      <MethodologySection scoring={result.scoring} categories={result.categories} />
     </article>
   );
 }

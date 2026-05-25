@@ -1,4 +1,4 @@
-import type { EvaluationResult } from "./schema";
+import type { EvaluationResultStrict } from "./schema";
 
 export type EvaluationStatus = "pending" | "running" | "complete" | "failed";
 
@@ -9,7 +9,7 @@ export type SermonEvaluationRow = {
   error_message: string | null;
   model: string | null;
   prompt_version: string;
-  result: EvaluationResult | null;
+  result: EvaluationResultStrict | null;
   overall_score: number | null;
   score_band: string | null;
   input_tokens: number | null;
