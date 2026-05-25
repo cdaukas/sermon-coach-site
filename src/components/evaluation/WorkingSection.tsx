@@ -1,5 +1,4 @@
 import type { EvaluationResult } from "@/lib/evaluation/schema";
-import { SectionEyebrow } from "./SectionEyebrow";
 import { SectionTitle } from "./SectionTitle";
 import { serifFont } from "./shared";
 
@@ -10,8 +9,7 @@ type WorkingSectionProps = {
 export function WorkingSection({ whatsWorking }: WorkingSectionProps) {
   return (
     <section className="mb-7">
-      <SectionEyebrow variant="green">Lead with these</SectionEyebrow>
-      <SectionTitle>What&apos;s working</SectionTitle>
+      <SectionTitle>Lead with these</SectionTitle>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {whatsWorking.map((card) => (
           <article

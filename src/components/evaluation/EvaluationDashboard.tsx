@@ -1,7 +1,6 @@
 import type { EvaluationResult } from "@/lib/evaluation/schema";
 import { CategoryCard } from "./CategoryCard";
 import { FcfSection } from "./FcfSection";
-import { GrowthOpportunitiesSection } from "./GrowthOpportunitiesSection";
 import { HeadlineLockup } from "./HeadlineLockup";
 import { HeatMapSection } from "./HeatMapSection";
 import { MethodologySection } from "./MethodologySection";
@@ -20,6 +19,7 @@ export function EvaluationDashboard({
   sermonTitle,
 }: EvaluationDashboardProps) {
   const { meta } = result;
+  const showHeatMap = result.heat_map?.audio_processed === true;
 
   return (
     <article>
@@ -76,19 +76,17 @@ export function EvaluationDashboard({
         <CategoryCard key={category.id} category={category} />
       ))}
 
-      {result.heat_map ? <HeatMapSection heatMap={result.heat_map} /> : null}
+      {showHeatMap ? <HeatMapSection heatMap={result.heat_map!} /> : null}
 
       {result.whats_working && result.whats_working.length > 0 ? (
         <WorkingSection whatsWorking={result.whats_working} />
       ) : null}
 
-      {result.growth_opportunities_detailed &&
-      result.growth_opportunities_detailed.length > 0 ? (
-        <GrowthOpportunitiesSection
-          growthOpportunities={result.growth_opportunities_detailed}
-        />
-      ) : null}
-
+      {/*
+        TODO(step-6+): Merge growth_opportunities_detailed + top_priorities into one
+        canonical "where_you_can_grow" schema; stop generating the hidden array in prompt/rubric.
+        Until then, growth_opportunities_detailed is produced but not rendered.
+      */}
       {result.top_priorities && result.top_priorities.length > 0 ? (
         <PrioritiesSection topPriorities={result.top_priorities} />
       ) : null}

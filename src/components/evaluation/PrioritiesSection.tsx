@@ -24,7 +24,7 @@ export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
         className="mb-2 text-[32px] font-normal"
         style={{ ...serifFont, color: "#faf8f3" }}
       >
-        Top 3 Priorities
+        Where You Can Grow
       </h2>
       <p
         className="mb-7 text-base italic"

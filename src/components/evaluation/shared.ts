@@ -53,3 +53,18 @@ export function textSupportLabel(
 export function formatLengthMinutes(minutes: number): string {
   return `~${minutes} minutes`;
 }
+
+/** Split "Opener: body" improvement copy for headline verdict typography. */
+export function splitVerdictImprovement(sentence: string): {
+  opener: string;
+  body: string;
+} {
+  const match = sentence.match(/^(.+?:)\s+([\s\S]+)$/);
+  if (match) {
+    return { opener: match[1], body: match[2] };
+  }
+  return {
+    opener: "The single highest-leverage change for the next sermon:",
+    body: sentence,
+  };
+}

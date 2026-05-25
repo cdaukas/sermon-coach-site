@@ -1,6 +1,5 @@
 import type { EvaluationResult } from "@/lib/evaluation/schema";
-import { formatScoreBand } from "@/lib/evaluation/schema";
-import { serifFont, uiFont } from "./shared";
+import { serifFont, splitVerdictImprovement, uiFont } from "./shared";
 
 type HeadlineLockupProps = {
   scoring: EvaluationResult["scoring"];
@@ -8,6 +7,8 @@ type HeadlineLockupProps = {
 };
 
 export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
+  const { opener, body } = splitVerdictImprovement(verdict.improvement_sentence);
+
   return (
     <section
       className="mb-10 grid min-h-[280px] grid-cols-1 md:grid-cols-[280px_1fr]"
@@ -24,13 +25,16 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
         }}
       >
         <p
-          className="mb-3 text-[64px] leading-none tracking-tight"
-          style={serifFont}
+          className="mb-3 text-[52px] leading-none italic"
+          style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
         >
-          {scoring.composite_weighted}
+          {scoring.band}
         </p>
-        <p className="mb-3 text-[22px] italic" style={{ color: "var(--sc-accent-soft)" }}>
-          {formatScoreBand(scoring)}
+        <p
+          className="mb-3 text-[20px] leading-none tracking-tight"
+          style={uiFont}
+        >
+          {scoring.raw_total}/{scoring.raw_max}
         </p>
         <div
           className="mb-3 h-px w-10"
@@ -40,7 +44,7 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
           className="text-[10px] tracking-[0.1em] uppercase"
           style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
         >
-          Overall score
+          Composite · See methodology at end
         </p>
       </div>
       <div
@@ -51,8 +55,7 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
           {verdict.affirmation_paragraph}
         </p>
         <p className="text-[17px] leading-snug" style={{ ...serifFont, color: "var(--sc-ink-soft)" }}>
-          <strong style={{ color: "var(--sc-ink)" }}>Grow here: </strong>
-          {verdict.improvement_sentence}
+          <strong style={{ color: "var(--sc-ink)", fontWeight: 600 }}>{opener}</strong> {body}
         </p>
       </div>
     </section>

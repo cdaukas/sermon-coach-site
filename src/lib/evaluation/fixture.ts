@@ -24,7 +24,7 @@ export const EVALUATION_FIXTURE: EvaluationResult = {
     affirmation_paragraph:
       "The central paradox — boasting in weakness — lands with clarity and stays tethered to the text. Listeners leave knowing what Paul is doing and why it matters for them.",
     improvement_sentence:
-      "Name the fallen condition as one present-tense sentence at the introduction, application turn, and gospel landing so the middle movements stay anchored.",
+      "The single highest-leverage change for the next sermon: name the fallen condition as one present-tense sentence at the introduction, application turn, and gospel landing so the middle movements stay anchored.",
   },
   categories: [
     {
