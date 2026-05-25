@@ -1,169 +1,214 @@
 # The Sermon Coach — Build Plan
 
-Analysis and recommended architecture for adding the product layer (auth → upload → AI → library → Stripe) on top of the existing marketing site. Captured from codebase scan, May 2026.
+Living plan for the product layer on `build/product-layer`: Next.js app + Supabase + Claude evaluations + Stripe, with marketing HTML unchanged in `public/`. Last updated May 2026.
 
 ---
 
-## Framework finding
+## Build status (product branch)
 
-**This is not a framework app.** The repo is eight hand-authored **static HTML files** at the repository root:
+| Session | Scope | Status |
+|---------|--------|--------|
+| **1–3** | Next.js scaffold, marketing at `public/`, Supabase clients + env | **Done** |
+| **4** | Auth (login, signup, reset, protected `/dashboard`) | **Done** |
+| **5** | Sermon schema (`sermons` + `sermon_versions`), paste-only submit, library list, detail | **Done** — **needs file upload + preview before evaluations ship** |
+| **6a** | File upload UI (`.docx`, `.pdf`, `.txt`) | **Next** |
+| **6b** | Server-side parsing (`mammoth`, `pdf-parse`) | Planned |
+| **6c** | Preview / edit extracted text, then save | Planned |
+| **7** | Evaluation pipeline (Claude, `sermon_evaluations`, dashboard UI) | Planned — see `STEP_6_PLAN.md` |
+| **8** | Library polish (evaluation status on list, filters later) | Partially done; finish after **7** |
+| **9–10** | Stripe (Checkout, Portal, webhooks, quota enforcement) | Planned |
 
-- No `package.json`, build step, React/Next/Astro, server code, `.env`, or `vercel.json` in the repo.
-- Styling: CSS variables and layout in a `<style>` block inside each file (duplicated per page).
-- Typography: system serif (`Iowan Old Style`, Georgia) plus system sans for UI chrome.
-- **Hosting:** Vercel (`server: Vercel` on live responses; comments in `index.html` reference redeploying to Vercel).
-- **Deploy flow:** GitHub `main` → Vercel static deploy — files served as-is from the repo root.
-- **Live third-party integration:** Tally waitlist embed on the landing page only. Pricing CTAs point to `index.html#reserve`, not Stripe.
-
-### Repo file map
-
-| File | Role |
-|------|------|
-| `index.html` | Landing + sample cards + Tally waitlist |
-| `pricing.html`, `faq.html` | Marketing |
-| `privacy.html`, `terms.html` | Legal (written for the *future* product) |
-| `sermon-evaluation-*.html` (×3) | Public sample dashboards |
+**Detail for Step 7:** `STEP_6_PLAN.md` (single `rubric.md`, structured JSON, `prompt_version`).
 
 ---
 
-## Publishing mechanism (public sample evaluations)
+## Session sequence (full build)
 
-**Fully static HTML files committed to git — not dynamic, not Supabase, not a CMS.**
+Order of work — each row is one **evening session** (~1.5–3 hours), same rhythm as Steps 4–5: build a chunk → `npm run build` → manual test → commit.
 
-### Inferred workflow
+| # | Session focus | What ships | Notes |
+|---|---------------|------------|--------|
+| 1 | Foundation | Next on Vercel, `public/` marketing URLs, Supabase wiring | Done |
+| 2 | *(often merged with 1)* | Homepage `/` → static marketing | Done |
+| 3 | *(often merged with 1)* | Env + Supabase package layout | Done |
+| 4 | **Auth** | Login, signup, password reset, middleware, dashboard shell | Done |
+| 5 | **Submission UI (baseline)** | Title + paste textarea → `createSermon` → library + detail | Done; paste remains permanent fallback |
+| 6 | **File upload component** | Dropzone / file picker on `/dashboard/sermons/new`; accept `.docx`, `.pdf`, `.txt`; client validation (type, size cap); calls parse endpoint — does **not** save sermon yet | No binary storage |
+| 7 | **Server-side parsing** | Route Handler or Server Action: `mammoth` (docx), `pdf-parse` (pdf), raw read (txt); returns `{ text, warnings?, error? }`; never persist uploaded bytes | Vercel body size limit (~4.5 MB) — document in UI |
+| 8 | **Preview / edit step** | After parse (or paste path): show extracted text in editable textarea + title; explicit **Submit sermon**; `createSermon` only receives final text | User confirms before DB write |
+| 9 | **Evaluation — schema + stub** | `profiles`, `sermon_evaluations`, RLS; fixture JSON dashboard | `STEP_6_PLAN` chunk 6.1–6.2 |
+| 10 | **Evaluation — Claude** | `rubric.md`, Anthropic tool output, `runEvaluation()`, quota guards | Chunks 6.3–6.4 |
+| 11 | **Evaluation — UI** | Evaluate button, loading, React dashboard vs sample HTML | Chunks 6.5–6.6 |
+| 12 | **Library page** | List badges (score / status), links to latest evaluation, empty states | Core list exists; this session is polish + eval links |
+| 13 | **Stripe — products & Checkout** | Three tiers, founding coupon, Checkout session | |
+| 14 | **Stripe — webhooks & quotas** | Webhook → `profiles.plan_tier`, monthly evaluation counter reset | DB enforces quota before Claude call |
 
-1. **Generate** — Claude skill outputs a complete standalone HTML document (title, embedded CSS, full evaluation body).
-2. **Commit** — Files land via GitHub “Add files via upload” commits (e.g. Tressler, Hebrews 1:1–4, Hebrews 3 revisions).
-3. **Link manually** — Add a sample card on `index.html` pointing at `./sermon-evaluation-<slug>.html`.
-4. **Deploy** — Push to `main`; Vercel serves `https://www.sermoncoach.online/sermon-evaluation-<slug>.html`.
+### How many evenings?
 
-There is **no** server rendering, database read, or build-time generation in this repo. Each evaluation is a self-contained ~42–74 KB HTML file with its own copy of dashboard CSS.
+| Phase | Sessions | Status |
+|-------|----------|--------|
+| Done (1–5) | **5** | Complete |
+| Sermon intake upgrade (6–8) | **3** | Next |
+| Evaluation (9–11) | **3** | After intake |
+| Library polish (12) | **1** | After evaluation |
+| Stripe (13–14) | **2** | Last |
+| **Total** | **14 evenings** | **5 done → 9 remaining** |
 
-### Client-side behavior
-
-- Some evaluation pages include light inline JS (accordion toggles, heat-map beat interaction).
-- Footer text like “Generated from manuscript transcript” is static copy in the HTML, not proof of runtime generation on the site.
-
-### Tony Reinke / 2 Corinthians 6
-
-Not in this repo or on `main` at GitHub. `sermon-evaluation-reinke-2cor6.html` returns **404** on production. That page may be local-only, unpublished, or under a different filename. The manual skill → HTML process still applies; it is not in the current deployed tree.
-
-### Current public samples (linked from `index.html`)
-
-- `sermon-evaluation-hebrews-3.html`
-- `sermon-evaluation-hebrews-1-1-4.html`
-- `sermon-evaluation-tressler-2cor11-rev2.html`
-
----
-
-## Supabase verdict
-
-**Unused in this codebase.**
-
-- Zero Supabase client code, env vars, SQL migrations, or API routes.
-- The only Supabase mention is forward-looking copy in `privacy.html` (alongside Anthropic, Stripe, Vercel as planned providers).
-- `terms.html` / `privacy.html` describe accounts, sermon libraries, Stripe billing, and sign-in cookies — **product spec in legal form**, not implemented behavior.
-
-The **supabase-teal-umbrella** project and empty `sermon_evaluations` table are legacy v0 scaffolding. Safe to treat as ignorable until a real schema is designed. Reusing that Supabase project later is reasonable; the current table would need a full redesign.
+Evaluation alone can stretch to **4 evenings** if chunk 11 runs long (dashboard parity with sample HTML). Stripe can stretch to **3** if webhook edge cases pile up. **Realistic range: 13–16 evenings** for the full product layer; **9–11 evenings** from today.
 
 ---
 
-## Bottom line
+## Sermon intake (day one — not a fast-follow)
 
-| Question | Answer |
-|----------|--------|
-| Framework? | **None** — plain static HTML/CSS, minimal inline JS |
-| How samples publish? | **Commit static HTML to git → Vercel serves files → manual link on homepage** |
-| Supabase used? | **No** in code; only mentioned in privacy policy; empty table is legacy |
-| Best path for product? | **Next.js + Supabase Auth/DB + Stripe + server-side Claude**, marketing/samples stay static at current paths until deliberately migrated |
+Preachers submit a **manuscript as text**. Files are a convenience input; the database stores **extracted text only**.
+
+### Accepted formats
+
+| Extension | Parser | Server package |
+|-----------|--------|----------------|
+| `.docx` | Word → HTML/text extraction | `mammoth` |
+| `.pdf` | PDF → text extraction | `pdf-parse` |
+| `.txt` | Read as UTF-8 | None (native) |
+
+### Storage rule
+
+- **Store:** `sermon_versions.content` (plain text), sermon title, timestamps.
+- **Do not store:** uploaded file bytes, Supabase Storage objects, or S3 blobs for manuscripts in v1.
+- **Privacy alignment:** `privacy.html` already describes sermon text stored for evaluation — no change needed for “text only.”
+
+### UX flow (`/dashboard/sermons/new`)
+
+Two paths, one outcome (confirmed text before save):
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────────┐
+│ Upload file     │────▶│ Parse (server)   │────▶│ Preview + edit      │
+│ .docx/.pdf/.txt │     │ mammoth/pdf-parse│     │ textarea + title    │
+└─────────────────┘     └────────┬─────────┘     └──────────┬──────────┘
+                                 │ fail                      │
+                                 ▼                           ▼
+                        ┌────────────────┐          ┌─────────────────┐
+                        │ Clear error +  │          │ Submit sermon   │
+                        │ paste fallback │          │ createSermon()  │
+                        │ (+ partial text)│         └─────────────────┘
+                        └────────────────┘
+
+┌─────────────────┐
+│ Paste textarea  │──────────────────────────────▶ Preview (optional     
+│ (skip upload)   │    or direct submit if paste   │  skip if user came  
+└─────────────────┘    already edited in place)  │  from paste-only)   
+```
+
+**Preview step (required for file path):** After a successful parse, show the extracted text in the same manuscript textarea used for paste. Preacher reviews, edits, then submits. Title field stays visible throughout.
+
+**Paste path:** Keep the current textarea as the fallback and primary path for preachers without a file. Paste can go straight to submit or through the same preview screen — implementation choice; file path must always preview.
+
+### Error handling (parsing failures)
+
+| Situation | User sees | Behavior |
+|-----------|-----------|----------|
+| Unsupported type / empty file | Clear message (“Please upload .docx, .pdf, or .txt”) | No server round-trip for obviously bad client picks |
+| Parse throws or returns empty | “We couldn’t read that file. Paste your manuscript below.” | Open/focus paste textarea |
+| Partial extraction | Same banner + **partial text** pre-filled in textarea | User fixes or pastes over |
+| Network / server error | Generic safe message + paste fallback | Log detail server-side only |
+
+Never silently save garbled or empty content from a failed parse.
+
+### Implementation sketch (sessions 6–8)
+
+- **`src/lib/sermons/parse.ts`** — `parseManuscript(buffer, mimeType | filename)` → `{ text: string, warnings: string[] }` or `{ error: string, partialText?: string }`
+- **`POST /api/sermons/parse`** (or `parseManuscriptAction`) — auth required; accepts `FormData` file; max size check; no DB write
+- **`SermonForm` refactor** — steps: `upload | paste` → `preview` (shared textarea) → submit via existing `createSermon`
+- **Dependencies:** `mammoth`, `pdf-parse` (+ `@types` if needed); confirm both run in Node server runtime (not Edge) for session 7
+
+### Out of scope for intake v1
+
+- Audio/video upload and Whisper transcription (pricing mentions later)
+- `.doc` (legacy Word), `.pages`, Google Docs links
+- Storing original files “for re-parse”
+- Auto-title from document metadata (nice later)
+
+---
+
+## Architecture (current)
+
+### Two lanes
+
+| Lane | Purpose | Keep as-is? |
+|------|---------|-------------|
+| **Marketing / public samples** | SEO, trust, zero auth | Yes — `public/*.html`, existing sample URLs |
+| **Product** | Auth, manuscript intake, AI evaluations, library, Stripe | `src/app/*` on same deploy |
+
+### Stack
+
+- **Next.js 16 (App Router)** on Vercel
+- **Supabase** — Auth, Postgres, RLS (`sermons`, `sermon_versions`; evaluations + `profiles` in Step 7)
+- **Anthropic** — Claude for evaluations; `rubric.md` server-side only
+- **Stripe** — Checkout, Customer Portal, webhooks → tier + monthly quota
+- **Parsing** — `mammoth` + `pdf-parse` in Node route/action; no Storage bucket for manuscripts
+
+### Data model (implemented + planned)
+
+| Table | Purpose |
+|-------|---------|
+| `sermons` | `user_id`, `title`, timestamps |
+| `sermon_versions` | `content` (extracted/pasted text), `version_number` |
+| `profiles` | Plan tier, `evaluations_used_this_period` (Step 7) |
+| `sermon_evaluations` | Per-version AI run, `status`, `result` jsonb, `prompt_version` (Step 7) |
+
+Optional later: `source` enum on version (`paste` | `docx` | `pdf` | `txt`) for analytics — not required for v1.
+
+### Evaluation output
+
+- **Canonical UI:** `public/sermon-evaluation-*.html` samples
+- **Product:** Claude → validated JSON → React dashboard (see `STEP_6_PLAN.md`)
+- **Not v1:** Store generated HTML blob; shareable public links (post-Stripe)
+
+### Phased order (revised)
+
+1. **Foundation + auth** — Done  
+2. **Manuscript intake** — Paste done; **file → parse → preview → save** (sessions 6–8)  
+3. **Evaluation pipeline** — Claude + DB + dashboard (sessions 9–11)  
+4. **Library** — List/detail done; polish with evaluation links (session 12)  
+5. **Stripe** — Billing + quota enforcement (sessions 13–14)  
+6. **Later** — Share links, audio/transcription, cohort sharing, marketing CTAs → sign-in
+
+### Risks to name early
+
+- **PDF quality** — Scanned PDFs parse poorly; error copy should suggest paste or a text-based PDF.
+- **DOCX complexity** — Footnotes, text boxes, multi-column layouts may extract out of order; preview step mitigates.
+- **Vercel request size** — Large `.docx`/`.pdf` uploads may hit limits; cap file size in UI (e.g. 10 MB) with clear message.
+- **Evaluation cost/time** — 20–60s+ Claude runs; sync + loading UI first, polling if timeouts (see `STEP_6_PLAN.md`).
+- **Founding member cap (25)** — Stripe promotion + app metadata when billing ships.
 
 ---
 
 ## Marketing vs product today
 
-`pricing.html` already documents tiers (Coach $15 / Coach Plus $29 / Cohort $99, founding 50% off for 12 months, evaluation quotas, shareable dashboards, library). CTAs are **waitlist only**. Legal pages describe the full SaaS. **Marketing and legal are ahead of engineering** — pre-launch marketing plus static portfolio samples.
+`pricing.html` documents tiers and evaluation quotas. CTAs are still **waitlist** on marketing pages. Legal pages describe the full SaaS. **Engineering on `build/product-layer`:** auth + paste submission live; evaluations and Stripe not yet.
+
+### Public sample evaluations
+
+Static HTML in `public/` — not generated from Supabase. Linked from `index.html`. Product evaluations will match that presentation via React, not by committing new HTML per user.
 
 ---
 
-## Recommended architecture
-
-### Guiding principle: two lanes
-
-| Lane | Purpose | Keep as-is? |
-|------|---------|--------------|
-| **Marketing / public samples** | SEO, trust, zero auth | Yes — same URLs, same static files (at least initially) |
-| **Product** | Auth, upload, AI, private library, Stripe | New stack *alongside* |
-
-Do **not** bolt auth/API onto raw root HTML files long term. Add a real app boundary.
-
-### Stack (aligned with `privacy.html`)
-
-**Next.js (App Router) on Vercel** in the same repo (or sibling repo + subdomain):
-
-- **Marketing / samples** — Existing HTML at current paths via `public/` so `sermoncoach.online/pricing.html` unchanged.
-- **`/app/*`** — Authenticated product: dashboard, upload, library, billing.
-- **Route handlers / server actions** — Claude API with rubric system prompt server-side only; never expose API keys to the browser.
-- **Supabase** — Auth (email/password or magic link), Postgres, RLS for per-user rows, optional Storage for manuscripts/audio.
-- **Stripe** — Checkout + Customer Portal + webhooks → subscription tier + monthly evaluation quota.
-
-**Alternative:** `app.sermoncoach.online` as a separate deploy; keep this repo 100% static forever. Cleanest separation; slightly more DNS/CORS/cookie work.
-
-### Suggested data model (replace empty `sermon_evaluations`)
-
-- **`profiles`** — linked to `auth.users`, Stripe customer id, plan tier, founding-member flag, `evaluations_used_this_period`
-- **`sermons`** — `user_id`, title, passage, source text or storage path, `created_at`
-- **`evaluations`** — `sermon_id`, status (`queued` / `running` / `done` / `failed`), `html_snapshot` or structured JSON + render template, scores metadata, `is_public` (false for private library)
-- **`subscriptions`** — mirror Stripe state for quotas and feature flags
-
-Public samples today = static files **or** same HTML with `is_public` + stable slug. Easiest migration: **keep the three existing files static**; new evaluations use DB + template.
-
-### Evaluation HTML: skill → product bridge
-
-1. **Short term:** Store generated HTML in Supabase (or Storage); serve behind auth; optional signed share links for “shareable dashboard.”
-2. **Medium term:** Extract shared CSS/components into one template; Claude returns **structured JSON** and render through that template (easier diffs, quotas, re-generation, compare drafts).
-
-The skill output is the **canonical UI contract** (rubric sections, heat map, scoring, growth opportunities). Duplicated CSS per file is the main tech debt that made manual publishing work well.
-
-### Phased build order
-
-1. **Foundation** — Next app in repo, env secrets, Supabase auth + schema + RLS, Vercel preview without moving marketing URLs.
-2. **Upload + queue** — Paste/upload sermon → DB row → background job calls Claude → save HTML → notify when done.
-3. **Library UI** — List/filter per user; view uses same dashboard presentation as samples.
-4. **Stripe** — Three products + founding coupon (50% × 12 months; cap 25 in Stripe/metadata); webhooks enforce monthly limits from `pricing.html`.
-5. **Share links** — Optional unlisted public URL per evaluation (distinct from marketing samples).
-6. **Marketing integration** — Replace “Reserve” with sign-in / trial when ready; keep sample section static or drive cards from `samples.json` later.
-
-### Leave untouched (for now)
-
-- Root-level marketing HTML paths and copy.
-- The three existing `sermon-evaluation-*.html` URLs.
-- Tally waitlist until Stripe + auth are live (or run both briefly).
-- Legacy `sermon_evaluations` table until the real schema is designed.
-
-### Risks to name early
-
-- **CSS duplication** — New samples via skill + commit do not scale; product should centralize one template.
-- **Evaluation cost/time** — Long Claude runs need async jobs (Vercel background functions, Inngest, or Supabase Edge + queue), not a synchronous form POST.
-- **Audio/video** — Pricing mentions transcript; implies Whisper/transcription before rubric — separate pipeline stage.
-- **Founding member cap (25)** — Enforce in Stripe promotion + app metadata.
-- **Reinke page** — If HTML exists locally, publishing is still add file + index card + push; not in `main` today.
-
----
-
-## Sensible first implementation slice
-
-When building starts, do this first — without touching marketing pages or sample URLs:
-
-1. Scaffold **Next.js on Vercel** in this repo (or `app.` subdomain).
-2. Wire **Supabase Auth** and a minimal schema + RLS.
-3. Ship one protected route: **view evaluation** — renders stored HTML for the signed-in owner.
-
-Defer Stripe, upload UI, and Claude pipeline until auth + render path are proven.
-
----
-
-## Remote / infra notes
+## Remote / infra
 
 - **Git remote:** `https://github.com/cdaukas/sermon-coach-site.git`
-- **Production:** `www.sermoncoach.online` (Vercel)
-- **Planned providers (legal only today):** Anthropic, Stripe, Vercel, Supabase
+- **Product branch:** `build/product-layer`
+- **Production marketing:** `www.sermoncoach.online`
+- **Secrets:** `NEXT_PUBLIC_SUPABASE_*`, `ANTHROPIC_API_KEY` (Step 7), Stripe keys (sessions 13–14)
+
+---
+
+## Related docs
+
+| File | Contents |
+|------|----------|
+| `STEP_6_PLAN.md` | Evaluation pipeline: schema, Claude, `rubric.md`, UI chunks, quotas |
+| `AGENTS.md` | Next.js 16 notes — read `node_modules/next/dist/docs/` before API changes |
+
+---
+
+*When Step 5 paste-only flow is extended with upload + preview, update session 5 row above to “Done + intake complete” and tick sessions 6–8.*
