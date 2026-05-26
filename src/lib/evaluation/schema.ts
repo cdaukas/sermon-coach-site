@@ -82,8 +82,40 @@ export const evaluationScoringStrictSchema = z
   });
 
 export const evaluationVerdictStrictSchema = z.object({
-  affirmation: z.string(),
-  improvement: z.string(),
+  affirmation: z
+    .string()
+    .min(1, "Verdict affirmation is required")
+    .refine(
+      (s) => s.trim().split(/\s+/).length <= 75,
+      {
+        message:
+          "Verdict affirmation must be 75 words or fewer (canon target ~50-60). The verdict is pastoral framing; the body does the detail work.",
+      },
+    )
+    .refine(
+      (s) => !/["""'']/.test(s),
+      {
+        message:
+          "Verdict affirmation must not contain quotation marks — quotes are body work, not verdict work (SKILL.md self-check item 7).",
+      },
+    ),
+  improvement: z
+    .string()
+    .min(1, "Verdict improvement is required")
+    .refine(
+      (s) => s.trim().split(/\s+/).length <= 30,
+      {
+        message:
+          "Verdict improvement must be 30 words or fewer (canon target ~15-20, single short sentence — a headline pointer, not an explanation).",
+      },
+    )
+    .refine(
+      (s) => !/["""'']/.test(s),
+      {
+        message:
+          "Verdict improvement must not contain quotation marks — quotes are body work.",
+      },
+    ),
 });
 
 export const anchoredQuoteStrictSchema = z.object({
