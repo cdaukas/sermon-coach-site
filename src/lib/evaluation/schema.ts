@@ -45,6 +45,33 @@ const EXPECTED_CRITERION_IDS_BY_CATEGORY: Record<number, number[]> = {
   4: [10, 11],
 };
 
+/** Load-bearing criteria (SCHEMA_SPEC) — counted twice in weighted_raw. */
+export const DOUBLE_WEIGHTED_CRITERION_IDS: ReadonlySet<number> = new Set([
+  3, 4, 7,
+]);
+
+export const SCORING_RAW_MAX = 55 as const;
+export const WEIGHTED_RAW_MAX = 70 as const;
+
+export function isDoubleWeightedCriterion(id: number): boolean {
+  return DOUBLE_WEIGHTED_CRITERION_IDS.has(id);
+}
+
+/** Extra points added to simple total for weighted_raw (scores for #3, #4, #7). */
+export function doubleWeightedBonus(
+  scoresById: Readonly<Record<number, number>>,
+): number {
+  let bonus = 0;
+  for (const id of DOUBLE_WEIGHTED_CRITERION_IDS) {
+    bonus += scoresById[id] ?? 0;
+  }
+  return bonus;
+}
+
+export function compositeWeightedFromWeightedRaw(weightedRaw: number): number {
+  return Math.round((weightedRaw * SCORING_RAW_MAX) / WEIGHTED_RAW_MAX);
+}
+
 export const categoryIdSchema = z.enum([
   "text_and_theology",
   "structure_and_craft",
@@ -135,7 +162,7 @@ export const evaluationCriterionStrictSchema = z
   })
   .transform((criterion) => ({
     ...criterion,
-    is_double_weighted: criterion.id === 3 || criterion.id === 4 || criterion.id === 7,
+    is_double_weighted: isDoubleWeightedCriterion(criterion.id),
   }));
 
 function refineCategoryCriteria(
