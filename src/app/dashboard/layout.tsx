@@ -12,8 +12,19 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  /*
+   * Session prewarm (@supabase/ssr) — keep before any child data fetch.
+   *
+   * Why: First RSC render after login can race session-cookie hydration;
+   * child Server Components that call createClient() may see auth.uid() as
+   * null, so RLS hides rows even when the user is logged in.
+   *
+   * If removed: evaluation pages can 404 (getEvaluation → null → notFound)
+   * with valid auth and valid result JSON in the database.
+   *
+   * Debugged 2026-05-25 (symptom also mimicked stale .next dev cache).
+   */
   const supabase = await createClient();
-  // Prewarm session cookies before child Server Components run RLS-gated queries.
   const {
     data: { user },
   } = await supabase.auth.getUser();
