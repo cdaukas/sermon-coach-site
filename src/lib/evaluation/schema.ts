@@ -90,23 +90,13 @@ export const evaluationMetaStrictSchema = z.object({
   audio_available: z.boolean(),
 });
 
-export const evaluationScoringStrictSchema = z
-  .object({
-    composite_simple: z.number().int().min(11).max(55),
-    composite_weighted: z.number().int().min(11).max(55),
-    band: scoreBandSchema,
-    raw_total: z.number().int().min(11).max(55),
-    raw_max: z.literal(55),
-  })
-  .superRefine((scoring, ctx) => {
-    if (scoring.raw_total !== scoring.composite_simple) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "raw_total must equal composite_simple",
-        path: ["raw_total"],
-      });
-    }
-  });
+export const evaluationScoringStrictSchema = z.object({
+  composite_simple: z.number().int().min(11).max(55),
+  composite_weighted: z.number().int().min(11).max(55),
+  band: scoreBandSchema,
+  raw_total: z.number().int().min(11).max(55),
+  raw_max: z.literal(55),
+});
 
 export const evaluationVerdictStrictSchema = z.object({
   affirmation: z
@@ -339,45 +329,93 @@ export const evaluationRewriteStrictSchema = z.object({
   rewrite: z.string(),
 });
 
-/** Claude tool output — SCHEMA_SPEC v2 strict. */
-export const evaluationResultStrictSchema = z
-  .object({
-    meta: evaluationMetaStrictSchema,
-    scoring: evaluationScoringStrictSchema,
-    verdict: evaluationVerdictStrictSchema,
-    categories: evaluationCategoriesStrictSchema,
-    heat_map: evaluationHeatMapStrictSchema.nullable(),
-    whats_working: z.array(whatsWorkingCardStrictSchema).min(3).max(5),
-    top_priorities: z.array(topPriorityStrictSchema).length(3),
-    rewrites: z.array(evaluationRewriteStrictSchema).min(1).max(2),
-  })
-  .superRefine((result, ctx) => {
-    if (!result.meta.audio_available && result.heat_map !== null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "heat_map must be null when meta.audio_available is false",
-        path: ["heat_map"],
-      });
-    }
-    if (result.meta.audio_available && result.heat_map === null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "heat_map is required when meta.audio_available is true",
-        path: ["heat_map"],
-      });
-    }
+const evaluationResultStrictObjectSchema = z.object({
+  meta: evaluationMetaStrictSchema,
+  scoring: evaluationScoringStrictSchema,
+  verdict: evaluationVerdictStrictSchema,
+  categories: evaluationCategoriesStrictSchema,
+  heat_map: evaluationHeatMapStrictSchema.nullable(),
+  whats_working: z.array(whatsWorkingCardStrictSchema).min(3).max(5),
+  top_priorities: z.array(topPriorityStrictSchema).length(3),
+  rewrites: z.array(evaluationRewriteStrictSchema).min(1).max(2),
+});
 
-    const ranks = result.top_priorities.map((p) => p.rank);
-    if (new Set(ranks).size !== 3 || !ranks.includes(1) || !ranks.includes(2) || !ranks.includes(3)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "top_priorities must include ranks 1, 2, and 3 exactly once",
-        path: ["top_priorities"],
-      });
-    }
-  });
+function refineEvaluationResultStructure(
+  result: z.infer<typeof evaluationResultStrictObjectSchema>,
+  ctx: z.RefinementCtx,
+): void {
+  if (!result.meta.audio_available && result.heat_map !== null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "heat_map must be null when meta.audio_available is false",
+      path: ["heat_map"],
+    });
+  }
+  if (result.meta.audio_available && result.heat_map === null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "heat_map is required when meta.audio_available is true",
+      path: ["heat_map"],
+    });
+  }
 
-export type EvaluationResultStrict = z.infer<typeof evaluationResultStrictSchema>;
+  const ranks = result.top_priorities.map((p) => p.rank);
+  if (new Set(ranks).size !== 3 || !ranks.includes(1) || !ranks.includes(2) || !ranks.includes(3)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "top_priorities must include ranks 1, 2, and 3 exactly once",
+      path: ["top_priorities"],
+    });
+  }
+}
+
+function refineScoringMatchesCategories(
+  result: z.infer<typeof evaluationResultStrictObjectSchema>,
+  ctx: z.RefinementCtx,
+): void {
+  const sum = sumCriterionScores(result.categories);
+  if (result.scoring.raw_total !== sum) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `raw_total must equal sum of criterion scores (${sum})`,
+      path: ["scoring", "raw_total"],
+    });
+  }
+  if (result.scoring.composite_simple !== sum) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `composite_simple must equal sum of criterion scores (${sum})`,
+      path: ["scoring", "composite_simple"],
+    });
+  }
+
+  const computed = computeScoringFromCategories(result.categories);
+  if (result.scoring.composite_weighted !== computed.composite_weighted) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `composite_weighted must equal round(weighted_raw × 55 / 70) (${computed.composite_weighted})`,
+      path: ["scoring", "composite_weighted"],
+    });
+  }
+  if (result.scoring.band !== computed.band) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `band must be derived from composite_weighted (${computed.band})`,
+      path: ["scoring", "band"],
+    });
+  }
+}
+
+/** Tool output before server-side scoring recompute (shape + structure only). */
+export const evaluationResultStrictBaseSchema =
+  evaluationResultStrictObjectSchema.superRefine(refineEvaluationResultStructure);
+
+/** Claude tool output — SCHEMA_SPEC v2 strict (includes canonical scoring). */
+export const evaluationResultStrictSchema = evaluationResultStrictBaseSchema.superRefine(
+  refineScoringMatchesCategories,
+);
+
+export type EvaluationResultStrict = z.infer<typeof evaluationResultStrictObjectSchema>;
 export type EvaluationScoringStrict = z.infer<typeof evaluationScoringStrictSchema>;
 export type ScoreBand = z.infer<typeof scoreBandSchema>;
 export type ScoreLetter = z.infer<typeof scoreLetterSchema>;
@@ -414,6 +452,58 @@ export function categorySubtotal(
   criteria: { score: number }[],
 ): number {
   return criteria.reduce((sum, c) => sum + c.score, 0);
+}
+
+export function sumCriterionScores(
+  categories: EvaluationResultStrict["categories"],
+): number {
+  return categories.reduce(
+    (sum, category) => sum + categorySubtotal(category.criteria),
+    0,
+  );
+}
+
+/** Band label from weighted /55 composite (SCHEMA_SPEC grading bands). */
+export function deriveBandFromWeighted(weighted: number): ScoreBand {
+  if (weighted >= 47) return "Exemplary";
+  if (weighted >= 39) return "Strong";
+  if (weighted >= 30) return "Faithful";
+  if (weighted >= 22) return "Needs Improvement";
+  return "Significant Concerns";
+}
+
+/** Canonical scoring from criterion scores — sole source of truth for totals. */
+export function computeScoringFromCategories(
+  categories: EvaluationResultStrict["categories"],
+): EvaluationScoringStrict {
+  const scoresById: Record<number, number> = {};
+  for (const category of categories) {
+    for (const criterion of category.criteria) {
+      scoresById[criterion.id] = criterion.score;
+    }
+  }
+
+  const raw_total = sumCriterionScores(categories);
+  const weightedRaw = raw_total + doubleWeightedBonus(scoresById);
+  const composite_weighted = compositeWeightedFromWeightedRaw(weightedRaw);
+
+  return {
+    composite_simple: raw_total,
+    composite_weighted,
+    band: deriveBandFromWeighted(composite_weighted),
+    raw_total,
+    raw_max: SCORING_RAW_MAX,
+  };
+}
+
+/** Overwrite model-submitted scoring with values derived from criteria. */
+export function applyComputedScoring(
+  result: EvaluationResultStrict,
+): EvaluationResultStrict {
+  return {
+    ...result,
+    scoring: computeScoringFromCategories(result.categories),
+  };
 }
 
 export function categoryAverage(criteria: { score: number }[]): number {

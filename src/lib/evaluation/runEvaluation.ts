@@ -6,6 +6,8 @@ import {
   type EvaluationUserMessageInput,
 } from "./prompt";
 import {
+  applyComputedScoring,
+  evaluationResultStrictBaseSchema,
   evaluationResultStrictSchema,
   type EvaluationResultStrict,
 } from "./schema";
@@ -96,7 +98,8 @@ export async function runEvaluation(
 
   let result: EvaluationResultStrict;
   try {
-    result = evaluationResultStrictSchema.parse(toolInput);
+    const draft = evaluationResultStrictBaseSchema.parse(toolInput);
+    result = evaluationResultStrictSchema.parse(applyComputedScoring(draft));
   } catch (error) {
     logSchemaFailure(toolInput, error);
     throw new EvaluationRunError(

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const EVALUATION_PROMPT_VERSION = "v2.1";
+export const EVALUATION_PROMPT_VERSION = "v2.2";
 
 const rubricPath = join(process.cwd(), "src/lib/evaluation/rubric.md");
 
