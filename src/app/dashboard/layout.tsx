@@ -13,6 +13,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const supabase = await createClient();
+  // Prewarm session cookies before child Server Components run RLS-gated queries.
   const {
     data: { user },
   } = await supabase.auth.getUser();
