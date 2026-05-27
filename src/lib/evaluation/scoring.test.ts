@@ -10,6 +10,7 @@ import {
   doubleWeightedBonus,
   evaluationResultStrictSchema,
   evaluationVerdictPersistSchema,
+  verdictNoQuotesRefine,
   isDoubleWeightedCriterion,
   promptVersionAtLeast,
   SCORING_RAW_MAX,
@@ -71,6 +72,36 @@ describe("prompt_version verdict cap gate", () => {
       improvement: longImprovement,
     });
     assert.equal(parsed.success, false);
+  });
+});
+
+describe("verdictNoQuotesRefine", () => {
+  it("allows possessive apostrophes in affirmation", () => {
+    const affirmation =
+      "God's faithfulness shows in the preacher's vulnerability and the congregation's trust.";
+    assert.equal(verdictNoQuotesRefine.affirmation(affirmation), true);
+    const parsed = evaluationVerdictPersistSchema.safeParse({
+      affirmation,
+      improvement: "Tighten the application close before the practical section lands.",
+    });
+    assert.equal(parsed.success, true);
+  });
+
+  it("rejects straight double-quote marks in affirmation", () => {
+    const affirmation =
+      'The move to "abide in the One who already is" carries the whole message.';
+    assert.equal(verdictNoQuotesRefine.affirmation(affirmation), false);
+    const parsed = evaluationVerdictPersistSchema.safeParse({
+      affirmation,
+      improvement: "Press the FCF into portraits before application arrives.",
+    });
+    assert.equal(parsed.success, false);
+  });
+
+  it("rejects curly double-quote marks in affirmation", () => {
+    const affirmation =
+      "The move to \u201Cabide in the One who already is\u201D carries the whole message.";
+    assert.equal(verdictNoQuotesRefine.affirmation(affirmation), false);
   });
 });
 

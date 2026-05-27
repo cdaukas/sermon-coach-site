@@ -105,9 +105,12 @@ function countWords(s: string): number {
   return trimmed.split(/\s+/).length;
 }
 
-const verdictNoQuotesRefine = {
-  affirmation: (s: string) => !/["""'']/.test(s),
-  improvement: (s: string) => !/["""'']/.test(s),
+/** Double quotation marks only — possessive apostrophes (U+0027) are allowed. */
+export const VERDICT_QUOTATION_MARK_PATTERN = /["\u201C\u201D]/;
+
+export const verdictNoQuotesRefine = {
+  affirmation: (s: string) => !VERDICT_QUOTATION_MARK_PATTERN.test(s),
+  improvement: (s: string) => !VERDICT_QUOTATION_MARK_PATTERN.test(s),
 } as const;
 
 /** Read path for v2.0–v2.2 rows: shape + no quotes; no word caps. */
