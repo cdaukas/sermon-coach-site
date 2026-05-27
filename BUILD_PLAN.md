@@ -212,3 +212,25 @@ Static HTML in `public/` — not generated from Supabase. Linked from `index.htm
 ---
 
 *When Step 5 paste-only flow is extended with upload + preview, update session 5 row above to “Done + intake complete” and tick sessions 6–8.*
+
+---
+
+## Step 8 — Rubric/prompt consistency audit
+
+After v2.5 lands, do a one-time audit pass.
+
+**Goal:** Find every rule that appears in BOTH rubric.md AND prompt.ts STRUCTURAL_CONTRACT (or that prompt.ts enforces via Zod refinement), and verify they say the same thing.
+
+**Known prior failures of this kind:**
+- Improvement word count: rubric.md said ~15-20, prompt.ts said ≤32 (fixed in v2.4, commit 1281b8a)
+- Verdict quotation marks: rubric.md said "no sermon quotes", prompt.ts said "no quotation marks at all" (fixed in v2.5)
+
+**Method:**
+1. Read rubric.md and prompt.ts side by side
+2. For every rule that touches verdict, criterion structure, or scoring, check whether both files agree
+3. Report any mismatches with severity (strict-vs-loose vs. cosmetic)
+4. Patch the looser one to match the stricter one (default direction)
+
+**Rationale:** Claude obeys the looser of two conflicting instructions, then the Zod schema rejects it. Each instance costs ~$0.50 in failed API calls plus a debugging session. Cheaper to audit once than to discover one at a time.
+
+**Precondition:** Do not run this audit until v2.5 passes a successful end-to-end eval.
