@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 
-export type PlanTier = "coach" | "coach_plus" | "cohort";
+export type PlanTier = "coach" | "cohort";
 
 export type EvaluationUsage = {
   planTier: PlanTier;
@@ -14,13 +14,11 @@ const COOLDOWN_MS = 60_000;
 export function tierLimit(planTier: PlanTier): number {
   switch (planTier) {
     case "coach":
-      return 3;
-    case "coach_plus":
       return 6;
     case "cohort":
       return 30;
     default:
-      return 3;
+      return 6;
   }
 }
 
