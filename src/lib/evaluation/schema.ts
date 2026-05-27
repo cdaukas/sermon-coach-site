@@ -144,9 +144,9 @@ export const evaluationVerdictPersistSchema = z.object({
   improvement: z
     .string()
     .min(1, "Verdict improvement is required")
-    .refine((s) => countWords(s) <= 25, {
+    .refine((s) => countWords(s) <= 32, {
       message:
-        "Verdict improvement must be 25 words or fewer (canon target ~15-20, single short sentence — a headline pointer, not an explanation).",
+        "Verdict improvement must be 32 words or fewer (canon target ~25-30; headline pointer with one qualifying clause, not an explanation).",
     })
     .refine(verdictNoQuotesRefine.improvement, {
       message:
@@ -759,7 +759,7 @@ export function promptVersionAtLeast(version: string, floor: string): boolean {
   return true;
 }
 
-/** fixture-* and v2 / v2.1 / v2.2 rows skip 60/25 on read. */
+/** fixture-* and v2 / v2.1 / v2.2 rows skip 60/32 verdict caps on read. */
 export function usesVerdictReadGrandfather(
   promptVersion: string | null | undefined,
 ): boolean {

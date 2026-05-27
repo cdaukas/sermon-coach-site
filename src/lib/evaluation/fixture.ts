@@ -23,7 +23,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
     affirmation:
       "The central paradox — boasting in weakness — lands with clarity and stays tethered to the text. Listeners leave knowing what Paul is doing and why it matters for them.",
     improvement:
-      "The single highest-leverage change for the next sermon: name the fallen condition in one present-tense sentence at the intro, application, and gospel landing.",
+      "The single highest-leverage change for the next sermon: let the Paton illustration breathe for thirty fewer words, then spend those recovered seconds crossing the bridge into a named, present-day life situation.",
   },
   categories: [
     {
