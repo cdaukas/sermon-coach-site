@@ -4,7 +4,7 @@
 
 **Canonical UI contract:** `public/sermon-evaluation-tressler-2cor11-rev2.html` (and the other sample HTML files). Chris referenced `sermon-evaluation-tressler-2cor11-rev3.html`; that file is not in the repo yet — treat **rev2** as the layout/section spec until rev3 is committed.
 
-**Pricing context (for quotas, not implemented yet):** Coach 3/mo, Coach Plus 6/mo, Cohort 30 pooled. FAQ: one evaluation = one full dashboard per submission; re-running a draft counts again; limits reset monthly, no rollover.
+**Pricing context (quotas in code; Stripe not wired yet):** Coach $29/mo — **6 evals/mo** (rollover up to 12); Cohort $99/mo — **30 evals/mo** pooled, 5 seats. FAQ: one evaluation = one full dashboard per submission; re-running a draft counts again; subscription counters reset monthly.
 
 ---
 
@@ -84,7 +84,7 @@ create index sermon_evaluations_status_idx
 | Reason | Detail |
 |--------|--------|
 | Pricing | FAQ: resubmitting the same sermon for a new dashboard counts as another evaluation. |
-| Coach Plus | Compare drafts = different `sermon_versions`; each version may have its own evaluation history. |
+| Coach | Compare drafts = different `sermon_versions`; each version may have its own evaluation history. |
 | Operations | Failed runs stay auditable; rubric `prompt_version` bumps don’t overwrite past results. |
 | UX | Default view: **latest `complete`** for that version; optional “history” later. |
 
@@ -232,7 +232,7 @@ Pipeline:
 | Sonnet 4.6 | ~$0.08 input + ~$0.15 output | **$0.25–$0.60** |
 | Opus 4.7 | ~5× Sonnet | **$1.25–$3.00** |
 
-At Coach **3 evals/mo** on Sonnet: **~$1–$2/mo** API cost per subscriber before margin — acceptable for $15 tier.
+At Coach **6 evals/mo** on Sonnet: **~$2–$4/mo** API cost per subscriber before margin — acceptable for $29 tier.
 
 Add **`@anthropic-ai/sdk`** as a dependency in the chunk that introduces the API.
 
@@ -320,7 +320,7 @@ if (profile.evaluations_used_this_period >= tierLimit(profile.plan_tier)) {
 ```sql
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
-  plan_tier text not null default 'coach' check (plan_tier in ('coach', 'coach_plus', 'cohort')),
+  plan_tier text not null default 'coach' check (plan_tier in ('coach', 'cohort')),
   evaluations_used_this_period int not null default 0,
   evaluations_period_start date not null default (date_trunc('month', now())::date),
   last_evaluation_at timestamptz,
@@ -331,7 +331,7 @@ create table public.profiles (
 - Trigger on `auth.users` insert → create profile (mirror Step 4 pattern if you add one).
 - **Stripe (Step 7+):** webhook updates `plan_tier`; optional mirror of Stripe subscription period for reset alignment.
 - **Period reset:** On each evaluation request, if `now() >= evaluations_period_start + 1 month`, reset counter and bump `evaluations_period_start`.
-- **Pre-Stripe dev:** `plan_tier` default `coach_plus` or env `DEV_EVALUATION_LIMIT=99`.
+- **Pre-Stripe dev:** `plan_tier` default `coach` (6 evals/mo in `tierLimit()`).
 
 **Do not** rely on Stripe metadata alone at request time — DB is source of truth for gating; Stripe catches up async.
 

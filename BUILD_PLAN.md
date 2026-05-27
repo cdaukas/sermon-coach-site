@@ -40,7 +40,7 @@ Order of work — each row is one **evening session** (~1.5–3 hours), same rhy
 | 10 | **Evaluation — Claude** | `rubric.md`, Anthropic tool output, `runEvaluation()`, quota guards | Chunks 6.3–6.4 |
 | 11 | **Evaluation — UI** | Evaluate button, loading, React dashboard vs sample HTML | Chunks 6.5–6.6 |
 | 12 | **Library page** | List badges (score / status), links to latest evaluation, empty states | Core list exists; this session is polish + eval links |
-| 13 | **Stripe — products & Checkout** | Three tiers, founding coupon, Checkout session | |
+| 13 | **Stripe — products & Checkout** | Coach + Cohort subscriptions, packs, founding coupon, Checkout session | |
 | 14 | **Stripe — webhooks & quotas** | Webhook → `profiles.plan_tier`, monthly evaluation counter reset | DB enforces quota before Claude call |
 
 ### How many evenings?

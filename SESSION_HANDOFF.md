@@ -50,7 +50,7 @@ Branch should be pushed after each docs commit.
 
 ### 6.4 — Guards, async UX, polling
 
-- `quota.ts`: monthly caps (coach 3 / coach_plus 6 / cohort 30), `DEV_EVALUATION_LIMIT`, 60s cooldown
+- `quota.ts`: monthly caps (coach 6 / cohort 30), 60s cooldown
 - `requestEvaluation`: quota + one-active-job-per-user; `after(processEvaluationJob)`; client polls `/api/evaluations/[id]`
 - `EvaluateButton`: loading panel, 3s poll → navigate on `complete`
 - `maxDuration = 300` on sermon detail page
@@ -114,7 +114,7 @@ Controlled by `requestEvaluation()` in `src/lib/evaluation/actions.ts`.
 
 ### Real (default when stub off + API key set)
 
-1. Requires `ANTHROPIC_API_KEY` (optional `EVALUATION_MODEL`, `DEV_EVALUATION_LIMIT`)  
+1. Requires `ANTHROPIC_API_KEY` (optional `EVALUATION_MODEL`)  
 2. Quota + active-job guards → insert `pending` (`prompt_version: v2`)  
 3. `processEvaluationJob()` → Claude → `complete` / `failed`  
 4. On **complete**: full `result` jsonb, tokens, scores; quota increment  
@@ -131,7 +131,6 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...   # JWT eyJhbGci... NOT sk-ant-...
 ANTHROPIC_API_KEY=sk-ant-...
 EVALUATION_MODEL=claude-sonnet-4-6
-DEV_EVALUATION_LIMIT=99              # optional
 # EVALUATION_USE_STUB=1            # optional: force fixture path
 ```
 
@@ -205,7 +204,7 @@ Until decided, treat **6.5 render work as complete** and **prompt/schema alignme
 
 4. **FCF** — No page-level FCF block; use Structure & Craft criterion accordion. `result.fcf` may still exist in DB until 6.7.
 
-5. **Quota** — `DEV_EVALUATION_LIMIT=99` bypasses caps; failed evals do not increment.
+5. **Quota** — `tierLimit()`: coach 6 / cohort 30 per month; failed evals do not increment usage.
 
 6. **Untracked** — `EMAIL_DELIVERABILITY.md` (do not commit unless intentional).
 
