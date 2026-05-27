@@ -20,7 +20,9 @@ function assert(condition: unknown, message: string): asserts condition {
 // Stub path inserts EVALUATION_FIXTURE with formatScoreBandStrict(scoring).
 evaluationResultStrictSchema.parse(EVALUATION_FIXTURE);
 
-const parsed = parseEvaluationResult(EVALUATION_FIXTURE);
+const parsed = parseEvaluationResult(EVALUATION_FIXTURE, {
+  promptVersion: "fixture-v1",
+});
 assert(parsed, "parseEvaluationResult returned null for fixture");
 
 const scoreBand = formatScoreBandStrict(EVALUATION_FIXTURE.scoring);

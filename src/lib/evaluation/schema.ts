@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { VERDICT_STRICT_CAPS_FROM } from "./prompt";
 import { CANONICAL_CRITERION_NAMES } from "./tool-schema";
 import { normalizeLegacyEvaluationResult } from "./schema-legacy";
 
@@ -98,42 +99,63 @@ export const evaluationScoringStrictSchema = z.object({
   raw_max: z.literal(55),
 });
 
-export const evaluationVerdictStrictSchema = z.object({
+function countWords(s: string): number {
+  const trimmed = s.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
+const verdictNoQuotesRefine = {
+  affirmation: (s: string) => !/["""'']/.test(s),
+  improvement: (s: string) => !/["""'']/.test(s),
+} as const;
+
+/** Read path for v2.0–v2.2 rows: shape + no quotes; no word caps. */
+export const evaluationVerdictReadGrandfatherSchema = z.object({
   affirmation: z
     .string()
     .min(1, "Verdict affirmation is required")
-    .refine(
-      (s) => s.trim().split(/\s+/).length <= 75,
-      {
-        message:
-          "Verdict affirmation must be 75 words or fewer (canon target ~50-60). The verdict is pastoral framing; the body does the detail work.",
-      },
-    )
-    .refine(
-      (s) => !/["""'']/.test(s),
-      {
-        message:
-          "Verdict affirmation must not contain quotation marks — quotes are body work, not verdict work (SKILL.md self-check item 7).",
-      },
-    ),
+    .refine(verdictNoQuotesRefine.affirmation, {
+      message:
+        "Verdict affirmation must not contain quotation marks — quotes are body work, not verdict work (SKILL.md self-check item 7).",
+    }),
   improvement: z
     .string()
     .min(1, "Verdict improvement is required")
-    .refine(
-      (s) => s.trim().split(/\s+/).length <= 30,
-      {
-        message:
-          "Verdict improvement must be 30 words or fewer (canon target ~15-20, single short sentence — a headline pointer, not an explanation).",
-      },
-    )
-    .refine(
-      (s) => !/["""'']/.test(s),
-      {
-        message:
-          "Verdict improvement must not contain quotation marks — quotes are body work.",
-      },
-    ),
+    .refine(verdictNoQuotesRefine.improvement, {
+      message:
+        "Verdict improvement must not contain quotation marks — quotes are body work.",
+    }),
 });
+
+/** Write path + read for prompt_version >= v2.3 — SCHEMA_SPEC hard caps. */
+export const evaluationVerdictPersistSchema = z.object({
+  affirmation: z
+    .string()
+    .min(1, "Verdict affirmation is required")
+    .refine((s) => countWords(s) <= 60, {
+      message:
+        "Verdict affirmation must be 60 words or fewer (canon target ~50-60). The verdict is pastoral framing; the body does the detail work.",
+    })
+    .refine(verdictNoQuotesRefine.affirmation, {
+      message:
+        "Verdict affirmation must not contain quotation marks — quotes are body work, not verdict work (SKILL.md self-check item 7).",
+    }),
+  improvement: z
+    .string()
+    .min(1, "Verdict improvement is required")
+    .refine((s) => countWords(s) <= 25, {
+      message:
+        "Verdict improvement must be 25 words or fewer (canon target ~15-20, single short sentence — a headline pointer, not an explanation).",
+    })
+    .refine(verdictNoQuotesRefine.improvement, {
+      message:
+        "Verdict improvement must not contain quotation marks — quotes are body work.",
+    }),
+});
+
+/** @deprecated alias — use evaluationVerdictPersistSchema */
+export const evaluationVerdictStrictSchema = evaluationVerdictPersistSchema;
 
 export const anchoredQuoteStrictSchema = z.object({
   text: z.string(),
@@ -329,19 +351,35 @@ export const evaluationRewriteStrictSchema = z.object({
   rewrite: z.string(),
 });
 
-const evaluationResultStrictObjectSchema = z.object({
-  meta: evaluationMetaStrictSchema,
-  scoring: evaluationScoringStrictSchema,
-  verdict: evaluationVerdictStrictSchema,
-  categories: evaluationCategoriesStrictSchema,
-  heat_map: evaluationHeatMapStrictSchema.nullable(),
-  whats_working: z.array(whatsWorkingCardStrictSchema).min(3).max(5),
-  top_priorities: z.array(topPriorityStrictSchema).length(3),
-  rewrites: z.array(evaluationRewriteStrictSchema).min(1).max(2),
-});
+function makeEvaluationResultStrictObjectSchema(
+  verdictSchema:
+    | typeof evaluationVerdictPersistSchema
+    | typeof evaluationVerdictReadGrandfatherSchema,
+) {
+  return z.object({
+    meta: evaluationMetaStrictSchema,
+    scoring: evaluationScoringStrictSchema,
+    verdict: verdictSchema,
+    categories: evaluationCategoriesStrictSchema,
+    heat_map: evaluationHeatMapStrictSchema.nullable(),
+    whats_working: z.array(whatsWorkingCardStrictSchema).min(3).max(5),
+    top_priorities: z.array(topPriorityStrictSchema).length(3),
+    rewrites: z.array(evaluationRewriteStrictSchema).min(1).max(2),
+  });
+}
+
+const evaluationResultStrictPersistObjectSchema =
+  makeEvaluationResultStrictObjectSchema(evaluationVerdictPersistSchema);
+
+const evaluationResultStrictReadObjectSchema =
+  makeEvaluationResultStrictObjectSchema(evaluationVerdictReadGrandfatherSchema);
+
+export type EvaluationResultStrict = z.infer<
+  typeof evaluationResultStrictPersistObjectSchema
+>;
 
 function refineEvaluationResultStructure(
-  result: z.infer<typeof evaluationResultStrictObjectSchema>,
+  result: EvaluationResultStrict,
   ctx: z.RefinementCtx,
 ): void {
   if (!result.meta.audio_available && result.heat_map !== null) {
@@ -370,7 +408,7 @@ function refineEvaluationResultStructure(
 }
 
 function refineScoringMatchesCategories(
-  result: z.infer<typeof evaluationResultStrictObjectSchema>,
+  result: EvaluationResultStrict,
   ctx: z.RefinementCtx,
 ): void {
   const sum = sumCriterionScores(result.categories);
@@ -408,14 +446,20 @@ function refineScoringMatchesCategories(
 
 /** Tool output before server-side scoring recompute (shape + structure only). */
 export const evaluationResultStrictBaseSchema =
-  evaluationResultStrictObjectSchema.superRefine(refineEvaluationResultStructure);
+  evaluationResultStrictPersistObjectSchema.superRefine(
+    refineEvaluationResultStructure,
+  );
 
-/** Claude tool output — SCHEMA_SPEC v2 strict (includes canonical scoring). */
+/** Write path + read for prompt_version >= v2.3. */
 export const evaluationResultStrictSchema = evaluationResultStrictBaseSchema.superRefine(
   refineScoringMatchesCategories,
 );
 
-export type EvaluationResultStrict = z.infer<typeof evaluationResultStrictObjectSchema>;
+/** Dashboard read for prompt_version < v2.3 (e.g. v2, v2.1, v2.2, fixture-*). */
+export const evaluationResultStrictReadSchema =
+  evaluationResultStrictReadObjectSchema
+    .superRefine(refineEvaluationResultStructure)
+    .superRefine(refineScoringMatchesCategories);
 export type EvaluationScoringStrict = z.infer<typeof evaluationScoringStrictSchema>;
 export type ScoreBand = z.infer<typeof scoreBandSchema>;
 export type ScoreLetter = z.infer<typeof scoreLetterSchema>;
@@ -695,10 +739,47 @@ function isLegacyShape(value: unknown): boolean {
   );
 }
 
+function parsePromptVersionSegments(version: string): number[] | null {
+  const match = version.match(/^v(\d+(?:\.\d+)*)/);
+  if (!match) return null;
+  return match[1].split(".").map(Number);
+}
+
+export function promptVersionAtLeast(version: string, floor: string): boolean {
+  const a = parsePromptVersionSegments(version);
+  const b = parsePromptVersionSegments(floor);
+  if (!a || !b) return false;
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    if (av > bv) return true;
+    if (av < bv) return false;
+  }
+  return true;
+}
+
+/** fixture-* and v2 / v2.1 / v2.2 rows skip 60/25 on read. */
+export function usesVerdictReadGrandfather(
+  promptVersion: string | null | undefined,
+): boolean {
+  if (promptVersion == null || promptVersion === "") return true;
+  if (promptVersion.startsWith("fixture-")) return true;
+  return !promptVersionAtLeast(promptVersion, VERDICT_STRICT_CAPS_FROM);
+}
+
+export type ParseEvaluationResultOptions = {
+  promptVersion?: string | null;
+};
+
 export function parseEvaluationResult(
   value: unknown,
+  options: ParseEvaluationResultOptions = {},
 ): EvaluationResultStrict | null {
-  const strict = evaluationResultStrictSchema.safeParse(value);
+  const schema = usesVerdictReadGrandfather(options.promptVersion)
+    ? evaluationResultStrictReadSchema
+    : evaluationResultStrictSchema;
+  const strict = schema.safeParse(value);
   if (strict.success) return strict.data;
 
   const v2 = evaluationResultSchema.safeParse(value);

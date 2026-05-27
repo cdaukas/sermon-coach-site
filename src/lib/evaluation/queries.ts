@@ -10,7 +10,12 @@ import type {
 function mapEvaluationRow(
   row: Record<string, unknown>,
 ): SermonEvaluationRow | null {
-  const result = row.result != null ? parseEvaluationResult(row.result) : null;
+  const result =
+    row.result != null
+      ? parseEvaluationResult(row.result, {
+          promptVersion: row.prompt_version as string | null | undefined,
+        })
+      : null;
 
   if (row.status === "complete" && row.result != null && result === null) {
     return null;

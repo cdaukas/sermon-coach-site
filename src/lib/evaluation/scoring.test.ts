@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { EVALUATION_FIXTURE } from "./fixture";
+import { VERDICT_STRICT_CAPS_FROM } from "./prompt";
 import {
   applyComputedScoring,
   compositeWeightedFromWeightedRaw,
@@ -8,11 +9,48 @@ import {
   DOUBLE_WEIGHTED_CRITERION_IDS,
   doubleWeightedBonus,
   evaluationResultStrictSchema,
+  evaluationVerdictPersistSchema,
   isDoubleWeightedCriterion,
+  promptVersionAtLeast,
   SCORING_RAW_MAX,
   sumCriterionScores,
+  usesVerdictReadGrandfather,
   WEIGHTED_RAW_MAX,
 } from "./schema";
+
+describe("prompt_version verdict cap gate", () => {
+  it("promptVersionAtLeast compares v2.x segments", () => {
+    assert.equal(promptVersionAtLeast("v2.3", "v2.3"), true);
+    assert.equal(promptVersionAtLeast("v2.4", "v2.3"), true);
+    assert.equal(promptVersionAtLeast("v2.2", "v2.3"), false);
+    assert.equal(promptVersionAtLeast("v2", "v2.3"), false);
+    assert.equal(promptVersionAtLeast("v3", "v2.3"), true);
+  });
+
+  it("usesVerdictReadGrandfather for v2–v2.2 and fixture-*", () => {
+    assert.equal(usesVerdictReadGrandfather("v2"), true);
+    assert.equal(usesVerdictReadGrandfather("v2.1"), true);
+    assert.equal(usesVerdictReadGrandfather("v2.2"), true);
+    assert.equal(usesVerdictReadGrandfather("fixture-v1"), true);
+    assert.equal(usesVerdictReadGrandfather(null), true);
+    assert.equal(usesVerdictReadGrandfather("v2.3"), false);
+    assert.equal(
+      usesVerdictReadGrandfather(VERDICT_STRICT_CAPS_FROM),
+      false,
+    );
+  });
+
+  it("evaluationVerdictPersistSchema rejects affirmation over 60 words", () => {
+    const longAffirmation = Array.from({ length: 61 }, (_, i) => `word${i}`).join(
+      " ",
+    );
+    const parsed = evaluationVerdictPersistSchema.safeParse({
+      affirmation: longAffirmation,
+      improvement: "The single highest-leverage change for the next sermon: tighten application.",
+    });
+    assert.equal(parsed.success, false);
+  });
+});
 
 describe("double-weighted criterion set (3, 4, 7)", () => {
   it("locks the SCHEMA_SPEC load-bearing ids", () => {

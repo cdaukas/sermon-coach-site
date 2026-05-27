@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const EVALUATION_PROMPT_VERSION = "v2.2";
+export const EVALUATION_PROMPT_VERSION = "v2.3";
+
+/** Rows below this prompt_version use read-grandfather verdict caps (no 60/25 on dashboard parse). */
+export const VERDICT_STRICT_CAPS_FROM = "v2.3";
 
 const rubricPath = join(process.cwd(), "src/lib/evaluation/rubric.md");
 
@@ -18,7 +21,7 @@ const STRUCTURAL_CONTRACT = `## STRUCTURAL CONTRACT (NON-NEGOTIABLE)
 
 1. Score exactly 11 criteria in a 3+3+3+2 layout across the four canonical categories (Text & Theology, Structure & Craft, Application & Audience Connection, Ecclesial & Spiritual). Use the canonical criterion names from the rubric. Each criterion object: \`id\` (1–11), \`name\` (enum), \`category\` (1–4), \`tradition_tag\`, \`score\` (1–5), \`narrative\` (2–4 sentences with at least one direct sermon quote), optional \`anchored_quote\`. Do not submit category subtotals — the app computes them.
 
-2. Split \`verdict\` into \`affirmation\` (~50–60 words, ONE named strength, no direct sermon quotes) and \`improvement\` (~15–20 words, one short sentence — headline pointer, not explanation). \`top_priorities[0]\` must match \`verdict.improvement\` in substance. Do not return a single concatenated verdict string.
+2. Split \`verdict\` into two JSON strings — \`affirmation\` and \`improvement\` (never one combined block). HARD LIMITS (count words before submit; over-limit responses are rejected): \`verdict.affirmation\` ≤60 words (target ~50–60; ONE named strength only; slightly elevated altitude; no quotation marks; no criterion-level detail). \`verdict.improvement\` ≤25 words (target ~15–20; one short sentence — headline pointer, not explanation; no quotation marks). \`top_priorities[0]\` must match \`verdict.improvement\` in substance.
 
 3. Category dashboards are diagnostic only. Do not put prescriptive growth footers in per-criterion narratives. Do not include \`growth_opportunities\` or any per-category growth array — that field is not in the schema. All prescriptive work goes in \`top_priorities\` only (length exactly 3; each item needs \`rank\`, \`headline\`, \`principle_tag\`, \`rationale\`, \`practical_step\`).
 
