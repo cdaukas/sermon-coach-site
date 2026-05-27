@@ -12,14 +12,6 @@ export type EvaluationUsage = {
 const COOLDOWN_MS = 60_000;
 
 export function tierLimit(planTier: PlanTier): number {
-  const devLimit = process.env.DEV_EVALUATION_LIMIT;
-  if (devLimit) {
-    const parsed = Number.parseInt(devLimit, 10);
-    if (!Number.isNaN(parsed) && parsed > 0) {
-      return parsed;
-    }
-  }
-
   switch (planTier) {
     case "coach":
       return 3;
