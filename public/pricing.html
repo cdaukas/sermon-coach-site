@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — The Sermon Coach</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+    --shadow-lift: 0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  .nav-cta:hover { background: var(--ink); color: var(--bg); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 28px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 46px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0;
+    color: var(--ink);
+  }
+  .hero-sub {
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin: 0 auto;
+    font-style: italic;
+  }
+
+  /* ---------- THE FRAMING SENTENCE ---------- */
+  .frame {
+    max-width: 760px;
+    margin: 0 auto 56px;
+    padding: 24px 32px;
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+  }
+  .frame p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin: 0;
+  }
+  .frame strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section-header {
+    max-width: 1100px;
+    margin: 0 auto 28px;
+    padding: 0 24px;
+    text-align: center;
+  }
+  .section-header h2 {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .section-header p {
+    font-size: 16px;
+    color: var(--ink-soft);
+    font-style: italic;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* ---------- BILLING TOGGLE ---------- */
+  .billing-toggle {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    padding: 0 24px;
+    display: flex;
+    justify-content: center;
+  }
+  .toggle-inner {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 4px;
+    display: inline-flex;
+    box-shadow: var(--shadow);
+  }
+  .toggle-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toggle-btn.active {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .toggle-savings {
+    font-size: 10px;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .toggle-btn.active .toggle-savings { background: var(--accent-soft); color: #1a2332; }
+
+  /* ---------- SUBSCRIPTION TIERS ---------- */
+  .subs {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .tier {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.18s ease;
+    border-radius: 4px;
+  }
+  .tier.featured {
+    box-shadow: var(--shadow-lift);
+    border-top: 4px solid var(--accent);
+    padding-top: 32px;
+  }
+  .tier-best-for {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tier-name {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .tier-tagline {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 26px;
+    line-height: 1.5;
+    min-height: 44px;
+  }
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .price-now {
+    font-size: 46px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .price-now .currency {
+    font-size: 26px;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  .price-period {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .price-note {
+    font-size: 12.5px;
+    color: var(--accent);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    min-height: 18px;
+  }
+  .price-founding {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 26px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .price-founding strong { color: var(--ink); font-weight: 600; font-style: normal; }
+  .tier-features {
+    list-style: none;
+    margin-bottom: 32px;
+    flex-grow: 1;
+  }
+  .tier-features li {
+    padding: 10px 0;
+    padding-left: 24px;
+    position: relative;
+    font-size: 14.5px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink-mid);
+  }
+  .tier-features li:last-child { border-bottom: none; }
+  .tier-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .tier-features li strong { color: var(--ink); font-weight: 600; }
+  .tier-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 13px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    letter-spacing: 0.02em;
+    transition: all 0.15s ease;
+    border: 1px solid var(--ink);
+    display: block;
+  }
+  .tier-cta:hover { background: var(--ink-mid); }
+  .tier.featured .tier-cta { background: var(--accent); border-color: var(--accent); }
+  .tier.featured .tier-cta:hover { background: #8a6624; border-color: #8a6624; }
+
+  /* ---------- DIVIDER ---------- */
+  .or-divider {
+    max-width: 600px;
+    margin: 64px auto 48px;
+    padding: 0 24px;
+    text-align: center;
+    position: relative;
+  }
+  .or-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: var(--rule);
+  }
+  .or-divider span {
+    position: relative;
+    background: var(--bg);
+    padding: 0 24px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  /* ---------- PACKS ---------- */
+  .packs {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .pack {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    text-align: center;
+    transition: all 0.18s ease;
+    position: relative;
+  }
+  .pack.featured {
+    box-shadow: var(--shadow-lift);
+    border-top: 3px solid var(--accent-soft);
+  }
+  .pack-best-value {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-soft);
+    color: var(--ink);
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .pack-count {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .pack-label {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .pack-price {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .pack-price .currency {
+    font-size: 18px;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  .pack-per {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+  .pack-features {
+    list-style: none;
+    margin-bottom: 24px;
+    flex-grow: 1;
+    text-align: left;
+  }
+  .pack-features li {
+    padding: 8px 0;
+    padding-left: 22px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-mid);
+  }
+  .pack-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .pack-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: transparent;
+    color: var(--ink);
+    padding: 11px 18px;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    letter-spacing: 0.02em;
+    transition: all 0.15s ease;
+    border: 1px solid var(--ink);
+    display: block;
+  }
+  .pack-cta:hover { background: var(--ink); color: var(--bg); }
+  .pack.featured .pack-cta { background: var(--ink); color: var(--bg); }
+  .pack.featured .pack-cta:hover { background: var(--ink-mid); }
+
+  .pack-note {
+    max-width: 600px;
+    margin: 24px auto 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-style: italic;
+  }
+
+  /* ---------- COST EXPLAINER ---------- */
+  .explainer {
+    background: var(--accent-pale);
+    padding: 40px 32px;
+    max-width: 800px;
+    margin: 80px auto 80px;
+    border-left: 3px solid var(--accent-soft);
+    border-radius: 4px;
+  }
+  .explainer h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .explainer p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin-bottom: 14px;
+  }
+  .explainer p:last-child { margin-bottom: 0; }
+
+  /* ---------- FAQ ---------- */
+  .faq {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+  .faq-title {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .faq-title .eyebrow { margin-bottom: 16px; }
+  .faq-title h2 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--rule);
+    padding: 24px 0;
+  }
+  .faq-q {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .faq-a {
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 880px) {
+    .subs { grid-template-columns: 1fr; max-width: 480px; }
+    .packs { grid-template-columns: 1fr; max-width: 420px; }
+    .tier.featured, .pack.featured { margin-top: 16px; }
+  }
+  @media (max-width: 720px) {
+    h1 { font-size: 34px; }
+    .hero { padding: 24px 20px 32px; }
+    .hero-sub { font-size: 17px; }
+    .nav { padding: 20px; }
+    .price-now { font-size: 40px; }
+    .explainer { padding: 28px 24px; }
+    .faq-title h2 { font-size: 26px; }
+    .section-header h2 { font-size: 24px; }
+    .frame { padding: 20px 22px; }
+    .frame p { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="./index.html" class="wordmark">The Sermon Coach</a>
+  <a href="#choose" class="nav-cta">View Plans</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Pricing · Pre-Launch</div>
+  <h1>Better Preaching Ahead</h1>
+</header>
+
+<!-- FRAMING -->
+<div class="frame">
+  <p><strong>Subscriptions are for preachers in the pulpit most weeks.</strong> Packs are for everyone else — guest preachers, pulpit supply, lay preachers, sabbath rest, the four-times-a-year crowd. Same rubric. Same evaluation. Different rhythm.</p>
+</div>
+
+<!-- SUBSCRIPTIONS SECTION -->
+<div id="choose" class="section-header">
+  <h2>Preach regularly? Subscribe.</h2>
+  <p>One tier for individual preachers. One for cohorts. Cancel anytime.</p>
+</div>
+
+<!-- BILLING TOGGLE -->
+<div class="billing-toggle">
+  <div class="toggle-inner" role="tablist" aria-label="Billing cadence">
+    <button class="toggle-btn active" data-billing="monthly" type="button" role="tab" aria-selected="true">Monthly</button>
+    <button class="toggle-btn" data-billing="annual" type="button" role="tab" aria-selected="false">
+      Annual <span class="toggle-savings">2 MONTHS FREE</span>
+    </button>
+  </div>
+</div>
+
+<!-- SUBSCRIPTION TIERS -->
+<section class="subs">
+
+  <!-- COACH -->
+  <div class="tier featured">
+    <div class="tier-best-for">Most Preachers</div>
+    <div class="tier-name">Coach</div>
+    <div class="tier-tagline">For the pastor preaching most weeks.</div>
+    <div class="price-row">
+      <span class="price-now"><span class="currency">$</span><span data-price="coach">29</span></span>
+      <span class="price-period" data-period="coach">/mo</span>
+    </div>
+    <div class="price-note" data-note="coach">Billed monthly. Cancel anytime.</div>
+    <div class="price-founding"><strong>Founding Member:</strong> <span data-founding="coach">$14.50/mo for first 12 months</span></div>
+    <ul class="tier-features">
+      <li><strong>6 sermon evaluations</strong> per month</li>
+      <li>Unused evaluations <strong>roll over</strong> (up to 12)</li>
+      <li>Full 11-criterion rubric</li>
+      <li>Simple + weighted scoring</li>
+      <li>Heat map of emotional delivery</li>
+      <li>Affirmation + improvement paragraphs</li>
+      <li>Top 3 priorities with practical steps</li>
+      <li>Private library of all your evaluations</li>
+    </ul>
+    <a href="./index.html#reserve" class="tier-cta">Reserve Your Spot</a>
+  </div>
+
+  <!-- COHORT -->
+  <div class="tier">
+    <div class="tier-name">Cohort</div>
+    <div class="tier-tagline">For staff teams, seminary classes, and preaching circles.</div>
+    <div class="price-row">
+      <span class="price-now"><span class="currency">$</span><span data-price="cohort">99</span></span>
+      <span class="price-period" data-period="cohort">/mo</span>
+    </div>
+    <div class="price-note" data-note="cohort">Billed monthly. Cancel anytime.</div>
+    <div class="price-founding"><strong>Founding Member:</strong> <span data-founding="cohort">$49.50/mo for first 12 months</span></div>
+    <ul class="tier-features">
+      <li><strong>5 seats</strong> included</li>
+      <li><strong>30 evaluations</strong> per month, pooled</li>
+      <li>Everything in Coach</li>
+      <li>Optional shared evaluations within cohort</li>
+      <li>Facilitator dashboard</li>
+      <li>Group analytics across the cohort</li>
+      <li>Optional onboarding call with Chris</li>
+    </ul>
+    <a href="./index.html#reserve" class="tier-cta">Reserve Your Spot</a>
+  </div>
+
+</section>
+
+<!-- OR DIVIDER -->
+<div class="or-divider"><span>Or</span></div>
+
+<!-- PACKS SECTION -->
+<div class="section-header">
+  <h2>Preach occasionally? Buy a pack.</h2>
+  <p>One-time purchase. Use your evaluations whenever you need them, within 18 months. No subscription, no recurring charge.</p>
+</div>
+
+<!-- PACKS -->
+<section class="packs">
+
+  <!-- 1 PACK -->
+  <div class="pack">
+    <div class="pack-count">1</div>
+    <div class="pack-label">Evaluation</div>
+    <div class="pack-price"><span class="currency">$</span>29</div>
+    <div class="pack-per">For one sermon</div>
+    <ul class="pack-features">
+      <li>One full evaluation</li>
+      <li>Full 11-criterion rubric</li>
+      <li>Valid 18 months</li>
+      <li>Private library access</li>
+    </ul>
+    <a href="./index.html#reserve" class="pack-cta">Reserve Your Spot</a>
+  </div>
+
+  <!-- 3 PACK -->
+  <div class="pack">
+    <div class="pack-count">3</div>
+    <div class="pack-label">Evaluations</div>
+    <div class="pack-price"><span class="currency">$</span>69</div>
+    <div class="pack-per">$23 per evaluation</div>
+    <ul class="pack-features">
+      <li>Three full evaluations</li>
+      <li>Full 11-criterion rubric</li>
+      <li>Valid 18 months</li>
+      <li>Use them whenever</li>
+    </ul>
+    <a href="./index.html#reserve" class="pack-cta">Reserve Your Spot</a>
+  </div>
+
+  <!-- 6 PACK -->
+  <div class="pack featured">
+    <div class="pack-best-value">Best Pack Value</div>
+    <div class="pack-count">6</div>
+    <div class="pack-label">Evaluations</div>
+    <div class="pack-price"><span class="currency">$</span>119</div>
+    <div class="pack-per">$19.83 per evaluation</div>
+    <ul class="pack-features">
+      <li>Six full evaluations</li>
+      <li>Full 11-criterion rubric</li>
+      <li>Valid 18 months</li>
+      <li>Best price per evaluation</li>
+    </ul>
+    <a href="./index.html#reserve" class="pack-cta">Reserve Your Spot</a>
+  </div>
+
+</section>
+
+<p class="pack-note">If you start preaching more often, you can subscribe later and your remaining pack evaluations stay valid.</p>
+
+<!-- COST EXPLAINER -->
+<div class="explainer">
+  <h3>Why these prices?</h3>
+  <p>We've priced these tiers to be sustainable while still being meaningfully cheaper than the alternatives: a single Simeon Trust workshop runs $400+ once a year, in-person coaching can cost $200-500/month per pastor, and most digital tools in adjacent categories sit at $15-50/month.</p>
+  <p>All proceeds will go toward global missions through my work with Global Training Network. I serve as Executive Vice President of GTN, a global nonprofit which trains indigenous pastors and planters in the Majority World. Visit us at <a href="https://gtn.org" target="_blank" rel="noopener">gtn.org</a> and <a href="https://chrisdaukas.net" target="_blank" rel="noopener">chrisdaukas.net</a>.</p>
+</div>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="faq-title">
+    <div class="eyebrow">Common Questions</div>
+    <h2>The details, before you commit.</h2>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What counts as one evaluation?</div>
+    <div class="faq-a">Submitting one sermon — manuscript, transcript, or audio/video with transcript — and receiving the full dashboard back. You can revise and resubmit the same sermon as a new evaluation if you want to compare drafts.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What happens if I hit my monthly limit?</div>
+    <div class="faq-a">You can either upgrade to the next tier mid-month (prorated) or wait for your next billing cycle. We don't auto-charge for overages — you stay in control of your spend. If you'd rather not change tiers, you can also buy a pack to bridge the gap.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can I cancel anytime?</div>
+    <div class="faq-a">Yes. No contracts. Cancel from your account dashboard at any point — your subscription stays active through the end of the current billing month, then ends. Packs aren't a subscription, so there's nothing to cancel.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What about refunds?</div>
+    <div class="faq-a">Every subscription comes with a 30-day money-back guarantee. If The Sermon Coach isn't useful for your preaching after a month of real use, email Chris and you'll get a full refund — no issues. Packs can be refunded within 7 days of purchase if no evaluations have been used.</div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
+  <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./faq.html">FAQ</a> · <a href="./privacy.html">Privacy</a>
+</footer>
+
+<script>
+  // Billing toggle: swap monthly / annual prices
+  const PRICING = {
+    monthly: {
+      coach: { price: '29', period: '/mo', note: 'Billed monthly. Cancel anytime.', founding: '$14.50/mo for first 12 months' },
+      cohort: { price: '99', period: '/mo', note: 'Billed monthly. Cancel anytime.', founding: '$49.50/mo for first 12 months' }
+    },
+    annual: {
+      coach: { price: '290', period: '/yr', note: 'Billed annually. 2 months free.', founding: '$145 for first year' },
+      cohort: { price: '990', period: '/yr', note: 'Billed annually. 2 months free.', founding: '$495 for first year' }
+    }
+  };
+
+  const toggleButtons = document.querySelectorAll('.toggle-btn');
+  toggleButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cadence = btn.getAttribute('data-billing');
+
+      // Update button states
+      toggleButtons.forEach(b => {
+        b.classList.toggle('active', b === btn);
+        b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+      });
+
+      // Update prices
+      ['coach', 'cohort'].forEach(tier => {
+        const data = PRICING[cadence][tier];
+        const priceEl = document.querySelector(`[data-price="${tier}"]`);
+        const periodEl = document.querySelector(`[data-period="${tier}"]`);
+        const noteEl = document.querySelector(`[data-note="${tier}"]`);
+        const foundingEl = document.querySelector(`[data-founding="${tier}"]`);
+
+        if (priceEl) priceEl.textContent = data.price;
+        if (periodEl) periodEl.textContent = data.period;
+        if (noteEl) noteEl.textContent = data.note;
+        if (foundingEl) foundingEl.textContent = data.founding;
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

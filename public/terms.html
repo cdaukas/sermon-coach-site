@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — The Sermon Coach</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .nav-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .nav-link:hover { color: var(--accent); }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  .nav-cta:hover { background: var(--ink); color: var(--bg); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 42px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .hero-sub {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px 24px 64px;
+  }
+  .content p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+  }
+  .content h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 48px;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+  .content h2:first-of-type { margin-top: 24px; }
+  .content ul {
+    margin-bottom: 20px;
+    padding-left: 24px;
+  }
+  .content li {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    margin-bottom: 8px;
+  }
+  .content strong { color: var(--ink); font-weight: 600; }
+  .content a { color: var(--accent); text-decoration: none; }
+  .content a:hover { text-decoration: underline; }
+
+  .lead {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 20px 24px;
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    margin-bottom: 24px;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    margin-top: 60px;
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px) {
+    h1 { font-size: 32px; }
+    .content h2 { font-size: 19px; }
+    .content p, .content li { font-size: 15.5px; }
+    .nav-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="./index.html" class="wordmark">The Sermon Coach</a>
+  <div class="nav-links">
+    <a href="./pricing.html" class="nav-link">Pricing</a>
+    <a href="./faq.html" class="nav-link">FAQ</a>
+    <a href="./index.html#reserve" class="nav-cta">Reserve Your Spot</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Terms of Service</div>
+  <h1>The rules of using The Sermon Coach.</h1>
+  <p class="hero-sub">Effective May 26, 2026</p>
+</header>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <p class="lead">These Terms of Service ("Terms") govern your use of The Sermon Coach (the "Service"), operated by The Trusted Pastor LLC ("we," "us," or "our"). By creating an account, subscribing, purchasing a pack, or using the Service, you agree to these Terms. If you do not agree, please do not use the Service.</p>
+
+  <p>We've written these Terms in plain English wherever possible. We're a small company built by a pastor for pastors, and we want our agreement with you to be readable. If anything is unclear, email <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a>.</p>
+
+  <h2>1. The Service</h2>
+  <p>The Sermon Coach provides AI-assisted feedback on sermon manuscripts and related content using a structured rubric drawn from established homiletical traditions. The Service is provided through sermoncoach.online and related domains.</p>
+  <p>We may add, modify, or remove features over time. We will not materially reduce the core functionality of paid subscriptions or paid packs without notice and a reasonable transition period.</p>
+
+  <h2>2. Eligibility</h2>
+  <p>To use the Service, you must be at least 18 years old and able to form a binding contract under applicable law. If you are using the Service on behalf of an organization (such as a church, seminary, or ministry), you represent that you are authorized to bind that organization to these Terms.</p>
+
+  <h2>3. Your Account</h2>
+  <p>To use most features, you must create an account. You agree to:</p>
+  <ul>
+    <li>Provide accurate and complete information when you register.</li>
+    <li>Keep your password secure and not share your account with others.</li>
+    <li>Notify us promptly if you suspect unauthorized access to your account.</li>
+    <li>Take responsibility for activity that occurs under your account.</li>
+  </ul>
+  <p>Cohort tier accounts include multiple seats. The account owner is responsible for managing seat access and for the conduct of all users on the account.</p>
+
+  <h2>4. Subscriptions, Packs, and Payment</h2>
+  <p>The Service is offered through two purchase models: recurring subscriptions and one-time pack purchases. Pricing, features, and limits for each option are described on the <a href="./pricing.html">pricing page</a>.</p>
+
+  <p><strong>Subscriptions:</strong> Subscriptions are billed in advance on a monthly or annual cadence through our payment processor, Stripe. You authorize us to charge your payment method on file for each billing cycle until you cancel.</p>
+
+  <p><strong>Packs:</strong> Packs are one-time purchases that grant a fixed number of evaluations valid for 18 months from the date of purchase. Packs do not auto-renew and create no recurring billing obligation. Unused pack evaluations expire 18 months after the date of purchase and are not refundable after expiration.</p>
+
+  <p><strong>Founding Member pricing:</strong> Founding Members receive 50% off subscriptions for the first 12 months. After month 12, the subscription converts to standard pricing for that tier. Founding Member status (priority support, early access to new features, and the Founding Member badge) is permanent for as long as the subscription remains active. Founding Member pricing applies to subscriptions only and does not apply to pack purchases.</p>
+
+  <p><strong>Failed payments:</strong> If a subscription payment fails, we will retry and notify you. If payment is not received within 14 days, we may suspend your access to the Service until payment is resolved.</p>
+
+  <p><strong>Price changes:</strong> We may change subscription or pack prices in the future. We will give existing subscribers at least 30 days' notice before any subscription price increase, and the increase will not take effect until your next billing cycle. Price changes do not affect packs already purchased.</p>
+
+  <p><strong>Refunds:</strong> Subscriptions are eligible for a full refund within 30 days of the initial purchase if you find the Service is not useful for your preaching. Packs are eligible for a full refund within 7 days of purchase, provided no evaluations from the pack have been used. To request a refund, email <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a>. Refund eligibility outside these windows is at our sole discretion.</p>
+
+  <h2>5. Usage Limits and Evaluation Allotments</h2>
+  <p><strong>Subscriptions:</strong> Each subscription tier includes a monthly evaluation allotment, described on the pricing page. Unused subscription evaluations roll over from month to month, up to a maximum bank of 12 evaluations per account. Once the bank reaches 12, additional unused evaluations do not accrue.</p>
+
+  <p><strong>Packs:</strong> Each pack includes a fixed number of evaluations, usable at any time within 18 months of the date of purchase. Pack evaluations do not expire on a monthly cycle; the only expiration is the 18-month outer limit from the purchase date.</p>
+
+  <p><strong>Combined accounts:</strong> An account may hold both subscription evaluations and pack evaluations simultaneously. Subscription evaluations (including banked rollover) are consumed first when an evaluation is submitted; pack evaluations are consumed after subscription evaluations are exhausted.</p>
+
+  <p><strong>Hitting your limit:</strong> If you exhaust your subscription allotment, rollover bank, and any pack evaluations, you may upgrade to a higher subscription tier (prorated for the remainder of the billing cycle), purchase a pack, or wait for your next billing month to begin. We do not auto-charge for overages.</p>
+
+  <p>We reserve the right to apply reasonable rate limits or other technical safeguards to prevent abuse of the Service.</p>
+
+  <h2>6. Your Content</h2>
+  <p><strong>Ownership:</strong> You retain all rights to the sermon content you submit to the Service. We do not claim ownership of your sermons or your evaluations.</p>
+  <p><strong>License to operate the Service:</strong> By submitting content, you grant us a limited, non-exclusive license to process, store, and analyze that content solely for the purpose of providing the Service to you. This license ends when you delete the content or your account.</p>
+  <p><strong>Privacy:</strong> Your sermon content is private to your account. We do not share it with third parties except as described in our <a href="./privacy.html">Privacy Policy</a>, and we do not use it to train AI models.</p>
+  <p><strong>Your responsibility:</strong> You represent that you have the right to submit any content you upload — that you wrote it, are authorized to use it, or that its use is otherwise lawful.</p>
+
+  <h2>7. Acceptable Use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>Use the Service for any unlawful purpose or in violation of these Terms.</li>
+    <li>Submit content that infringes the intellectual property rights of others (including submitting sermons authored by someone else without permission).</li>
+    <li>Submit content that is harassing, defamatory, obscene, or otherwise harmful.</li>
+    <li>Attempt to reverse-engineer, scrape, or copy the rubric, evaluation logic, or other proprietary aspects of the Service.</li>
+    <li>Resell or redistribute the Service or any output from the Service as your own product.</li>
+    <li>Attempt to gain unauthorized access to other users' accounts or our systems.</li>
+    <li>Use the Service to develop a competing product.</li>
+    <li>Interfere with the operation of the Service or impose unreasonable load on our infrastructure.</li>
+  </ul>
+  <p>We reserve the right to suspend or terminate accounts that violate these rules.</p>
+
+  <h2>8. The Evaluation Output</h2>
+  <p>The Sermon Coach generates structured feedback using an AI-assisted rubric. The evaluations are intended to be useful guidance, not authoritative judgments. The Service is a tool for preachers to use alongside their own discernment, study, and counsel from trusted advisors.</p>
+  <p>We do not guarantee any particular outcome from using the Service — such as improved preaching, audience response, or ministry results. Evaluations may contain errors or limitations inherent to AI systems, and you are responsible for exercising your own judgment about whether and how to apply the feedback.</p>
+
+  <h2>9. Intellectual Property</h2>
+  <p>The Sermon Coach (including the rubric, evaluation framework, website design, software, and all related materials) is the property of The Trusted Pastor LLC and is protected by copyright, trademark, and other laws. These Terms grant you a limited, non-exclusive, non-transferable license to use the Service for its intended purpose. You may not copy, modify, distribute, sell, or create derivative works from the Service or its outputs beyond what is necessary for your personal or organizational use of the Service.</p>
+  <p>Feedback you provide to us about the Service may be used by us to improve the Service without compensation to you.</p>
+
+  <h2>10. Cancellation and Termination</h2>
+  <p><strong>Cancellation of a subscription:</strong> You may cancel your subscription at any time through your account settings. Your subscription will remain active through the end of the current billing period, after which it will not renew. You will not be charged again, but we do not provide refunds for partial months outside the 30-day initial refund window described in Section 4.</p>
+
+  <p><strong>Banked rollover evaluations on cancellation:</strong> When a subscription is cancelled, any banked rollover evaluations remain usable until the end of the current billing period. After the subscription ends, banked rollover evaluations are forfeited and do not convert to credit, a refund, or a pack. The Trusted Pastor LLC may, at its sole discretion, accommodate exceptional circumstances on a case-by-case basis.</p>
+
+  <p><strong>Packs after subscription cancellation:</strong> Pack evaluations purchased separately from a subscription remain valid through their original 18-month expiration window, regardless of subscription status.</p>
+
+  <p><strong>Termination by us:</strong> We may suspend or terminate your access to the Service if you violate these Terms, fail to pay, or use the Service in a way that creates legal, security, or operational risk for us or other users. In most cases we will give you notice and an opportunity to cure before terminating. If we terminate your account for cause, unused subscription evaluations and unused pack evaluations are forfeited and non-refundable.</p>
+
+  <p><strong>Effect of termination:</strong> When your account is terminated (by you or by us), you will lose access to the Service and your sermon library. We will delete your content according to our Privacy Policy. You may request an export of your library before termination by contacting us.</p>
+
+  <h2>11. Disclaimers</h2>
+  <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. WE DISCLAIM ALL WARRANTIES INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND ACCURACY.</p>
+  <p>We do not warrant that the Service will be uninterrupted, error-free, secure, or that any defects will be corrected. We do not warrant the accuracy, completeness, or reliability of any evaluations or other content generated by the Service.</p>
+
+  <h2>12. Limitation of Liability</h2>
+  <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE TRUSTED PASTOR LLC AND ITS AFFILIATES, OFFICERS, AND EMPLOYEES WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL, ARISING FROM YOUR USE OF THE SERVICE.</p>
+  <p>Our total liability for any claim arising out of or relating to the Service or these Terms will not exceed the greater of (a) the amount you paid us in the 12 months preceding the claim or (b) one hundred US dollars ($100).</p>
+  <p>Some jurisdictions do not allow the exclusion or limitation of certain damages. In those jurisdictions, our liability will be limited to the maximum extent permitted by law.</p>
+
+  <h2>13. Indemnification</h2>
+  <p>You agree to defend, indemnify, and hold harmless The Trusted Pastor LLC and its affiliates, officers, and employees from any claims, damages, losses, liabilities, and expenses (including reasonable attorneys' fees) arising from your use of the Service, your content, your violation of these Terms, or your violation of any rights of another party.</p>
+
+  <h2>14. Changes to These Terms</h2>
+  <p>We may update these Terms from time to time. When we make material changes, we will notify you by email or through a notice in the Service at least 14 days before the changes take effect. Your continued use of the Service after the effective date constitutes acceptance of the updated Terms. If you do not agree to the updated Terms, you may cancel your subscription before they take effect.</p>
+
+  <h2>15. Governing Law and Disputes</h2>
+  <p>These Terms are governed by the laws of the State of Arizona, United States, without regard to its conflict of laws principles. Any dispute arising from or relating to these Terms or the Service will be resolved as follows:</p>
+  <p><strong>Informal resolution first:</strong> Before filing any formal claim, you agree to contact us at <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a> and attempt to resolve the dispute informally for at least 60 days.</p>
+  <p><strong>Arbitration:</strong> If informal resolution fails, any dispute will be resolved by binding arbitration administered by the American Arbitration Association under its Consumer Arbitration Rules, conducted in Maricopa County, Arizona (or remotely at the arbitrator's discretion). Each party will bear its own costs. You waive any right to a jury trial.</p>
+  <p><strong>Class action waiver:</strong> You agree that disputes will be resolved on an individual basis and not as part of a class, consolidated, or representative action.</p>
+  <p><strong>Exceptions:</strong> Either party may bring an individual claim in small-claims court if eligible, or seek injunctive relief in court to protect intellectual property rights.</p>
+
+  <h2>16. Miscellaneous</h2>
+  <p><strong>Entire agreement:</strong> These Terms, together with the Privacy Policy and any other policies referenced here, constitute the entire agreement between you and us regarding the Service.</p>
+  <p><strong>Severability:</strong> If any provision of these Terms is found unenforceable, the rest of the Terms will remain in effect.</p>
+  <p><strong>No waiver:</strong> Our failure to enforce any right or provision will not be considered a waiver of that right or provision.</p>
+  <p><strong>Assignment:</strong> You may not assign these Terms without our written consent. We may assign these Terms in connection with a merger, acquisition, or sale of assets.</p>
+
+  <h2>17. Contact</h2>
+  <p>Questions about these Terms?</p>
+  <ul>
+    <li><strong>Email:</strong> <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a></li>
+    <li><strong>Mail:</strong> The Trusted Pastor LLC, Phoenix, Arizona, USA</li>
+  </ul>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
+  <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./faq.html">FAQ</a> · <a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Supabase local/dev config — project ref matches .env.local
+project_id = "gskxtjfzqaitcruhbwgq"
+
+[db]
+major_version = 15

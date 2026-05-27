@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sermon Coach — Structured Feedback on Your Preaching</title>
+<meta name="description" content="Substantive sermon evaluation drawn from Chapell, Simeon Trust, Piper, Keller, Robinson, and 9Marks. Built by a pastor for pastors.">
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+    --shadow-lift: 0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+.wordmark {
+  font-family: 'Iowan Old Style', Georgia, serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  color: var(--ink);
+}
+  }
+  .wordmark .amp { color: var(--accent); font-weight: 400; }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  .nav-cta:hover {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .nav-links {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.nav-link {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.nav-link:hover {
+  color: var(--accent);
+}
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  h1 {
+    font-size: 56px;
+    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+  h1 .accent { color: var(--accent); font-style: italic; font-weight: 500; }
+  .hero-sub {
+    font-size: 21px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 680px;
+    margin: 0 auto 40px;
+    font-style: italic;
+  }
+  .hero-cta-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 14px 28px;
+    border-radius: 4px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: all 0.15s ease;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    background: var(--ink-mid);
+    box-shadow: var(--shadow-lift);
+  }
+  .btn-secondary {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 14px 28px;
+    border-radius: 4px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--rule);
+    background: var(--panel);
+    transition: all 0.15s ease;
+  }
+  .btn-secondary:hover { border-color: var(--ink); }
+
+  /* ---------- SECTION SHELL ---------- */
+  section.block {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 24px;
+  }
+  section.block.dark {
+    max-width: none;
+    background: linear-gradient(135deg, #1a2332 0%, #2a3447 100%);
+    color: #f5f0e3;
+    padding: 96px 24px;
+  }
+  .block-inner { max-width: 900px; margin: 0 auto; }
+  .section-eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .block.dark .section-eyebrow { color: var(--accent-soft); }
+  h2 {
+    font-size: 36px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+  }
+  .block.dark h2 { color: #fff; }
+  h3 {
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .block.dark h3 { color: #fff; }
+  p.lede {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+  }
+  .block.dark p.lede { color: #d8d2c2; }
+  p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .block.dark p { color: #ebe6d5; }
+
+  /* ---------- PROBLEM ---------- */
+  .problem-quote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 28px;
+    margin: 32px 0;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink-mid);
+    line-height: 1.55;
+  }
+
+  /* ---------- FEATURE GRID ---------- */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: rgba(245,240,227,.12);
+    margin-top: 48px;
+    border: 1px solid rgba(245,240,227,.12);
+  }
+  .feature {
+    background: var(--ink-mid);
+    padding: 32px 28px;
+  }
+  .feature-num {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--accent-soft);
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .feature h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .feature p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #c8c2b3;
+    margin-bottom: 0;
+  }
+
+  /* ---------- RUBRIC SOURCES ---------- */
+  .sources {
+    background: var(--panel);
+    padding: 36px 32px;
+    box-shadow: var(--shadow);
+    margin: 32px 0;
+  }
+  .source-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .source-item:last-child { border-bottom: none; }
+  .source-name {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .source-name em {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .source-contributes {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  /* ---------- SAMPLES ---------- */
+  .samples {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .sample-card {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: all 0.18s ease;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid transparent;
+  }
+  .sample-card:hover {
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-2px);
+    border-color: var(--accent-soft);
+  }
+  .sample-card.placeholder {
+    background: transparent;
+    box-shadow: none;
+    border: 1px dashed var(--rule);
+    cursor: default;
+    color: var(--ink-soft);
+  }
+  .sample-card.placeholder:hover {
+    transform: none;
+    border-color: var(--rule);
+    box-shadow: none;
+  }
+  .sample-eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .sample-card.placeholder .sample-eyebrow { color: var(--ink-soft); }
+  .sample-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .sample-meta {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .sample-verdict {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin-bottom: 18px;
+    flex-grow: 1;
+  }
+  .sample-card.placeholder .sample-verdict { color: var(--ink-soft); }
+  .sample-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .sample-card.placeholder .sample-link { color: var(--ink-soft); }
+
+  /* ---------- WHO IT'S FOR ---------- */
+  .audience-list {
+    list-style: none;
+    margin: 24px 0;
+  }
+  .audience-list li {
+    padding: 14px 0;
+    padding-left: 32px;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .audience-list li:last-child { border-bottom: none; }
+  .audience-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .lane-note {
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent-soft);
+    padding: 20px 24px;
+    margin-top: 32px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-mid);
+  }
+
+  /* ---------- FOUNDER ---------- */
+  .founder {
+    background: var(--panel);
+    padding: 40px 36px;
+    box-shadow: var(--shadow);
+    margin-top: 24px;
+  }
+  .founder p {
+    font-size: 16.5px;
+    line-height: 1.7;
+  }
+  .founder p:last-child { margin-bottom: 0; }
+
+  /* ---------- RESERVE / EMAIL ---------- */
+  .reserve {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3447 100%);
+    padding: 96px 24px;
+    color: #f5f0e3;
+    text-align: center;
+  }
+  .reserve-inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .reserve h2 {
+    font-size: 40px;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+  .reserve p {
+    color: #d8d2c2;
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .reserve-form-placeholder {
+    background: rgba(255,255,255,.04);
+    border: 1px dashed rgba(245,240,227,.25);
+    border-radius: 6px;
+    padding: 40px 24px;
+    margin: 32px auto;
+    max-width: 460px;
+  }
+  .reserve-form-placeholder p {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--accent-soft);
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .reserve-form-placeholder code {
+    background: rgba(0,0,0,.3);
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #ebe6d5;
+    display: inline-block;
+    margin-top: 8px;
+  }
+  .reserve-note {
+    font-size: 13px;
+    color: #a8a297;
+    font-style: italic;
+    margin-top: 24px;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 720px) {
+    h1 { font-size: 38px; }
+    h2 { font-size: 28px; }
+    .hero { padding: 24px 20px 56px; }
+    .hero-sub { font-size: 18px; }
+    section.block { padding: 56px 20px; }
+    section.block.dark { padding: 64px 20px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .source-item { grid-template-columns: 1fr; gap: 4px; }
+    .source-name { font-size: 17px; }
+    .reserve { padding: 64px 20px; }
+    .reserve h2 { font-size: 30px; }
+    .nav { padding: 20px; }
+    .hero-cta-row { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-secondary { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="./index.html" class="wordmark">The Sermon Coach</a>
+  <div class="nav-links">
+    <a href="./pricing.html" class="nav-link">Pricing</a>
+    <a href="./faq.html" class="nav-link">FAQ</a>
+    <a href="#reserve" class="nav-cta">Reserve Your Spot</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Pre-launch · Founding Members</div>
+  <h1>Most preachers stopped getting <span class="accent">real feedback</span> the day they left seminary.</h1>
+  <p class="hero-sub">The Sermon Coach gives you substantive, structured feedback on your preaching — drawn from Chapell, Simeon Trust, Piper, Keller, Robinson, and 9Marks. Built by a pastor for pastors.</p>
+  <div class="hero-cta-row">
+    <a href="#reserve" class="btn-primary">Reserve Your Spot</a>
+    <a href="#sample" class="btn-secondary">See a Sample Evaluation →</a>
+  </div>
+</header>
+
+<!-- PROBLEM -->
+<section class="block">
+  <div class="section-eyebrow">The Problem You Already Know</div>
+  <h2>You hear "great sermon, pastor" at the door every Sunday.</h2>
+  <p class="lede">No one wants to risk offending you. Your wife loves you and tells you what you want to hear. Your elders affirm. Your closest friends in ministry are slammed with their ministry burdens to listen to your message. The candid, structured feedback that made you grow in your homiletics class — the kind that called out what wasn't working and showed you how to fix it — quietly disappeared the moment you became the one doing the preaching.</p>
+
+  <p>And you've felt it. There are sermons you know someone should have pushed back on, or the series where the application was too thin but no one said a word. You can feel the moments when you are drifting into moralism, into book-report exposition, into preaching at people instead of TO them.</p>
+
+  <div class="problem-quote">You don't need another book on preaching. You need real guidance derived from wisdom and experience, to celebrate what's working, point out what can be better, and show you what to work on next week to keep growing as a preacher.</div>
+
+  <p>That's what The Sermon Coach does.</p>
+</section>
+
+<!-- WHAT IT IS — DARK -->
+<section class="block dark">
+  <div class="block-inner">
+    <div class="section-eyebrow">What It Is</div>
+    <h2>A structured evaluation of your sermon. In minutes, not weeks.</h2>
+    <p class="lede">Paste your manuscript or transcript. Confirm the rubric. Receive a substantive assessment — scored, narrated, mapped, and prioritized — drawn from homiletical traditions that have shaped the best preaching of the last fifty years.</p>
+
+    <div class="feature-grid">
+      <div class="feature">
+        <span class="feature-num">01</span>
+        <h4>A 12-criterion rubric</h4>
+        <p>Scored on a 5-point scale across four categories: Text &amp; Theology, Structure &amp; Craft, Application &amp; Audience Connection, and Ecclesial &amp; Spiritual.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-num">02</span>
+        <h4>Two overall scores</h4>
+        <p>Simple average and weighted, with Fallen Condition Focus, gospel clarity, and application to the present audience counted double. The goal is increasing faithfulness.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-num">03</span>
+        <h4>Narrative critique that quotes you</h4>
+        <p>Specific feedback for each category — citing your sermon directly, highlighting the homiletical principle at stake. This is not generic preaching advice.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-num">04</span>
+        <h4>Growth opportunities with practical steps</h4>
+        <p>Three per sermon, with concrete next steps you can act on this week.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-num">05</span>
+        <h4>The Heat Map</h4>
+        <p>A visual timeline of your sermon's emotional beats — lament, exultation, warning, comfort, awe — assessed against your pacing. Reveals mismatches you can't see from the pulpit.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-num">06</span>
+        <h4>Top 3 priorities &amp; suggested rewrites</h4>
+        <p>Ranked by leverage. What to work on for next Sunday, plus rewrites of one or two weakest moments in your voice.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RUBRIC SOURCES -->
+<section class="block">
+  <div class="section-eyebrow">Why You Can Trust The Rubric</div>
+  <h2>Drawn from the homiletical traditions that have shaped you.</h2>
+  <p class="lede">Every criterion in The Sermon Coach traces back to a named principle in one of the six sources. When the tool tells you your Fallen Condition Focus is drifting, it's holding you to the standard Chapell himself set.</p>
+
+  <div class="sources">
+    <div class="source-item">
+      <div class="source-name">Bryan Chapell<em>Christ-Centered Preaching</em></div>
+      <div class="source-contributes">Fallen Condition Focus · the redemptive arc · the principle of unity in sermon structure</div>
+    </div>
+    <div class="source-item">
+      <div class="source-name">Simeon Trust<em>The workshop method</em></div>
+      <div class="source-contributes">Textual fidelity · melodic line · theme, aim, and application · structure that flows from the text</div>
+    </div>
+    <div class="source-item">
+      <div class="source-name">John Piper<em>Expository Exultation</em></div>
+      <div class="source-contributes">Gospel clarity · preaching as worship · affections shaped by the cross</div>
+    </div>
+    <div class="source-item">
+      <div class="source-name">9Marks<em>Expositional preaching</em></div>
+      <div class="source-contributes">Ecclesial faithfulness · preaching that builds the church's understanding of itself under the Word</div>
+    </div>
+     <div class="source-item">
+        <div class="source-name">Tim Keller<em>Preaching: Communicating Faith in an Age of Skepticism</em></div>
+        <div class="source-contributes">Three-audiences framework · pastoral specificity · naming the cultural counter-narrative</div>
+      </div>
+      <div class="source-item">
+        <div class="source-name">Haddon Robinson<em>Biblical Preaching</em></div>
+        <div class="source-contributes">The big idea · structural unity · expository development</div>
+      </div>
+</section>
+
+<!-- SAMPLES -->
+<section class="block" id="sample">
+  <div class="section-eyebrow">See It For Yourself</div>
+  <h2>Sample evaluations.</h2>
+  <p class="lede">Real evaluations of real sermons. These are what every preacher who uses The Sermon Coach receives.</p>
+
+  <div class="samples">
+    <a href="./sermon-evaluation-hebrews-3.html" class="sample-card">
+      <div class="sample-eyebrow">Sample · Hebrews 3:1-6</div>
+      <div class="sample-title">Loyalty and Faithfulness</div>
+      <div class="sample-meta">Grace Church · Sunday morning · 41 min</div>
+      <div class="sample-verdict">"This sermon names a real condition with warmth and gets the Jesus-greater-than-Moses argument right, but the gospel and the Fallen Condition Focus both arrive in pieces rather than land with force…"</div>
+     <div class="sample-link">View full dashboard →</div>
+      </a>
+      <a href="./sermon-evaluation-hebrews-1-1-4.html" class="sample-card">
+        <div class="sample-eyebrow">Sample · Hebrews 1:1-4</div>
+        <div class="sample-title">Listen to the Son</div>
+        <div class="sample-meta">Grace Church · Sunday morning · 38 min</div>
+        <div class="sample-verdict">The opening sermon for the book of Hebrews — establishing the supremacy of Christ as the foundation for everything that follows.</div>
+        <div class="sample-link">View full dashboard →</div>
+      </a>
+      <a href="./sermon-evaluation-tressler-2cor11-rev2.html" class="sample-card">
+        <div class="sample-eyebrow">Sample · 2 Corinthians 11:16-33</div>
+        <div class="sample-title">Boasting That Sounds Like Defeat</div>
+        <div class="sample-meta">Trinity Bible Church · Sunday morning · 42 min</div>
+        <div class="sample-verdict">A sermon on the foolishness of prideful boasting and the allure of strength in the Christian life</div>
+        <div class="sample-link">View full dashboard →</div>
+      </a>
+    </div>
+  </section>
+  <!-- WHO IT'S FOR -->
+  <section class="block">
+  <div class="section-eyebrow">Who It's For</div>
+  <h2>Preachers who want to grow.</h2>
+  <p class="lede">The Sermon Coach is designed for preachers who take their craft seriously and don't have a structured feedback loop. Especially:</p>
+
+  <ul class="audience-list">
+    <li>Pastors in Reformed and evangelical traditions where the rubric resonates naturally</li>
+    <li>Solo and small-staff churches where you're the only one preaching most Sundays</li>
+    <li>Preaching cohorts and coaching groups using The Sermon Coach as a shared rubric</li>
+    <li>Seminary preaching courses and homiletics professors</li>
+    <li>Mentors discipling younger preachers</li>
+  </ul>
+
+  <div class="lane-note">
+    <strong style="color: var(--accent); display: block; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">A Note on Our Lane</strong>
+    The rubric is drawn from a specific Reformed evangelical tradition — Chapell, Piper, 9Marks, Simeon Trust, Keller, Robinson. The tool will work best for preachers who already operate inside this stream. Optional rubric variants for other evangelical traditions are on the roadmap.
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section class="block">
+  <div class="section-eyebrow">Built By A Pastor For Pastors</div>
+  <h2>Built by a preacher.</h2>
+
+  <div class="founder">
+    <p>The Sermon Coach was built by <strong>Dr. Christopher M. Daukas</strong>, a former church planter in Phoenix, Arizona, with 25 years of pastoral ministry experience and 14 years as a Lead Pastor. Chris has been preaching for 25 years, has been shaped by these resources, and has spent the last several years sharpening his own preaching against the rubric this tool now offers other preachers.</p>
+    <p>The Sermon Coach is the actual rubric Chris uses on his own work — including the sample evaluations 1 and 2 above, which he ran on two of his own old sermons. If the rubric is going to find your Fallen Condition Focus drifting, you should know it has already found his.</p>
+    <p>Have questions? Email Chris directly at chris@sermoncoach.online. He reads everything.</p>
+  </div>
+</section>
+
+<!-- RESERVE -->
+<section class="reserve" id="reserve">
+  <div class="reserve-inner">
+    <div class="section-eyebrow">Reserve Your Spot</div>
+    <h2>Be among the first preachers to use it.</h2>
+    <p>The Sermon Coach is in pre-launch. Reserve your spot to be notified when it goes live, and to learn about founding-member pricing for early subscribers.</p>
+
+    <!-- ============================================
+         REPLACE THIS PLACEHOLDER BLOCK WITH YOUR TALLY EMBED CODE
+         ============================================
+         To wire up the email signup:
+         1. Go to tally.so and sign up (free)
+         2. Click "Create form" → add one Email field + Submit button
+         3. Customize the success message ("Thanks — you're on the list. Chris will be in touch.")
+         4. Click "Share" → "Embed" → "HTML"
+         5. Copy the entire embed snippet
+         6. DELETE this placeholder div below
+         7. PASTE the Tally embed snippet in its place
+         8. Re-deploy to Vercel
+         ============================================ -->
+    <div style="max-width: 540px; margin: 0 auto; padding: 24px; background: rgba(255,255,255,0.04); border-radius: 8px;">
+        <iframe data-tally-src="https://tally.so/embed/VLbv2J?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+                loading="lazy"
+                width="100%"
+                height="400"
+                frameborder="0"
+                marginheight="0"
+                marginwidth="0"
+                title="Sermon Coach Pre-Launch Waitlist">
+        </iframe>
+        <script async src="https://tally.so/widgets/embed.js"></script>
+      </div>
+    <!-- ============================================ END PLACEHOLDER ============================================ -->
+
+    <div class="reserve-note">No payment. No commitment. Just an email so we can let you know when it's ready.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
+  <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./faq.html">FAQ</a> <a href="./privacy.html">Privacy</a> <a href="./terms.html">Terms</a>
+</footer>
+
+</body>
+</html>

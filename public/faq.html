@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — The Sermon Coach</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .nav-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .nav-link:hover { color: var(--accent); }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  .nav-cta:hover { background: var(--ink); color: var(--bg); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px 28px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 42px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .hero-sub {
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 580px;
+    margin: 0 auto;
+    font-style: italic;
+  }
+
+  /* ---------- TABLE OF CONTENTS ---------- */
+  .toc {
+    max-width: 760px;
+    margin: 32px auto 48px;
+    padding: 0 24px;
+  }
+  .toc-inner {
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 22px 28px;
+  }
+  .toc-label {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .toc-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+  }
+  .toc-links a {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+  .toc-links a:hover { color: var(--accent); }
+
+  /* ---------- CONTENT ---------- */
+  .content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+  }
+  .section {
+    margin-bottom: 56px;
+  }
+  .section-title {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .faq-item {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--ink);
+    line-height: 1.35;
+  }
+  .faq-a {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+  }
+  .faq-a strong { color: var(--ink); font-weight: 600; }
+  .faq-a a { color: var(--accent); text-decoration: none; }
+  .faq-a a:hover { text-decoration: underline; }
+  .faq-a p { margin-bottom: 12px; }
+  .faq-a p:last-child { margin-bottom: 0; }
+
+  /* ---------- CLOSING CARD ---------- */
+  .closing {
+    max-width: 760px;
+    margin: 24px auto 64px;
+    padding: 0 24px;
+  }
+  .closing-inner {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    padding: 36px 32px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .closing h2 {
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .closing p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+  }
+  .closing a {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 12px 22px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    display: inline-block;
+    transition: all 0.15s ease;
+  }
+  .closing a:hover { background: var(--ink); color: var(--bg); }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    margin-top: 40px;
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px) {
+    h1 { font-size: 32px; }
+    .hero-sub { font-size: 16px; }
+    .faq-q { font-size: 17px; }
+    .faq-a { font-size: 15.5px; }
+    .nav-links { gap: 16px; }
+    .toc-links { gap: 8px 18px; }
+    .toc-links a { font-size: 13px; }
+    .closing h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="./index.html" class="wordmark">The Sermon Coach</a>
+  <div class="nav-links">
+    <a href="./pricing.html" class="nav-link">Pricing</a>
+    <a href="./privacy.html" class="nav-link">Privacy</a>
+    <a href="./index.html#reserve" class="nav-cta">Reserve Your Spot</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Frequently Asked Questions</div>
+  <h1>Everything you might be wondering.</h1>
+  <p class="hero-sub">Answers to the questions you might actually ask. If yours isn't here, email Chris directly.</p>
+</header>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-inner">
+    <div class="toc-label">Jump to a section</div>
+    <div class="toc-links">
+      <a href="#trust">Trust &amp; Safety</a>
+      <a href="#how">How It Works</a>
+      <a href="#pricing">Pricing &amp; Plans</a>
+      <a href="#cohorts">Cohorts</a>
+      <a href="#data">Data &amp; Privacy</a>
+      <a href="#about">About</a>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <!-- TRUST & SAFETY -->
+  <section class="section" id="trust">
+    <div class="section-title">Trust &amp; Safety</div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is The Sermon Coach safe for my preaching?</div>
+      <div class="faq-a">
+        <p>Most preachers ask two questions when they consider a tool like this: <em>Is my sermon safe?</em> and <em>Am I outsourcing my calling?</em> This page answers both.</p>
+        <p><strong>The short answer to the second:</strong> no. The Sermon Coach evaluates a sermon you've already written. It doesn't study for you, write for you, or pray for you. The pulpit is still yours, and the work of getting there is still yours. The rubric is a trusted reader after the fact — not a co-author, not a ghostwriter, not a stand-in for the slow, prayerful work of sermon prep.</p>
+        <p><strong>The short answer to the first:</strong> your sermons are yours — your study, your prayer, your work for your congregation — and The Sermon Coach is built to keep it that way.</p>
+        <p>Here's what that means in practice:</p>
+        <p><strong>Your sermons stay private to your account.</strong> No other user can see them. Cohort members can choose to share specific evaluations with their cohort, but everything else is private by default.</p>
+        <p><strong>Your sermons are never used to train AI models.</strong> The Sermon Coach uses Anthropic's Claude API under data privacy terms that prohibit using your inputs for model training. Your preaching stays your preaching.</p>
+        <p><strong>Your sermons are never shared or sold.</strong> We don't sell your data. We don't share your manuscripts with third parties. The only services that touch your sermon text are the ones required to deliver your evaluation — and they're listed in our <a href="./privacy.html">Privacy Policy</a>.</p>
+        <p><strong>You stay in control.</strong> You can delete any evaluation, or your entire account, at any time. Deletion is permanent. Your library is yours to export whenever you want.</p>
+        <p>Built by a pastor, for pastors. We use the rubric on our own sermons too. If you ever have a question about how your data is handled — or about how the tool fits in your week of sermon prep — <a href="mailto:chris@sermoncoach.online">email Chris directly</a>. He reads every email.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="section-title">How It Works</div>
+
+    <div class="faq-item">
+      <div class="faq-q">What do I submit — a manuscript or audio?</div>
+      <div class="faq-a">A manuscript. Paste the text directly or upload a .docx file. The evaluation works on the written sermon, which is how the rubric was designed. If you preach from notes rather than a full manuscript, send what you have and Chris can advise during your first concierge evaluation.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How long does an evaluation take?</div>
+      <div class="faq-a">A few minutes inside the product, once it's live. Concierge evaluations during pre-launch are returned within 48 hours.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What does the evaluation look like?</div>
+      <div class="faq-a">A structured dashboard scoring your sermon against 11 criteria drawn from Chapell, Simeon Trust, Piper, 9Marks, Keller, and Robinson — with specific anchors in your sermon text, a band-level summary (Faithful, Strong, Exemplary, etc.), and an affirmation paragraph plus an improvement paragraph at the top. See the samples on the homepage for the actual format.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Will it work for my preaching style?</div>
+      <div class="faq-a">The rubric draws from the evangelical expositional tradition. It will work best for preachers who already operate inside the expository, gospel-centered, and text-driven stream. Email Chris before subscribing if you're not sure — he'll be honest about whether it's a fit.</div>
+    </div>
+  </section>
+
+  <!-- PRICING & PLANS -->
+  <section class="section" id="pricing">
+    <div class="section-title">Pricing &amp; Plans</div>
+
+    <div class="faq-item">
+      <div class="faq-q">What's the difference between a subscription and a pack?</div>
+      <div class="faq-a">A subscription is built for preachers who preach regularly — every Sunday, or close to it. You get a monthly evaluation allotment, you build a habit, and the per-sermon cost drops sharply. A pack is for preachers who preach occasionally — elders, guest preachers, lay preachers, church planters in early days, retired pastors doing pulpit supply. You buy a pack when you need it, use the evaluations when you preach, and skip the months you don't. Packs cost more per sermon than subscriptions because there's no commitment and no cadence — but you only pay for what you actually use.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Do pack evaluations expire?</div>
+      <div class="faq-a">Yes — 18 months from the date of purchase, for all pack sizes. That covers the once-a-quarter preacher comfortably and gives you room for unexpected slow stretches. After 18 months, unused evaluations expire — but you'll receive reminders before that happens.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Do unused subscription evaluations roll over?</div>
+      <div class="faq-a">Yes, up to a maximum of 12 banked evaluations. So if you skip a month, your evaluations don't evaporate. This keeps the subscription honest during slow seasons of your preaching calendar.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What happens to banked evaluations if I cancel?</div>
+      <div class="faq-a">Your subscription stays active through the end of the current billing month, and any banked evaluations are usable until then. After cancellation, banked evaluations don't carry forward — but if you'd rather convert them to a pack so they don't disappear, email Chris and he'll work it out with you.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I switch from a pack to a subscription later?</div>
+      <div class="faq-a">Yes, anytime. If you have unused pack evaluations when you subscribe, they stay in your account and get used after your monthly subscription evaluations — so nothing's wasted. Many preachers start with a 1-Pack or 3-Pack to see how the rubric works on their own preaching, then move to a Coach subscription once they know they want it regularly.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I switch tiers?</div>
+      <div class="faq-a">Yes. You can upgrade from Coach to Cohort, or downgrade, at any time. Upgrades take effect immediately with prorated billing; downgrades take effect at your next billing cycle.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What does "2 months free" mean for annual billing?</div>
+      <div class="faq-a">Pay for the year up front and you get the equivalent of ten months at the monthly price instead of twelve. Coach: $290/year instead of $348. Cohort: $990/year instead of $1,188. Same evaluations, same features — just less money in total.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What if I hit my monthly subscription limit?</div>
+      <div class="faq-a">You can either upgrade to the next tier mid-month (prorated) or wait for your next billing cycle. We don't auto-charge for overages — you stay in control of your spend. If you'd rather not change tiers, you can also buy a pack to bridge the gap.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What's included in the Founding Member offer?</div>
+      <div class="faq-a">Founding Member spots have been filled. Founding members who reserved early get 50% off subscriptions for their first 12 months, plus permanent Founding Member status: priority support direct from Chris, early access to new features, and a Founding Member badge on their account that doesn't expire when the discount does.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Does the Founding Member discount apply to packs?</div>
+      <div class="faq-a">No — Founding Member pricing is for subscriptions only. The 50% off is meant to reward preachers who bet on the product early and committed to a monthly cadence. Packs are already priced for low-commitment use, so they stay at standard pricing. If you're a Founding Member and want to add a pack on top of your subscription (for a season when you're preaching more than usual, for instance), you absolutely can — at standard pack pricing.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What about refunds?</div>
+      <div class="faq-a">Every subscription comes with a 30-day money-back guarantee. If The Sermon Coach isn't useful for your preaching after a month of real use, email Chris and you'll get a full refund — no issues. Packs can be refunded within 7 days of purchase if no evaluations have been used.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I cancel anytime?</div>
+      <div class="faq-a">Yes. No contracts. Cancel from your account dashboard at any point — your subscription stays active through the end of the current billing month, then ends. Packs aren't a subscription, so there's nothing to cancel.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is there a free trial?</div>
+      <div class="faq-a">Not in the traditional sense. The 1-Pack at $29 is the low-commitment way to see the rubric on your own preaching before you subscribe — one full evaluation, no recurring charge, 18 months to use it. The samples on the homepage also show exactly what every evaluation looks like.</div>
+    </div>
+  </section>
+
+  <!-- COHORTS -->
+  <section class="section" id="cohorts">
+    <div class="section-title">Cohorts</div>
+
+    <div class="faq-item">
+      <div class="faq-q">How does the Cohort tier work?</div>
+      <div class="faq-a">Cohort gives you 5 seats and 30 sermons per month, pooled across the group. Each member has their own private library by default, with the option to share specific evaluations with the cohort. It's built for staff teams at one church, seminary classmates, mentor-mentee pairs, or peer preaching groups.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can my cohort see my evaluations automatically?</div>
+      <div class="faq-a">No. Sharing is opt-in per evaluation. You decide which ones to expose to the group and which ones stay private. This mirrors how preachers already work — share the sermon you want feedback on, keep the rest to yourself.</div>
+    </div>
+  </section>
+
+  <!-- DATA & PRIVACY -->
+  <section class="section" id="data">
+    <div class="section-title">Data &amp; Privacy</div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is my data private?</div>
+      <div class="faq-a">Yes. Your sermons stay private to your account, are never used to train AI models, and are never shared with third parties. You own your work; The Sermon Coach is just the rubric you run it through.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Who can see my evaluations?</div>
+      <div class="faq-a">Only you. Each preacher's library is private to their account. Cohort tier members can optionally choose to share specific evaluations with their cohort, but private-by-default is the rule everywhere else.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Will my sermons be used to train AI?</div>
+      <div class="faq-a">No. The Sermon Coach uses Anthropic's Claude API with data privacy commitments that prohibit using your sermons for model training. Your preaching stays your preaching.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I delete an evaluation?</div>
+      <div class="faq-a">Yes. You can delete any evaluation, or delete your entire account, at any time. Deletion is permanent.</div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-title">About</div>
+
+    <div class="faq-item">
+      <div class="faq-q">Who built this?</div>
+      <div class="faq-a">Dr. Christopher M. Daukas — a former church planter in Phoenix, Arizona, with 25 years of pastoral ministry experience and 14 years as a Lead Pastor. The Sermon Coach is the actual rubric Chris uses on his own preaching. Two of the sample evaluations on the homepage are of his own sermons.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">When does this actually launch?</div>
+      <div class="faq-a">The Sermon Coach is in pre-launch. We're running concierge evaluations for early reservists while we build the full automated product. Founding members get full access the moment the product goes live.</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- CLOSING CARD -->
+<div class="closing">
+  <div class="closing-inner">
+    <h2>Still have questions?</h2>
+    <p>Email Chris directly. He reads everything.</p>
+    <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
+  <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./faq.html">FAQ</a> · <a href="./privacy.html">Privacy</a>
+</footer>
+
+</body>
+</html>

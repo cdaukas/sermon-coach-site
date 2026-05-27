@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — The Sermon Coach</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .nav-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .nav-link:hover { color: var(--accent); }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    transition: all 0.15s ease;
+  }
+  .nav-cta:hover { background: var(--ink); color: var(--bg); }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 42px;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .hero-sub {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- CONTENT ---------- */
+  .content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 16px 24px 64px;
+  }
+  .content p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+  }
+  .content h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 48px;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+  .content h2:first-of-type { margin-top: 24px; }
+  .content ul {
+    margin-bottom: 20px;
+    padding-left: 24px;
+  }
+  .content li {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    margin-bottom: 8px;
+  }
+  .content strong { color: var(--ink); font-weight: 600; }
+  .content a { color: var(--accent); text-decoration: none; }
+  .content a:hover { text-decoration: underline; }
+
+  .lead {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 20px 24px;
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    margin-bottom: 24px;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    margin-top: 60px;
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 640px) {
+    h1 { font-size: 32px; }
+    .content h2 { font-size: 19px; }
+    .content p, .content li { font-size: 15.5px; }
+    .nav-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="./index.html" class="wordmark">The Sermon Coach</a>
+  <div class="nav-links">
+    <a href="./pricing.html" class="nav-link">Pricing</a>
+    <a href="./faq.html" class="nav-link">FAQ</a>
+    <a href="./index.html#reserve" class="nav-cta">Reserve Your Spot</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Privacy Policy</div>
+  <h1>How we handle your data.</h1>
+  <p class="hero-sub">Effective May 19, 2026</p>
+</header>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <p class="lead">This Privacy Policy explains how The Trusted Pastor LLC ("we," "us," or "our") collects, uses, and protects your information when you use The Sermon Coach (the "Service"), accessed through sermoncoach.online and related domains.</p>
+
+  <p>We believe preachers should be able to use this tool with full confidence that their work stays their own. This policy is written in plain English wherever possible. If anything is unclear, email <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a>.</p>
+
+  <h2>1. Who We Are</h2>
+  <p>The Sermon Coach is operated by The Trusted Pastor LLC, a company registered in Arizona, United States. For privacy-related questions or requests, you can reach us at:</p>
+  <ul>
+    <li><strong>Email:</strong> <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a></li>
+    <li><strong>Mail:</strong> The Trusted Pastor LLC, Phoenix, Arizona, USA</li>
+  </ul>
+
+  <h2>2. Information We Collect</h2>
+  <p>We collect only what we need to provide the Service. Specifically:</p>
+
+  <p><strong>Account information:</strong> Your name, email address, and password (stored encrypted). If you subscribe, we collect billing information through our payment processor (see Section 4).</p>
+
+  <p><strong>Sermon content you submit:</strong> The sermon manuscripts, transcripts, or text you upload for evaluation. This is private to your account and stored securely. We do not read, analyze, sell, or share this content beyond what is required to generate your evaluation.</p>
+
+  <p><strong>Evaluations we generate:</strong> The evaluation outputs created by the Service from your sermon submissions. These are stored in your account library for your ongoing access.</p>
+
+  <p><strong>Usage data:</strong> Basic technical data — IP address, browser type, pages visited, actions taken in the product — collected to keep the Service running and to detect abuse. We use this in aggregate, not to identify individuals.</p>
+
+  <p><strong>Communications:</strong> When you email us, we keep the message so we can respond and improve the Service.</p>
+
+  <h2>3. How We Use Your Information</h2>
+  <p>We use your information to:</p>
+  <ul>
+    <li>Provide the Service: generate evaluations, maintain your account, and let you access your sermon library.</li>
+    <li>Process payments through our payment processor when you subscribe to a paid plan.</li>
+    <li>Respond to your questions and provide customer support.</li>
+    <li>Send you essential communications about your account (billing, security, service updates).</li>
+    <li>Improve the Service in aggregate ways — for example, understanding which features are used most.</li>
+    <li>Detect, prevent, and respond to fraud, abuse, or security issues.</li>
+  </ul>
+
+  <p>We do not use your sermon content to train artificial intelligence models. We do not sell your personal information. We do not share your sermons with anyone outside the Service except as described in Section 4 (Service Providers).</p>
+
+  <h2>4. Service Providers We Use</h2>
+  <p>The Sermon Coach relies on a small number of trusted third-party services to operate. Each of these has its own privacy practices:</p>
+
+  <p><strong>Anthropic (Claude API):</strong> We use Anthropic's Claude API to generate the AI-assisted portions of your evaluations. Anthropic's API terms commit to not using your inputs to train their models. Read <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a>.</p>
+
+  <p><strong>Stripe:</strong> When you subscribe, payments are processed by Stripe, a leading payments company. We do not store your full credit card information on our servers — Stripe handles that directly under PCI-DSS compliance. Read <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's privacy policy</a>.</p>
+
+  <p><strong>Vercel:</strong> Our website and product are hosted on Vercel, which provides infrastructure and content delivery. Read <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel's privacy policy</a>.</p>
+
+  <p><strong>Supabase:</strong> We use Supabase as our database provider for storing account data, sermon submissions, and evaluations. Read <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase's privacy policy</a>.</p>
+
+  <p><strong>Email delivery:</strong> We may use third-party email services (such as Resend, Postmark, or similar transactional email providers) to send account-related emails. These providers only handle email metadata and content as needed to deliver messages.</p>
+
+  <p>We only share information with these providers as necessary to operate the Service. None of them are permitted to use your data for their own purposes beyond providing services to us.</p>
+
+  <h2>5. Data Security</h2>
+  <p>We take reasonable steps to protect your information, including:</p>
+  <ul>
+    <li>Encryption of data in transit (HTTPS/TLS).</li>
+    <li>Encryption of passwords using industry-standard hashing.</li>
+    <li>Access controls limiting who can view stored data internally.</li>
+    <li>Regular review of our systems and dependencies for security issues.</li>
+  </ul>
+  <p>No system is perfectly secure. If we ever discover a breach affecting your data, we will notify you promptly and in accordance with applicable law.</p>
+
+  <h2>6. Data Retention</h2>
+  <p>We retain your account information and sermon library for as long as your account is active. If you delete your account, we will delete your personal information and sermon content within 30 days, except where we are required by law to retain certain records (such as billing records for tax purposes).</p>
+  <p>You may delete individual evaluations or your entire account at any time through your account settings. Deletion is permanent.</p>
+
+  <h2>7. Your Rights</h2>
+  <p>Depending on where you live, you may have additional rights regarding your personal data. We honor the following for all users, regardless of location:</p>
+  <ul>
+    <li><strong>Access:</strong> You may request a copy of the personal information we hold about you.</li>
+    <li><strong>Correction:</strong> You may correct inaccurate personal information through your account settings or by contacting us.</li>
+    <li><strong>Deletion:</strong> You may delete your account and personal information at any time.</li>
+    <li><strong>Portability:</strong> You may request your sermon library and evaluations in a portable format.</li>
+    <li><strong>Objection:</strong> You may object to certain types of processing.</li>
+    <li><strong>Marketing opt-out:</strong> We do not send marketing emails by default. If we ever do, you can unsubscribe from any such email.</li>
+  </ul>
+  <p>To exercise any of these rights, email <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a>. We will respond within 30 days.</p>
+
+  <h2>8. For Users in the European Economic Area (EEA), United Kingdom, and Switzerland</h2>
+  <p>If you are located in the EEA, UK, or Switzerland, the General Data Protection Regulation (GDPR) and equivalent laws apply to our processing of your personal data.</p>
+  <p><strong>Legal basis:</strong> We process your personal data on the following legal bases: (a) performance of a contract with you (providing the Service), (b) our legitimate interests (improving the Service, preventing fraud), and (c) your consent where required.</p>
+  <p><strong>Data transfers:</strong> Your data may be transferred to and processed in the United States, where some of our service providers are located. We rely on appropriate safeguards, including Standard Contractual Clauses, for such transfers.</p>
+  <p><strong>Complaints:</strong> You have the right to lodge a complaint with your local data protection authority. We encourage you to contact us first so we can address your concern.</p>
+
+  <h2>9. For Users in California</h2>
+  <p>If you are a California resident, the California Consumer Privacy Act (CCPA) and California Privacy Rights Act (CPRA) give you specific rights regarding your personal information:</p>
+  <ul>
+    <li>The right to know what personal information we collect, use, disclose, and sell.</li>
+    <li>The right to delete personal information we have collected from you.</li>
+    <li>The right to correct inaccurate personal information.</li>
+    <li>The right to opt out of the sale or sharing of your personal information.</li>
+    <li>The right to limit the use of sensitive personal information.</li>
+    <li>The right to non-discrimination for exercising your privacy rights.</li>
+  </ul>
+  <p>We do not sell or share personal information for cross-context behavioral advertising. We do not use sensitive personal information for purposes that would require the right to limit. To exercise any California privacy right, email <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a>.</p>
+
+  <h2>10. Children's Privacy</h2>
+  <p>The Sermon Coach is not directed to children under 16, and we do not knowingly collect personal information from anyone under 16. If you believe a child has provided us with personal information, please contact us and we will delete it promptly.</p>
+
+  <h2>11. Cookies and Tracking</h2>
+  <p>We use a minimal number of cookies — primarily for keeping you signed in and remembering basic preferences. We do not use third-party advertising cookies or cross-site trackers.</p>
+  <p>You can control cookies through your browser settings. Disabling cookies may affect your ability to stay signed in or use certain features.</p>
+
+  <h2>12. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. When we make material changes, we will notify you by email or through a notice in the Service. The effective date at the top of this policy tells you when it was last updated.</p>
+
+  <h2>13. Contact Us</h2>
+  <p>Questions, requests, or concerns about this Privacy Policy or how we handle your information:</p>
+  <ul>
+    <li><strong>Email:</strong> <a href="mailto:chris@sermoncoach.online">chris@sermoncoach.online</a></li>
+    <li><strong>Mail:</strong> The Trusted Pastor LLC, Phoenix, Arizona, USA</li>
+  </ul>
+  <p>We read every email and aim to respond within 5 business days.</p>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
+  <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./faq.html">FAQ</a> · <a href="./privacy.html">Privacy</a>
+</footer>
+
+</body>
+</html>
