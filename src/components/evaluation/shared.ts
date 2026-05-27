@@ -1,8 +1,6 @@
 export const serifFont = { fontFamily: "var(--font-serif)" };
 export const uiFont = { fontFamily: "var(--font-ui)" };
 
-export type SectionEyebrowVariant = "green" | "amber";
-
 /** SKILL.md / rubric heat-map register colors (14 registers). */
 const BEAT_REGISTER_COLORS: Record<string, string> = {
   humor: "#d4a857",
