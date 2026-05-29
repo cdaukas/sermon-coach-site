@@ -210,6 +210,12 @@ Until decided, treat **6.5 render work as complete** and **prompt/schema alignme
 
 ---
 
+## Deployment gotchas
+
+**Vercel env vars and Framework Preset are deploy-time config, NOT in the repo.** A working `npm run dev` locally proves nothing about production until env vars are set in Vercel and Framework Preset = Next.js. Check both before debugging.
+
+---
+
 ## Key file map
 
 ```
