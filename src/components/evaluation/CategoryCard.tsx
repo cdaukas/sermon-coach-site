@@ -4,17 +4,44 @@ import {
   categoryAverage,
   categorySubtotal,
 } from "@/lib/evaluation/schema";
-import { serifFont, uiFont } from "./shared";
+import {
+  criterionScoreColor,
+  criterionScoreFillPercent,
+  serifFont,
+  uiFont,
+} from "./shared";
 
 type CategoryCardProps = {
   category: EvaluationResultStrict["categories"][number];
 };
 
+function CriterionScoreBar({ score }: { score: number }) {
+  const color = criterionScoreColor(score);
+  const fillPercent = criterionScoreFillPercent(score);
+
+  return (
+    <div
+      className="relative hidden h-2.5 rounded-full md:block"
+      style={{ background: "var(--sc-rule)" }}
+      aria-hidden
+    >
+      <div
+        className="absolute inset-y-0 left-0 rounded-full"
+        style={{ width: `${fillPercent}%`, background: color }}
+      />
+      <div
+        className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-[var(--sc-panel)]"
+        style={{ left: `${fillPercent}%`, borderColor: color }}
+      />
+    </div>
+  );
+}
+
 export function CategoryCard({ category }: CategoryCardProps) {
   const subtotal = categorySubtotal(category.criteria);
   const max = CATEGORY_MAX_POINTS[category.number] ?? subtotal;
   const average = categoryAverage(category.criteria);
-  const averageLabel = `Avg ${average} / 5 · ${subtotal}/${max}`;
+  const averageLabel = `Average ${average} / 5 · ${subtotal}/${max}`;
 
   return (
     <section
@@ -32,7 +59,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
         }}
       >
         <h2 className="text-2xl font-normal" style={serifFont}>
-          <span style={{ color: "var(--sc-accent-soft)" }}>{category.number}.</span>{" "}
+          <span style={{ color: "var(--sc-accent-soft)" }}>{category.number} ·</span>{" "}
           {category.name}
         </h2>
         <p
@@ -44,85 +71,74 @@ export function CategoryCard({ category }: CategoryCardProps) {
       </header>
 
       <div className="py-2">
-        {category.criteria.map((criterion) => {
-          const preview = criterion.narrative;
-          return (
-            <details
-              key={`${criterion.id}-${criterion.name}`}
-              className="group border-b last:border-b-0"
-              style={{ borderColor: "var(--sc-rule)" }}
+        {category.criteria.map((criterion) => (
+          <details
+            key={`${criterion.id}-${criterion.name}`}
+            className="group border-b last:border-b-0"
+            style={{ borderColor: "var(--sc-rule)" }}
+          >
+            <summary
+              className="grid cursor-pointer list-none grid-cols-[24px_1fr_auto] items-center gap-3 px-8 py-4 transition-colors hover:bg-[var(--sc-accent-pale)] md:grid-cols-[24px_1fr_220px_56px] md:gap-4 [&::-webkit-details-marker]:hidden"
             >
-              <summary
-                className="grid cursor-pointer list-none grid-cols-1 gap-2 px-8 py-4 transition-colors hover:bg-[var(--sc-accent-pale)] md:grid-cols-[1fr_auto_48px] md:items-center md:gap-6 [&::-webkit-details-marker]:hidden"
+              <span
+                className="text-sm leading-none transition-transform group-open:rotate-90"
+                style={{ color: "var(--sc-accent)" }}
+                aria-hidden
               >
-                <div>
-                  <p className="text-lg" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-                    {criterion.name}
-                    {criterion.is_double_weighted ? (
-                      <span
-                        className="ml-2 text-[10px] font-semibold uppercase tracking-[0.06em]"
-                        style={{ ...uiFont, color: "var(--sc-accent)" }}
-                      >
-                        ×2
-                      </span>
-                    ) : null}
-                  </p>
-                  <p
-                    className="mt-1 text-[11px] font-semibold uppercase tracking-[0.06em]"
-                    style={{ ...uiFont, color: "var(--sc-accent)" }}
-                  >
-                    {criterion.tradition_tag}
-                  </p>
-                </div>
-                <p
-                  className="hidden text-[13px] md:block"
-                  style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+                ▸
+              </span>
+              <p className="text-base font-medium" style={{ ...serifFont, color: "var(--sc-ink)" }}>
+                {criterion.name}
+                <span
+                  className="text-[11px] font-normal tracking-normal"
+                  style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
                 >
-                  {preview.slice(0, 120)}
-                  {preview.length > 120 ? "…" : ""}
-                </p>
-                <p
-                  className="text-right text-2xl font-normal"
-                  style={{ ...serifFont, color: "var(--sc-ink)" }}
-                >
-                  {criterion.score}
-                </p>
-              </summary>
-              <div
-                className="border-t px-8 pb-6 pt-2"
-                style={{
-                  borderColor: "var(--sc-rule)",
-                  background: "var(--sc-accent-pale)",
-                }}
+                  {" · "}
+                  <em style={{ fontStyle: "italic" }}>{criterion.tradition_tag}</em>
+                </span>
+              </p>
+              <CriterionScoreBar score={criterion.score} />
+              <p
+                className="text-right text-sm font-semibold md:col-start-4"
+                style={{ ...uiFont, color: "var(--sc-ink)" }}
               >
-                <p
-                  className="mb-3 text-[15px] leading-relaxed"
-                  style={{ ...serifFont, color: "var(--sc-ink)" }}
+                {criterion.score}/5
+              </p>
+            </summary>
+            <div
+              className="border-t px-8 pb-6 pt-2"
+              style={{
+                borderColor: "var(--sc-rule)",
+                background: "var(--sc-accent-pale)",
+              }}
+            >
+              <p
+                className="mb-3 text-[15px] leading-relaxed"
+                style={{ ...serifFont, color: "var(--sc-ink)" }}
+              >
+                {criterion.narrative}
+              </p>
+              {criterion.anchored_quote ? (
+                <blockquote
+                  className="mt-4 border-l-2 pl-4 text-[15px] italic leading-relaxed"
+                  style={{
+                    ...serifFont,
+                    borderColor: "var(--sc-accent)",
+                    color: "var(--sc-ink-mid)",
+                  }}
                 >
-                  {criterion.narrative}
-                </p>
-                {criterion.anchored_quote ? (
-                  <blockquote
-                    className="mt-4 border-l-2 pl-4 text-[15px] italic leading-relaxed"
-                    style={{
-                      ...serifFont,
-                      borderColor: "var(--sc-accent)",
-                      color: "var(--sc-ink-mid)",
-                    }}
+                  {criterion.anchored_quote.text}
+                  <footer
+                    className="mt-2 text-[11px] not-italic uppercase tracking-[0.06em]"
+                    style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
                   >
-                    {criterion.anchored_quote.text}
-                    <footer
-                      className="mt-2 text-[11px] not-italic uppercase tracking-[0.06em]"
-                      style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-                    >
-                      {criterion.anchored_quote.approximate_location}
-                    </footer>
-                  </blockquote>
-                ) : null}
-              </div>
-            </details>
-          );
-        })}
+                    {criterion.anchored_quote.approximate_location}
+                  </footer>
+                </blockquote>
+              ) : null}
+            </div>
+          </details>
+        ))}
       </div>
     </section>
   );
