@@ -3,7 +3,6 @@ import {
   CATEGORY_MAX_POINTS,
   categorySubtotal,
   deriveTierFromWeighted,
-  diagnosticGap,
   formatScoreBandStrict,
 } from "@/lib/evaluation/schema";
 import { serifFont, uiFont } from "./shared";
@@ -46,20 +45,8 @@ type MethodologySectionProps = {
   categories: EvaluationResultStrict["categories"];
 };
 
-function methodologyGapNote(simple: number, weighted: number): string {
-  const gap = diagnosticGap(simple, weighted);
-  if (gap === 0) {
-    return "Simple and weighted composites match — load-bearing criteria (FCF, gospel clarity, application) scored in line with the rest.";
-  }
-  if (gap > 0) {
-    return `Weighted exceeds simple by ${gap} point${gap === 1 ? "" : "s"} — load-bearing criteria outperformed supporting ones.`;
-  }
-  return `Weighted trails simple by ${Math.abs(gap)} point${Math.abs(gap) === 1 ? "" : "s"} — supporting criteria outscored load-bearing ones.`;
-}
-
 export function MethodologySection({ scoring, categories }: MethodologySectionProps) {
   const currentTier = deriveTierFromWeighted(scoring.composite_weighted);
-  const gap = diagnosticGap(scoring.composite_simple, scoring.composite_weighted);
 
   return (
     <details
@@ -201,53 +188,22 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
           How this sermon was scored
         </h3>
         <div
-          className="mb-6 grid grid-cols-1 gap-6 rounded border px-6 py-6 md:grid-cols-2"
+          className="mb-6 rounded border px-6 py-6"
           style={{
             borderColor: "var(--sc-rule)",
             background: "var(--sc-cream-tint)",
           }}
         >
-          <div>
-            <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-              {scoring.composite_simple}/55
-            </p>
-            <p
-              className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
-              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-            >
-              Composite (Simple)
-            </p>
-          </div>
-          <div>
-            <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-              {scoring.composite_weighted}/55
-            </p>
-            <p
-              className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
-              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-            >
-              Composite (Weighted)
-            </p>
-          </div>
+          <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
+            {scoring.composite_weighted}/55
+          </p>
+          <p
+            className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            Composite score
+          </p>
         </div>
-        <p
-          className="mb-6 text-[14px] leading-relaxed"
-          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
-        >
-          {methodologyGapNote(scoring.composite_simple, scoring.composite_weighted)}
-        </p>
-        <p
-          className="mb-4 text-[13px]"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-        >
-          Diagnostic gap (weighted − simple):{" "}
-          <strong style={{ color: "var(--sc-ink)" }}>
-            {gap > 0 ? "+" : ""}
-            {gap}
-          </strong>
-          {" · "}
-          Raw total: {scoring.raw_total}/{scoring.raw_max}
-        </p>
 
         <table className="w-full max-w-md border-collapse text-[13px]">
           <tbody>
