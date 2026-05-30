@@ -2,7 +2,7 @@ import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import {
   CATEGORY_MAX_POINTS,
   categorySubtotal,
-  deriveLetterFromWeighted,
+  deriveTierFromWeighted,
   diagnosticGap,
   formatScoreBandStrict,
 } from "@/lib/evaluation/schema";
@@ -10,31 +10,31 @@ import { serifFont, uiFont } from "./shared";
 
 const GRADING_BANDS = [
   {
-    letter: "A",
+    tier: 5,
     range: "47–55",
     band: "Exemplary",
     meaning: "Multiple criteria scored 5s. Worth studying or sharing.",
   },
   {
-    letter: "B",
+    tier: 4,
     range: "39–46",
     band: "Strong",
     meaning: "Most criteria scored 4s. Doing the work well.",
   },
   {
-    letter: "C",
+    tier: 3,
     range: "30–38",
     band: "Faithful",
     meaning: "Most criteria scored 3s. Faithfully doing the work.",
   },
   {
-    letter: "D",
+    tier: 2,
     range: "22–29",
     band: "Needs Improvement",
     meaning: "Multiple criteria scored 2s. Real gaps to address.",
   },
   {
-    letter: "F",
+    tier: 1,
     range: "<22",
     band: "Significant Concerns",
     meaning: "Multiple criteria scored 1s. Address before preaching again.",
@@ -58,7 +58,7 @@ function methodologyGapNote(simple: number, weighted: number): string {
 }
 
 export function MethodologySection({ scoring, categories }: MethodologySectionProps) {
-  const currentLetter = deriveLetterFromWeighted(scoring.composite_weighted);
+  const currentTier = deriveTierFromWeighted(scoring.composite_weighted);
   const gap = diagnosticGap(scoring.composite_simple, scoring.composite_weighted);
 
   return (
@@ -117,7 +117,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
           <table className="w-full min-w-[520px] border-collapse text-[13px]">
             <thead>
               <tr style={{ ...uiFont, color: "var(--sc-ink)" }}>
-                {["Letter", "Range", "Band", "What it means"].map((col) => (
+                {["Tier", "Range", "Band", "What it means"].map((col) => (
                   <th
                     key={col}
                     className="border-b px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.06em]"
@@ -134,10 +134,10 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
             <tbody>
               {GRADING_BANDS.map((band) => {
                 const isCurrent =
-                  band.letter === currentLetter && band.band === scoring.band;
+                  band.tier === currentTier && band.band === scoring.band;
                 return (
                   <tr
-                    key={band.letter}
+                    key={band.tier}
                     style={{
                       ...serifFont,
                       color: "var(--sc-ink)",
@@ -148,7 +148,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
                       className="border-b px-3 py-2.5 font-semibold"
                       style={{ borderColor: "var(--sc-rule)" }}
                     >
-                      {band.letter}
+                      {band.tier}
                     </td>
                     <td
                       className="border-b px-3 py-2.5"

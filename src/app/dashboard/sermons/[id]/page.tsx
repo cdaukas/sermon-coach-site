@@ -9,6 +9,7 @@ import {
   listEvaluationsForSermon,
   sermonHasActiveEvaluation,
 } from "@/lib/evaluation/queries";
+import { formatStoredScoreBand } from "@/lib/evaluation/schema";
 import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
 /** Long-running Claude evaluation (see STEP_6_PLAN §B). */
@@ -113,7 +114,11 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
             className="font-medium no-underline hover:underline"
             style={{ color: "var(--sc-accent)" }}
           >
-            {latestComplete.score_band ?? "View"} ({latestComplete.overall_score ?? "—"}/100)
+            {formatStoredScoreBand(
+              latestComplete.score_band,
+              latestComplete.overall_score,
+            )}{" "}
+            ({latestComplete.overall_score ?? "—"}/55)
           </Link>
         </p>
       ) : null}
