@@ -26,7 +26,7 @@ const parsed = parseEvaluationResult(EVALUATION_FIXTURE, {
 assert(parsed, "parseEvaluationResult returned null for fixture");
 
 const scoreBand = formatScoreBandStrict(EVALUATION_FIXTURE.scoring);
-assert(scoreBand === "B · Strong", `unexpected score_band: ${scoreBand}`);
+assert(scoreBand === "Strong · Tier 4", `unexpected score_band: ${scoreBand}`);
 
 const html = renderToStaticMarkup(
   React.createElement(EvaluationDashboard, {

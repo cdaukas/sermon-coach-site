@@ -467,6 +467,9 @@ export type EvaluationScoringStrict = z.infer<typeof evaluationScoringStrictSche
 export type ScoreBand = z.infer<typeof scoreBandSchema>;
 export type ScoreLetter = z.infer<typeof scoreLetterSchema>;
 
+/** Tier label from weighted /55 score (display only; same thresholds as letter grades). */
+export type ScoreTier = 1 | 2 | 3 | 4 | 5;
+
 /** Letter grade from weighted /55 score (methodology appendix only). */
 export function deriveLetterFromWeighted(weighted: number): ScoreLetter {
   if (weighted >= 47) return "A";
@@ -476,8 +479,34 @@ export function deriveLetterFromWeighted(weighted: number): ScoreLetter {
   return "F";
 }
 
+/** Band tier from weighted /55 score — 5 is best, aligned with criterion sliders. */
+export function deriveTierFromWeighted(weighted: number): ScoreTier {
+  if (weighted >= 47) return 5;
+  if (weighted >= 39) return 4;
+  if (weighted >= 30) return 3;
+  if (weighted >= 22) return 2;
+  return 1;
+}
+
 export function formatScoreBandStrict(scoring: EvaluationScoringStrict): string {
-  return `${deriveLetterFromWeighted(scoring.composite_weighted)} · ${scoring.band}`;
+  return `${scoring.band} · Tier ${deriveTierFromWeighted(scoring.composite_weighted)}`;
+}
+
+/** Display stored score_band rows, including legacy "C · Faithful" strings. */
+export function formatStoredScoreBand(
+  scoreBand: string | null,
+  overallScore: number | null,
+): string {
+  if (!scoreBand) return "View";
+  if (scoreBand.includes("Tier ")) return scoreBand;
+
+  const parts = scoreBand.split("·").map((part) => part.trim());
+  if (parts.length === 2 && overallScore != null) {
+    const [, band] = parts;
+    return `${band} · Tier ${deriveTierFromWeighted(overallScore)}`;
+  }
+
+  return scoreBand;
 }
 
 export function diagnosticGap(
@@ -730,7 +759,11 @@ export type EvaluationScoring = z.infer<typeof evaluationScoringSchema>;
 
 /** Legacy rows that still include scoring.letter. */
 export function formatScoreBand(scoring: EvaluationScoring): string {
-  return `${scoring.letter} · ${scoring.band}`;
+  const tier =
+    scoring.composite_weighted != null
+      ? deriveTierFromWeighted(scoring.composite_weighted)
+      : ({ A: 5, B: 4, C: 3, D: 2, F: 1 } as const)[scoring.letter];
+  return `${scoring.band} · Tier ${tier}`;
 }
 
 function isLegacyShape(value: unknown): boolean {
