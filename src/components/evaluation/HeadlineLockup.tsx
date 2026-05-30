@@ -1,5 +1,5 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
-import { formatScoreBandStrict } from "@/lib/evaluation/schema";
+import { deriveTierFromWeighted } from "@/lib/evaluation/schema";
 import { serifFont, splitVerdictImprovement, uiFont } from "./shared";
 
 type HeadlineLockupProps = {
@@ -26,10 +26,22 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
         }}
       >
         <p
-          className="mb-3 text-[52px] leading-none italic"
-          style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
+          className="mb-3 leading-none"
+          style={serifFont}
         >
-          {formatScoreBandStrict(scoring)}
+          <span
+            className="text-[52px] italic"
+            style={{ color: "var(--sc-accent-soft)" }}
+          >
+            {scoring.band}
+          </span>
+          <span
+            className="text-[11px] font-medium uppercase not-italic tracking-[0.14em]"
+            style={{ ...uiFont, color: "rgba(250,248,243,0.65)" }}
+          >
+            {" · Tier "}
+            {deriveTierFromWeighted(scoring.composite_weighted)}
+          </span>
         </p>
         <p
           className="text-[10px] tracking-[0.1em] uppercase"
