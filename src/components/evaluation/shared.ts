@@ -75,6 +75,18 @@ export function formatLengthMinutes(minutes: number): string {
   return `~${minutes} minutes`;
 }
 
+/** Progress bar fill color: green 4–5, amber 3, red 1–2 (reference dashboard). */
+export function criterionScoreColor(score: number): string {
+  if (score >= 4) return "var(--sc-green)";
+  if (score === 3) return "var(--sc-amber)";
+  return "var(--sc-red)";
+}
+
+/** Progress bar fill width as a percentage of track (score 1–5 → 20%–100%). */
+export function criterionScoreFillPercent(score: number): number {
+  return Math.min(5, Math.max(1, score)) * 20;
+}
+
 /** Split "Opener: body" improvement copy for headline verdict typography. */
 export function splitVerdictImprovement(sentence: string): {
   opener: string;
