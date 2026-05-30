@@ -287,10 +287,12 @@ These are the named criteria for sermon-coach. Read this section when you reach 
 
 Each criterion is scored on a 5-point scale:
 - **5** — Exemplary. Worth studying.
-- **4** — Strong. Doing the work well.
+- **4** — Strong. A 4 means the criterion is met with real strength, even if not unforgettable.
 - **3** — Adequate. Present but not striking.
 - **2** — Weak. Noticeable gap.
 - **1** — Absent or actively counterproductive.
+
+A 5 is the correct score when a criterion is met with the kind of execution worth studying or sharing with another preacher. Do not reserve 5s for unicorn sermons. Multiple criteria in a single faithful sermon can earn 5s. The A-Exemplary band (47-55) describes excellent preaching, not perfect preaching.
 
 **Total possible: 55 raw points across 11 criteria — the deliverable displays this raw total directly as a /55 composite.** Surface the composite score (e.g. "37 / 55") at the top of the evaluation alongside the verdict, with category subtotals broken out underneath in their natural units (15/15, 15/15, 15/15, 10/10). The simple composite is just the sum of the 11 criterion scores — no conversion. Use whole numbers for the composite.
 
