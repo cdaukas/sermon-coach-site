@@ -174,6 +174,74 @@
     text-align: center;
   }
 
+  /* ---------- TRUST RUBRIC (scoped from index) ---------- */
+  main.content section.block.trust-sources {
+    max-width: none;
+    margin: 0;
+    padding: 48px 0 0;
+  }
+  main.content section.block.trust-sources .section-eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  main.content section.block.trust-sources h2 {
+    font-size: 36px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+    color: var(--ink);
+  }
+  main.content section.block.trust-sources p.lede {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+    font-style: normal;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+  main.content section.block.trust-sources .sources {
+    background: var(--panel);
+    padding: 36px 32px;
+    box-shadow: var(--shadow);
+    margin: 32px 0 0;
+  }
+  main.content section.block.trust-sources .source-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  main.content section.block.trust-sources .source-item:last-child { border-bottom: none; }
+  main.content section.block.trust-sources .source-name {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  main.content section.block.trust-sources .source-name em {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  main.content section.block.trust-sources .source-contributes {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
   /* ---------- FOOTER ---------- */
   footer {
     margin-top: 60px;
@@ -193,6 +261,9 @@
     .criterion-q { font-size: 17px; }
     .nav-links { gap: 16px; }
     .bands { font-size: 14px; }
+    main.content section.block.trust-sources h2 { font-size: 28px; }
+    main.content section.block.trust-sources .source-item { grid-template-columns: 1fr; gap: 4px; }
+    main.content section.block.trust-sources .source-name { font-size: 17px; }
   }
 </style>
 </head>
@@ -294,6 +365,40 @@
       </div>
     </div>
 
+  </section>
+
+  <!-- RUBRIC SOURCES -->
+  <section class="block trust-sources">
+    <div class="section-eyebrow">Why You Can Trust The Rubric</div>
+    <h2>Drawn from the homiletical traditions that have shaped you.</h2>
+    <p class="lede">Every criterion in The Sermon Coach traces back to a named principle in one of the six sources. When the tool tells you your Fallen Condition Focus is drifting, it's holding you to the standard Chapell himself set.</p>
+
+    <div class="sources">
+      <div class="source-item">
+        <div class="source-name">Bryan Chapell<em>Christ-Centered Preaching</em></div>
+        <div class="source-contributes">Fallen Condition Focus · the redemptive arc · the principle of unity in sermon structure</div>
+      </div>
+      <div class="source-item">
+        <div class="source-name">Simeon Trust<em>The workshop method</em></div>
+        <div class="source-contributes">Textual fidelity · melodic line · theme, aim, and application · structure that flows from the text</div>
+      </div>
+      <div class="source-item">
+        <div class="source-name">John Piper<em>Expository Exultation</em></div>
+        <div class="source-contributes">Gospel clarity · preaching as worship · affections shaped by the cross</div>
+      </div>
+      <div class="source-item">
+        <div class="source-name">9Marks<em>Expositional preaching</em></div>
+        <div class="source-contributes">Ecclesial faithfulness · preaching that builds the church's understanding of itself under the Word</div>
+      </div>
+       <div class="source-item">
+          <div class="source-name">Tim Keller<em>Preaching: Communicating Faith in an Age of Skepticism</em></div>
+          <div class="source-contributes">Three-audiences framework · pastoral specificity · naming the cultural counter-narrative</div>
+        </div>
+        <div class="source-item">
+          <div class="source-name">Haddon Robinson<em>Biblical Preaching</em></div>
+          <div class="source-contributes">The big idea · structural unity · expository development</div>
+        </div>
+    </div>
   </section>
 
   <!-- SECTION: scoring -->
