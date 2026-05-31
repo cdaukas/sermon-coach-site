@@ -407,12 +407,18 @@
   }
   .pack-label {
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
+    font-size: 22px;
     font-weight: 600;
-    margin-bottom: 24px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    text-transform: none;
+    margin-bottom: 8px;
+  }
+  .pack-tagline {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
   }
   .pack-price {
     font-size: 30px;
@@ -580,19 +586,19 @@
   <div class="nav-links">
     <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
     <a href="./faq.html" class="nav-link">FAQ</a>
-    <a href="./index.html#reserve" class="nav-cta">Reserve Your Spot</a>
+    <a href="/signup" class="nav-cta">Start free</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <header class="hero">
-  <div class="eyebrow">Pricing · Pre-Launch</div>
+  <div class="eyebrow">Pricing</div>
   <h1>Your path to a better sermon</h1>
 </header>
 
 <!-- FRAMING -->
 <div class="frame">
-  <p><strong>Subscriptions are for preachers in the pulpit most weeks.</strong> Packs are for everyone else — guest preachers, pulpit supply, lay preachers, sabbath rest, the four-times-a-year crowd. Same rubric. Same evaluation. Different rhythm.</p>
+  <p>Subscriptions are for preachers in the pulpit most weeks who want a standing rhythm of preparation. Packs are for milestone preaching — a new series, a high-stakes guest slot, the occasional pulpit supply. Same rubric. Same evaluation. Different rhythm.</p>
 </div>
 
 <!-- SUBSCRIPTIONS SECTION -->
@@ -618,22 +624,22 @@
   <div class="tier featured">
     <div class="tier-best-for">Most Preachers</div>
     <div class="tier-name">Coach</div>
-    <div class="tier-tagline">For the pastor preaching most weeks.</div>
+    <div class="tier-tagline">For the pastor in the pulpit most weeks.</div>
     <div class="price-row">
       <span class="price-now"><span class="currency">$</span><span data-price="coach">29</span></span>
       <span class="price-period" data-period="coach">/mo</span>
     </div>
-    <div class="price-note" data-note="coach">Billed monthly. Cancel anytime.</div>
-    <div class="price-founding"><strong>Founding Member:</strong> <span data-founding="coach">$14.50/mo for first 12 months</span></div>
+    <div class="price-note" data-note="coach">Billed monthly. Cancel anytime. Your first evaluation is free.</div>
     <ul class="tier-features">
-      <li><strong>6 sermon evaluations</strong> per month</li>
-      <li>Full 11-criterion rubric, including emotional arc and dynamics</li>
+      <li><strong>10 sermon evaluations a month</strong> — room to run the full Thursday-and-Monday rhythm on every sermon you preach, even in a five-Sunday month</li>
+      <li>Full 11-criterion rubric</li>
       <li>Simple + weighted scoring</li>
+      <li>Emotional arc and dynamics, scored in your dashboard</li>
       <li>Affirmation + improvement paragraphs</li>
-      <li>Top 3 priorities with practical steps</li>
-      <li>Private library of all your evaluations</li>
+      <li>Your top 3 priorities, with practical next steps</li>
+      <li>A private library of every evaluation you run</li>
     </ul>
-    <a href="./index.html#reserve" class="tier-cta">Reserve Your Spot</a>
+    <a href="/signup" class="tier-cta">Start free</a>
   </div>
 
   <!-- COHORT -->
@@ -645,17 +651,15 @@
       <span class="price-period" data-period="cohort">/mo</span>
     </div>
     <div class="price-note" data-note="cohort">Billed monthly. Cancel anytime.</div>
-    <div class="price-founding"><strong>Founding Member:</strong> <span data-founding="cohort">$49.50/mo for first 12 months</span></div>
     <ul class="tier-features">
-      <li><strong>5 seats</strong> included</li>
-      <li><strong>30 evaluations</strong> per month, pooled</li>
-      <li>Everything in Coach</li>
-      <li>Optional shared evaluations within cohort</li>
-      <li>Facilitator dashboard</li>
-      <li>Group analytics across the cohort</li>
-      <li>Optional onboarding call with Chris</li>
+      <li><strong>5 seats, 30 evaluations a month,</strong> pooled across the group</li>
+      <li>Everything in Coach, for every preacher on your team</li>
+      <li><strong>One named standard, not five opinions</strong> — your whole team evaluated against Chapell, Keller, Piper, Robinson, the Simeon Trust, and 9Marks, so feedback has a common language</li>
+      <li>Optional shared evaluations within the cohort</li>
+      <li>Facilitator dashboard and group analytics</li>
+      <li>An onboarding call with Chris</li>
     </ul>
-    <a href="./index.html#reserve" class="tier-cta">Reserve Your Spot</a>
+    <a href="/signup" class="tier-cta">Start with Cohort</a>
   </div>
 
 </section>
@@ -666,67 +670,63 @@
 <!-- PACKS SECTION -->
 <div class="section-header">
   <h2>Preach occasionally? Buy a pack.</h2>
-  <p>One-time purchase. Use your evaluations whenever you need them, within 18 months. No subscription, no recurring charge.</p>
+  <p>One-time purchase. Use your evaluations when you need them — each pack has its own validity window.</p>
 </div>
 
 <!-- PACKS -->
 <section class="packs">
 
-  <!-- 1 PACK -->
+  <!-- SINGLE SERMON -->
   <div class="pack">
-    <div class="pack-count">1</div>
-    <div class="pack-label">Evaluation</div>
+    <div class="pack-label">Single Sermon</div>
     <div class="pack-price"><span class="currency">$</span>29</div>
-    <div class="pack-per">For one sermon</div>
+    <div class="pack-tagline">For the sermon that has to land.</div>
     <ul class="pack-features">
       <li>One full evaluation</li>
-      <li>Full 11-criterion rubric</li>
       <li>Valid 18 months</li>
-      <li>Private library access</li>
+      <li>Candidating messages, conference keynotes, or trying the rubric on your own work</li>
     </ul>
-    <a href="./index.html#reserve" class="pack-cta">Reserve Your Spot</a>
+    <a href="/signup" class="pack-cta">Start free</a>
   </div>
 
-  <!-- 3 PACK -->
+  <!-- GUEST PREACHER -->
   <div class="pack">
-    <div class="pack-count">3</div>
-    <div class="pack-label">Evaluations</div>
+    <div class="pack-label">Guest Preacher</div>
     <div class="pack-price"><span class="currency">$</span>69</div>
     <div class="pack-per">$23 per evaluation</div>
+    <div class="pack-tagline">For occasional pulpit supply.</div>
     <ul class="pack-features">
       <li>Three full evaluations</li>
-      <li>Full 11-criterion rubric</li>
       <li>Valid 18 months</li>
-      <li>Use them whenever</li>
+      <li>Built for elders, lay preachers, and retired pastors filling a pulpit</li>
     </ul>
-    <a href="./index.html#reserve" class="pack-cta">Reserve Your Spot</a>
+    <a href="/signup" class="pack-cta">Start free</a>
   </div>
 
-  <!-- 6 PACK -->
+  <!-- SERIES PREP -->
   <div class="pack featured">
     <div class="pack-best-value">Best Pack Value</div>
-    <div class="pack-count">6</div>
-    <div class="pack-label">Evaluations</div>
-    <div class="pack-price"><span class="currency">$</span>119</div>
-    <div class="pack-per">$19.83 per evaluation</div>
+    <div class="pack-label">Series Prep</div>
+    <div class="pack-price"><span class="currency">$</span>109</div>
+    <div class="pack-per">$18.17 per evaluation</div>
+    <div class="pack-tagline">Launch your next series with confidence.</div>
     <ul class="pack-features">
       <li>Six full evaluations</li>
-      <li>Full 11-criterion rubric</li>
-      <li>Valid 18 months</li>
-      <li>Best price per evaluation</li>
+      <li>Valid 120 days</li>
+      <li>Run every manuscript through the rubric the week before you preach it. Six sermons, six honest reads, one series done right.</li>
     </ul>
-    <a href="./index.html#reserve" class="pack-cta">Reserve Your Spot</a>
+    <a href="/signup" class="pack-cta">Start free</a>
   </div>
 
 </section>
 
-<p class="pack-note">If you start preaching more often, you can subscribe later and your remaining pack evaluations stay valid.</p>
+<p class="pack-note">Start preaching more often and you can subscribe later. Your remaining pack evaluations stay valid.</p>
 
 <!-- COST EXPLAINER -->
 <div class="explainer">
   <h3>Why these prices?</h3>
-  <p>We've priced these tiers to be sustainable while still being meaningfully cheaper than the alternatives: a single Simeon Trust workshop runs $400+ once a year, in-person coaching can cost $200-500/month per pastor, and most digital tools in adjacent categories sit at $15-50/month.</p>
-  <p>All proceeds will go toward global missions through my work with Global Training Network. I serve as Executive Vice President of GTN, a global nonprofit which trains indigenous pastors and planters in the Majority World. Visit us at <a href="https://gtn.org" target="_blank" rel="noopener">gtn.org</a> and <a href="https://chrisdaukas.net" target="_blank" rel="noopener">chrisdaukas.net</a>.</p>
+  <p>We've priced this to be sustainable while staying well under the alternatives: a single Simeon Trust workshop runs $400+ once a year, in-person coaching can run $200–500 a month, and most digital tools in the neighborhood sit at $15–50 a month.</p>
+  <p>And every dollar of proceeds goes to global missions through Global Training Network. I serve as GTN's Executive Vice President; GTN trains indigenous pastors and church planters in the Majority World, where seminary often isn't an option. Sharpen your own preaching, and help train a preacher who may never set foot in a classroom. More at <a href="https://gtn.org" target="_blank" rel="noopener">gtn.org</a>.</p>
 </div>
 
 <!-- FAQ -->
@@ -768,12 +768,12 @@
   // Billing toggle: swap monthly / annual prices
   const PRICING = {
     monthly: {
-      coach: { price: '29', period: '/mo', note: 'Billed monthly. Cancel anytime.', founding: '$14.50/mo for first 12 months' },
-      cohort: { price: '99', period: '/mo', note: 'Billed monthly. Cancel anytime.', founding: '$49.50/mo for first 12 months' }
+      coach: { price: '29', period: '/mo', note: 'Billed monthly. Cancel anytime. Your first evaluation is free.' },
+      cohort: { price: '99', period: '/mo', note: 'Billed monthly. Cancel anytime.' }
     },
     annual: {
-      coach: { price: '290', period: '/yr', note: 'Billed annually. 2 months free.', founding: '$145 for first year' },
-      cohort: { price: '990', period: '/yr', note: 'Billed annually. 2 months free.', founding: '$495 for first year' }
+      coach: { price: '290', period: '/yr', note: 'Billed annually. 2 months free. Your first evaluation is free.' },
+      cohort: { price: '990', period: '/yr', note: 'Billed annually. 2 months free.' }
     }
   };
 
@@ -794,12 +794,10 @@
         const priceEl = document.querySelector(`[data-price="${tier}"]`);
         const periodEl = document.querySelector(`[data-period="${tier}"]`);
         const noteEl = document.querySelector(`[data-note="${tier}"]`);
-        const foundingEl = document.querySelector(`[data-founding="${tier}"]`);
 
         if (priceEl) priceEl.textContent = data.price;
         if (periodEl) periodEl.textContent = data.period;
         if (noteEl) noteEl.textContent = data.note;
-        if (foundingEl) foundingEl.textContent = data.founding;
       });
     });
   });
