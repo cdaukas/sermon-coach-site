@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const EVALUATION_PROMPT_VERSION = "v2.8";
+export const EVALUATION_PROMPT_VERSION = "v2.9";
 
 /** Rows below this prompt_version use read-grandfather verdict caps (no 60/32 on dashboard parse). */
 export const VERDICT_STRICT_CAPS_FROM = "v2.3";
@@ -37,9 +37,9 @@ Schema validation will reject responses that violate this contract. Call \`submi
 
 const SCORING_CALIBRATION = `## SCORING CALIBRATION (TOP OF SCALE — APPLY WHEN ASSIGNING CRITERION SCORES)
 
-**Permission to award 5:** A **5** is the correct and expected score when a criterion is genuinely excellent in this sermon — exemplary execution a preacher could study as a model for that homiletical move. A 5 means worth studying or sharing, **not** perfect or flawless. **Withholding a deserved 5 is a scoring error**, not prudent caution. Do not treat 5 as reserved or nearly unreachable; when the evidence in this sermon supports it, assign 5. Multiple criteria in one faithful sermon may earn 5s without inflating the rest of the scale.
+**When to award 5:** Apply this per criterion: if the work is not merely strong but is among the best examples of that homiletical move you would expect to see — something a preacher could study as a model — the score is **5**. Do not reserve 5 for theoretical perfection; reserve it for genuine excellence, which real sermons do achieve. A faithful, well-crafted sermon may legitimately earn one or more 5s. A 5 means worth studying or sharing, **not** perfect or flawless. **Withholding a deserved 5 is a scoring error.** Award 5 when the evidence supports it; do not inflate the rest of the scale.
 
-**4 vs 3 boundary:** A **4** is the right score when the criterion is **clearly strong** with only minor room to grow — real strength in this sermon, not near-perfection or an unforgettable tour de force. Do not require flawless execution to award a 4. **Do not default to 3 when the work is plainly strong.** Keep the Rubric Reference definition of **3** unchanged ("Adequate. Present but not striking") — that anchor is calibrated; do not soften 3s or inflate every score. This section only unlocks the top of the scale where the model has been range-compressing 4s and 5s; it does not change 1, 2, band thresholds, weighting, or tone.`;
+**3 vs 4 decision rule:** Apply this test per criterion: if you can point to **specific, genuine strength** in the sermon text for this criterion and your main reservation is only that it could be even better, the score is **4**, not 3. Reserve **3** for criteria that are merely adequate — present and competent but with **no notable strength**. If you find yourself scoring 3 while also describing real strength in the narrative, that is the compression error; the correct score is 4. The Rubric Reference definition of **3** is unchanged ("Adequate. Present but not striking") — this rule sharpens the line; it does not move it. Do not soften 3s on merely-adequate work or inflate every score. This section only corrects top-of-scale compression; it does not change 1, 2, band thresholds, weighting, or tone.`;
 
 export function buildSystemPrompt(): string {
   const rubric = loadRubricMarkdown();
