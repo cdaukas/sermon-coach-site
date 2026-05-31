@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const EVALUATION_PROMPT_VERSION = "v3.0";
+export const EVALUATION_PROMPT_VERSION = "v3.1";
 
 /** Rows below this prompt_version use read-grandfather verdict caps (no 60/32 on dashboard parse). */
 export const VERDICT_STRICT_CAPS_FROM = "v2.3";
@@ -81,5 +81,5 @@ ${manuscript}`;
 }
 
 export function getEvaluationModel(): string {
-  return process.env.EVALUATION_MODEL ?? "claude-sonnet-4-6";
+  return process.env.EVALUATION_MODEL ?? "claude-opus-4-8";
 }
