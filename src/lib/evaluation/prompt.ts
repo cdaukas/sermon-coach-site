@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const EVALUATION_PROMPT_VERSION = "v2.9";
+export const EVALUATION_PROMPT_VERSION = "v3.0";
 
 /** Rows below this prompt_version use read-grandfather verdict caps (no 60/32 on dashboard parse). */
 export const VERDICT_STRICT_CAPS_FROM = "v2.3";
@@ -41,6 +41,8 @@ const SCORING_CALIBRATION = `## SCORING CALIBRATION (TOP OF SCALE — APPLY WHEN
 
 **3 vs 4 decision rule:** Apply this test per criterion: if you can point to **specific, genuine strength** in the sermon text for this criterion and your main reservation is only that it could be even better, the score is **4**, not 3. Reserve **3** for criteria that are merely adequate — present and competent but with **no notable strength**. If you find yourself scoring 3 while also describing real strength in the narrative, that is the compression error; the correct score is 4. The Rubric Reference definition of **3** is unchanged ("Adequate. Present but not striking") — this rule sharpens the line; it does not move it. Do not soften 3s on merely-adequate work or inflate every score. This section only corrects top-of-scale compression; it does not change 1, 2, band thresholds, weighting, or tone.`;
 
+const SCORING_STRENGTH_GATE = `**REQUIRED per-criterion strength gate (procedural — run while scoring, not part of JSON):** Before you assign each criterion's \`score\`, complete this gate for that criterion alone. Work through criteria **1 through 11 in order**; do not batch-assign scores. In your reasoning only (never in the submitted JSON), answer exactly: **"Is there notable, genuine strength in the sermon text for this criterion — strength striking enough that this criterion stands out, not merely functions? — [cite the specific textual evidence that makes it striking, OR state 'no notable strength']"** Baseline competence alone (a clear outline, a workable transition, generic clarity) is **not** notable strength — that is adequate work. Then apply the rule that follows from your answer: (a) If you cited **notable** strength (this criterion **stands out** in the sermon, not merely does its job) and your only reservation is that it **could be even better**, the score is **at minimum 4** — you may not assign 3. (b) If that notable strength is **among the best examples of that homiletical move you would expect to see** (a preacher could study it as a model), the score is **5**. (c) If you stated **no notable strength** (present and competent but not striking — including work that functions without standing out), the score is **3 or below**, per the rubric definitions for 1–3. **Compression check:** If your gate answer cites **notable** strength but you were about to assign 3, stop — that contradiction is a scoring error; resolve it to **4** (or **5** if (b) applies) before you lock the score. Do not paste the gate question or answer into \`narrative\`; do not add any new JSON field for the gate. The submitted \`narrative\` is the published critique only and must match the locked score.`;
+
 export function buildSystemPrompt(): string {
   const rubric = loadRubricMarkdown();
   return `${rubric}
@@ -48,6 +50,8 @@ export function buildSystemPrompt(): string {
 ---
 
 ${SCORING_CALIBRATION}
+
+${SCORING_STRENGTH_GATE}
 
 ---
 
