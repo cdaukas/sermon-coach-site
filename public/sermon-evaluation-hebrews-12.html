@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sermon Evaluation · The Unshakable Kingdom (Hebrews 12:18–29)</title>
+<style>
+  :root{
+    --bg:#faf8f3; --ink:#1a2332; --ink-soft:#4a5568; --rule:#d4cfc1;
+    --panel:#ffffff; --accent:#a67c2e; --accent-soft:#c9a55c;
+    --shadow:0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+    --green:#4a7c59; --green-soft:#7ba886; --amber:#c9892e; --red:#a04848;
+    --slider-track:#ebe5d5; --cream-tint:#faf6ed;
+    --serif:'Iowan Old Style','Charter',Georgia,'Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--serif);
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:48px 24px 96px;}
+  @media(max-width:640px){ .wrap{padding:24px 16px 64px;} }
+
+  .eyebrow{
+    font-family:var(--sans); font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--accent); font-weight:600;
+  }
+  h1{font-family:var(--serif); font-size:40px; line-height:1.12; margin:10px 0 6px; font-weight:700;}
+  @media(max-width:640px){ h1{font-size:30px;} }
+  .subtitle{font-style:italic; color:var(--ink-soft); font-size:18px; margin:0 0 18px;}
+  .metastrip{
+    font-family:var(--sans); font-size:12px; color:var(--ink-soft);
+    display:flex; flex-wrap:wrap; gap:18px; padding:14px 0; border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+  }
+  .metastrip b{color:var(--ink); font-weight:600;}
+
+  /* ---- Headline score lockup ---- */
+  .lockup{
+    display:flex; background:var(--panel); box-shadow:var(--shadow);
+    margin:32px 0 36px; overflow:hidden;
+  }
+  @media(max-width:760px){ .lockup{flex-direction:column;} }
+  .lockup .score-panel{
+    flex:0 0 300px; background:linear-gradient(160deg,#202d40,#141d2b);
+    color:#fff; padding:34px 30px; display:flex; flex-direction:column; justify-content:center;
+  }
+  @media(max-width:760px){ .lockup .score-panel{flex:none;} }
+  .band-label{
+    font-family:var(--serif); font-style:italic; font-size:52px; line-height:1;
+    color:var(--accent-soft); margin:0;
+  }
+  @media(max-width:640px){ .band-label{font-size:44px;} }
+  .composite-num{font-family:var(--sans); font-size:20px; color:#faf8f3; margin-top:12px; font-weight:500;}
+  .score-divider{height:1px; background:rgba(255,255,255,.18); margin:18px 0 12px;}
+  .score-mono{font-family:var(--sans); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.55);}
+
+  .verdict{flex:1; padding:34px 36px; border-left:4px solid var(--accent);}
+  @media(max-width:760px){ .verdict{border-left:none; border-top:4px solid var(--accent);} }
+  .verdict p{margin:0 0 16px; font-size:17px;}
+  .verdict p:last-child{margin-bottom:0;}
+  .verdict .improve b{font-family:var(--sans); font-size:13px; letter-spacing:.02em; text-transform:uppercase; color:var(--accent); font-weight:700; display:block; margin-bottom:4px;}
+
+  /* ---- Category cards ---- */
+  .cat{background:var(--panel); box-shadow:var(--shadow); margin:28px 0;}
+  .cat-head{
+    background:linear-gradient(150deg,#202d40,#16202f); color:#fff;
+    padding:18px 26px; display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  }
+  .cat-head .ct{font-family:var(--serif); font-size:21px; font-weight:600;}
+  .cat-head .ct .num{color:var(--accent-soft); margin-right:10px;}
+  .cat-head .avg{font-family:var(--sans); font-size:12px; color:rgba(255,255,255,.7); white-space:nowrap;}
+
+  .crit{border-bottom:1px solid var(--rule); cursor:pointer;}
+  .crit:last-child{border-bottom:none;}
+  .crit-row{
+    display:grid; grid-template-columns:22px 1fr 200px 44px; align-items:center;
+    gap:16px; padding:18px 26px;
+  }
+  @media(max-width:640px){
+    .crit-row{grid-template-columns:22px 1fr 40px; }
+    .crit-row .slider-cell{display:none;}
+  }
+  .chev{font-family:var(--sans); font-size:13px; color:var(--accent); transition:transform .18s ease;}
+  .crit.open .chev{transform:rotate(90deg);}
+  .crit-name{font-size:16px;}
+  .crit-name .src{font-style:italic; color:var(--ink-soft); font-size:14px;}
+  .crit-name .star{color:var(--accent); font-size:12px; vertical-align:super;}
+  .slider-cell{display:flex; align-items:center;}
+  .slider{position:relative; width:100%; height:10px; background:var(--slider-track); border-radius:5px;}
+  .slider .fill{position:absolute; top:0; left:0; height:10px; border-radius:5px;}
+  .slider .thumb{
+    position:absolute; top:50%; width:16px; height:16px; border-radius:50%;
+    transform:translate(-50%,-50%); background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25);
+    border:2px solid #fff;
+  }
+  .scorebox{font-family:var(--sans); font-size:15px; font-weight:600; text-align:right;}
+  .detail{display:none; padding:0 26px 24px 64px;}
+  @media(max-width:640px){ .detail{padding:0 20px 22px 48px;} }
+  .crit.open .detail{display:block;}
+  .detail-inner{background:var(--cream-tint); border-left:3px solid var(--accent); padding:16px 20px;}
+  .ptag{font-family:var(--sans); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:8px;}
+  .detail-inner p{margin:0; font-size:15.5px;}
+  .qt{color:var(--ink); font-style:italic;}
+
+  /* ---- Lead with these ---- */
+  .section-head{margin:48px 0 22px;}
+  .section-head .st{font-family:var(--serif); font-size:30px; font-weight:700; margin:6px 0 0;}
+  .lead-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px;}
+  @media(max-width:760px){ .lead-grid{grid-template-columns:1fr;} }
+  .lead-card{background:var(--panel); box-shadow:var(--shadow); border-top:3px solid var(--green); padding:24px 24px 22px;}
+  .lead-card h3{font-family:var(--serif); color:var(--green); font-size:19px; margin:0 0 10px; font-weight:600;}
+  .lead-card blockquote{margin:0 0 10px; padding-left:14px; border-left:2px solid var(--green-soft); font-style:italic; color:var(--ink-soft); font-size:14.5px;}
+  .lead-card p{margin:0; font-size:15px;}
+  .lead-card .tag{font-family:var(--sans); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--green); font-weight:600; margin-top:12px; display:block;}
+
+  /* ---- Where You Can Grow ---- */
+  .grow{background:linear-gradient(165deg,#1d2838,#131c29); color:#f3ede0; padding:40px 40px 34px; margin:48px 0;}
+  @media(max-width:640px){ .grow{padding:30px 22px;} }
+  .grow .eyebrow{color:var(--accent-soft);}
+  .grow .st{font-family:var(--serif); font-size:30px; font-weight:700; margin:6px 0 4px; color:#f6f1e6;}
+  .grow .sub{font-family:var(--sans); font-size:13px; color:var(--accent-soft); margin:0 0 26px;}
+  .prio{display:grid; grid-template-columns:78px 1fr; gap:20px; padding:26px 0; border-top:1px solid rgba(255,255,255,.12);}
+  @media(max-width:640px){ .prio{grid-template-columns:1fr; gap:8px;} }
+  .prio .pn{font-family:var(--serif); font-size:54px; font-weight:300; color:var(--accent-soft); line-height:.9;}
+  .prio h3{font-family:var(--serif); font-size:21px; color:#fff; margin:0 0 4px; font-weight:600;}
+  .prio .ptag{color:var(--accent-soft); margin-bottom:10px;}
+  .prio p{margin:0 0 14px; color:#d8cfbd; font-size:15.5px;}
+  .pstep{background:rgba(166,124,46,.16); border:1px solid rgba(201,165,92,.4); padding:13px 16px; font-size:14.5px; color:#f3ead8;}
+  .pstep b{font-family:var(--sans); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-soft); font-weight:700; display:block; margin-bottom:4px;}
+
+  /* ---- What Improvement Looks Like ---- */
+  .rw{background:var(--panel); box-shadow:var(--shadow); margin:18px 0; cursor:pointer;}
+  .rw-head{display:grid; grid-template-columns:22px 1fr; gap:14px; padding:20px 26px; align-items:start;}
+  .rw .chev{margin-top:4px;}
+  .rw-head h3{font-family:var(--serif); font-size:19px; margin:0; font-weight:600;}
+  .rw-head .tag{font-family:var(--sans); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--amber); font-weight:600; margin-top:6px; display:block;}
+  .rw-detail{display:none; padding:0 26px 24px 62px;}
+  @media(max-width:640px){ .rw-detail{padding:0 20px 22px 26px;} }
+  .rw.open .rw-detail{display:block;}
+  .rw.open .chev{transform:rotate(90deg);}
+  .block{padding:14px 18px; margin-bottom:12px; font-size:15px;}
+  .block.orig{background:#f4ece0; border-left:3px solid var(--red);}
+  .block.impr{background:var(--cream-tint); border-left:3px solid var(--green);}
+  .block .lbl{font-family:var(--sans); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px;}
+  .block.orig .lbl{color:var(--red);} .block.impr .lbl{color:var(--green);}
+  .why{font-size:14.5px; color:var(--ink-soft); font-style:italic;}
+
+  /* ---- Methodology ---- */
+  .method{background:var(--panel); box-shadow:var(--shadow); border-top:3px solid var(--ink); padding:34px 34px 30px; margin:48px 0 0;}
+  @media(max-width:640px){ .method{padding:26px 20px;} }
+  .method h2{font-family:var(--serif); font-size:26px; margin:6px 0 0; font-weight:700;}
+  .method .subhead{font-family:var(--serif); font-style:italic; font-size:20px; margin:26px 0 12px; font-weight:600;}
+  .method p{font-size:15.5px;}
+  table.bands{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:13px; margin-top:8px;}
+  table.bands th{text-align:left; padding:9px 12px; background:var(--cream-tint); border-bottom:1px solid var(--rule); font-weight:600; color:var(--ink);}
+  table.bands td{padding:9px 12px; border-bottom:1px solid var(--rule); color:var(--ink-soft); vertical-align:top;}
+  table.bands tr.current td{background:var(--cream-tint); color:var(--ink);}
+  table.bands tr.current td:first-child{border-left:4px solid var(--accent);}
+  .divider{height:1px; background:var(--rule); margin:36px 0 0;}
+  .mathbox{background:var(--cream-tint); padding:20px 22px; margin-top:14px;}
+  .mathgrid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media(max-width:640px){ .mathgrid{grid-template-columns:1fr;} }
+  .mathgrid .num{font-family:var(--serif); font-size:44px; font-weight:700; line-height:1;}
+  .mathgrid .lab{font-family:var(--sans); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-top:4px;}
+  .note{background:var(--cream-tint); padding:14px 18px; margin-top:14px; font-size:14.5px; color:var(--ink-soft);}
+  table.subt{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:13px; margin-top:16px; border:1px dashed var(--rule);}
+  table.subt td{padding:8px 14px; border-bottom:1px dashed var(--rule);}
+  table.subt td:last-child{text-align:right; font-weight:600; color:var(--ink);}
+  table.subt tr:last-child td{border-bottom:none; font-weight:700;}
+  pre.calc{font-family:'SF Mono',Menlo,Consolas,monospace; font-size:12.5px; background:#1a2332; color:#e8e2d4; padding:16px 18px; margin-top:16px; overflow-x:auto; line-height:1.7;}
+  pre.calc .gold{color:var(--accent-soft);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="eyebrow">Sermon Evaluation · sermon-coach</div>
+  <h1>The Unshakable Kingdom</h1>
+  <p class="subtitle">Hebrews 12:18–29 · Grace Church · Sunday morning (July 4th weekend)</p>
+  <div class="metastrip">
+    <span><b>Length</b> Full manuscript</span>
+    <span><b>Preacher</b> Chris Daukas</span>
+    <span><b>Series</b> Hebrews (#549)</span>
+    <span><b>Mode</b> Manuscript only — Heat Map omitted</span>
+    <span><b>Source</b> .docx manuscript</span>
+  </div>
+
+  <!-- HEADLINE SCORE LOCKUP -->
+  <div class="lockup">
+    <div class="score-panel">
+      <div class="band-label"><em>Exemplary</em></div>
+      <div class="composite-num">47 / 55</div>
+      <div class="score-divider"></div>
+      <div class="score-mono">Composite · See methodology at end</div>
+    </div>
+    <div class="verdict">
+      <p>Hebrews 12's hardest demand is to let the terror stay terrifying — and that's the move that defines this sermon. You preach Sinai at full voltage, circle back to judgment <em>after</em> the gospel instead of ending on comfort, and let the text's final image of God's holiness stand undiluted. Zion lands as relief because you didn't anesthetize the threat first.</p>
+      <p class="improve"><b>The single highest-leverage change for the next sermon:</b>make application as relentless in the joy and warning movements as it is in the mini-laws section.</p>
+    </div>
+  </div>
+
+  <!-- CATEGORY 1 -->
+  <div class="cat">
+    <div class="cat-head">
+      <div class="ct"><span class="num">1</span>Text &amp; Theology</div>
+      <div class="avg">Average 4.3 / 5 · 13 / 15</div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Textual fidelity &amp; exegesis <span class="src">· Simeon Trust</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Simeon Trust · Let the text drive</div>
+        <p>You read <em>behind</em> Hebrews' quotations to the OT sources — Exodus 19 and Deuteronomy 4 for Sinai, Haggai 2:6–8 for the shaking, 2 Samuel 5:7 for Zion. The "already/not yet" handling is correctly deployed — <span class="qt">"It's ALREADY HAPPENED in one sense. Not yet fully consummated."</span> The one soft spot is v.27: <span class="qt">"things that have been made"</span> gets read as "self-made idols," when the verse more naturally means the created, temporal order removed so the unshakable kingdom can remain — a small slippage that narrows the verse.</p>
+      </div></div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Christ-centered / redemptive arc <span class="src">· Chapell</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:100%;background:var(--green);"></span><span class="thumb" style="left:100%;"></span></span></span>
+        <span class="scorebox">5/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Chapell · Redemptive arc as architecture</div>
+        <p>The redemptive arc isn't appended; it <em>is</em> the architecture — the whole sermon is a journey from Sinai to Zion, and Zion's center is Jesus the mediator. Penal substitution is preached without flinching: <span class="qt">"he gave us the one secured by perfect obedience from Him — to the point of death, even death on the cross, where God the judge thundered all of his holy wrath against his son as justice against our sins."</span> The gospel is load-bearing from the first minute to the last, not a footnote.</p>
+      </div></div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Gospel clarity <span class="src">· Piper</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Piper · Make the good news unmistakable</div>
+        <p>For the catechized listener the good news is unmistakable: <span class="qt">"PARDONED. FORGIVEN. JUSTIFIED. PEACE WITH GOD. No more law-keeping necessary."</span> The terror/joy contrast makes the gospel emotionally legible to anyone in the room. What holds it at 4: the framing leans insider — "works based justification," "antinomians… gospelnomians" assume theological literacy. A genuine outsider tracks the <em>feeling</em> more than the <em>mechanism</em>. The cross is plain; the door could open wider for the person without the categories.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- CATEGORY 2 -->
+  <div class="cat">
+    <div class="cat-head">
+      <div class="ct"><span class="num">2</span>Structure &amp; Craft</div>
+      <div class="avg">Average 4.7 / 5 · 14 / 15</div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Fallen Condition Focus <span class="star">★</span> <span class="src">· Chapell</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:100%;background:var(--green);"></span><span class="thumb" style="left:100%;"></span></span></span>
+        <span class="scorebox">5/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Chapell · Fallen Condition Focus · double-weighted</div>
+        <p>Exactly what Chapell asks for — one sentence, present-tense, specific, not generic fallenness: <span class="qt">"We are constantly in danger of manufacturing our own laws, and then trying to justify ourselves based on them."</span> It threads the whole sermon: Sinai (the law that can't justify), the mini-laws, Zion (grace that frees from self-justification), the warning against a <span class="qt">"padded spiritual resume."</span> The FCF doesn't drift; it deepens.</p>
+      </div></div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Structure: melodic line · fit · memorability <span class="src">· Robinson</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Robinson · Big idea / Simeon Trust · Melodic line</div>
+        <p>Structural fit and memorability are strong — the three movements rise from the passage's own seams, and the two-mountains image (<span class="qt">"Imagine you are in a gully between two mountains"</span>) is the text's own picture, instantly graspable. The melodic line is singular. Why it's a 4 and not a melodic-line failure that would cap at 3: title alignment. <span class="qt">"The Unshakable Kingdom"</span> arrives late — the engine for two-thirds of the sermon is Sinai/Zion; "unshakable" only fully lands at v.27–28.</p>
+      </div></div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Hard things handled <span class="src">· Simeon Trust practice</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:100%;background:var(--green);"></span><span class="thumb" style="left:100%;"></span></span></span>
+        <span class="scorebox">5/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Simeon Trust · Let the hard thing be hard</div>
+        <p>The sermon's signature. Sinai's terror gets preached at full voltage — the Annie Dillard "crash helmets" line, <span class="qt">"This description is utterly terrifying"</span> — and you don't rush to relief. The structural proof: you return to judgment <em>after</em> the gospel of Zion, refusing to end on comfort, and let the text's last word stand — <span class="qt">"Don't trifle with such a God and with such a salvation."</span> Reformed congregations can absorb hard exegesis; what they can't absorb is a preacher who defuses the disturbing text while looking like he handled it. This does the opposite.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- CATEGORY 3 -->
+  <div class="cat">
+    <div class="cat-head">
+      <div class="ct"><span class="num">3</span>Application &amp; Audience Connection</div>
+      <div class="avg">Average 4.0 / 5 · 12 / 15</div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Application to present audience <span class="star">★</span> <span class="src">· Keller</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Keller · Application to present audience · double-weighted</div>
+        <p>The gutsiest move in the sermon: on July 4th weekend, in a conservative evangelical room, you name the congregation's own self-justifications out loud — <span class="qt">"justifying yourself because you didn't vote for Biden or because you pulled your kids from public schools or because you never listen to a song from Bethel or you only wear one-piece bathing suits."</span> That's Keller's cultural exegesis. It's a 4 not a 5 because the intensity is uneven: point 2 (Zion's joy) stays largely doctrinal, and the doubter and seeker among Keller's three audiences are addressed only glancingly. Electric where it fires; the growth edge is sustaining it.</p>
+      </div></div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Heat Map: emotional delivery <span class="src">· manuscript cap 4/5</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Delivery criterion · scored as design (no audio)</div>
+        <p>No audio was available, so this is a <em>design</em> read, not a <em>delivery</em> read, and capped at 4. On the page the arc is intelligently built: terror (Sinai) → relief (Zion) → sober warning (the shaking) → awe held in tension (<span class="qt">"CONSUMING FIRE… and… TENDER FATHER"</span>). Whether the consuming-fire ending was <em>delivered</em> with matching gravity — rather than rushed, the way final movements often are — can't be confirmed without the recording. The full beat-by-beat Heat Map is omitted by design for a manuscript-only read; send audio and it returns.</p>
+      </div></div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Pastoral specificity <span class="src">· Keller</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Keller · Actual people in actual situations</div>
+        <p>The specificity is real — the mini-laws name concrete behaviors, not "we all struggle with legalism," and you implicate yourself first: <span class="qt">"If there was ever a season of my life where I've needed Hebrews it's this one… voices of my sin telling me I'm never going to change."</span> The refinement: you name specific <em>behaviors and tribes</em> more than specific <em>people in situations</em>. The person lying awake afraid they've lost their salvation, the new convert, the forty-year member gone cold each get a sentence but not the developed portrait the mini-laws get.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- CATEGORY 4 -->
+  <div class="cat">
+    <div class="cat-head">
+      <div class="ct"><span class="num">4</span>Ecclesial &amp; Spiritual</div>
+      <div class="avg">Average 4.0 / 5 · 8 / 10</div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Ecclesial faithfulness <span class="src">· 9Marks</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">9Marks · Expositional preaching, the first mark</div>
+        <p>On the first 9Marks mark this delivers: the sermon's authority is the text, walked verse by verse, OT substructure and all. The church's self-understanding is served by the Zion material — <span class="qt">"the assembly of the firstborn who are enrolled in heaven… the spirits of the righteous made perfect"</span> frames the room as part of a worshiping cosmic assembly. The 4: the address is predominantly <em>individual</em> rather than <em>congregational</em>; the "we are gospelnomians" corporate identity is stated more than developed.</p>
+      </div></div>
+    </div>
+
+    <div class="crit" onclick="this.classList.toggle('open')">
+      <div class="crit-row">
+        <span class="chev">▸</span>
+        <span class="crit-name">Expository exultation <span class="src">· Piper</span></span>
+        <span class="slider-cell"><span class="slider"><span class="fill" style="width:80%;background:var(--green);"></span><span class="thumb" style="left:80%;"></span></span></span>
+        <span class="scorebox">4/5</span>
+      </div>
+      <div class="detail"><div class="detail-inner">
+        <div class="ptag">Piper · Explanation joined to worshipful affection</div>
+        <p>Genuine affection, not just information — <span class="qt">"What a dazzling sea of angelic glory!"</span>, <span class="qt">"What a beautiful description of glorification!"</span>, and the confession of need: <span class="qt">"I need a gospel that yanks me forward by grace."</span> The hymn and the Bunyan lines are deployed as worship, not decoration. The 4: the highest exultant notes lean on <em>borrowed</em> material more than your own sustained affection, and the dominant register is sober warning. The next level is letting <em>your</em> exultation carry the Zion section.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- LEAD WITH THESE -->
+  <div class="section-head">
+    <div class="eyebrow">What's Working</div>
+    <div class="st">Lead with these</div>
+  </div>
+  <div class="lead-grid">
+    <div class="lead-card">
+      <h3>You let the consuming fire stay a consuming fire</h3>
+      <p>Most sermons on this text reach for relief too fast. You sat in Sinai's terror, then did the harder thing — came <em>back</em> to judgment after the gospel and ended on a warning, not a reassurance. The hard thing stayed hard.</p>
+      <span class="tag">Simeon Trust · Hard things handled</span>
+    </div>
+    <div class="lead-card">
+      <h3>The FCF is specific, present-tense, self-implicating</h3>
+      <blockquote>"We are constantly in danger of manufacturing our own laws, and then trying to justify ourselves based on them."</blockquote>
+      <p>A textbook Chapell FCF — one sentence, this text, this room — and you named yourself inside it before you named anyone else.</p>
+      <span class="tag">Chapell · Fallen Condition Focus</span>
+    </div>
+    <div class="lead-card">
+      <h3>The mini-laws application has nerve</h3>
+      <p>Naming "you didn't vote for Biden" and "you only wear one-piece bathing suits" as modern Sinais — on July 4th weekend — is exactly the cultural exegesis Keller calls for. It crosses the bridge into the room and refuses to flatter it.</p>
+      <span class="tag">Keller · Application to present audience</span>
+    </div>
+    <div class="lead-card">
+      <h3>The redemptive arc is the architecture, not an appendix</h3>
+      <p>The Sinai-to-Zion journey <em>is</em> the sermon, and it lands on the cross with full penal-substitution weight. Nothing about the gospel here is bolted on; it's load-bearing from the first minute to the last.</p>
+      <span class="tag">Chapell · Christ-centered preaching</span>
+    </div>
+  </div>
+
+  <!-- WHERE YOU CAN GROW -->
+  <div class="grow">
+    <div class="eyebrow">Top 3 Priorities</div>
+    <div class="st">Where You Can Grow</div>
+    <p class="sub">Ranked by leverage for the next sermon — #1 is the same point named in the verdict.</p>
+
+    <div class="prio">
+      <div class="pn">01</div>
+      <div>
+        <h3>Make Zion's joy as concrete as Sinai's mini-laws</h3>
+        <div class="ptag">Keller · Application to present audience</div>
+        <p>Your mini-laws section crosses the bridge with surgical specificity — but it's the <em>terror</em> movement that gets that treatment. Point 2, the longest section, stays in doctrine: festal assembly, already/not-yet, mediator of a new covenant. The joy of Zion is described; it isn't yet <em>landed</em> in a Tuesday-morning life the way the legalism is. Because this is the double-weighted, highest-stakes criterion, closing that gap is the single biggest lever you have.</p>
+        <div class="pstep"><b>Practical Step</b>Before you preach any doctrinal stretch in the next sermon, write one sentence that begins "If you're the person who [specific situation], here's what this means by Tuesday" — and don't leave the section until you've earned it. Apply it to the Zion material first.</div>
+      </div>
+    </div>
+
+    <div class="prio">
+      <div class="pn">02</div>
+      <div>
+        <h3>Preach the door open for the person without the categories</h3>
+        <div class="ptag">Keller · The three audiences</div>
+        <p>The gospel is clear for the catechized, but it's pitched in insider vocabulary — "works based justification," "gospelnomians." The doubter and seeker in the room track the <em>feeling</em> of terror-vs-joy more than the <em>mechanism</em> of justification. One or two defining sentences would let them follow the logic, not just the emotion.</p>
+        <div class="pstep"><b>Practical Step</b>In the gospel section, add a plain-language gloss the first time a category word appears — e.g., "self-justification — that's just trying to earn God's approval by your own record." Define once, then use freely.</div>
+      </div>
+    </div>
+
+    <div class="prio">
+      <div class="pn">03</div>
+      <div>
+        <h3>Thread "unshakable" from the first minute</h3>
+        <div class="ptag">Robinson · Big idea / Simeon Trust · Melodic line</div>
+        <p>The title promises <em>The Unshakable Kingdom</em>, but the working engine for two-thirds of the sermon is Sinai vs. Zion; "unshakable" doesn't fully arrive until v.27–28. The melodic line is singular and strong — it just surfaces late under its own title.</p>
+        <div class="pstep"><b>Practical Step</b>Plant the word in the two-mountains intro — frame the whole journey as "from the mountain that made them tremble to the kingdom that cannot be shaken." Now the title and the body sing the same note from the top.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT IMPROVEMENT LOOKS LIKE -->
+  <div class="section-head">
+    <div class="eyebrow">Suggested Rewrites</div>
+    <div class="st">What Improvement Looks Like</div>
+  </div>
+
+  <div class="rw" onclick="this.classList.toggle('open')">
+    <div class="rw-head">
+      <span class="chev">▸</span>
+      <div>
+        <h3>Rewrite 1 · The Zion section — let glorification land on a grieving listener</h3>
+        <span class="tag">Application discipline · doctrine → present-tense life</span>
+      </div>
+    </div>
+    <div class="rw-detail">
+      <div class="block orig"><span class="lbl">Original</span>"we've come to the assembly of the firstborn who are enrolled in heaven – our fellow believers who are joined to Jesus and waiting for us to join the party. Later in the verse he calls them the spirits of the righteous made perfect."</div>
+      <div class="block impr"><span class="lbl">Stronger</span>"We've come to <em>the spirits of the righteous made perfect.</em> Let that land where you actually live. If you buried a believing parent this year, hear what the author is telling you: they aren't a memory you visit at a graveside. They're at the party. Made perfect — more alive than they've ever been — in the city you are walking toward. And notice the tense: you have <em>already</em> come to Mount Zion. The reunion isn't a someday hope you cross your fingers for. It's a membership you already hold. You're not waiting to get in. You're waiting for the rest of it to arrive."</div>
+      <p class="why">Why this works: it keeps your already/not-yet exegesis intact but crosses Keller's bridge into one specific listener, turning a doctrinal phrase into the application moment point 2 is currently missing.</p>
+    </div>
+  </div>
+
+  <div class="rw" onclick="this.classList.toggle('open')">
+    <div class="rw-head">
+      <span class="chev">▸</span>
+      <div>
+        <h3>Rewrite 2 · The gospel opener — hand the outsider the category</h3>
+        <span class="tag">Three-audiences discipline · define the mechanism in lived terms</span>
+      </div>
+    </div>
+    <div class="rw-detail">
+      <div class="block orig"><span class="lbl">Original</span>"These Christians are thinking about turning back to Mosaic law-keeping as the way to be counted righteous before God. Works based justification."</div>
+      <div class="block impr"><span class="lbl">Stronger</span>"These Christians are tempted to go back to <em>earning</em> their standing with God — keeping the rules well enough to make themselves acceptable. There's a name for that: self-justification. And if the word is new to you, the instinct isn't — it's the voice that whispers God will love you more on the weeks you behave. That's the mountain of terror. The whole point of this passage is that you can stop climbing it."</div>
+      <p class="why">Why this works: it preserves the theological precision for the catechized while handing the seeker the category in plain terms — Keller's three audiences served in two sentences, without slowing anyone down.</p>
+    </div>
+  </div>
+
+  <!-- METHODOLOGY -->
+  <div class="method">
+    <div class="eyebrow">Methodology · Show Your Work</div>
+    <h2>What the score means &amp; how it was calculated</h2>
+
+    <div class="subhead">Grading Bands</div>
+    <p>The letter grade is derived from the <b>weighted score</b>, not the simple score. This sermon's weighted score of <b>47</b> places it in the <b>A · Exemplary</b> band — at the floor of that band, which is where the skill expects a strong manuscript-only read to land. Criterion #8 (emotional delivery) can't earn a 5 from a document alone, so a manuscript caps near 53/55 and the realistic document ceiling is the low A. A true high-A would require audio of the delivered sermon. "Low A" is not a hedge: multiple 5s, no criterion below 4, sitting at the honest ceiling its medium allows.</p>
+
+    <table class="bands">
+      <tr><th>Letter</th><th>Range</th><th>Band</th><th>What it means</th></tr>
+      <tr class="current"><td><b>A</b></td><td>47–55</td><td><b>Exemplary</b></td><td>Multiple 5s. Worth studying or handing to another preacher. <b>← this sermon (47)</b></td></tr>
+      <tr><td>B</td><td>39–46</td><td>Strong</td><td>Most criteria 4s; the preacher is doing the work well.</td></tr>
+      <tr><td>C</td><td>30–38</td><td>Faithful</td><td>Most criteria 3s; faithful and competent, not yet striking. The healthy expected score for most sermons.</td></tr>
+      <tr><td>D</td><td>22–29</td><td>Needs Improvement</td><td>Multiple 2s; real gaps to address before next Sunday.</td></tr>
+      <tr><td>F</td><td>&lt; 22</td><td>Significant Concerns</td><td>Multiple 1s; issues to address before preaching again.</td></tr>
+    </table>
+
+    <div class="divider"></div>
+    <div class="subhead">How this sermon was scored</div>
+    <div class="mathbox">
+      <div class="mathgrid">
+        <div><div class="num">47/55</div><div class="lab">Simple composite — sum of 11 criteria</div></div>
+        <div><div class="num">47/55</div><div class="lab">Weighted composite — FCF, Gospel, Application ×2</div></div>
+      </div>
+    </div>
+    <div class="note">The simple and weighted scores are <b>identical at 47</b> — a near-zero gap. That tells you this is an <em>even</em> sermon: it performs on the load-bearing criteria (Fallen Condition Focus, Gospel Clarity, Application) at essentially the same level as everything else. No hollow center propped up by the periphery, and no inflated edges hiding a weak core.</div>
+    <div class="note">A <b>3/5</b> on this rubric means "adequate, present, doing the work but not striking." This sermon has no 3s — its weakest dimensions are still doing the work well; its strengths (Christ-centeredness, FCF, hard things handled) are genuinely striking.</div>
+
+    <table class="subt">
+      <tr><td>Text &amp; Theology</td><td>13 / 15</td></tr>
+      <tr><td>Structure &amp; Craft</td><td>14 / 15</td></tr>
+      <tr><td>Application &amp; Audience Connection</td><td>12 / 15</td></tr>
+      <tr><td>Ecclesial &amp; Spiritual</td><td>8 / 10</td></tr>
+      <tr><td>Raw Total</td><td>47 / 55</td></tr>
+    </table>
+
+<pre class="calc">simple composite  = 13 + 14 + 12 + 8                 = <span class="gold">47/55</span>
+weighted_raw      = 47 + FCF(5) + gospel(4) + appl(4)  = 60/70
+weighted composite = round(60 &#215; 55 / 70) = round(47.1) = <span class="gold">47/55</span></pre>
+  </div>
+
+</div>
+</body>
+</html>
