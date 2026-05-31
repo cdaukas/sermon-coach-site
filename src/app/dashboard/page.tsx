@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SermonList } from "@/components/dashboard/SermonList";
 import { listSermons } from "@/lib/sermons/queries";
 
@@ -17,35 +16,19 @@ export default async function DashboardPage() {
         boxShadow: "var(--sc-shadow-lift)",
       }}
     >
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p
-            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-            style={{ ...uiFont, color: "var(--sc-accent)" }}
-          >
-            Dashboard
-          </p>
-          <h1
-            className="text-[32px] font-semibold leading-tight tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            Your sermons
-          </h1>
-        </div>
-        {sermons.length > 0 ? (
-          <Link
-            href="/dashboard/sermons/new"
-            className="rounded border px-5 py-2.5 text-[13px] font-semibold tracking-wide no-underline transition-all"
-            style={{
-              ...uiFont,
-              background: "var(--sc-ink)",
-              color: "var(--sc-bg)",
-              borderColor: "var(--sc-ink)",
-            }}
-          >
-            New sermon
-          </Link>
-        ) : null}
+      <div className="mb-8">
+        <p
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+          style={{ ...uiFont, color: "var(--sc-accent)" }}
+        >
+          Dashboard
+        </p>
+        <h1
+          className="text-[32px] font-semibold leading-tight tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          Your sermons
+        </h1>
       </div>
 
       <SermonList sermons={sermons} />

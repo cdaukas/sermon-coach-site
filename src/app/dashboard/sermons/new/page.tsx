@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SermonForm } from "@/components/dashboard/SermonForm";
 
 export const metadata: Metadata = {
-  title: "New sermon",
+  title: "New Sermon",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -38,7 +38,7 @@ export default function NewSermonPage() {
           className="text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          New sermon
+          New Sermon
         </h1>
         <p
           className="mt-3 text-base leading-relaxed"
@@ -48,7 +48,8 @@ export default function NewSermonPage() {
             fontStyle: "italic",
           }}
         >
-          Paste your manuscript below. You can request an evaluation later.
+          Select all, copy, and paste your manuscript or transcript below. Don&apos;t
+          worry about formatting. Save the sermon, then run an evaluation.
         </p>
       </div>
 

@@ -69,7 +69,7 @@ export function SermonForm() {
           onChange={(event) => setContent(event.target.value)}
           disabled={loading}
           rows={16}
-          placeholder="Paste your sermon manuscript here…"
+          placeholder="Paste your manuscript or transcript here..."
           className="w-full resize-y rounded border px-3 py-2.5 text-[15px] leading-relaxed outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
           style={{
             ...uiFont,
