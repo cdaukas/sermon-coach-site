@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const EVALUATION_PROMPT_VERSION = "v2.6";
+export const EVALUATION_PROMPT_VERSION = "v2.7";
 
 /** Rows below this prompt_version use read-grandfather verdict caps (no 60/32 on dashboard parse). */
 export const VERDICT_STRICT_CAPS_FROM = "v2.3";
@@ -30,6 +30,8 @@ const STRUCTURAL_CONTRACT = `## STRUCTURAL CONTRACT (NON-NEGOTIABLE)
 5. Lock section titles: "Lead with these", "Where You Can Grow", "What Improvement Looks Like". No alternatives or editorial garnish. JSON field names (\`whats_working\`, \`top_priorities\`, \`rewrites\`) describe content; titles are render-layer only.
 
 6. Return JSON matching \`submit_sermon_evaluation\` exactly. Top-level keys (all required): \`meta\`, \`scoring\`, \`verdict\`, \`categories\`, \`heat_map\`, \`whats_working\` (3–5 cards), \`top_priorities\` (exactly 3), \`rewrites\` (1–2). \`meta\` includes \`audio_available\`. \`scoring\` includes \`composite_simple\`, \`composite_weighted\`, \`band\`, \`raw_total\`, \`raw_max\` (55) — no letter grade, no \`diagnostic_gap\`. \`categories\` is four items (3+3+3+2 criteria); each has \`id\`, \`name\`, \`number\`, \`criteria\` only. \`verdict\` is \`{ affirmation, improvement }\`. Do not include \`fcf\`, \`growth_opportunities_detailed\`, \`methodology_note\`, or per-category \`growth_opportunities\`.
+
+7. **PER-CRITERION CLIMB NOTE** (append inside \`narrative\` for low-scoring criteria only): For any criterion scoring 1–3, append ONE sentence to the end of its \`narrative\` that names what the next band up would concretely require IN THIS SERMON. Format: "To reach a [next score], [specific, sermon-anchored change]." Rules: (a) ONLY for criteria scoring 1–3 — criteria scoring 4 or 5 get NO climb note; their \`narrative\` stays purely diagnostic. (b) ONE sentence, woven into the existing \`narrative\` field — do NOT create a separate field, callout, or "Practical Step" box (that formatting belongs to Top 3 Priorities only). (c) The climb note POINTS tactically; it does not prescribe deeply — \`top_priorities\` remains the place for ranked, this-week prescriptive steps. If a criterion also appears in \`top_priorities\`, the climb note stays a one-line tactical pointer and must NOT duplicate the Priority's full prescription (different altitude, same as the verdict-vs-Priority#1 split). (d) Anchor it to a specific, namable change in THIS sermon — not generic homiletics advice (e.g. "To reach a 4, ground the application in one concrete situation your congregation actually faces this week" beats "improve your application"). (e) Scale with the score: a 3→4 note names a smaller, sharper move; a 1→2 or 2→3 note may name a more foundational fix.
 
 Schema validation will reject responses that violate this contract. Call \`submit_sermon_evaluation\` once with the complete object.`;
 
