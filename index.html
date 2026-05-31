@@ -110,7 +110,26 @@
     line-height: 1.55;
     color: var(--ink-soft);
     max-width: 680px;
-    margin: 0 auto 40px;
+    margin: 0 auto 24px;
+    font-style: italic;
+  }
+  .privacy-panel {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    box-shadow: var(--shadow);
+    padding: 24px 28px;
+    max-width: 680px;
+    margin: 0 auto 36px;
+    text-align: left;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+  }
+  .hero-cta-caption {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 14px;
     font-style: italic;
   }
   .hero-cta-row {
@@ -206,7 +225,42 @@
   }
   .block.dark p { color: #ebe6d5; }
 
-  /* ---------- PROBLEM ---------- */
+  /* ---------- FELT PAIN ---------- */
+  .pain-block {
+    margin-bottom: 36px;
+  }
+  .pain-block:last-of-type {
+    margin-bottom: 28px;
+  }
+  .pain-quote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 28px;
+    margin: 0 0 14px;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink-mid);
+    line-height: 1.55;
+  }
+  .pain-block p {
+    padding-left: 28px;
+    margin-bottom: 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .felt-close {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin: 40px 0 36px;
+    font-style: italic;
+  }
+  .hero-cta-block {
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* ---------- PROBLEM (legacy) ---------- */
   .problem-quote {
     border-left: 3px solid var(--accent);
     padding: 4px 0 4px 28px;
@@ -461,30 +515,51 @@
     <a href="./pricing.html" class="nav-link">Pricing</a>
     <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
     <a href="./faq.html" class="nav-link">FAQ</a>
-    <a href="./index.html#reserve" class="nav-cta">Reserve Your Spot</a>
+    <a href="/signup" class="nav-cta">Start with Coach</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <header class="hero">
-  <div class="eyebrow">Pre-launch · Founding Members</div>
-  <h1>Most preachers stopped getting <span class="accent">real feedback</span> the day they left seminary.</h1>
-  <div class="hero-cta-row">
-    <a href="#reserve" class="btn-primary">Reserve Your Spot</a>
-    <a href="#sample" class="btn-secondary">See a Sample Evaluation →</a>
-  </div>
+  <div class="eyebrow">Built by a preacher for preachers</div>
+  <h1>Walk into Sunday knowing your sermon is ready.</h1>
+  <p class="hero-sub">Most preachers stop getting real feedback the day they leave seminary. The Sermon Coach gives it back — a careful read of your sermon <em>before</em> you preach it, not just after.</p>
+  <div class="privacy-panel">Your sermons stay yours. We never use them to train AI, never share them, never sell them. The Sermon Coach reads your work; it doesn't write it.</div>
 </header>
 
-<!-- INTRO -->
+<!-- FELT PAIN -->
 <section class="block">
-  <h2>You hear "great sermon, pastor" at the door every Sunday.</h2>
-  <p class="lede">No one wants to risk offending you. Your wife loves you and tells you what you want to hear. Your elders affirm you with generic encouragement. Your closest friends in ministry are too buried to weigh in on your preaching. The candid, structured feedback that made you grow in homiletics class quietly disappeared once you were the one in the pulpit.</p>
+  <h2>You already know the questions. You've just never had anyone to answer them.</h2>
 
-  <p>And you've felt it. You can feel the moments you're drifting into moralism, into book-report exposition, into preaching at people instead of TO them.</p>
+  <div class="pain-block">
+    <blockquote class="pain-quote">"I'm not sure this sermon is ready, and I preach it in two days."</blockquote>
+    <p>The Saturday-night knot, the Sunday-morning drive with your stomach in a fist. Sunday comes whether the sermon is ready or not, and you've had no way to know which. The Sermon Coach reads it on Thursday and tells you where it stands, while there's still time to do something about it.</p>
+  </div>
 
-  <div class="problem-quote">You don't need another book on preaching. You need a careful read of the sermon you just preached — one that celebrates what's working, points out what isn't, and shows you what to sharpen before your next Sunday.</div>
+  <div class="pain-block">
+    <blockquote class="pain-quote">"It's clear to me. But I wrote it. Is it clear to them?"</blockquote>
+    <p>The author's curse: fifteen hours in the text and you've read the manuscript so many times you can't see it straight anymore. You can't tell whether your big idea lands or just feels obvious because it's yours. The melodic line criterion asks the question you can't ask yourself — could a listener repeat your main point on Tuesday?</p>
+  </div>
 
-  <p>That's what The Sermon Coach does.</p>
+  <div class="pain-block">
+    <blockquote class="pain-quote">"Did I preach the gospel, or just good advice?"</blockquote>
+    <p>The most honest fear a preacher carries, and the easiest to miss, because a moralistic sermon still sounds biblical. The Sermon Coach catches the drift while you can still fix it, before three hundred people hear "try harder" in a sermon that was supposed to give them Christ.</p>
+  </div>
+
+  <div class="pain-block">
+    <blockquote class="pain-quote">"Something's off. I can't name it. And the clock is running."</blockquote>
+    <p>The Thursday-afternoon feeling. The sermon is mostly there, something isn't working, and you can't put your finger on it. Eleven criteria put a finger on it in minutes, so you spend your last two days fixing the right thing.</p>
+  </div>
+
+  <p class="felt-close">The people who love you tell you it was a good sermon, and they mean it. The Sermon Coach tells you the part they can't — what to sharpen before Sunday.</p>
+
+  <div class="hero-cta-block">
+    <div class="hero-cta-row">
+      <a href="/signup" class="btn-primary">Start with Coach</a>
+      <a href="#sample" class="btn-secondary">See a Sample Evaluation →</a>
+    </div>
+    <p class="hero-cta-caption">$29/mo · 10 evaluations · cancel anytime</p>
+  </div>
 </section>
 
 <!-- WHAT IT IS — DARK -->
@@ -492,7 +567,7 @@
   <div class="block-inner">
     <div class="section-eyebrow">What It Is</div>
     <h2>A structured evaluation of your sermon. In minutes, not weeks.</h2>
-    <p class="lede">Paste your manuscript or transcript and receive a substantive assessment — scored, narrated, mapped, and prioritized — drawn from expositional homiletical traditions that have shaped the best preaching of the last fifty years.</p>
+    <p class="lede">Paste your manuscript and in a few minutes you get a structured read: scored, narrated, and prioritized, measured against eleven things the expository tradition has always cared about — Chapell, Keller, Piper, Robinson, the Simeon Trust, and 9Marks.</p>
   </div>
 </section>
 
@@ -555,41 +630,14 @@
   </div>
 </section>
 
-<!-- RESERVE -->
-<section class="reserve" id="reserve">
+<!-- CTA -->
+<section class="reserve" id="start">
   <div class="reserve-inner">
-    <div class="section-eyebrow">Reserve Your Spot</div>
-    <h2>Be among the first preachers to use it.</h2>
-    <p>The Sermon Coach is in pre-launch. Reserve your spot to be notified when it goes live, and to learn about founding-member pricing for early subscribers.</p>
-
-    <!-- ============================================
-         REPLACE THIS PLACEHOLDER BLOCK WITH YOUR TALLY EMBED CODE
-         ============================================
-         To wire up the email signup:
-         1. Go to tally.so and sign up (free)
-         2. Click "Create form" → add one Email field + Submit button
-         3. Customize the success message ("Thanks — you're on the list. Chris will be in touch.")
-         4. Click "Share" → "Embed" → "HTML"
-         5. Copy the entire embed snippet
-         6. DELETE this placeholder div below
-         7. PASTE the Tally embed snippet in its place
-         8. Re-deploy to Vercel
-         ============================================ -->
-    <div style="max-width: 540px; margin: 0 auto; padding: 24px; background: rgba(255,255,255,0.04); border-radius: 8px;">
-        <iframe data-tally-src="https://tally.so/embed/VLbv2J?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
-                loading="lazy"
-                width="100%"
-                height="400"
-                frameborder="0"
-                marginheight="0"
-                marginwidth="0"
-                title="Sermon Coach Pre-Launch Waitlist">
-        </iframe>
-        <script async src="https://tally.so/widgets/embed.js"></script>
-      </div>
-    <!-- ============================================ END PLACEHOLDER ============================================ -->
-
-    <div class="reserve-note">No payment. No commitment. Just an email so we can let you know when it's ready.</div>
+    <div class="section-eyebrow">Get Started</div>
+    <h2>Start sharpening before Sunday.</h2>
+    <p>Paste your manuscript, run the full 11-criterion rubric, and know where you stand while there's still time to fix it.</p>
+    <a href="/signup" class="btn-primary">Start with Coach</a>
+    <div class="reserve-note">$29/mo · 10 evaluations · cancel anytime</div>
   </div>
 </section>
 

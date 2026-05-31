@@ -50,7 +50,7 @@ Branch should be pushed after each docs commit.
 
 ### 6.4 — Guards, async UX, polling
 
-- `quota.ts`: monthly caps (coach 6 / cohort 30), 60s cooldown
+- `quota.ts`: monthly caps (coach 10 / cohort 30), 60s cooldown
 - `requestEvaluation`: quota + one-active-job-per-user; `after(processEvaluationJob)`; client polls `/api/evaluations/[id]`
 - `EvaluateButton`: loading panel, 3s poll → navigate on `complete`
 - `maxDuration = 300` on sermon detail page
@@ -204,7 +204,7 @@ Until decided, treat **6.5 render work as complete** and **prompt/schema alignme
 
 4. **FCF** — No page-level FCF block; use Structure & Craft criterion accordion. `result.fcf` may still exist in DB until 6.7.
 
-5. **Quota** — `tierLimit()`: coach 6 / cohort 30 per month; failed evals do not increment usage.
+5. **Quota** — `tierLimit()`: coach 10 / cohort 30 per month; failed evals do not increment usage.
 
 6. **Untracked** — `EMAIL_DELIVERABILITY.md` (do not commit unless intentional).
 

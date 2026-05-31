@@ -14,11 +14,11 @@ const COOLDOWN_MS = 60_000;
 export function tierLimit(planTier: PlanTier): number {
   switch (planTier) {
     case "coach":
-      return 6;
+      return 10;
     case "cohort":
       return 30;
     default:
-      return 6;
+      return 10;
   }
 }
 
