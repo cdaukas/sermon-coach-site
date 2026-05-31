@@ -30,6 +30,18 @@ export class EvaluationRunError extends Error {
   }
 }
 
+export type CreateEvaluationMessage = (
+  params: Anthropic.Messages.MessageCreateParamsNonStreaming,
+) => Promise<Anthropic.Messages.Message>;
+
+export type RunEvaluationOptions = {
+  /**
+   * Test hook: replaces Anthropic messages.create.
+   * Each schema retry invokes this again (fresh generate, not re-validation).
+   */
+  createMessage?: CreateEvaluationMessage;
+};
+
 function extractToolInput(
   content: Anthropic.Messages.ContentBlock[],
 ): unknown {
@@ -61,25 +73,28 @@ function logSchemaFailure(toolInput: unknown, error: unknown): void {
   console.error("[evaluation] Validation error:", error);
 }
 
-export async function runEvaluation(
-  input: EvaluationUserMessageInput,
-): Promise<RunEvaluationSuccess> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!apiKey) {
+function parseValidatedResult(toolInput: unknown): EvaluationResultStrict {
+  try {
+    const draft = evaluationResultStrictBaseSchema.parse(toolInput);
+    return evaluationResultStrictSchema.parse(applyComputedScoring(draft));
+  } catch (error) {
+    logSchemaFailure(toolInput, error);
     throw new EvaluationRunError(
-      "ANTHROPIC_API_KEY is not configured.",
-      "config",
+      "Evaluation response failed schema validation.",
+      "schema",
     );
   }
+}
 
-  const model = getEvaluationModel();
-  const client = new Anthropic({ apiKey });
-
+async function callClaudeAndValidate(
+  model: string,
+  input: EvaluationUserMessageInput,
+  createMessage: CreateEvaluationMessage,
+): Promise<RunEvaluationSuccess> {
   let response: Anthropic.Messages.Message;
 
   try {
-    response = await client.messages.create({
+    response = await createMessage({
       model,
       max_tokens: 16_000,
       system: buildSystemPrompt(),
@@ -95,18 +110,7 @@ export async function runEvaluation(
   }
 
   const toolInput = extractToolInput(response.content);
-
-  let result: EvaluationResultStrict;
-  try {
-    const draft = evaluationResultStrictBaseSchema.parse(toolInput);
-    result = evaluationResultStrictSchema.parse(applyComputedScoring(draft));
-  } catch (error) {
-    logSchemaFailure(toolInput, error);
-    throw new EvaluationRunError(
-      "Evaluation response failed schema validation.",
-      "schema",
-    );
-  }
+  const result = parseValidatedResult(toolInput);
 
   return {
     result,
@@ -114,4 +118,47 @@ export async function runEvaluation(
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
   };
+}
+
+export async function runEvaluation(
+  input: EvaluationUserMessageInput,
+  options?: RunEvaluationOptions,
+): Promise<RunEvaluationSuccess> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!apiKey) {
+    throw new EvaluationRunError(
+      "ANTHROPIC_API_KEY is not configured.",
+      "config",
+    );
+  }
+
+  const model = getEvaluationModel();
+  const client = new Anthropic({ apiKey });
+  const createMessage =
+    options?.createMessage ??
+    ((params) => client.messages.create(params));
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await callClaudeAndValidate(model, input, createMessage);
+    } catch (error) {
+      if (
+        attempt === 0 &&
+        error instanceof EvaluationRunError &&
+        error.code === "schema"
+      ) {
+        console.error(
+          "[evaluation] Schema validation failed; retrying once with a fresh API call.",
+        );
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new EvaluationRunError(
+    "Evaluation response failed schema validation.",
+    "schema",
+  );
 }
