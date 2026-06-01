@@ -84,7 +84,7 @@
   .hero {
     max-width: 900px;
     margin: 0 auto;
-    padding: 48px 24px 80px;
+    padding: 48px 24px 28px;
     text-align: center;
   }
   .eyebrow {
@@ -114,16 +114,15 @@
     font-style: italic;
   }
   .privacy-panel {
-    background: var(--panel);
-    border: 1px solid var(--rule);
-    box-shadow: var(--shadow);
-    padding: 24px 28px;
-    max-width: 680px;
-    margin: 0 auto 36px;
-    text-align: left;
-    font-size: 16px;
-    line-height: 1.65;
-    color: var(--ink-mid);
+    max-width: 620px;
+    margin: 20px auto 0;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--rule);
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
   }
   .hero-cta-caption {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -176,6 +175,9 @@
     max-width: 900px;
     margin: 0 auto;
     padding: 80px 24px;
+  }
+  section.block.felt-pain {
+    padding-top: 36px;
   }
   section.block.dark {
     max-width: none;
@@ -236,9 +238,10 @@
     border-left: 3px solid var(--accent);
     padding: 4px 0 4px 28px;
     margin: 0 0 14px;
-    font-style: italic;
+    font-style: normal;
+    font-weight: 600;
     font-size: 19px;
-    color: var(--ink-mid);
+    color: var(--ink);
     line-height: 1.55;
   }
   .pain-block p {
@@ -472,11 +475,23 @@
     display: inline-block;
     margin-top: 8px;
   }
+  .reserve-trust {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #a8a297;
+    margin-bottom: 28px;
+    font-style: normal;
+  }
+  .reserve-form {
+    max-width: 540px;
+    margin: 0 auto 20px;
+  }
   .reserve-note {
     font-size: 13px;
     color: #a8a297;
     font-style: italic;
-    margin-top: 24px;
+    margin-top: 16px;
   }
 
   /* ---------- FOOTER ---------- */
@@ -493,7 +508,7 @@
   @media (max-width: 720px) {
     h1 { font-size: 38px; }
     h2 { font-size: 28px; }
-    .hero { padding: 24px 20px 56px; }
+    .hero { padding: 24px 20px 24px; }
     .hero-sub { font-size: 18px; }
     section.block { padding: 56px 20px; }
     section.block.dark { padding: 64px 20px; }
@@ -515,7 +530,7 @@
     <a href="./pricing.html" class="nav-link">Pricing</a>
     <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
     <a href="./faq.html" class="nav-link">FAQ</a>
-    <a href="/signup" class="nav-cta">Start with Coach</a>
+    <a href="#reserve" class="nav-cta">Reserve Your Seat</a>
   </div>
 </nav>
 
@@ -524,20 +539,19 @@
   <div class="eyebrow">Built by a preacher for preachers</div>
   <h1>Walk into Sunday knowing your sermon is ready.</h1>
   <p class="hero-sub">Most preachers stop getting real feedback the day they leave seminary. The Sermon Coach gives it back — a careful read of your sermon <em>before</em> you preach it, not just after.</p>
-  <div class="privacy-panel">Your sermons stay yours. We never use them to train AI, never share them, never sell them. The Sermon Coach reads your work; it doesn't write it.</div>
 </header>
 
 <!-- FELT PAIN -->
-<section class="block">
-  <h2>You already know the questions. You've just never had anyone to answer them.</h2>
+<section class="block felt-pain">
+  <h2>You already know the problem. You are living it.</h2>
 
   <div class="pain-block">
     <blockquote class="pain-quote">"I'm not sure this sermon is ready, and I preach it in two days."</blockquote>
-    <p>The Saturday-night knot, the Sunday-morning drive with your stomach in a fist. Sunday comes whether the sermon is ready or not, and you've had no way to know which. The Sermon Coach reads it on Thursday and tells you where it stands, while there's still time to do something about it.</p>
+    <p>The Saturday-night knot, the Sunday-morning drive with your stomach in a fist. Sunday comes whether the sermon is ready or not, and you've had no way to know if you are. The Sermon Coach reads it on Thursday and tells you where it stands, while there's still time to do something about it.</p>
   </div>
 
   <div class="pain-block">
-    <blockquote class="pain-quote">"It's clear to me. But I wrote it. Is it clear to them?"</blockquote>
+    <blockquote class="pain-quote">"It's clear to me, but I wrote it. How do I know if it will be clear to them?"</blockquote>
     <p>The author's curse: fifteen hours in the text and you've read the manuscript so many times you can't see it straight anymore. You can't tell whether your big idea lands or just feels obvious because it's yours. The melodic line criterion asks the question you can't ask yourself — could a listener repeat your main point on Tuesday?</p>
   </div>
 
@@ -555,10 +569,10 @@
 
   <div class="hero-cta-block">
     <div class="hero-cta-row">
-      <a href="/signup" class="btn-primary">Start with Coach</a>
+      <a href="#reserve" class="btn-primary">Reserve Your Seat</a>
       <a href="#sample" class="btn-secondary">See a Sample Evaluation →</a>
     </div>
-    <p class="hero-cta-caption">$29/mo · 10 evaluations · cancel anytime</p>
+    <p class="hero-cta-caption">Reserve now — we'll email you the moment the doors open.</p>
   </div>
 </section>
 
@@ -630,14 +644,26 @@
   </div>
 </section>
 
-<!-- CTA -->
-<section class="reserve" id="start">
+<!-- GET STARTED -->
+<section class="reserve" id="reserve">
   <div class="reserve-inner">
     <div class="section-eyebrow">Get Started</div>
     <h2>Start sharpening before Sunday.</h2>
     <p>Paste your manuscript, run the full 11-criterion rubric, and know where you stand while there's still time to fix it.</p>
-    <a href="/signup" class="btn-primary">Start with Coach</a>
-    <div class="reserve-note">$29/mo · 10 evaluations · cancel anytime</div>
+    <p class="reserve-trust">Your sermons stay yours. We never use them to train AI, never share them, never sell them. The Sermon Coach reads your work; it doesn't write it.</p>
+    <div class="reserve-form">
+      <iframe data-tally-src="https://tally.so/embed/VLbv2J?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+              loading="lazy"
+              width="100%"
+              height="400"
+              frameborder="0"
+              marginheight="0"
+              marginwidth="0"
+              title="Sermon Coach Pre-Launch Waitlist">
+      </iframe>
+      <script async src="https://tally.so/widgets/embed.js"></script>
+    </div>
+    <div class="reserve-note">Reserve now — we'll email you the moment the doors open.</div>
   </div>
 </section>
 

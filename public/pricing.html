@@ -586,7 +586,7 @@
   <div class="nav-links">
     <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
     <a href="./faq.html" class="nav-link">FAQ</a>
-    <a href="/signup" class="nav-cta">Start with Coach</a>
+    <a href="./index.html#reserve" class="nav-cta">Reserve Your Seat</a>
   </div>
 </nav>
 
@@ -629,7 +629,7 @@
       <span class="price-now"><span class="currency">$</span><span data-price="coach">29</span></span>
       <span class="price-period" data-period="coach">/mo</span>
     </div>
-    <div class="price-note" data-note="coach">Billed monthly. Cancel anytime.</div>
+    <div class="price-note" data-note="coach"></div>
     <ul class="tier-features">
       <li><strong>10 sermon evaluations a month</strong> — room to run the full Thursday-and-Monday rhythm on every sermon you preach, even in a five-Sunday month</li>
       <li>Full 11-criterion rubric</li>
@@ -639,7 +639,7 @@
       <li>Your top 3 priorities, with practical next steps</li>
       <li>A private library of every evaluation you run</li>
     </ul>
-    <a href="/signup" class="tier-cta">Start with Coach</a>
+    <a href="./index.html#reserve" class="tier-cta">Reserve Your Seat</a>
   </div>
 
   <!-- COHORT -->
@@ -650,7 +650,7 @@
       <span class="price-now"><span class="currency">$</span><span data-price="cohort">99</span></span>
       <span class="price-period" data-period="cohort">/mo</span>
     </div>
-    <div class="price-note" data-note="cohort">Billed monthly. Cancel anytime.</div>
+    <div class="price-note" data-note="cohort"></div>
     <ul class="tier-features">
       <li><strong>5 seats, 30 evaluations a month,</strong> pooled across the group</li>
       <li>Everything in Coach, for every preacher on your team</li>
@@ -659,7 +659,7 @@
       <li>Facilitator dashboard and group analytics</li>
       <li>An onboarding call with Chris</li>
     </ul>
-    <a href="/signup" class="tier-cta">Start with Cohort</a>
+    <a href="./index.html#reserve" class="tier-cta">Reserve Your Seat</a>
   </div>
 
 </section>
@@ -686,7 +686,7 @@
       <li>Valid 18 months</li>
       <li>Candidating messages, conference keynotes, or trying the rubric on your own work</li>
     </ul>
-    <a href="/signup" class="pack-cta">Start with Coach</a>
+    <a href="./index.html#reserve" class="pack-cta">Reserve Your Seat</a>
   </div>
 
   <!-- GUEST PREACHER -->
@@ -700,7 +700,7 @@
       <li>Valid 18 months</li>
       <li>Built for elders, lay preachers, and retired pastors filling a pulpit</li>
     </ul>
-    <a href="/signup" class="pack-cta">Start with Coach</a>
+    <a href="./index.html#reserve" class="pack-cta">Reserve Your Seat</a>
   </div>
 
   <!-- SERIES PREP -->
@@ -715,7 +715,7 @@
       <li>Valid 120 days</li>
       <li>Run every manuscript through the rubric the week before you preach it. Six sermons, six honest reads, one series done right.</li>
     </ul>
-    <a href="/signup" class="pack-cta">Start with Coach</a>
+    <a href="./index.html#reserve" class="pack-cta">Reserve Your Seat</a>
   </div>
 
 </section>
@@ -768,12 +768,12 @@
   // Billing toggle: swap monthly / annual prices
   const PRICING = {
     monthly: {
-      coach: { price: '29', period: '/mo', note: 'Billed monthly. Cancel anytime.' },
-      cohort: { price: '99', period: '/mo', note: 'Billed monthly. Cancel anytime.' }
+      coach: { price: '29', period: '/mo', note: '' },
+      cohort: { price: '99', period: '/mo', note: '' }
     },
     annual: {
-      coach: { price: '290', period: '/yr', note: 'Billed annually. 2 months free.' },
-      cohort: { price: '990', period: '/yr', note: 'Billed annually. 2 months free.' }
+      coach: { price: '290', period: '/yr', note: '2 months free' },
+      cohort: { price: '990', period: '/yr', note: '2 months free' }
     }
   };
 
