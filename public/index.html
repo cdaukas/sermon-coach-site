@@ -503,6 +503,29 @@
     color: var(--ink-soft);
   }
   footer a { color: var(--accent); text-decoration: none; }
+  .footer-tagline {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .footer-mission {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+  }
+  .footer-mission a { color: var(--accent); text-decoration: none; }
+  .story-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .story-link:hover { text-decoration: underline; }
 
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 720px) {
@@ -527,10 +550,11 @@
 <nav class="nav">
   <a href="./index.html" class="wordmark">The Sermon Coach</a>
   <div class="nav-links">
-    <a href="./pricing.html" class="nav-link">Pricing</a>
     <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
+    <a href="./pricing.html" class="nav-link">Pricing</a>
     <a href="./faq.html" class="nav-link">FAQ</a>
-    <a href="#reserve" class="nav-cta">Reserve Your Seat</a>
+    <a href="./story.html" class="nav-link">Story</a>
+    <a href="./index.html#reserve" class="nav-cta">Reserve Your Seat</a>
   </div>
 </nav>
 
@@ -641,6 +665,7 @@
     <p>The Sermon Coach was built by <strong>Dr. Christopher M. Daukas</strong>, a former church planter in Phoenix, Arizona, with 25 years of pastoral ministry experience and 14 years as a Lead Pastor. Chris has been preaching for 25 years, has been shaped by these resources, and has spent the last several years sharpening his own preaching against the rubric this tool now offers other preachers.</p>
     <p>The Sermon Coach is the actual rubric Chris uses on his own work — including the sample evaluations 1 and 2 above, which he ran on two of his own old sermons. If the rubric is going to find your Fallen Condition Focus drifting, you should know it has already found his.</p>
     <p>Have questions? Email Chris directly at chris@sermoncoach.online. He reads everything.</p>
+    <p><a href="./story.html" class="story-link">Read the story &rarr;</a></p>
   </div>
 </section>
 
@@ -669,6 +694,8 @@
 
 <!-- FOOTER -->
 <footer>
+  <div class="footer-tagline">Strengthen the Local Church. Train the Global Church.</div>
+  <div class="footer-mission">Every subscription helps train pastors in the Majority World through <a href="https://gtn.org" target="_blank" rel="noopener">GTN</a>.</div>
   The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
   <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./how-its-scored.html">How It's Scored</a> · <a href="./faq.html">FAQ</a> · <a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a>
 </footer>
