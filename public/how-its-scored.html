@@ -73,9 +73,9 @@
 
   /* ---------- HERO ---------- */
   .hero {
-    max-width: 800px;
+    max-width: 760px;
     margin: 0 auto;
-    padding: 32px 24px 48px;
+    padding: 32px 24px 24px;
     text-align: center;
   }
   .eyebrow {
@@ -89,170 +89,221 @@
   }
   h1 {
     font-size: 42px;
-    line-height: 1.1;
+    line-height: 1.12;
     font-weight: 600;
     letter-spacing: -0.02em;
-    margin-bottom: 16px;
+    margin-bottom: 0;
   }
 
   /* ---------- CONTENT ---------- */
   .content {
     max-width: 760px;
     margin: 0 auto;
-    padding: 16px 24px 64px;
+    padding: 8px 24px 32px;
   }
-  .content p {
-    font-size: 16px;
-    line-height: 1.7;
-    color: var(--ink-mid);
-    margin-bottom: 16px;
-  }
-  .content a { color: var(--accent); text-decoration: none; }
-  .content a:hover { text-decoration: underline; }
-
   .lead {
     font-size: 17px;
+    line-height: 1.75;
+    color: var(--ink-mid);
+    margin-bottom: 28px;
+  }
+  .lead strong { color: var(--ink); font-weight: 600; }
+  .listening {
+    font-size: 16px;
     line-height: 1.7;
     color: var(--ink-soft);
     font-style: italic;
-    padding: 20px 24px;
-    background: var(--accent-pale);
-    border-left: 3px solid var(--accent);
+    text-align: center;
+    max-width: 620px;
+    margin: 0 auto 36px;
+  }
+
+  /* ---------- RUBRIC: CATEGORIES + QUESTION ACCORDIONS ---------- */
+  .rubric { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  .cat {
+    background: var(--panel);
+    box-shadow: var(--shadow);
     border-radius: 4px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+    padding: 8px 28px 12px;
   }
-
-  .page-section {
-    margin-bottom: 56px;
+  .cat-header {
+    padding: 18px 0 14px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 4px;
   }
-  .page-section:last-child {
-    margin-bottom: 0;
-  }
-
-  .section-title {
+  .cat-num {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 11px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--accent);
     font-weight: 700;
-    margin-bottom: 8px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--rule);
+    margin-bottom: 6px;
   }
-
-  .criterion {
-    padding: 22px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  .criterion:last-child { border-bottom: none; }
-
-  .criterion-q {
-    font-size: 18px;
+  .cat-name {
+    font-size: 22px;
     font-weight: 600;
-    margin-bottom: 12px;
     color: var(--ink);
-    line-height: 1.35;
+    letter-spacing: -0.01em;
   }
-  .criterion-a {
-    font-size: 16px;
+  .q { border-bottom: 1px solid var(--rule); }
+  .q:last-child { border-bottom: none; }
+  .q summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 18px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .q summary::-webkit-details-marker { display: none; }
+  .q-text {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+    transition: color 0.15s ease;
+  }
+  .q summary:hover .q-text { color: var(--accent); }
+  .chevron {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+    transition: transform 0.2s ease;
+  }
+  .q[open] .chevron { transform: rotate(180deg); }
+  .q-detail {
+    font-size: 15px;
     line-height: 1.7;
     color: var(--ink-mid);
+    padding: 0 0 20px;
   }
 
-  .bands {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
+  /* ---------- SOURCES ---------- */
+  .sources-wrap {
+    max-width: 900px;
+    margin: 72px auto 0;
+    padding: 0 24px;
+  }
+  .section-head {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 36px;
+  }
+  .section-head h2 {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--ink);
-    letter-spacing: 0.01em;
-    margin: 20px 0 24px;
-    padding: 16px 20px;
+    margin: 8px 0 14px;
+  }
+  .section-head p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .sources {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .source {
     background: var(--panel);
     box-shadow: var(--shadow);
     border-radius: 4px;
-    text-align: center;
+    padding: 24px 26px;
+  }
+  .source-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .source-work {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+  .source-principles {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink-mid);
   }
 
-  /* ---------- TRUST RUBRIC (scoped from index) ---------- */
-  main.content section.block.trust-sources {
-    max-width: none;
-    margin: 0;
-    padding: 48px 0 0;
-  }
-  main.content section.block.trust-sources .section-eyebrow {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    font-weight: 600;
-    margin-bottom: 16px;
-  }
-  main.content section.block.trust-sources h2 {
-    font-size: 36px;
-    line-height: 1.2;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    margin-bottom: 24px;
-    color: var(--ink);
-  }
-  main.content section.block.trust-sources p.lede {
-    font-size: 19px;
-    line-height: 1.65;
-    color: var(--ink-soft);
-    margin-bottom: 20px;
-    font-style: normal;
-    padding: 0;
-    background: none;
-    border: none;
-    border-radius: 0;
-  }
-  main.content section.block.trust-sources .sources {
-    background: var(--panel);
+  /* ---------- SCORING PANEL ---------- */
+  .scoring {
+    max-width: 760px;
+    margin: 56px auto 0;
     padding: 36px 32px;
-    box-shadow: var(--shadow);
-    margin: 32px 0 0;
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
   }
-  main.content section.block.trust-sources .source-item {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 24px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--rule);
-    align-items: baseline;
+  .scoring p {
+    font-size: 15.5px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    margin-bottom: 14px;
   }
-  main.content section.block.trust-sources .source-item:last-child { border-bottom: none; }
-  main.content section.block.trust-sources .source-name {
-    font-family: 'Iowan Old Style', Georgia, serif;
-    font-size: 16px;
+  .scoring p:last-child { margin-bottom: 0; }
+  .scoring strong { color: var(--ink); font-weight: 600; }
+  .bands {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
     font-weight: 600;
     color: var(--ink);
+    letter-spacing: 0.01em;
   }
-  main.content section.block.trust-sources .source-name em {
-    display: block;
+
+  /* ---------- CTA ---------- */
+  .cta-row {
+    text-align: center;
+    margin: 56px auto 0;
+    max-width: 760px;
+    padding: 0 24px;
+  }
+  .cta-line {
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .cta-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    letter-spacing: 0.02em;
+    border: 1px solid var(--accent);
+    transition: all 0.15s ease;
+  }
+  .cta-btn:hover { background: #8a6624; border-color: #8a6624; }
+  .cta-caption {
+    margin-top: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px;
     color: var(--ink-soft);
-    font-weight: 400;
-    margin-top: 2px;
+    font-style: italic;
   }
-  main.content section.block.trust-sources .source-contributes {
-    font-size: 15px;
-    color: var(--ink-soft);
-    line-height: 1.55;
-  }
+  .cta-caption a { color: var(--accent); text-decoration: none; }
+  .cta-caption a:hover { text-decoration: underline; }
 
   /* ---------- FOOTER ---------- */
   footer {
-    margin-top: 60px;
-    padding: 40px 24px;
+    margin-top: 72px;
+    padding: 44px 24px;
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    color: var(--ink-soft);
     border-top: 1px solid var(--rule);
   }
-  footer a { color: var(--accent); text-decoration: none; }
   .footer-tagline {
     font-family: 'Iowan Old Style', Georgia, serif;
     font-size: 16px;
@@ -268,17 +319,24 @@
     margin-bottom: 28px;
   }
   .footer-mission a { color: var(--accent); text-decoration: none; }
+  .footer-meta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .footer-meta a { color: var(--accent); text-decoration: none; }
 
   /* ---------- RESPONSIVE ---------- */
-  @media (max-width: 640px) {
+  @media (max-width: 720px) {
     h1 { font-size: 32px; }
-    .content p, .criterion-a { font-size: 15.5px; }
-    .criterion-q { font-size: 17px; }
+    .sources { grid-template-columns: 1fr; }
+    .section-head h2 { font-size: 25px; }
+    .cat-name { font-size: 19px; }
+    .cat summary { padding: 20px 22px; }
+    .cat-body { padding: 4px 22px 8px; }
+    .scoring { padding: 28px 24px; }
     .nav-links { gap: 16px; }
-    .bands { font-size: 14px; }
-    main.content section.block.trust-sources h2 { font-size: 28px; }
-    main.content section.block.trust-sources .source-item { grid-template-columns: 1fr; gap: 4px; }
-    main.content section.block.trust-sources .source-name { font-size: 17px; }
   }
 </style>
 </head>
@@ -296,147 +354,197 @@
   </div>
 </nav>
 
-<!-- SECTION: problem -->
+<!-- HERO -->
 <header class="hero">
   <div class="eyebrow">How It's Scored</div>
   <h1>The specific feedback a handshake at the door never gives you.</h1>
 </header>
 
+<!-- LEAD -->
 <main class="content">
-
   <p class="lead">You preach forty-plus times a year. Most weeks the only feedback is a handshake at the door and "good word, pastor." No clear rubric to measure against. No mirror to show you your blind spots. No trusted peer who's also stood in the pulpit telling you where the sermon actually drifted. The Sermon Coach is that mirror — a structured read of your sermon against eleven things the expository preaching tradition has always cared about, anchored in your own words, not generic advice.</p>
 
-  <!-- SECTION: rubric -->
-  <section class="page-section" id="rubric">
-
-    <p>Here's what we're listening for. Eleven questions, across four areas — each one rooted in the wisdom of a teacher or model who has shaped how the church preaches.</p>
-
-    <div class="page-section">
-      <h2 class="section-title">Category 1 — Text &amp; Theology</h2>
-
-      <div class="criterion">
-        <p class="criterion-q">Does the sermon say what the text actually says?</p>
-        <p class="criterion-a">Honoring the passage's genre, context, and grammar, rather than using the verse as a launchpad for the preacher's own agenda. The Simeon Trust workshop calls this letting the text drive the sermon, not the other way around.</p>
-      </div>
-
-      <div class="criterion">
-        <p class="criterion-q">Does it land in the gospel or stop at good advice?</p>
-        <p class="criterion-a">Whether the sermon arrives at the person and work of Christ, or settles for moralism and better-living principles. Bryan Chapell calls this the redemptive arc: every text finally points to Christ.</p>
-      </div>
-
-      <div class="criterion">
-        <p class="criterion-q">Would a non-Christian in the room know what the good news is?</p>
-        <p class="criterion-a">Whether the gospel is made unmistakable — not just what listeners should do better, but why the news is good. Piper's standard for gospel clarity.</p>
-      </div>
-    </div>
-
-    <div class="page-section">
-      <h2 class="section-title">Category 2 — Structure &amp; Craft</h2>
-
-      <div class="criterion">
-        <p class="criterion-q">What problem, or element of human pain, sin, or suffering, is this sermon addressing?</p>
-        <p class="criterion-a">Chapell's Fallen Condition Focus: the specific aspect of human fallenness the text speaks to, named in one present-tense sentence with the sermon anchored to it throughout.</p>
-      </div>
-
-      <div class="criterion">
-        <p class="criterion-q">Is there one main thing, and will anyone remember it by Tuesday?</p>
-        <p class="criterion-a">Whether the sermon has a single dominant idea the text itself yields, with every part serving it, in a shape that's actually graspable. Simeon Trust calls this the melodic line; Haddon Robinson, the big idea.</p>
-      </div>
-
-      <div class="criterion">
-        <p class="criterion-q">Does it preach the hard parts, or skip past them?</p>
-        <p class="criterion-a">Whether the sermon wrestles with the genuinely difficult verses — the ones that resist easy resolution — or defuses them too fast and papers them over. A faithful sermon lets the hard thing be hard, then preaches through it, not around it.</p>
-      </div>
-    </div>
-
-    <div class="page-section">
-      <h2 class="section-title">Category 3 — Application &amp; Audience</h2>
-
-      <div class="criterion">
-        <p class="criterion-q">Does this reach the people in the room or stay a lecture about ancient Israel?</p>
-        <p class="criterion-a">Whether the sermon crosses the bridge into the listener's actual life. Keller's three-audiences lens asks whether believers, doubters, and seekers are all addressed.</p>
-      </div>
-
-      <div class="criterion">
-        <p class="criterion-q">Does the sermon shape a clear emotional arc?</p>
-        <p class="criterion-a">Whether lament, joy, warning, comfort, and awe are woven into the structure and rhythm of the text on the page, not flattened into one register throughout. In your written evaluation, this criterion scores emotional arc and dynamics in prose as part of the 11-criterion dashboard. A visual beat-by-beat timeline is planned for when audio upload is available; today the assessment lives in the category narrative, not a separate panel.</p>
-      </div>
-
-      <div class="criterion">
-        <p class="criterion-q">Does it name real people or real situations?</p>
-        <p class="criterion-a">Whether the application is specific. "We all struggle with idolatry" is wallpaper; "if you're the dad checking work email at the dinner table, this text is speaking to you" is pastoral specificity. Keller's standard.</p>
-      </div>
-    </div>
-
-    <div class="page-section">
-      <h2 class="section-title">Category 4 — Ecclesial &amp; Spiritual</h2>
-
-      <div class="criterion">
-        <p class="criterion-q">Does this build up the church as the people of God under the Word?</p>
-        <p class="criterion-a">Whether the sermon strengthens the congregation's understanding of itself. In the 9Marks framework, expositional preaching is the first mark of a healthy church.</p>
-      </div>
-
-      <div class="criterion">
-        <p class="criterion-q">Has the preacher been moved by what he's preaching?</p>
-        <p class="criterion-a">Whether there's evidence of worshipful affection, not just information transfer. Piper calls this expository exultation: a sermon that explains without exulting is a lecture; one that exults without explaining is a pep talk.</p>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- RUBRIC SOURCES -->
-  <section class="block trust-sources">
-    <div class="section-eyebrow">Why You Can Trust The Rubric</div>
-    <h2>Drawn from the homiletical traditions that have shaped you.</h2>
-    <p class="lede">Every criterion in The Sermon Coach traces back to a named principle in one of the six sources. When the tool tells you your Fallen Condition Focus is drifting, it's holding you to the standard Chapell himself set.</p>
-
-    <div class="sources">
-      <div class="source-item">
-        <div class="source-name">Bryan Chapell<em>Christ-Centered Preaching</em></div>
-        <div class="source-contributes">Fallen Condition Focus · the redemptive arc · the principle of unity in sermon structure</div>
-      </div>
-      <div class="source-item">
-        <div class="source-name">Simeon Trust<em>The workshop method</em></div>
-        <div class="source-contributes">Textual fidelity · melodic line · theme, aim, and application · structure that flows from the text</div>
-      </div>
-      <div class="source-item">
-        <div class="source-name">John Piper<em>Expository Exultation</em></div>
-        <div class="source-contributes">Gospel clarity · preaching as worship · affections shaped by the cross</div>
-      </div>
-      <div class="source-item">
-        <div class="source-name">9Marks<em>Expositional preaching</em></div>
-        <div class="source-contributes">Ecclesial faithfulness · preaching that builds the church's understanding of itself under the Word</div>
-      </div>
-       <div class="source-item">
-          <div class="source-name">Tim Keller<em>Preaching: Communicating Faith in an Age of Skepticism</em></div>
-          <div class="source-contributes">Three-audiences framework · pastoral specificity · naming the cultural counter-narrative</div>
-        </div>
-        <div class="source-item">
-          <div class="source-name">Haddon Robinson<em>Biblical Preaching</em></div>
-          <div class="source-contributes">The big idea · structural unity · expository development</div>
-        </div>
-    </div>
-  </section>
-
-  <!-- SECTION: scoring -->
-  <section class="page-section" id="scoring">
-
-    <p>Each question is scored 1–5, summing to a composite out of 55, which maps to a band label:</p>
-
-    <p class="bands">Exemplary · Strong · Faithful · Needs Improvement · Significant Concerns</p>
-
-    <p class="lead">Most faithful preaching lands in the Faithful or Strong band. "Faithful" isn't a subpar sermon, it's one that is sufficient to build the church. The point isn't a perfect score; it's helping your next sermon being better than the last.</p>
-
-  </section>
-
+  <p class="listening">Here's what we're listening for. Eleven questions, across four areas — each one rooted in the wisdom of a teacher or model who has shaped how the church preaches. Tap any question to see the principle behind it.</p>
 </main>
+
+<!-- CATEGORY ACCORDIONS -->
+<section class="rubric">
+
+  <!-- CATEGORY 1 -->
+  <div class="cat">
+    <div class="cat-header">
+      <div class="cat-num">Category 1</div>
+      <div class="cat-name">Text &amp; Theology</div>
+    </div>
+    <details class="q">
+      <summary>
+        <span class="q-text">Does the sermon say what the text actually says?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Honoring the passage's genre, context, and grammar, rather than using the verse as a launchpad for the preacher's own agenda. The Simeon Trust workshop calls this letting the text drive the sermon, not the other way around.</div>
+    </details>
+    <details class="q">
+      <summary>
+        <span class="q-text">Does it land in the gospel or stop at good advice?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether the sermon arrives at the person and work of Christ, or settles for moralism and better-living principles. Bryan Chapell calls this the redemptive arc: every text finally points to Christ.</div>
+    </details>
+    <details class="q">
+      <summary>
+        <span class="q-text">Would a non-Christian in the room know what the good news is?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether the gospel is made unmistakable — not just what listeners should do better, but why the news is good. Piper's standard for gospel clarity.</div>
+    </details>
+  </div>
+
+  <!-- CATEGORY 2 -->
+  <div class="cat">
+    <div class="cat-header">
+      <div class="cat-num">Category 2</div>
+      <div class="cat-name">Structure &amp; Craft</div>
+    </div>
+    <details class="q">
+      <summary>
+        <span class="q-text">What problem — what human pain, sin, or suffering — is this sermon addressing?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Chapell's Fallen Condition Focus: the specific aspect of human fallenness the text speaks to, named in one present-tense sentence, with the sermon anchored to it throughout.</div>
+    </details>
+    <details class="q">
+      <summary>
+        <span class="q-text">Is there one main thing, and will anyone remember it by Tuesday?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether the sermon has a single dominant idea the text itself yields, with every part serving it, in a shape that's actually graspable. Simeon Trust calls this the melodic line; Haddon Robinson, the big idea.</div>
+    </details>
+    <details class="q">
+      <summary>
+        <span class="q-text">Does it preach the hard parts, or skip past them?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether the sermon wrestles with the genuinely difficult verses — the ones that resist easy resolution — or defuses them too fast and papers them over. A faithful sermon lets the hard thing be hard, then preaches through it, not around it.</div>
+    </details>
+  </div>
+
+  <!-- CATEGORY 3 -->
+  <div class="cat">
+    <div class="cat-header">
+      <div class="cat-num">Category 3</div>
+      <div class="cat-name">Application &amp; Audience</div>
+    </div>
+    <details class="q">
+      <summary>
+        <span class="q-text">Does this reach the people in the room, or stay a lecture about ancient Israel?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether the sermon crosses the bridge into the listener's actual life. Keller's three-audiences lens asks whether believers, doubters, and seekers are all addressed.</div>
+    </details>
+    <details class="q">
+      <summary>
+        <span class="q-text">Does the sermon shape a clear emotional arc?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether lament, joy, warning, comfort, and awe are woven into the structure and rhythm of the text, not flattened into one register throughout. In your written evaluation, this criterion scores emotional arc and dynamics in prose as part of the 11-criterion dashboard. A visual beat-by-beat timeline is planned for when audio upload is available; today the assessment lives in the category narrative, not a separate panel.</div>
+    </details>
+    <details class="q">
+      <summary>
+        <span class="q-text">Does it name real people or real situations?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether the application is specific. "We all struggle with idolatry" is wallpaper; "if you're the dad checking work email at the dinner table, this text is speaking to you" is pastoral specificity. Keller's standard.</div>
+    </details>
+  </div>
+
+  <!-- CATEGORY 4 -->
+  <div class="cat">
+    <div class="cat-header">
+      <div class="cat-num">Category 4</div>
+      <div class="cat-name">Ecclesial &amp; Spiritual</div>
+    </div>
+    <details class="q">
+      <summary>
+        <span class="q-text">Does this build up the church as the people of God under the Word?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether the sermon strengthens the congregation's understanding of itself. In the 9Marks framework, expositional preaching is the first mark of a healthy church.</div>
+    </details>
+    <details class="q">
+      <summary>
+        <span class="q-text">Has the preacher been moved by what he's preaching?</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
+      <div class="q-detail">Whether there's evidence of worshipful affection, not just information transfer. Piper calls this expository exultation: a sermon that explains without exulting is a lecture; one that exults without explaining is a pep talk.</div>
+    </details>
+  </div>
+
+</section>
+
+<!-- SOURCES -->
+<div class="sources-wrap">
+  <div class="section-head">
+    <div class="eyebrow">Why You Can Trust The Rubric</div>
+    <h2>Drawn from the traditions that have shaped you.</h2>
+    <p>Every criterion in The Sermon Coach traces back to a named principle in one of six sources. When the tool tells you your Fallen Condition Focus is drifting, it's holding you to the standard Chapell himself set.</p>
+  </div>
+
+  <div class="sources">
+    <div class="source">
+      <div class="source-name">Bryan Chapell</div>
+      <div class="source-work">Christ-Centered Preaching</div>
+      <div class="source-principles">Fallen Condition Focus · the redemptive arc · the principle of unity in sermon structure</div>
+    </div>
+    <div class="source">
+      <div class="source-name">The Simeon Trust</div>
+      <div class="source-work">The workshop method</div>
+      <div class="source-principles">Textual fidelity · melodic line · theme, aim, and application · structure that flows from the text</div>
+    </div>
+    <div class="source">
+      <div class="source-name">John Piper</div>
+      <div class="source-work">Expository Exultation</div>
+      <div class="source-principles">Gospel clarity · preaching as worship · affections shaped by the cross</div>
+    </div>
+    <div class="source">
+      <div class="source-name">9Marks</div>
+      <div class="source-work">Expositional preaching</div>
+      <div class="source-principles">Ecclesial faithfulness · preaching that builds the church's understanding of itself under the Word</div>
+    </div>
+    <div class="source">
+      <div class="source-name">Tim Keller</div>
+      <div class="source-work">Preaching: Communicating Faith in an Age of Skepticism</div>
+      <div class="source-principles">Three-audiences framework · pastoral specificity · naming the cultural counter-narrative</div>
+    </div>
+    <div class="source">
+      <div class="source-name">Haddon Robinson</div>
+      <div class="source-work">Biblical Preaching</div>
+      <div class="source-principles">The big idea · structural unity · expository development</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCORING -->
+<div class="scoring">
+  <p>Each question is scored 1–5, summing to a composite out of 55, which maps to a band label:</p>
+  <p class="bands">Exemplary · Strong · Faithful · Needs Improvement · Significant Concerns</p>
+  <p>Most faithful preaching lands in the Faithful or Strong band. "Faithful" isn't a subpar sermon — it's one that is sufficient to build the church. The point isn't a perfect score; it's making your next sermon better than the last.</p>
+</div>
+
+<!-- CTA -->
+<div class="cta-row">
+  <div class="cta-line">See the rubric run on a real sermon.</div>
+  <a href="./sermon-evaluation-hebrews-10.html" class="cta-btn">See a Sample Evaluation →</a>
+  <div class="cta-caption">Or <a href="./index.html#reserve">reserve your seat</a> — we'll email you the moment the doors open.</div>
+</div>
 
 <!-- FOOTER -->
 <footer>
   <div class="footer-tagline">Strengthen the Local Church. Train the Global Church.</div>
   <div class="footer-mission">Every subscription helps train pastors in the Majority World through <a href="https://gtn.org" target="_blank" rel="noopener">GTN</a>.</div>
-  The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
-  <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./how-its-scored.html">How It's Scored</a> · <a href="./faq.html">FAQ</a> · <a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a>
+  <div class="footer-meta">
+    The Sermon Coach · Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> · Phoenix, Arizona<br>
+    <a href="./index.html">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./how-its-scored.html">How It's Scored</a> · <a href="./faq.html">FAQ</a> · <a href="./story.html">Story</a> · <a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a>
+  </div>
 </footer>
 
 </body>
