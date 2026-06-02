@@ -179,6 +179,16 @@
   section.block.felt-pain {
     padding-top: 36px;
   }
+  .felt-pain-band {
+    background: var(--ink);
+    padding: 72px 24px;
+    text-align: center;
+  }
+  .felt-pain-band h2 {
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--bg);
+  }
   section.block.dark {
     max-width: none;
     background: linear-gradient(135deg, #1a2332 0%, #2a3447 100%);
@@ -535,6 +545,7 @@
     .hero-sub { font-size: 18px; }
     section.block { padding: 56px 20px; }
     section.block.dark { padding: 64px 20px; }
+    .felt-pain-band { padding: 44px 20px; }
     .feature-grid { grid-template-columns: 1fr; }
     .reserve { padding: 64px 20px; }
     .reserve h2 { font-size: 30px; }
@@ -566,8 +577,10 @@
 </header>
 
 <!-- FELT PAIN -->
-<section class="block felt-pain">
+<div class="felt-pain-band">
   <h2>You already know the problem. You are living it.</h2>
+</div>
+<section class="block felt-pain">
 
   <div class="pain-block">
     <blockquote class="pain-quote">"I'm not sure this sermon is ready, and I preach it in two days."</blockquote>
