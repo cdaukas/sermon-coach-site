@@ -174,9 +174,9 @@
 
   /* signoff */
   .signoff {
-    margin-top: 32px;
-    padding-top: 28px;
-    border-top: 1px solid var(--rule);
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
   }
   .signoff .name {
     font-size: 18px;
@@ -190,6 +190,26 @@
     color: var(--ink-soft);
     font-style: italic;
   }
+
+  /* GTN MISSION BAND */
+  .gtn-band {
+    background: var(--ink);
+    padding: 56px 24px;
+  }
+  .gtn-inner {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .gtn-band p {
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--bg);
+    margin-bottom: 22px;
+  }
+  .gtn-band p:last-child { margin-bottom: 0; }
+  .gtn-band a { color: var(--accent-soft); }
+  .gtn-band a:hover { text-decoration: underline; }
+  .content.closing { padding-top: 40px; }
 
   /* CTA */
   .cta-row {
@@ -261,6 +281,8 @@
     .hero-sub { font-size: 16px; }
     .content p { font-size: 16px; }
     .beat { font-size: 17px; }
+    .gtn-band { padding: 40px 20px; }
+    .gtn-band p { font-size: 16px; }
     .pull { padding: 22px 24px; }
     .tagline-line { font-size: 18px; }
     .nav-links { gap: 16px; }
@@ -310,16 +332,23 @@
 
   <p>I ran my own sermons through it first. It caught things. Things I'd half-sensed for years and never had words for. I started using it in my prep, clarifying the main idea and catching drift before it ever reached the congregation. And my preaching got better.</p>
 
-  <div class="turn">◆</div>
+</main>
 
-  <p>There's one more reason this exists.</p>
+<!-- GTN MISSION BAND -->
+<section class="gtn-band">
+  <div class="gtn-inner">
+    <p>There's one more reason this exists.</p>
 
-  <p>I serve as Executive Vice President of <a href="https://gtn.org" target="_blank" rel="noopener">Global Training Network</a>. We train pastors in the Majority World — men shepherding real congregations who will never see the inside of a seminary. The lack of feedback I just described? For them it isn't a phase they pass through. It's the whole of ministry. No professor, no peer, no helpful critique, ever.</p>
+    <p>I serve as Executive Vice President of <a href="https://gtn.org" target="_blank" rel="noopener">Global Training Network</a>. We train pastors in the Majority World — men shepherding real congregations who will never see the inside of a seminary. The lack of feedback I just described? For them it isn't a phase they pass through. It's the whole of ministry. No professor, no peer, no helpful critique, ever.</p>
 
-  <p>Every subscription to The Sermon Coach helps train one of them. We work in 90 countries, equipping and encouraging pastors and church planters.</p>
+    <p>Every subscription to The Sermon Coach helps train one of them. We work in 90 countries, equipping and encouraging pastors and church planters.</p>
 
-  <p>So here's what that means: as you strengthen your own church through The Sermon Coach, you help train and encourage a pastor in the global church — one who may have no other coach at all.</p>
+    <p>So here's what that means: as you strengthen your own church through The Sermon Coach, you help train and encourage a pastor in the global church — one who may have no other coach at all.</p>
+  </div>
+</section>
 
+<!-- CLOSING: byline + CTA on cream -->
+<div class="content closing">
   <div class="signoff">
     <div class="name">Dr. Christopher M. Daukas, founder</div>
   </div>
@@ -330,8 +359,7 @@
     <a href="./index.html#reserve" class="cta-btn">Reserve Your Seat</a>
     <div class="cta-caption">Reserve now — we'll email you the moment the doors open.</div>
   </div>
-
-</main>
+</div>
 
 <!-- FOOTER -->
 <footer>
