@@ -746,7 +746,7 @@
       <li>Your top 3 priorities, with practical next steps</li>
       <li>A private library of every evaluation you run</li>
     </ul>
-    <a href="./index.html#reserve" class="tier-cta">Reserve Your Seat</a>
+    <a href="https://buy.stripe.com/3cI28k09A8CidcUgAl04800" class="tier-cta" data-tier-cta="coach">Start with Coach</a>
   </div>
 
   <!-- COHORT -->
@@ -766,7 +766,7 @@
       <li>Share an evaluation with the group when you want feedback</li>
       <li>Onboarding call with Chris</li>
     </ul>
-    <a href="./index.html#reserve" class="tier-cta">Tell Us About Your Group</a>
+    <a href="https://buy.stripe.com/3cIeV65tUf0G3CkabX04802" class="tier-cta" data-tier-cta="cohort">Start with Cohort</a>
   </div>
 
 </section>
@@ -872,39 +872,66 @@
   // Billing toggle: swap monthly / annual prices
   const PRICING = {
     monthly: {
-      coach: { price: '29', period: '/mo', note: 'Billed monthly.' },
-      cohort: { price: '99', period: '/mo', note: 'Billed monthly.' }
+      coach: {
+        price: '29',
+        period: '/mo',
+        note: 'Billed monthly.',
+        checkoutUrl: 'https://buy.stripe.com/3cI28k09A8CidcUgAl04800',
+      },
+      cohort: {
+        price: '99',
+        period: '/mo',
+        note: 'Billed monthly.',
+        checkoutUrl: 'https://buy.stripe.com/3cIeV65tUf0G3CkabX04802',
+      },
     },
     annual: {
-      coach: { price: '290', period: '/yr', note: '2 months free' },
-      cohort: { price: '990', period: '/yr', note: '2 months free' }
-    }
+      coach: {
+        price: '290',
+        period: '/yr',
+        note: '2 months free',
+        checkoutUrl: 'https://buy.stripe.com/4gMcMY8G6bOuc8Q1Fr04801',
+      },
+      cohort: {
+        price: '990',
+        period: '/yr',
+        note: '2 months free',
+        checkoutUrl: 'https://buy.stripe.com/5kQ7sEg8yf0G2ygdo904803',
+      },
+    },
   };
 
+  function applyBillingCadence(cadence) {
+    ['coach', 'cohort'].forEach((tier) => {
+      const data = PRICING[cadence][tier];
+      const priceEl = document.querySelector(`[data-price="${tier}"]`);
+      const periodEl = document.querySelector(`[data-period="${tier}"]`);
+      const noteEl = document.querySelector(`[data-note="${tier}"]`);
+      const ctaEl = document.querySelector(`[data-tier-cta="${tier}"]`);
+
+      if (priceEl) priceEl.textContent = data.price;
+      if (periodEl) periodEl.textContent = data.period;
+      if (noteEl) noteEl.textContent = data.note;
+      if (ctaEl) ctaEl.href = data.checkoutUrl;
+    });
+  }
+
   const toggleButtons = document.querySelectorAll('.toggle-btn');
-  toggleButtons.forEach(btn => {
+  toggleButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const cadence = btn.getAttribute('data-billing');
+      if (!cadence || !PRICING[cadence]) return;
 
-      // Update button states
-      toggleButtons.forEach(b => {
+      toggleButtons.forEach((b) => {
         b.classList.toggle('active', b === btn);
         b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
       });
 
-      // Update prices
-      ['coach', 'cohort'].forEach(tier => {
-        const data = PRICING[cadence][tier];
-        const priceEl = document.querySelector(`[data-price="${tier}"]`);
-        const periodEl = document.querySelector(`[data-period="${tier}"]`);
-        const noteEl = document.querySelector(`[data-note="${tier}"]`);
-
-        if (priceEl) priceEl.textContent = data.price;
-        if (periodEl) periodEl.textContent = data.period;
-        if (noteEl) noteEl.textContent = data.note;
-      });
+      applyBillingCadence(cadence);
     });
   });
+
+  applyBillingCadence('monthly');
 </script>
 
 
