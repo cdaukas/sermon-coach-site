@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SermonForm } from "@/components/dashboard/SermonForm";
+import { SubscribeToEvaluate } from "@/components/evaluation/SubscribeToEvaluate";
+import { createClient } from "@/lib/supabase/server";
+import {
+  getSubscriptionStatus,
+  isSubscriptionActive,
+} from "@/lib/evaluation/subscription";
 
 export const metadata: Metadata = {
   title: "New Sermon",
@@ -9,7 +15,16 @@ export const metadata: Metadata = {
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
-export default function NewSermonPage() {
+export default async function NewSermonPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const subscriptionStatus = user
+    ? await getSubscriptionStatus(user.id)
+    : null;
+  const subscriptionActive = isSubscriptionActive(subscriptionStatus);
+
   return (
     <main
       className="rounded px-8 py-10"
@@ -52,6 +67,10 @@ export default function NewSermonPage() {
           worry about formatting. Save the sermon, then run an evaluation.
         </p>
       </div>
+
+      {!subscriptionActive ? (
+        <SubscribeToEvaluate className="mb-8" />
+      ) : null}
 
       <SermonForm />
     </main>

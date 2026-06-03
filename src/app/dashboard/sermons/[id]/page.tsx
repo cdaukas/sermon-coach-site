@@ -6,6 +6,10 @@ import { EvaluateButton } from "@/components/evaluation/EvaluateButton";
 import { SermonManuscript } from "@/components/dashboard/SermonManuscript";
 import { getEvaluationUsage } from "@/lib/evaluation/quota";
 import {
+  getSubscriptionStatus,
+  isSubscriptionActive,
+} from "@/lib/evaluation/subscription";
+import {
   listEvaluationsForSermon,
   sermonHasActiveEvaluation,
 } from "@/lib/evaluation/queries";
@@ -49,12 +53,14 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermon, evaluations, usage, hasActiveEvaluation] = await Promise.all([
-    getSermonWithLatestVersion(id),
-    listEvaluationsForSermon(id),
-    user ? getEvaluationUsage(user.id) : Promise.resolve(null),
-    sermonHasActiveEvaluation(id),
-  ]);
+  const [sermon, evaluations, usage, hasActiveEvaluation, subscriptionStatus] =
+    await Promise.all([
+      getSermonWithLatestVersion(id),
+      listEvaluationsForSermon(id),
+      user ? getEvaluationUsage(user.id) : Promise.resolve(null),
+      sermonHasActiveEvaluation(id),
+      user ? getSubscriptionStatus(user.id) : Promise.resolve(null),
+    ]);
 
   if (!sermon?.latest_version) {
     notFound();
@@ -104,6 +110,7 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
         sermonId={sermon.id}
         usage={usage}
         hasActiveEvaluation={hasActiveEvaluation}
+        subscriptionActive={isSubscriptionActive(subscriptionStatus)}
       />
 
       {latestComplete ? (

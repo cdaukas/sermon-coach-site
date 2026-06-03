@@ -37,4 +37,4 @@ export type EvaluationWithSermon = {
 
 export type RequestEvaluationResult =
   | { ok: true; evaluationId: string; sermonId: string }
-  | { ok: false; error: string };
+  | { ok: false; error: string; code?: string };

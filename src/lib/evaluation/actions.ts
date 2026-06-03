@@ -14,6 +14,7 @@ import {
   checkEvaluationQuota,
   countActiveEvaluationsForUser,
 } from "./quota";
+import { checkSubscriptionActive } from "./subscription";
 import type { RequestEvaluationResult } from "./types";
 
 async function runFixtureEvaluation(
@@ -66,6 +67,15 @@ export async function requestEvaluation(
 
   if (!user) {
     return { ok: false, error: "You must be signed in to run an evaluation." };
+  }
+
+  const subscription = await checkSubscriptionActive(user.id);
+  if (!subscription.ok) {
+    return {
+      ok: false,
+      error: subscription.error,
+      code: subscription.code,
+    };
   }
 
   const { data: sermon, error: sermonError } = await supabase

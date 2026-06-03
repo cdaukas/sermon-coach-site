@@ -10,6 +10,7 @@ import {
 } from "react";
 import { requestEvaluation } from "@/lib/evaluation/actions";
 import type { EvaluationUsage } from "@/lib/evaluation/quota";
+import { SubscribeToEvaluate } from "./SubscribeToEvaluate";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const POLL_MS = 3000;
@@ -18,6 +19,7 @@ type EvaluateButtonProps = {
   sermonId: string;
   usage: EvaluationUsage | null;
   hasActiveEvaluation: boolean;
+  subscriptionActive: boolean;
 };
 
 function formatElapsed(seconds: number): string {
@@ -30,6 +32,7 @@ export function EvaluateButton({
   sermonId,
   usage,
   hasActiveEvaluation,
+  subscriptionActive,
 }: EvaluateButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -131,6 +134,14 @@ export function EvaluateButton({
 
   const busy = pending || polling;
   const atQuota = usage != null && usage.used >= usage.limit;
+
+  if (!subscriptionActive) {
+    return (
+      <div className="mt-8">
+        <SubscribeToEvaluate />
+      </div>
+    );
+  }
 
   return (
     <div className="mt-8">
