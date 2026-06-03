@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         source: "/",
         destination: "/index.html",
       },
+      {
+        source: "/welcome",
+        destination: "/welcome.html",
+      },
     ];
   },
 };
