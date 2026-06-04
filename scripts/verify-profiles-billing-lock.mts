@@ -28,16 +28,21 @@ function loadEnvFile(name: string) {
 loadEnvFile(".env.local");
 loadEnvFile(".env.patch-test.local");
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const accessToken = process.env.PATCH_TEST_ACCESS_TOKEN;
 const email = process.env.PATCH_TEST_EMAIL;
 const password = process.env.PATCH_TEST_PASSWORD;
 
-if (!url || !anonKey) {
-  console.error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
-  process.exit(1);
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    console.error(`Missing ${name}`);
+    process.exit(1);
+  }
+  return value;
 }
+
+const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
+const supabaseAnonKey = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
 const billingPatches: Record<string, Record<string, unknown>> = {
   subscription_status: { subscription_status: "active" },
@@ -51,15 +56,16 @@ async function patchWithRawHttp(
   label: string,
   body: Record<string, unknown>,
 ): Promise<void> {
-  const endpoint = `${url}/rest/v1/profiles?id=eq.${userId}`;
+  const endpoint = `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`;
+  const headers = new Headers({
+    apikey: supabaseAnonKey,
+    Authorization: `Bearer ${jwt}`,
+    "Content-Type": "application/json",
+    Prefer: "return=minimal",
+  });
   const response = await fetch(endpoint, {
     method: "PATCH",
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${jwt}`,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal",
-    },
+    headers,
     body: JSON.stringify(body),
   });
 
@@ -71,7 +77,7 @@ async function patchWithRawHttp(
 
 async function resolveSession(): Promise<{ userId: string; jwt: string }> {
   if (accessToken) {
-    const supabase = createClient(url!, anonKey!, {
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
     const { data, error } = await supabase.auth.getUser(accessToken);
@@ -89,7 +95,7 @@ async function resolveSession(): Promise<{ userId: string; jwt: string }> {
     process.exit(1);
   }
 
-  const supabase = createClient(url!, anonKey!);
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.session) {
     console.error("Sign-in failed:", error?.message ?? "no session");
@@ -99,7 +105,7 @@ async function resolveSession(): Promise<{ userId: string; jwt: string }> {
 }
 
 async function main() {
-  const supabaseAnon = createClient(url!, anonKey!);
+  const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
 
   const { error: rpcProbe } = await supabaseAnon.rpc("consume_evaluation_credit", {
     p_user_id: "00000000-0000-0000-0000-000000000000",
@@ -114,7 +120,7 @@ async function main() {
   const { userId, jwt } = await resolveSession();
   console.log(`\nAuthenticated as user ${userId}`);
 
-  const supabase = createClient(url!, anonKey!, {
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     global: { headers: { Authorization: `Bearer ${jwt}` } },
   });
 
