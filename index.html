@@ -442,6 +442,41 @@
   }
   .sample-card.placeholder .sample-link { color: var(--ink-soft); }
 
+  /* ---------- TESTIMONIALS ---------- */
+  .testimonials {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .testimonial-card {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid transparent;
+    border-top: 3px solid var(--accent);
+  }
+  .testimonial-quote {
+    font-size: 16.5px;
+    line-height: 1.7;
+    color: var(--ink);
+    margin: 0 0 20px;
+    flex-grow: 1;
+    font-style: italic;
+  }
+  .testimonial-attribution {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--ink-mid);
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
   /* ---------- WHO IT'S FOR ---------- */
   .audience-list {
     list-style: none;
@@ -781,6 +816,27 @@
         <div class="sample-link">View full dashboard →</div>
       </a>
     </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="block" id="testimonials">
+  <div class="section-eyebrow">What Preachers Are Saying</div>
+  <h2>Feedback from pastors using The Sermon Coach.</h2>
+
+  <div class="testimonials">
+    <article class="testimonial-card">
+      <blockquote class="testimonial-quote">"People want to be nice, they want to encourage you. But it takes a lot of effort and knowledge to give really specific feedback. That's where The Sermon Coach tool comes in — it's like having the best preachers listening to your sermon and taking the time to give specific feedback from their expert perspective. I found it immediately helpful, specifically challenging, and just so valuable. I'll still ask the staff and members of the church how the sermon landed with them, but I can add their encouragements to this deeper analysis."</blockquote>
+      <p class="testimonial-attribution">Tyler, Lead Pastor in Phoenix, AZ</p>
+    </article>
+    <article class="testimonial-card">
+      <blockquote class="testimonial-quote">"Sermon Coach has been an incredibly valuable tool for my growth as a preacher. It provides objective, real-time feedback that has helped me identify communication patterns, address blind spots, and take practical steps toward becoming a more effective communicator of God's Word. If you're looking for a next step in growing as a preacher, I highly recommend it."</blockquote>
+      <p class="testimonial-attribution">Jon Demeter, Lead Pastor of Redemption Peoria</p>
+    </article>
+    <article class="testimonial-card">
+      <blockquote class="testimonial-quote">"We all know that practice doesn't make perfect, but rather 'evaluated' practice makes perfect. If I could go back to my early days of pastoring, I would want to invest more time in having someone coach me to become a better preacher, teacher, and expositor of God's Word. Now with Sermon Coach, it is possible to have regular, immediate evaluation of each message you preach. I wish I had this new tool available when I was pastoring and preaching week in and week out."</blockquote>
+      <p class="testimonial-attribution">Dr. Paul R. Madson, Founder and President of Global Training Network</p>
+    </article>
   </div>
 </section>
 
