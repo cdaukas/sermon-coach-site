@@ -9,7 +9,7 @@ import {
   useTransition,
 } from "react";
 import { requestEvaluation } from "@/lib/evaluation/actions";
-import type { EvaluationUsage } from "@/lib/evaluation/quota";
+import type { EvaluationEntitlement } from "@/lib/evaluation/quota";
 import { SubscribeToEvaluate } from "./SubscribeToEvaluate";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -17,9 +17,8 @@ const POLL_MS = 3000;
 
 type EvaluateButtonProps = {
   sermonId: string;
-  usage: EvaluationUsage | null;
+  entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
-  subscriptionActive: boolean;
 };
 
 function formatElapsed(seconds: number): string {
@@ -30,9 +29,8 @@ function formatElapsed(seconds: number): string {
 
 export function EvaluateButton({
   sermonId,
-  usage,
+  entitlement,
   hasActiveEvaluation,
-  subscriptionActive,
 }: EvaluateButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -133,9 +131,10 @@ export function EvaluateButton({
   }
 
   const busy = pending || polling;
-  const atQuota = usage != null && usage.used >= usage.limit;
+  const canEvaluate = entitlement?.canEvaluate ?? false;
+  const usage = entitlement?.usage;
 
-  if (!subscriptionActive) {
+  if (!canEvaluate) {
     return (
       <div className="mt-8">
         <SubscribeToEvaluate />
@@ -173,7 +172,7 @@ export function EvaluateButton({
       <button
         type="button"
         onClick={handleClick}
-        disabled={busy || atQuota || hasActiveEvaluation}
+        disabled={busy || hasActiveEvaluation}
         className="rounded px-5 py-2.5 text-[13px] font-semibold transition-opacity disabled:opacity-60"
         style={{
           ...uiFont,
@@ -188,7 +187,14 @@ export function EvaluateButton({
             : "Evaluate sermon"}
       </button>
 
-      {usage ? (
+      {entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
+        <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+          {entitlement.freeRemaining} free evaluation
+          {entitlement.freeRemaining === 1 ? "" : "s"} remaining
+        </p>
+      ) : null}
+
+      {usage && entitlement?.creditSource === "subscription" ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {usage.used} of {usage.limit} evaluations used this month
         </p>

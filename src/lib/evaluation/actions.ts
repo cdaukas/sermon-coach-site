@@ -11,10 +11,11 @@ import { EVALUATION_PROMPT_VERSION } from "./prompt";
 import { formatScoreBandStrict } from "./schema";
 import { processEvaluationJob } from "./processEvaluation";
 import {
-  checkEvaluationQuota,
+  checkEvaluationEligibility,
   countActiveEvaluationsForUser,
+  NO_EVALUATION_CREDITS_CODE,
 } from "./quota";
-import { checkSubscriptionActive } from "./subscription";
+import { isEvaluationStubEnabled } from "./stub";
 import type { RequestEvaluationResult } from "./types";
 
 async function runFixtureEvaluation(
@@ -69,15 +70,6 @@ export async function requestEvaluation(
     return { ok: false, error: "You must be signed in to run an evaluation." };
   }
 
-  const subscription = await checkSubscriptionActive(user.id);
-  if (!subscription.ok) {
-    return {
-      ok: false,
-      error: subscription.error,
-      code: subscription.code,
-    };
-  }
-
   const { data: sermon, error: sermonError } = await supabase
     .from("sermons")
     .select("id, title")
@@ -108,7 +100,7 @@ export async function requestEvaluation(
     return { ok: false, error: "No manuscript version found for this sermon." };
   }
 
-  if (process.env.EVALUATION_USE_STUB === "1") {
+  if (isEvaluationStubEnabled()) {
     return runFixtureEvaluation(sermonId, version.id);
   }
 
@@ -120,9 +112,12 @@ export async function requestEvaluation(
     };
   }
 
-  const quota = await checkEvaluationQuota(user.id);
-  if (!quota.ok) {
-    return { ok: false, error: quota.error };
+  const eligibility = await checkEvaluationEligibility(user.id);
+  if (!eligibility.ok) {
+    if (eligibility.code === NO_EVALUATION_CREDITS_CODE) {
+      redirect("/pricing.html");
+    }
+    return { ok: false, error: eligibility.error, code: eligibility.code };
   }
 
   const activeCount = await countActiveEvaluationsForUser(user.id);

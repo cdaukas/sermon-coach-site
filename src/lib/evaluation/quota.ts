@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export type PlanTier = "coach" | "cohort";
 
+export type EvaluationCreditSource = "free" | "subscription";
+
 export type EvaluationUsage = {
   planTier: PlanTier;
   used: number;
@@ -9,7 +11,34 @@ export type EvaluationUsage = {
   periodStart: string;
 };
 
+export type EvaluationEntitlement = {
+  freeRemaining: number;
+  subscriptionActive: boolean;
+  usage: EvaluationUsage | null;
+  canEvaluate: boolean;
+  creditSource: EvaluationCreditSource | null;
+};
+
 const COOLDOWN_MS = 60_000;
+
+export const NO_EVALUATION_CREDITS_CODE = "NO_EVALUATION_CREDITS" as const;
+
+export type EligibilityGuardResult =
+  | {
+      ok: true;
+      usage: EvaluationUsage | null;
+      creditSource: EvaluationCreditSource;
+      freeRemaining: number;
+      subscriptionActive: boolean;
+    }
+  | {
+      ok: false;
+      error: string;
+      code?: typeof NO_EVALUATION_CREDITS_CODE;
+    };
+
+/** @deprecated Use checkEvaluationEligibility */
+export type QuotaGuardResult = EligibilityGuardResult;
 
 export function tierLimit(planTier: PlanTier): number {
   switch (planTier) {
@@ -36,19 +65,39 @@ function periodHasExpired(periodStart: string): boolean {
   return Date.now() >= end.getTime();
 }
 
-export type QuotaGuardResult =
-  | { ok: true; usage: EvaluationUsage }
-  | { ok: false; error: string };
+type ProfileBillingRow = {
+  plan_tier: string;
+  subscription_status: string;
+  free_evaluations_remaining: number;
+  evaluations_used_this_period: number;
+  evaluations_period_start: string;
+  last_evaluation_at: string | null;
+};
 
-export async function checkEvaluationQuota(
+async function refreshEvaluationPeriodIfNeeded(
   userId: string,
-): Promise<QuotaGuardResult> {
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("refresh_evaluation_period_if_needed", {
+    p_user_id: userId,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
+}
+
+async function loadProfileBilling(
+  userId: string,
+): Promise<{ ok: true; profile: ProfileBillingRow } | { ok: false; error: string }> {
   const supabase = await createClient();
 
   const { data: profile, error } = await supabase
     .from("profiles")
     .select(
-      "plan_tier, evaluations_used_this_period, evaluations_period_start, last_evaluation_at",
+      "plan_tier, subscription_status, free_evaluations_remaining, evaluations_used_this_period, evaluations_period_start, last_evaluation_at",
     )
     .eq("id", userId)
     .maybeSingle();
@@ -64,50 +113,112 @@ export async function checkEvaluationQuota(
     };
   }
 
+  return { ok: true, profile };
+}
+
+function buildUsageFromProfile(profile: ProfileBillingRow): EvaluationUsage {
+  const planTier = profile.plan_tier as PlanTier;
   let used = profile.evaluations_used_this_period;
   let periodStart = profile.evaluations_period_start;
-  const planTier = profile.plan_tier as PlanTier;
 
   if (periodHasExpired(periodStart)) {
     used = 0;
     periodStart = startOfCurrentMonthUtc();
-    const { error: resetError } = await supabase
-      .from("profiles")
-      .update({
-        evaluations_used_this_period: 0,
-        evaluations_period_start: periodStart,
-      })
-      .eq("id", userId);
-
-    if (resetError) {
-      return { ok: false, error: resetError.message };
-    }
-  }
-
-  const limit = tierLimit(planTier);
-
-  if (used >= limit) {
-    return {
-      ok: false,
-      error: `Monthly evaluation limit reached (${limit} per month on ${planTier.replace("_", " ")}).`,
-    };
-  }
-
-  if (profile.last_evaluation_at) {
-    const elapsed = Date.now() - new Date(profile.last_evaluation_at).getTime();
-    if (elapsed < COOLDOWN_MS) {
-      const secondsLeft = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
-      return {
-        ok: false,
-        error: `Please wait ${secondsLeft} seconds before starting another evaluation.`,
-      };
-    }
   }
 
   return {
-    ok: true,
-    usage: { planTier, used, limit, periodStart },
+    planTier,
+    used,
+    limit: tierLimit(planTier),
+    periodStart,
   };
+}
+
+function checkCooldown(
+  lastEvaluationAt: string | null,
+): EligibilityGuardResult | null {
+  if (!lastEvaluationAt) {
+    return null;
+  }
+
+  const elapsed = Date.now() - new Date(lastEvaluationAt).getTime();
+  if (elapsed < COOLDOWN_MS) {
+    const secondsLeft = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
+    return {
+      ok: false,
+      error: `Please wait ${secondsLeft} seconds before starting another evaluation.`,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Production eligibility: free credit first, then active subscription monthly quota.
+ * Packs/rollover are not implemented yet.
+ */
+export async function checkEvaluationEligibility(
+  userId: string,
+): Promise<EligibilityGuardResult> {
+  const refreshed = await refreshEvaluationPeriodIfNeeded(userId);
+  if (!refreshed.ok) {
+    return refreshed;
+  }
+
+  const loaded = await loadProfileBilling(userId);
+  if (!loaded.ok) {
+    return loaded;
+  }
+
+  const { profile } = loaded;
+  const subscriptionActive = profile.subscription_status === "active";
+  const freeRemaining = profile.free_evaluations_remaining;
+
+  const cooldownBlock = checkCooldown(profile.last_evaluation_at);
+  if (cooldownBlock) {
+    return cooldownBlock;
+  }
+
+  if (freeRemaining > 0) {
+    return {
+      ok: true,
+      creditSource: "free",
+      freeRemaining,
+      subscriptionActive,
+      usage: subscriptionActive ? buildUsageFromProfile(profile) : null,
+    };
+  }
+
+  if (subscriptionActive) {
+    const usage = buildUsageFromProfile(profile);
+    if (usage.used >= usage.limit) {
+      return {
+        ok: false,
+        error: `Monthly evaluation limit reached (${usage.limit} per month on ${usage.planTier.replace("_", " ")}).`,
+      };
+    }
+
+    return {
+      ok: true,
+      creditSource: "subscription",
+      freeRemaining: 0,
+      subscriptionActive: true,
+      usage,
+    };
+  }
+
+  return {
+    ok: false,
+    error: "No evaluation credits remaining.",
+    code: NO_EVALUATION_CREDITS_CODE,
+  };
+}
+
+/** @deprecated Use checkEvaluationEligibility */
+export async function checkEvaluationQuota(
+  userId: string,
+): Promise<EligibilityGuardResult> {
+  return checkEvaluationEligibility(userId);
 }
 
 export async function countActiveEvaluationsForUser(
@@ -160,60 +271,54 @@ export async function recordEvaluationComplete(
   userId: string,
 ): Promise<void> {
   const supabase = await createClient();
+  const { error } = await supabase.rpc("consume_evaluation_credit", {
+    p_user_id: userId,
+  });
 
-  const { data: profile, error: fetchError } = await supabase
-    .from("profiles")
-    .select("evaluations_used_this_period")
-    .eq("id", userId)
-    .single();
-
-  if (fetchError) {
-    throw new Error(fetchError.message);
-  }
-
-  const { error: updateError } = await supabase
-    .from("profiles")
-    .update({
-      evaluations_used_this_period:
-        profile.evaluations_used_this_period + 1,
-      last_evaluation_at: new Date().toISOString(),
-    })
-    .eq("id", userId);
-
-  if (updateError) {
-    throw new Error(updateError.message);
+  if (error) {
+    throw new Error(error.message);
   }
 }
 
-export async function getEvaluationUsage(
+export async function getEvaluationEntitlement(
   userId: string,
-): Promise<EvaluationUsage | null> {
-  const supabase = await createClient();
-
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("plan_tier, evaluations_used_this_period, evaluations_period_start")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (error || !profile) {
+): Promise<EvaluationEntitlement | null> {
+  const refreshed = await refreshEvaluationPeriodIfNeeded(userId);
+  if (!refreshed.ok) {
     return null;
   }
 
-  let used = profile.evaluations_used_this_period;
-  let periodStart = profile.evaluations_period_start;
-
-  if (periodHasExpired(periodStart)) {
-    used = 0;
-    periodStart = startOfCurrentMonthUtc();
+  const loaded = await loadProfileBilling(userId);
+  if (!loaded.ok) {
+    return null;
   }
 
-  const planTier = profile.plan_tier as PlanTier;
+  const { profile } = loaded;
+  const subscriptionActive = profile.subscription_status === "active";
+  const freeRemaining = profile.free_evaluations_remaining;
+  const usage = subscriptionActive ? buildUsageFromProfile(profile) : null;
+
+  let canEvaluate = freeRemaining > 0;
+  let creditSource: EvaluationCreditSource | null = canEvaluate ? "free" : null;
+
+  if (!canEvaluate && subscriptionActive && usage) {
+    canEvaluate = usage.used < usage.limit;
+    creditSource = canEvaluate ? "subscription" : null;
+  }
 
   return {
-    planTier,
-    used,
-    limit: tierLimit(planTier),
-    periodStart,
+    freeRemaining,
+    subscriptionActive,
+    usage,
+    canEvaluate,
+    creditSource,
   };
+}
+
+/** @deprecated Use getEvaluationEntitlement */
+export async function getEvaluationUsage(
+  userId: string,
+): Promise<EvaluationUsage | null> {
+  const entitlement = await getEvaluationEntitlement(userId);
+  return entitlement?.usage ?? null;
 }
