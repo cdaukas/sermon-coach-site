@@ -3,10 +3,7 @@ import Link from "next/link";
 import { SermonForm } from "@/components/dashboard/SermonForm";
 import { SubscribeToEvaluate } from "@/components/evaluation/SubscribeToEvaluate";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getSubscriptionStatus,
-  isSubscriptionActive,
-} from "@/lib/evaluation/subscription";
+import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 
 export const metadata: Metadata = {
   title: "New Sermon",
@@ -20,10 +17,10 @@ export default async function NewSermonPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const subscriptionStatus = user
-    ? await getSubscriptionStatus(user.id)
+  const entitlement = user
+    ? await getEvaluationEntitlement(user.id)
     : null;
-  const subscriptionActive = isSubscriptionActive(subscriptionStatus);
+  const canEvaluate = entitlement?.canEvaluate ?? false;
 
   return (
     <main
@@ -68,8 +65,17 @@ export default async function NewSermonPage() {
         </p>
       </div>
 
-      {!subscriptionActive ? (
+      {!canEvaluate ? (
         <SubscribeToEvaluate className="mb-8" />
+      ) : entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
+        <p
+          className="mb-6 text-[13px]"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          {entitlement.freeRemaining} free evaluation
+          {entitlement.freeRemaining === 1 ? "" : "s"} remaining — save a sermon,
+          then run your evaluation.
+        </p>
       ) : null}
 
       <SermonForm />
