@@ -58,13 +58,19 @@ export default function SignupPage() {
 
     setLoading(true);
     const supabase = createClient();
-    const redirectBase =
-      typeof window !== "undefined" ? window.location.origin : "";
+    const isLocalDev =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1");
+    const siteOrigin = isLocalDev
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+        "https://sermoncoach.online");
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: `${redirectBase}/auth/callback?next=/dashboard`,
+        emailRedirectTo: `${siteOrigin}/login`,
       },
     });
     setLoading(false);
