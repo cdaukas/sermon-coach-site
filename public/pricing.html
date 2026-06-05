@@ -504,6 +504,24 @@
   .pack.featured .pack-cta { background: var(--ink); color: var(--bg); }
   .pack.featured .pack-cta:hover { background: var(--ink-mid); }
 
+  .pack-cta-disabled {
+    color: var(--ink-soft);
+    border-color: var(--rule);
+    background: transparent;
+    opacity: 0.7;
+    cursor: default;
+    pointer-events: none;
+  }
+  .pack-cta-disabled:hover {
+    background: transparent;
+    color: var(--ink-soft);
+  }
+  .pack.featured .pack-cta-disabled {
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--rule);
+  }
+
   .pack-note {
     max-width: 600px;
     margin: 24px auto 0;
@@ -795,7 +813,7 @@
       <li>Valid 18 months</li>
       <li>Candidating messages, conference keynotes, or trying the rubric on your own work</li>
     </ul>
-    <a href="/signup" class="pack-cta">Get Started</a>
+    <span class="pack-cta pack-cta-disabled">Coming soon</span>
   </div>
 
   <!-- GUEST PREACHER -->
@@ -809,7 +827,7 @@
       <li>Valid 18 months</li>
       <li>Built for elders, lay preachers, and retired pastors filling a pulpit</li>
     </ul>
-    <a href="/signup" class="pack-cta">Get Started</a>
+    <span class="pack-cta pack-cta-disabled">Coming soon</span>
   </div>
 
   <!-- SERIES PREP -->
@@ -824,7 +842,7 @@
       <li>Valid 18 months</li>
       <li>Run every manuscript through the rubric the week before you preach it. Ten sermons, ten honest reads, one series done right.</li>
     </ul>
-    <a href="/signup" class="pack-cta">Get Started</a>
+    <span class="pack-cta pack-cta-disabled">Coming soon</span>
   </div>
 
 </section>
