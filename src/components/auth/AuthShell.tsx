@@ -21,7 +21,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           style={{ fontFamily: "var(--font-serif)", color: "var(--sc-ink)" }}
         >
           The Sermon{" "}
-          <span style={{ color: "var(--sc-accent)" }}>Coach</span>
+          <span style={{ color: "var(--sc-accent)" }}>Coach</span>™
         </Link>
       </header>
 
