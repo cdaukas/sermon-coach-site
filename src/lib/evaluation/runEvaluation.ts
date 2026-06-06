@@ -75,15 +75,43 @@ function logSchemaFailure(toolInput: unknown, error: unknown): void {
 
 function parseValidatedResult(toolInput: unknown): EvaluationResultStrict {
   try {
-    const draft = evaluationResultStrictBaseSchema.parse(toolInput);
-    return evaluationResultStrictSchema.parse(applyComputedScoring(draft));
-  } catch (error) {
-    logSchemaFailure(toolInput, error);
+    console.log(
+      "RAW_CLAUDE_RESPONSE:",
+      JSON.stringify(toolInput, null, 2),
+    );
+  } catch {
+    console.log("RAW_CLAUDE_RESPONSE:", toolInput);
+  }
+
+  const baseResult = evaluationResultStrictBaseSchema.safeParse(toolInput);
+  if (!baseResult.success) {
+    console.error(
+      "ZOD_ISSUES:",
+      JSON.stringify(baseResult.error.issues, null, 2),
+    );
+    logSchemaFailure(toolInput, baseResult.error);
     throw new EvaluationRunError(
       "Evaluation response failed schema validation.",
       "schema",
     );
   }
+
+  const strictResult = evaluationResultStrictSchema.safeParse(
+    applyComputedScoring(baseResult.data),
+  );
+  if (!strictResult.success) {
+    console.error(
+      "ZOD_ISSUES:",
+      JSON.stringify(strictResult.error.issues, null, 2),
+    );
+    logSchemaFailure(toolInput, strictResult.error);
+    throw new EvaluationRunError(
+      "Evaluation response failed schema validation.",
+      "schema",
+    );
+  }
+
+  return strictResult.data;
 }
 
 async function callClaudeAndValidate(
