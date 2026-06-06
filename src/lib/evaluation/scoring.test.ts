@@ -41,8 +41,19 @@ describe("prompt_version verdict cap gate", () => {
     );
   });
 
-  it("evaluationVerdictPersistSchema rejects affirmation over 60 words", () => {
-    const longAffirmation = Array.from({ length: 61 }, (_, i) => `word${i}`).join(
+  it("evaluationVerdictPersistSchema accepts affirmation up to 80 words", () => {
+    const affirmation = Array.from({ length: 80 }, (_, i) => `word${i}`).join(
+      " ",
+    );
+    const parsed = evaluationVerdictPersistSchema.safeParse({
+      affirmation,
+      improvement: "The single highest-leverage change for the next sermon: tighten application.",
+    });
+    assert.equal(parsed.success, true);
+  });
+
+  it("evaluationVerdictPersistSchema rejects affirmation over 80 words", () => {
+    const longAffirmation = Array.from({ length: 81 }, (_, i) => `word${i}`).join(
       " ",
     );
     const parsed = evaluationVerdictPersistSchema.safeParse({
@@ -52,23 +63,23 @@ describe("prompt_version verdict cap gate", () => {
     assert.equal(parsed.success, false);
   });
 
-  it("evaluationVerdictPersistSchema accepts improvement up to 32 words", () => {
-    const lingerImprovement =
-      "The single highest-leverage change for the next sermon: let the Paton illustration breathe for thirty fewer words, then spend those recovered seconds crossing the bridge into a named, present-day life situation.";
-    assert.equal(lingerImprovement.trim().split(/\s+/).length, 31);
+  it("evaluationVerdictPersistSchema accepts improvement up to 80 words", () => {
+    const improvement = Array.from({ length: 80 }, (_, i) => `word${i}`).join(
+      " ",
+    );
     const parsed = evaluationVerdictPersistSchema.safeParse({
-      affirmation: "One named strength in a single pastoral paragraph under sixty words total here.",
-      improvement: lingerImprovement,
+      affirmation: "One named strength in a single pastoral paragraph under eighty words total here now.",
+      improvement,
     });
     assert.equal(parsed.success, true);
   });
 
-  it("evaluationVerdictPersistSchema rejects improvement over 32 words", () => {
-    const longImprovement = Array.from({ length: 33 }, (_, i) => `word${i}`).join(
+  it("evaluationVerdictPersistSchema rejects improvement over 80 words", () => {
+    const longImprovement = Array.from({ length: 81 }, (_, i) => `word${i}`).join(
       " ",
     );
     const parsed = evaluationVerdictPersistSchema.safeParse({
-      affirmation: "One named strength in a single pastoral paragraph under sixty words total here.",
+      affirmation: "One named strength in a single pastoral paragraph under eighty words total here now.",
       improvement: longImprovement,
     });
     assert.equal(parsed.success, false);
