@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthMessage } from "@/components/auth/AuthMessage";
 import {
@@ -11,6 +11,12 @@ import {
   AuthSubmit,
 } from "@/components/auth/AuthForm";
 import { createClient } from "@/lib/supabase/client";
+import {
+  buildAuthCallbackUrl,
+  buildCheckoutPath,
+  buildLoginPath,
+  parseCoachCheckoutParams,
+} from "@/lib/billing/checkout";
 
 function friendlySignupError(message: string): string {
   const lower = message.toLowerCase();
@@ -23,8 +29,26 @@ function friendlySignupError(message: string): string {
   return "Something went wrong. Please try again.";
 }
 
-export default function SignupPage() {
+function getSiteOrigin(): string {
+  const isLocalDev =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1");
+
+  if (isLocalDev && typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+    "https://sermoncoach.online"
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const checkoutParams = parseCoachCheckoutParams(searchParams);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,6 +58,10 @@ export default function SignupPage() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+
+  const loginHref = checkoutParams
+    ? buildLoginPath(checkoutParams.cadence)
+    : "/login";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,19 +86,19 @@ export default function SignupPage() {
 
     setLoading(true);
     const supabase = createClient();
-    const isLocalDev =
-      typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1");
-    const siteOrigin = isLocalDev
-      ? window.location.origin
-      : (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-        "https://sermoncoach.online");
+    const siteOrigin = getSiteOrigin();
+    const emailRedirectTo = checkoutParams
+      ? buildAuthCallbackUrl(
+          siteOrigin,
+          buildCheckoutPath(checkoutParams.cadence),
+        )
+      : `${siteOrigin}/login`;
+
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: `${siteOrigin}/login`,
+        emailRedirectTo,
       },
     });
     setLoading(false);
@@ -81,7 +109,11 @@ export default function SignupPage() {
     }
 
     if (data.session) {
-      router.push("/dashboard");
+      router.push(
+        checkoutParams
+          ? buildCheckoutPath(checkoutParams.cadence)
+          : "/dashboard",
+      );
       router.refresh();
       return;
     }
@@ -89,18 +121,24 @@ export default function SignupPage() {
     setAwaitingConfirmation(true);
     setBanner({
       variant: "success",
-      text: "Check your email to confirm your account, then sign in.",
+      text: checkoutParams
+        ? "Check your email to confirm your account. After you verify, you'll continue to Coach checkout."
+        : "Check your email to confirm your account, then sign in.",
     });
   }
 
   return (
     <AuthShell
       title="Create account"
-      subtitle="Start building your private sermon library."
+      subtitle={
+        checkoutParams
+          ? "Create your account, then continue to Coach checkout."
+          : "Start building your private sermon library."
+      }
       footer={
         <>
           Already have an account?{" "}
-          <AuthLink href="/login">Sign in</AuthLink>
+          <AuthLink href={loginHref}>Sign in</AuthLink>
         </>
       }
     >
@@ -115,7 +153,7 @@ export default function SignupPage() {
           className="text-center text-sm"
           style={{ fontFamily: "var(--font-ui)", color: "var(--sc-ink-soft)" }}
         >
-          <AuthLink href="/login">Go to sign in</AuthLink>
+          <AuthLink href={loginHref}>Go to sign in</AuthLink>
         </p>
       ) : (
         <AuthForm onSubmit={handleSubmit}>
@@ -163,5 +201,24 @@ export default function SignupPage() {
         </AuthForm>
       )}
     </AuthShell>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <AuthShell title="Create account" subtitle="Start building your private sermon library.">
+          <p
+            className="text-center text-sm"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--sc-ink-soft)" }}
+          >
+            Loading…
+          </p>
+        </AuthShell>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   );
 }

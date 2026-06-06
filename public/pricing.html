@@ -766,7 +766,7 @@
       <li>Your top 3 priorities, with practical next steps</li>
       <li>A private library of every evaluation you run</li>
     </ul>
-    <a href="https://buy.stripe.com/3cI28k09A8CidcUgAl04800" class="tier-cta" data-tier-cta="coach">Start with Coach</a>
+    <a href="/checkout?plan=coach&cadence=monthly" class="tier-cta" data-tier-cta="coach">Start with Coach</a>
   </div>
 
   <!-- COHORT -->
@@ -901,7 +901,6 @@
         price: '29',
         period: '/mo',
         note: 'Billed monthly.',
-        checkoutUrl: 'https://buy.stripe.com/3cI28k09A8CidcUgAl04800',
       },
       cohort: {
         price: '99',
@@ -915,7 +914,6 @@
         price: '290',
         period: '/yr',
         note: '2 months free',
-        checkoutUrl: 'https://buy.stripe.com/4gMcMY8G6bOuc8Q1Fr04801',
       },
       cohort: {
         price: '990',
@@ -937,7 +935,13 @@
       if (priceEl) priceEl.textContent = data.price;
       if (periodEl) periodEl.textContent = data.period;
       if (noteEl) noteEl.textContent = data.note;
-      if (ctaEl) ctaEl.href = data.checkoutUrl;
+      if (ctaEl) {
+        if (tier === 'coach') {
+          ctaEl.href = `/checkout?plan=coach&cadence=${cadence}`;
+        } else if (data.checkoutUrl) {
+          ctaEl.href = data.checkoutUrl;
+        }
+      }
     });
   }
 

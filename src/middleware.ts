@@ -49,6 +49,15 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/login/") ||
       pathname.startsWith("/signup/"))
   ) {
+    const plan = request.nextUrl.searchParams.get("plan");
+    const cadence = request.nextUrl.searchParams.get("cadence");
+
+    if (plan === "coach" && (cadence === "monthly" || cadence === "annual")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/checkout";
+      return NextResponse.redirect(url);
+    }
+
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";
