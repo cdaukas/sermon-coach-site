@@ -11,6 +11,11 @@ import {
   AuthSubmit,
 } from "@/components/auth/AuthForm";
 import { createClient } from "@/lib/supabase/client";
+import {
+  buildCheckoutPath,
+  buildSignupPath,
+  parseCoachCheckoutParams,
+} from "@/lib/billing/checkout";
 
 const QUERY_MESSAGES: Record<string, { variant: "error" | "success"; text: string }> =
   {
@@ -38,6 +43,7 @@ function friendlyAuthError(message: string): string {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const checkoutParams = parseCoachCheckoutParams(searchParams);
   const redirectTo = searchParams.get("redirectTo") ?? "/dashboard";
   const queryKey = searchParams.get("error") ?? searchParams.get("message");
   const queryBanner = queryKey ? QUERY_MESSAGES[queryKey] : undefined;
@@ -75,7 +81,13 @@ function LoginForm() {
       return;
     }
 
-    router.push(redirectTo.startsWith("/") ? redirectTo : "/dashboard");
+    router.push(
+      checkoutParams
+        ? buildCheckoutPath(checkoutParams.cadence)
+        : redirectTo.startsWith("/")
+          ? redirectTo
+          : "/dashboard",
+    );
     router.refresh();
   }
 
@@ -86,7 +98,15 @@ function LoginForm() {
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <AuthLink href="/signup">Create one</AuthLink>
+          <AuthLink
+            href={
+              checkoutParams
+                ? buildSignupPath(checkoutParams.cadence)
+                : "/signup"
+            }
+          >
+            Create one
+          </AuthLink>
         </>
       }
     >
