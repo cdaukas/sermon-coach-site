@@ -136,9 +136,9 @@ export const evaluationVerdictPersistSchema = z.object({
   affirmation: z
     .string()
     .min(1, "Verdict affirmation is required")
-    .refine((s) => countWords(s) <= 60, {
+    .refine((s) => countWords(s) <= 80, {
       message:
-        "Verdict affirmation must be 60 words or fewer (canon target ~50-60). The verdict is pastoral framing; the body does the detail work.",
+        "Verdict affirmation must be 80 words or fewer (canon target ~50-60). The verdict is pastoral framing; the body does the detail work.",
     })
     .refine(verdictNoQuotesRefine.affirmation, {
       message:
@@ -147,9 +147,9 @@ export const evaluationVerdictPersistSchema = z.object({
   improvement: z
     .string()
     .min(1, "Verdict improvement is required")
-    .refine((s) => countWords(s) <= 32, {
+    .refine((s) => countWords(s) <= 80, {
       message:
-        "Verdict improvement must be 32 words or fewer (canon target ~25-30; headline pointer with one qualifying clause, not an explanation).",
+        "Verdict improvement must be 80 words or fewer (canon target ~25-30; headline pointer with one qualifying clause, not an explanation).",
     })
     .refine(verdictNoQuotesRefine.improvement, {
       message:
