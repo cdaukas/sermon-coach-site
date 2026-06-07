@@ -4,7 +4,7 @@
 
 **Canonical UI contract:** `public/sermon-evaluation-tressler-2cor11-rev2.html` (and the other sample HTML files). Chris referenced `sermon-evaluation-tressler-2cor11-rev3.html`; that file is not in the repo yet — treat **rev2** as the layout/section spec until rev3 is committed.
 
-**Pricing context (quotas in code; Stripe not wired yet):** Coach $29/mo — **10 evals/mo**; Cohort $99/mo — **30 evals/mo** pooled, 5 seats. FAQ: one evaluation = one full dashboard per submission; re-running a draft counts again; subscription counters reset monthly.
+**Pricing context (quotas in code; Stripe not wired yet):** Coach $29/mo — **10 evals/mo**; Cohort $99/mo — **50 evals/mo** pooled, 5 seats. FAQ: one evaluation = one full dashboard per submission; re-running a draft counts again; subscription counters reset monthly.
 
 ---
 
