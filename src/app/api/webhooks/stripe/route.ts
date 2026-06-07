@@ -15,6 +15,9 @@ export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
+  console.error("WH secret present:", Boolean(process.env.STRIPE_WEBHOOK_SECRET));
+  console.error("SK present:", Boolean(process.env.STRIPE_SECRET_KEY));
+
   if (!webhookSecret || !stripeSecretKey) {
     console.error(
       "Stripe webhook: missing STRIPE_WEBHOOK_SECRET or STRIPE_SECRET_KEY",
