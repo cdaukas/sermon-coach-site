@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { handleSubscriptionActivationEvent } from "@/lib/billing/stripe-webhook";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// Redeploy trigger — no functional change.
 export const runtime = "nodejs";
 
 const SUBSCRIPTION_EVENTS = new Set([
