@@ -286,11 +286,8 @@
   .rhythm-head p { max-width: 560px; margin: 0 auto 28px; color: var(--ink-soft); font-style: italic; }
   .rhythm-figure { margin: 0; }
   .rhythm-figure img { width: 100%; height: auto; display: block; }
-  .rhythm-desktop { max-width: 1000px; margin: 0 auto; }
-  .rhythm-mobile { display: none; max-width: 360px; margin: 0 auto; }
   @media (max-width: 640px) {
-    .rhythm-desktop { display: none; }
-    .rhythm-mobile { display: block; }
+    .rhythm-figure img { max-width: 360px; margin: 0 auto; }
   }
 
   p {
@@ -791,16 +788,14 @@
        The Sermon Coach is the read in between.</p>
   </div>
   <figure class="rhythm-figure">
-    <img class="rhythm-desktop" src="/preaching-rhythm-flow.svg"
-      alt="The preaching rhythm: pray and study, write the sermon,
-      strengthen the manuscript with The Sermon Coach, preach with
-      Spirit-empowered confidence, then keep growing from the
-      transcript with The Sermon Coach." />
-    <img class="rhythm-mobile" src="/preaching-rhythm-flow-mobile.svg"
-      alt="The preaching rhythm: pray and study, write the sermon,
-      strengthen the manuscript with The Sermon Coach, preach with
-      Spirit-empowered confidence, then keep growing from the
-      transcript with The Sermon Coach." />
+    <picture>
+      <source media="(max-width: 640px)" srcset="/preaching-rhythm-flow-mobile.svg">
+      <img src="/preaching-rhythm-flow.svg"
+        alt="The preaching rhythm: pray and study, write the sermon,
+        strengthen the manuscript with The Sermon Coach, preach with
+        Spirit-empowered confidence, then keep growing from the
+        transcript with The Sermon Coach." />
+    </picture>
   </figure>
 </section>
 
