@@ -45,7 +45,7 @@ export function tierLimit(planTier: PlanTier): number {
     case "coach":
       return 10;
     case "cohort":
-      return 30;
+      return 50;
     default:
       return 10;
   }
