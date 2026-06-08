@@ -280,6 +280,65 @@
   }
   .block.dark p.lede { color: #d8d2c2; }
 
+  /* ---------- SECTION DARK MODIFIER ---------- */
+  section.block.section--dark {
+    max-width: none;
+    padding: 96px 24px;
+  }
+  section.block.section--dark > .section-eyebrow,
+  section.block.section--dark > h2,
+  section.block.section--dark > p,
+  section.block.section--dark > ul,
+  section.block.section--dark > .testimonials {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section--dark {
+    background: var(--ink);
+    color: rgba(250,248,243,0.82);
+  }
+  .section--dark h1,
+  .section--dark h2,
+  .section--dark h3,
+  .section--dark .section-title,
+  .section--dark strong { color: var(--bg); }
+  .section--dark .eyebrow,
+  .section--dark .section-eyebrow,
+  .section--dark a:not(.cta):not([class*="cta"]) { color: var(--accent-soft); }
+  .section--dark li::before { color: var(--accent-soft); }
+  .section--dark p.lede { color: rgba(250,248,243,0.75); }
+  .section--dark .card,
+  .section--dark .panel,
+  .section--dark .testimonial,
+  .section--dark [class*="card"] {
+    background: var(--ink-mid);
+    border-color: rgba(255,255,255,0.10);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+  }
+  .section--dark .testimonial-quote { color: rgba(250,248,243,0.88); }
+  .section--dark .testimonial-attribution {
+    color: rgba(250,248,243,0.65);
+    border-top-color: rgba(255,255,255,0.12);
+  }
+  .section--dark .testimonial-card {
+    border-top-color: var(--accent-soft);
+  }
+  .section--dark,
+  .section--dark * { border-color: rgba(255,255,255,0.12); }
+  .section--dark .cta,
+  .section--dark [class*="cta"] {
+    background: var(--accent-soft);
+    color: var(--ink);
+    border-color: var(--accent-soft);
+  }
+  .section--dark .cta:hover,
+  .section--dark [class*="cta"]:hover {
+    background: var(--bg);
+    color: var(--ink);
+    border-color: var(--bg);
+  }
+
   /* ---------- PREACHING RHYTHM ---------- */
   .rhythm { max-width: 1000px; margin: 0 auto; padding: 64px 24px; text-align: center; }
   .rhythm-head h2 { margin: 8px 0 10px; }
@@ -523,25 +582,6 @@
   }
 
   /* ---------- FOUNDER ---------- */
-  section.block.founder-block {
-    max-width: none;
-    background: var(--ink);
-    color: var(--bg);
-  }
-  .founder-block .section-eyebrow {
-    color: var(--accent-soft);
-  }
-  .founder-block h2 {
-    color: var(--bg);
-  }
-  .founder-block .block-inner,
-  .founder-block > .section-eyebrow,
-  .founder-block > h2,
-  .founder-block > .founder {
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
-  }
   .founder {
     background: var(--panel);
     padding: 40px 36px;
@@ -554,7 +594,7 @@
     color: var(--ink);
   }
   .founder p:last-child { margin-bottom: 0; }
-  .founder-block .story-link {
+  .founder .story-link {
     color: var(--accent);
   }
 
@@ -625,7 +665,7 @@
     .hero-sub { font-size: 18px; }
     section.block { padding: 56px 20px; }
     section.block.dark { padding: 64px 20px; }
-    section.block.founder-block { padding: 64px 20px; }
+    section.block.section--dark { padding: 64px 20px; }
     .felt-pain-band { padding: 44px 20px; }
     .feature-grid { grid-template-columns: 1fr; }
     .testimonials {
@@ -793,7 +833,7 @@
 </section>
 
 <!-- WHO IT'S FOR -->
-<section class="block">
+<section class="block section--dark">
   <div class="section-eyebrow">Who it's for</div>
   <p class="lede">The Sermon Coach is for preachers who take the craft seriously and want to strengthen every sermon before they step into the pulpit. Especially:</p>
 
@@ -807,7 +847,7 @@
 </section>
 
 <!-- SAMPLES -->
-<section class="block dark" id="sample">
+<section class="block" id="sample">
   <div class="block-inner">
     <div class="section-eyebrow">See It For Yourself</div>
     <h2>Sample evaluations.</h2>
@@ -840,7 +880,7 @@
 </section>
 
 <!-- TESTIMONIALS -->
-<section class="block" id="testimonials">
+<section class="block section--dark" id="testimonials">
   <div class="section-eyebrow">What Preachers Are Saying</div>
   <h2>Feedback from pastors using The Sermon Coach.</h2>
 
@@ -865,7 +905,7 @@
 </section>
 
 <!-- FOUNDER -->
-<section class="block founder-block">
+<section class="block">
   <div class="section-eyebrow">Built By A Pastor For Pastors</div>
   <h2>Built by a preacher.</h2>
 
