@@ -136,12 +136,12 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
         },
         {
           id: 8,
-          name: "Heat Map: emotional delivery",
+          name: "Emotional arc and dynamics",
           category: 3,
           tradition_tag: "Simeon Trust",
           score: 3,
           narrative:
-            "Manuscript-only: the emotional arc is designed (irony, catalog, doxological landing) but delivery cannot be assessed without audio.",
+            "The emotional arc is partially designed (irony, catalog, doxological landing) but holds one register too long in the middle; the turn to doxology could be engineered more deliberately on the page.",
           anchored_quote: null,
           is_double_weighted: false,
         },

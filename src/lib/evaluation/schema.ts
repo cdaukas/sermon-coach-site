@@ -33,7 +33,7 @@ export const CANONICAL_CRITERION_BY_ID: Record<
   5: "Structure",
   6: "Hard things handled",
   7: "Application to present audience",
-  8: "Heat Map: emotional delivery",
+  8: "Emotional arc and dynamics",
   9: "Pastoral specificity",
   10: "Ecclesial faithfulness",
   11: "Expository exultation",

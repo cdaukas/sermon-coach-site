@@ -9,7 +9,7 @@ export const CANONICAL_CRITERION_NAMES = [
   "Structure",
   "Hard things handled",
   "Application to present audience",
-  "Heat Map: emotional delivery",
+  "Emotional arc and dynamics",
   "Pastoral specificity",
   "Ecclesial faithfulness",
   "Expository exultation",
