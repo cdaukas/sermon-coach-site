@@ -1,5 +1,12 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  buildEvalCostLogPayload,
+  logEvalCost,
+  sumEvalUsage,
+  usageFromResponse,
+  type EvalUsageTotals,
+} from "./eval-cost";
+import {
   buildSystemPrompt,
   buildUserMessage,
   getEvaluationModel,
@@ -86,11 +93,17 @@ function parseValidatedResult(toolInput: unknown): EvaluationResultStrict {
   }
 }
 
-async function callClaudeAndValidate(
+type CallClaudeResult = {
+  model: string;
+  usage: EvalUsageTotals;
+  toolInput: unknown;
+};
+
+async function callClaude(
   model: string,
   input: EvaluationUserMessageInput,
   createMessage: CreateEvaluationMessage,
-): Promise<RunEvaluationSuccess> {
+): Promise<CallClaudeResult> {
   let response: Anthropic.Messages.Message;
 
   try {
@@ -109,14 +122,10 @@ async function callClaudeAndValidate(
     );
   }
 
-  const toolInput = extractToolInput(response.content);
-  const result = parseValidatedResult(toolInput);
-
   return {
-    result,
     model: response.model,
-    inputTokens: response.usage.input_tokens,
-    outputTokens: response.usage.output_tokens,
+    usage: usageFromResponse(response.usage),
+    toolInput: extractToolInput(response.content),
   };
 }
 
@@ -139,9 +148,34 @@ export async function runEvaluation(
     options?.createMessage ??
     ((params) => client.messages.create(params));
 
+  const attemptUsages: EvalUsageTotals[] = [];
+  let apiAttempts = 0;
+  let responseModel = model;
+
   for (let attempt = 0; attempt < 2; attempt++) {
+    const call = await callClaude(model, input, createMessage);
+    apiAttempts += 1;
+    attemptUsages.push(call.usage);
+    responseModel = call.model;
+
     try {
-      return await callClaudeAndValidate(model, input, createMessage);
+      const result = parseValidatedResult(call.toolInput);
+      const billedUsage = sumEvalUsage(attemptUsages);
+
+      logEvalCost(
+        buildEvalCostLogPayload({
+          model: responseModel,
+          usage: billedUsage,
+          apiAttempts,
+        }),
+      );
+
+      return {
+        result,
+        model: responseModel,
+        inputTokens: call.usage.input_tokens,
+        outputTokens: call.usage.output_tokens,
+      };
     } catch (error) {
       if (
         attempt === 0 &&

@@ -17,6 +17,7 @@ const evaluationInput = {
 function messageWithToolInput(
   toolInput: unknown,
   model = "claude-test-model",
+  usage: Anthropic.Messages.Usage = { input_tokens: 10, output_tokens: 20 },
 ): Anthropic.Messages.Message {
   return {
     id: "msg_test",
@@ -33,7 +34,7 @@ function messageWithToolInput(
     ],
     stop_reason: "tool_use",
     stop_sequence: null,
-    usage: { input_tokens: 10, output_tokens: 20 },
+    usage,
   };
 }
 
@@ -69,18 +70,58 @@ describe("runEvaluation schema retry", () => {
     const createMessage: CreateEvaluationMessage = async () => {
       createCalls += 1;
       if (createCalls === 1) {
-        return messageWithToolInput({ invalid: "schema" });
+        return messageWithToolInput({ invalid: "schema" }, "claude-test-model", {
+          input_tokens: 10,
+          output_tokens: 20,
+        });
       }
-      return messageWithToolInput(EVALUATION_FIXTURE);
+      return messageWithToolInput(EVALUATION_FIXTURE, "claude-test-model", {
+        input_tokens: 30,
+        output_tokens: 40,
+      });
     };
 
-    const { result, model } = await runEvaluation(evaluationInput, {
-      createMessage,
-    });
+    const logs: string[] = [];
+    const originalLog = console.log;
+    console.log = (message?: unknown) => {
+      if (typeof message === "string") {
+        logs.push(message);
+      }
+    };
 
-    assert.equal(createCalls, 2);
-    assert.equal(model, "claude-test-model");
-    assert.equal(result.meta.sermon_title, EVALUATION_FIXTURE.meta.sermon_title);
+    try {
+      const { result, model, inputTokens, outputTokens } = await runEvaluation(
+        evaluationInput,
+        { createMessage },
+      );
+
+      assert.equal(createCalls, 2);
+      assert.equal(model, "claude-test-model");
+      assert.equal(
+        result.meta.sermon_title,
+        EVALUATION_FIXTURE.meta.sermon_title,
+      );
+      assert.equal(inputTokens, 30);
+      assert.equal(outputTokens, 40);
+
+      const evalCostLine = logs.find((line) => line.includes('"eval_cost"'));
+      assert.ok(evalCostLine);
+      const payload = JSON.parse(evalCostLine!) as {
+        tag: string;
+        input_tokens: number;
+        output_tokens: number;
+        api_attempts: number;
+        cost_usd: number | null;
+      };
+      assert.equal(payload.tag, "eval_cost");
+      assert.equal(payload.input_tokens, 40);
+      assert.equal(payload.output_tokens, 60);
+      assert.equal(payload.api_attempts, 2);
+      assert.equal(payload.cost_usd, null);
+      assert.equal(evalCostLine!.includes("Opening line"), false);
+    } finally {
+      console.log = originalLog;
+    }
   });
 
   it("surfaces schema error after two failed generates", async () => {
