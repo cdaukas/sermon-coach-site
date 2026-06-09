@@ -1,3 +1,7 @@
+import {
+  formatDisplayScoreBare,
+  formatDisplayScoreWithDenom,
+} from "@/lib/evaluation/display-score";
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import {
   CATEGORY_MAX_POINTS,
@@ -11,30 +15,35 @@ const GRADING_BANDS = [
   {
     tier: 5,
     range: "47–55",
+    rangeDisplay: "8.5–10.0",
     band: "Exemplary",
     meaning: "Multiple criteria scored 5s. Worth studying or sharing.",
   },
   {
     tier: 4,
     range: "39–46",
+    rangeDisplay: "7.1–8.4",
     band: "Strong",
     meaning: "Most criteria scored 4s. Doing the work well.",
   },
   {
     tier: 3,
     range: "30–38",
+    rangeDisplay: "5.5–6.9",
     band: "Faithful",
     meaning: "Most criteria scored 3s. Faithfully doing the work.",
   },
   {
     tier: 2,
     range: "22–29",
+    rangeDisplay: "4.0–5.4",
     band: "Needs Improvement",
     meaning: "Multiple criteria scored 2s. Real gaps to address.",
   },
   {
     tier: 1,
     range: "<22",
+    rangeDisplay: "<4.0",
     band: "Significant Concerns",
     meaning: "Multiple criteria scored 1s. Address before preaching again.",
   },
@@ -96,15 +105,16 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
           className="mb-5 text-[14px] leading-relaxed"
           style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
         >
-          Weighted score of <strong>{scoring.composite_weighted}</strong>/55 places this sermon in{" "}
-          <strong>{formatScoreBandStrict(scoring)}</strong>.
+          Display score of <strong>{formatDisplayScoreWithDenom(scoring.composite_weighted)}</strong>{" "}
+          places this sermon in <strong>{formatScoreBandStrict(scoring)}</strong>. Band thresholds
+          use the internal weighted /55 score ({scoring.composite_weighted}/55).
         </p>
 
         <div className="-mx-2 mb-8 overflow-x-auto">
-          <table className="w-full min-w-[520px] border-collapse text-[13px]">
+          <table className="w-full min-w-[640px] border-collapse text-[13px]">
             <thead>
               <tr style={{ ...uiFont, color: "var(--sc-ink)" }}>
-                {["Tier", "Range", "Band", "What it means"].map((col) => (
+                {["Tier", "Range (/55)", "Display (/10)", "Band", "What it means"].map((col) => (
                   <th
                     key={col}
                     className="border-b px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.06em]"
@@ -142,6 +152,12 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
                       style={{ borderColor: "var(--sc-rule)" }}
                     >
                       {band.range}
+                    </td>
+                    <td
+                      className="border-b px-3 py-2.5"
+                      style={{ borderColor: "var(--sc-rule)" }}
+                    >
+                      {band.rangeDisplay}
                     </td>
                     <td
                       className="border-b px-3 py-2.5"
@@ -195,13 +211,33 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
           }}
         >
           <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-            {scoring.composite_weighted}/55
+            {formatDisplayScoreWithDenom(scoring.composite_weighted)}
           </p>
           <p
             className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            Composite score
+            Composite score (display)
+          </p>
+          <p
+            className="mt-4 text-[13px] leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+          >
+            Internal weighted score: <strong>{scoring.composite_weighted}/55</strong> · Simple
+            composite: <strong>{scoring.composite_simple}/55</strong>
+          </p>
+          <p
+            className="mt-2 font-mono text-[12px] leading-relaxed"
+            style={{ color: "var(--sc-ink-mid)" }}
+          >
+            weighted = round(weighted_raw × 55 / 70) = {scoring.composite_weighted}/55
+          </p>
+          <p
+            className="mt-2 text-[12px] leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+          >
+            Base-10 display converts weighted /55 ÷ 5.5 ({scoring.composite_weighted} ÷ 5.5 ={" "}
+            {formatDisplayScoreBare(scoring.composite_weighted)}).
           </p>
         </div>
 

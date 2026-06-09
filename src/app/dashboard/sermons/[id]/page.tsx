@@ -9,6 +9,7 @@ import {
   listEvaluationsForSermon,
   sermonHasActiveEvaluation,
 } from "@/lib/evaluation/queries";
+import { formatDisplayScoreBare } from "@/lib/evaluation/display-score";
 import { formatStoredScoreBand } from "@/lib/evaluation/schema";
 import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
@@ -119,7 +120,11 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
               latestComplete.score_band,
               latestComplete.overall_score,
             )}{" "}
-            ({latestComplete.overall_score ?? "—"}/55)
+            (
+            {latestComplete.overall_score != null
+              ? formatDisplayScoreBare(latestComplete.overall_score)
+              : "—"}
+            )
           </Link>
         </p>
       ) : null}
