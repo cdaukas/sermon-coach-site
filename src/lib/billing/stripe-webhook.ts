@@ -176,10 +176,6 @@ export async function writePackGrant(
   }
 
   if (!profileId) {
-    console.warn(
-      "Pack grant: no Supabase profile match for checkout purchaser",
-      { email, stripePaymentId },
-    );
     return { outcome: "no_profile", email, stripePaymentId };
   }
 
@@ -249,10 +245,17 @@ export async function handlePackCheckoutCompleted(
     return;
   }
 
-  await writePackGrant(deps.supabase, {
+  const result = await writePackGrant(deps.supabase, {
     email,
     packSource,
     packQuantity,
     stripePaymentId,
   });
+
+  if (result.outcome === "no_profile") {
+    deps.logError(
+      "Pack checkout: payment succeeded but no Supabase profile matched the email; manual grant required",
+      { email: result.email, stripePaymentId: result.stripePaymentId },
+    );
+  }
 }
