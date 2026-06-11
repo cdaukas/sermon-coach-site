@@ -135,6 +135,7 @@ export async function requestEvaluation(
       sermon_version_id: version.id,
       status: "pending",
       prompt_version: EVALUATION_PROMPT_VERSION,
+      credit_source: eligibility.creditSource,
     })
     .select("id")
     .single();
