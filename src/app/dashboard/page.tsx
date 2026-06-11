@@ -1,4 +1,6 @@
+import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SermonList } from "@/components/dashboard/SermonList";
+import { getPackCredits } from "@/lib/billing/pack-credits";
 import { listSermons } from "@/lib/sermons/queries";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -6,6 +8,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 export default async function DashboardPage() {
   const sermons = await listSermons();
+  const packCredits = await getPackCredits();
 
   return (
     <main
@@ -30,6 +33,13 @@ export default async function DashboardPage() {
           Your sermons
         </h1>
       </div>
+
+      {packCredits ? (
+        <PackCreditsCard
+          totalRemaining={packCredits.totalRemaining}
+          soonestExpiry={packCredits.soonestExpiry}
+        />
+      ) : null}
 
       <SermonList sermons={sermons} />
     </main>
