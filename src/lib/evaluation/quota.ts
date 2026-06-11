@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type PlanTier = "coach" | "cohort";
 
-export type EvaluationCreditSource = "free" | "subscription";
+export type EvaluationCreditSource = "free" | "subscription" | "pack";
 
 export type EvaluationUsage = {
   planTier: PlanTier;
@@ -153,9 +154,24 @@ function checkCooldown(
   return null;
 }
 
+async function userHasLivePackCredit(userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("eval_credit_grants")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gt("quantity_remaining", 0)
+    .gt("expires_at", new Date().toISOString());
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return (count ?? 0) > 0;
+}
+
 /**
- * Production eligibility: free credit first, then active subscription monthly quota.
- * Packs/rollover are not implemented yet.
+ * Production eligibility: free credit first, then subscription monthly quota, then pack credits.
  */
 export async function checkEvaluationEligibility(
   userId: string,
@@ -191,19 +207,32 @@ export async function checkEvaluationEligibility(
 
   if (subscriptionActive) {
     const usage = buildUsageFromProfile(profile);
-    if (usage.used >= usage.limit) {
+    if (usage.used < usage.limit) {
       return {
-        ok: false,
-        error: `Monthly evaluation limit reached (${usage.limit} per month on ${usage.planTier.replace("_", " ")}).`,
+        ok: true,
+        creditSource: "subscription",
+        freeRemaining: 0,
+        subscriptionActive: true,
+        usage,
       };
     }
+  }
 
+  if (await userHasLivePackCredit(userId)) {
     return {
       ok: true,
-      creditSource: "subscription",
+      creditSource: "pack",
       freeRemaining: 0,
-      subscriptionActive: true,
-      usage,
+      subscriptionActive,
+      usage: subscriptionActive ? buildUsageFromProfile(profile) : null,
+    };
+  }
+
+  if (subscriptionActive) {
+    const usage = buildUsageFromProfile(profile);
+    return {
+      ok: false,
+      error: `Monthly evaluation limit reached (${usage.limit} per month on ${usage.planTier.replace("_", " ")}).`,
     };
   }
 
@@ -267,9 +296,88 @@ export async function countActiveEvaluationsForUser(
   return count ?? 0;
 }
 
+async function loadLatestCompletedEvaluationForUser(
+  userId: string,
+): Promise<{ id: string; creditSource: string | null } | null> {
+  const supabase = await createClient();
+
+  const { data: sermons, error: sermonsError } = await supabase
+    .from("sermons")
+    .select("id")
+    .eq("user_id", userId);
+
+  if (sermonsError) {
+    throw new Error(sermonsError.message);
+  }
+
+  const sermonIds = (sermons ?? []).map((s) => s.id);
+  if (sermonIds.length === 0) {
+    return null;
+  }
+
+  const { data: versions, error: versionsError } = await supabase
+    .from("sermon_versions")
+    .select("id")
+    .in("sermon_id", sermonIds);
+
+  if (versionsError) {
+    throw new Error(versionsError.message);
+  }
+
+  const versionIds = (versions ?? []).map((v) => v.id);
+  if (versionIds.length === 0) {
+    return null;
+  }
+
+  const { data: evaluation, error } = await supabase
+    .from("sermon_evaluations")
+    .select("id, credit_source")
+    .in("sermon_version_id", versionIds)
+    .eq("status", "complete")
+    .order("completed_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!evaluation) {
+    return null;
+  }
+
+  return {
+    id: evaluation.id,
+    creditSource: evaluation.credit_source,
+  };
+}
+
 export async function recordEvaluationComplete(
   userId: string,
 ): Promise<void> {
+  const completed = await loadLatestCompletedEvaluationForUser(userId);
+  const creditSource = completed?.creditSource ?? null;
+  const evaluationId = completed?.id ?? "unknown";
+
+  if (creditSource === "pack") {
+    const admin = createAdminClient();
+    const { data: grantId, error } = await admin.rpc("consume_pack_credit", {
+      p_user_id: userId,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (grantId === null) {
+      console.warn(
+        `consume_pack_credit returned null (no live pack credit at consume time) for user_id=${userId} evaluation_id=${evaluationId}`,
+      );
+    }
+
+    return;
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.rpc("consume_evaluation_credit", {
     p_user_id: userId,
