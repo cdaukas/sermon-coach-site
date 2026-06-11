@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { handleSubscriptionActivationEvent } from "@/lib/billing/stripe-webhook";
+import {
+  handlePackCheckoutCompleted,
+  handleSubscriptionActivationEvent,
+} from "@/lib/billing/stripe-webhook";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Redeploy trigger — pick up corrected STRIPE_SECRET_KEY.
@@ -39,6 +42,24 @@ export async function POST(request: Request) {
     const message = err instanceof Error ? err.message : "Invalid signature";
     console.error("Stripe webhook signature verification failed:", message);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  if (event.type === "checkout.session.completed") {
+    try {
+      const supabase = createAdminClient();
+      await handlePackCheckoutCompleted(
+        event.data.object as Stripe.Checkout.Session,
+        {
+          supabase,
+          stripe,
+          logError: (message, meta) => console.error(message, meta ?? {}),
+        },
+      );
+    } catch (err) {
+      console.error("Stripe pack webhook handler error:", err);
+      return NextResponse.json({ error: "Handler failed" }, { status: 500 });
+    }
+    return NextResponse.json({ received: true });
   }
 
   if (!SUBSCRIPTION_EVENTS.has(event.type)) {

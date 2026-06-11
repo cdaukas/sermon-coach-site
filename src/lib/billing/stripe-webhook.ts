@@ -123,3 +123,136 @@ export async function handleSubscriptionActivationEvent(
   await activateProfile(deps.supabase, profileId, customerId);
   return { matched: true };
 }
+
+function getCheckoutStripePaymentId(session: Stripe.Checkout.Session): string {
+  const paymentIntent = session.payment_intent;
+  if (typeof paymentIntent === "string") {
+    return paymentIntent;
+  }
+  if (paymentIntent && typeof paymentIntent === "object") {
+    return paymentIntent.id;
+  }
+  return session.id;
+}
+
+function getPackProductFromLineItems(
+  lineItems: Stripe.ApiList<Stripe.LineItem>,
+): Stripe.Product | null {
+  const price = lineItems.data[0]?.price;
+  const product = price?.product;
+  if (!product || typeof product !== "object") {
+    return null;
+  }
+  if ("deleted" in product && product.deleted) {
+    return null;
+  }
+  return product;
+}
+
+export type WritePackGrantResult =
+  | { outcome: "inserted"; row: Record<string, unknown> }
+  | { outcome: "skipped_idempotent"; stripePaymentId: string }
+  | { outcome: "no_profile"; email: string; stripePaymentId: string };
+
+/** Profile lookup + idempotent insert into eval_credit_grants. */
+export async function writePackGrant(
+  supabase: SupabaseClient,
+  params: {
+    email: string;
+    packSource: string;
+    packQuantity: number;
+    stripePaymentId: string;
+  },
+): Promise<WritePackGrantResult> {
+  const { email, packSource, packQuantity, stripePaymentId } = params;
+
+  const { data: profileId, error: emailLookupError } = await supabase.rpc(
+    "find_profile_id_by_email",
+    { p_email: email },
+  );
+
+  if (emailLookupError) {
+    throw new Error(`Profile lookup by email failed: ${emailLookupError.message}`);
+  }
+
+  if (!profileId) {
+    console.warn(
+      "Pack grant: no Supabase profile match for checkout purchaser",
+      { email, stripePaymentId },
+    );
+    return { outcome: "no_profile", email, stripePaymentId };
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setMonth(expiresAt.getMonth() + 18);
+
+  const { data: row, error: insertError } = await supabase
+    .from("eval_credit_grants")
+    .insert({
+      user_id: profileId,
+      source: packSource,
+      quantity_total: packQuantity,
+      quantity_remaining: packQuantity,
+      expires_at: expiresAt.toISOString(),
+      stripe_payment_id: stripePaymentId,
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    if (insertError.code === "23505") {
+      console.log("grant already exists, skipping", { stripePaymentId });
+      return { outcome: "skipped_idempotent", stripePaymentId };
+    }
+    throw new Error(
+      `Failed to insert eval_credit_grant: ${insertError.message}`,
+    );
+  }
+
+  return { outcome: "inserted", row };
+}
+
+export async function handlePackCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+  deps: StripeWebhookDeps,
+): Promise<void> {
+  const lineItems = await deps.stripe.checkout.sessions.listLineItems(
+    session.id,
+    { expand: ["data.price.product"] },
+  );
+
+  const product = getPackProductFromLineItems(lineItems);
+  const packSource = product?.metadata?.pack_source;
+  const packQuantityRaw = product?.metadata?.pack_quantity;
+
+  if (!packSource || !packQuantityRaw) {
+    return;
+  }
+
+  const packQuantity = Number.parseInt(packQuantityRaw, 10);
+  if (!Number.isFinite(packQuantity) || packQuantity <= 0) {
+    deps.logError("Pack checkout: invalid pack_quantity metadata", {
+      sessionId: session.id,
+      packQuantityRaw,
+    });
+    return;
+  }
+
+  const stripePaymentId = getCheckoutStripePaymentId(session);
+  const email = session.customer_details?.email;
+
+  if (!email) {
+    deps.logError("Pack checkout: missing customer email", {
+      sessionId: session.id,
+      stripePaymentId,
+    });
+    return;
+  }
+
+  await writePackGrant(deps.supabase, {
+    email,
+    packSource,
+    packQuantity,
+    stripePaymentId,
+  });
+}
