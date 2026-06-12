@@ -32,7 +32,7 @@ export function AppHeader() {
   const onNewSermon = pathname === "/dashboard/sermons/new";
 
   return (
-    <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
+    <header className="dashboard-app-header mb-10 flex flex-wrap items-center justify-between gap-4">
       <Link
         href="/dashboard"
         className="text-xl font-semibold tracking-tight no-underline"

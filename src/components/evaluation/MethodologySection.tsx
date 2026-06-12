@@ -59,7 +59,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
 
   return (
     <details
-      className="group mt-14 border-t-[3px]"
+      className="evaluation-methodology group mt-14 border-t-[3px]"
       style={{
         background: "var(--sc-panel)",
         borderColor: "var(--sc-ink)",

@@ -8,7 +8,7 @@ type PrioritiesSectionProps = {
 export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
   return (
     <section
-      className="mb-7 px-6 py-9 md:px-9"
+      className="evaluation-priorities mb-7 px-6 py-9 md:px-9"
       style={{
         background: "linear-gradient(165deg, #1a2332 0%, #2a3548 100%)",
         color: "#faf8f3",
@@ -65,7 +65,7 @@ export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
                 {priority.rationale}
               </p>
               <div
-                className="border-l-2 px-4 py-3 text-[13px] leading-relaxed"
+                className="evaluation-priorities-step border-l-2 px-4 py-3 text-[13px] leading-relaxed"
                 style={{
                   background: "rgba(199,165,92,0.12)",
                   borderColor: "var(--sc-accent-soft)",

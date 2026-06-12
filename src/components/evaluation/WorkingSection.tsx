@@ -14,7 +14,7 @@ export function WorkingSection({ whatsWorking }: WorkingSectionProps) {
         {whatsWorking.map((card) => (
           <article
             key={card.headline}
-            className="border-t-[3px] px-6 py-6"
+            className="evaluation-working-card border-t-[3px] px-6 py-6"
             style={{
               background: "var(--sc-panel)",
               borderColor: "var(--sc-green)",

@@ -1,0 +1,314 @@
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 0.75in 0.7in 1in;
+  }
+
+  body {
+    background: #fff !important;
+    color: var(--sc-ink) !important;
+    font-size: 11pt;
+    line-height: 1.45;
+    counter-reset: page;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .screen-only,
+  .dashboard-shell > header,
+  .dashboard-app-header {
+    display: none !important;
+  }
+
+  .dashboard-shell {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .evaluation-page-main {
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .evaluation-print-header {
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--sc-rule);
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .evaluation-print-wordmark {
+    margin: 0 0 0.35rem;
+    font-size: 14pt;
+    font-weight: 600;
+  }
+
+  .evaluation-print-title-line {
+    margin: 0 0 0.2rem;
+    font-family: var(--font-serif);
+    font-size: 13pt;
+    font-weight: 600;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-print-meta-line,
+  .evaluation-print-provenance {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-ui);
+    font-size: 9pt;
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-print-disclaimer {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-ui);
+    font-size: 8pt;
+    line-height: 1.35;
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--sc-rule);
+    font-family: var(--font-ui);
+    font-size: 8pt;
+    color: var(--sc-ink-soft);
+    text-align: center;
+    background: #fff;
+  }
+
+  .evaluation-print-footer::after {
+    content: " · page " counter(page);
+  }
+
+  .evaluation-report-meta {
+    display: none !important;
+  }
+
+  .evaluation-report-eyebrow {
+    display: none !important;
+  }
+
+  .evaluation-report-title,
+  .evaluation-report-scripture {
+    display: none !important;
+  }
+
+  .evaluation-headline-lockup {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem !important;
+    min-height: 0 !important;
+    box-shadow: none !important;
+    border: 1px solid var(--sc-rule) !important;
+    background: #fff !important;
+    grid-template-columns: 1fr 2fr !important;
+  }
+
+  .evaluation-score-panel {
+    background: #fff !important;
+    color: var(--sc-ink) !important;
+    border-right: 1px solid var(--sc-rule) !important;
+    padding: 1rem !important;
+  }
+
+  .evaluation-score-panel p {
+    color: var(--sc-ink) !important;
+  }
+
+  .evaluation-score-panel p:first-child {
+    color: var(--sc-accent) !important;
+    font-size: 24pt !important;
+    font-weight: 600 !important;
+  }
+
+  .evaluation-score-panel p:nth-child(2) {
+    font-size: 20pt !important;
+    font-weight: 700 !important;
+  }
+
+  .evaluation-score-panel .evaluation-score-method-note {
+    color: var(--sc-ink-soft) !important;
+  }
+
+  .evaluation-score-weight {
+    display: block !important;
+    margin-top: 0.35rem;
+    font-family: var(--font-ui);
+    font-size: 9pt;
+    color: var(--sc-ink-soft) !important;
+  }
+
+  .evaluation-verdict-panel {
+    border-left: 2px solid var(--sc-accent) !important;
+    background: #fff !important;
+    padding: 1rem !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .evaluation-category-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem !important;
+    box-shadow: none !important;
+    border: 1px solid var(--sc-rule) !important;
+  }
+
+  .evaluation-category-card > header {
+    background: #fff !important;
+    color: var(--sc-ink) !important;
+    border-bottom: 1px solid var(--sc-rule) !important;
+    padding: 0.65rem 0.85rem !important;
+  }
+
+  .evaluation-category-card > header h2,
+  .evaluation-category-card > header p {
+    color: var(--sc-ink) !important;
+  }
+
+  .evaluation-category-card > header h2 span {
+    color: var(--sc-accent) !important;
+  }
+
+  .evaluation-criterion > summary {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.65rem;
+    grid-template-columns: unset !important;
+    background: #fff !important;
+    padding: 0.55rem 0.85rem !important;
+  }
+
+  .evaluation-criterion > summary span[aria-hidden] {
+    display: none !important;
+  }
+
+  /* Criterion score slider: track, fill, and knob (CategoryCard CriterionScoreBar) */
+  .evaluation-criterion > summary > div.relative.rounded-full {
+    display: none !important;
+  }
+
+  .evaluation-criterion > summary > p.text-base {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0 !important;
+    font-size: 11pt !important;
+  }
+
+  .evaluation-criterion > summary > p.text-right {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    text-align: right !important;
+    font-family: var(--font-ui) !important;
+    font-size: 12pt !important;
+    font-weight: 700 !important;
+    color: var(--sc-ink) !important;
+  }
+
+  .evaluation-criterion {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .evaluation-criterion > :not(summary) {
+    display: block !important;
+    background: #fff !important;
+    border-top: 1px solid var(--sc-rule) !important;
+    padding: 0.55rem 0.85rem 0.75rem !important;
+  }
+
+  .evaluation-criterion blockquote {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border-left: 2px solid var(--sc-accent) !important;
+    background: var(--sc-accent-pale) !important;
+  }
+
+  .evaluation-priorities {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    background: #fff !important;
+    color: var(--sc-ink) !important;
+    border: 1px solid var(--sc-rule) !important;
+    padding: 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .evaluation-priorities p,
+  .evaluation-priorities h2,
+  .evaluation-priorities h3 {
+    color: var(--sc-ink) !important;
+  }
+
+  .evaluation-priorities .evaluation-priorities-step {
+    background: var(--sc-accent-pale) !important;
+    color: var(--sc-ink) !important;
+    border-left: 2px solid var(--sc-accent) !important;
+  }
+
+  .evaluation-working-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid var(--sc-rule) !important;
+    border-top: 2px solid var(--sc-green) !important;
+    background: #fff !important;
+  }
+
+  .evaluation-methodology {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid var(--sc-rule) !important;
+    border-top: 2px solid var(--sc-ink) !important;
+    margin-top: 1rem !important;
+  }
+
+  .evaluation-methodology > summary span[aria-hidden] {
+    display: none !important;
+  }
+
+  .evaluation-methodology > :not(summary),
+  .evaluation-rewrite > :not(summary) {
+    display: block !important;
+  }
+
+  .evaluation-rewrite {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid var(--sc-rule) !important;
+    box-shadow: none !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .evaluation-rewrite > summary span[aria-hidden] {
+    display: none !important;
+  }
+
+  .evaluation-heatmap {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid var(--sc-rule) !important;
+  }
+
+  a {
+    color: var(--sc-ink) !important;
+    text-decoration: none !important;
+  }
+}

@@ -25,7 +25,7 @@ export function HeatMapSection({ heatMap, fallbackTotalMinutes }: HeatMapSection
 
   return (
     <section
-      className="mb-7 px-6 py-7 md:px-8"
+      className="evaluation-heatmap mb-7 px-6 py-7 md:px-8"
       style={{
         background: "var(--sc-panel)",
         boxShadow: "var(--sc-shadow)",

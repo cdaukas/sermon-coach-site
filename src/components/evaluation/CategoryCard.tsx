@@ -45,7 +45,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
 
   return (
     <section
-      className="mb-7"
+      className="evaluation-category-card mb-7"
       style={{
         background: "var(--sc-panel)",
         boxShadow: "var(--sc-shadow)",
@@ -74,7 +74,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
         {category.criteria.map((criterion) => (
           <details
             key={`${criterion.id}-${criterion.name}`}
-            className="group border-b last:border-b-0"
+            className="evaluation-criterion group border-b last:border-b-0"
             style={{ borderColor: "var(--sc-rule)" }}
           >
             <summary

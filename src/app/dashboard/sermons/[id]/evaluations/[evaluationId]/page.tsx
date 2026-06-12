@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
+import { EvaluationPrintButton } from "@/components/evaluation/EvaluationPrintButton";
+import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
 import { getEvaluation } from "@/lib/evaluation/queries";
+import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
@@ -67,24 +70,50 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
     );
   }
 
+  const evaluatedAt = evaluation.completed_at ?? evaluation.created_at;
+  const pastorName = evaluation.result.meta.preacher_name;
+  const scriptureReference =
+    evaluation.result.meta.scripture_reference.trim() || null;
+  const footerDate = new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+  }).format(new Date(evaluatedAt));
+
   return (
     <main
-      className="rounded px-6 py-10 md:px-8"
+      className="evaluation-page-main rounded px-6 py-10 md:px-8"
       style={{
         background: "var(--sc-panel)",
         border: "1px solid var(--sc-rule)",
         boxShadow: "var(--sc-shadow-lift)",
       }}
     >
-      <Link
-        href={`/dashboard/sermons/${sermonId}`}
-        className="mb-8 inline-block text-[13px] font-medium no-underline hover:underline"
-        style={{ ...uiFont, color: "var(--sc-accent)" }}
-      >
-        ← Back to {sermon.title}
-      </Link>
+      <div className="screen-only mb-8 flex flex-wrap items-center justify-between gap-4">
+        <Link
+          href={`/dashboard/sermons/${sermonId}`}
+          className="inline-block text-[13px] font-medium no-underline hover:underline"
+          style={{ ...uiFont, color: "var(--sc-accent)" }}
+        >
+          ← Back to {sermon.title}
+        </Link>
+        <EvaluationPrintButton />
+      </div>
+
+      <EvaluationPrintHeader
+        pastorName={pastorName}
+        sermonTitle={sermon.title}
+        scriptureReference={scriptureReference}
+        evaluatedAt={evaluatedAt}
+      />
 
       <EvaluationDashboard result={evaluation.result} sermonTitle={sermon.title} />
+
+      <footer
+        className="evaluation-print-footer print-only"
+        aria-hidden="true"
+        data-date={footerDate}
+      >
+        The Sermon Coach · sermoncoach.online · {footerDate}
+      </footer>
     </main>
   );
 }

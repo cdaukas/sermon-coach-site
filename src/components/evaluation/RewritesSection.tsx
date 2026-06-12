@@ -14,7 +14,7 @@ export function RewritesSection({ rewrites }: RewritesSectionProps) {
         {rewrites.map((rewrite, index) => (
           <details
             key={rewrite.moment_label}
-            className="group"
+            className="evaluation-rewrite group"
             open={index === 0}
             style={{
               background: "var(--sc-panel)",

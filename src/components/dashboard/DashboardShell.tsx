@@ -7,7 +7,7 @@ type DashboardShellProps = {
 
 export function DashboardShell({ children }: DashboardShellProps) {
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-6 py-12">
+    <div className="dashboard-shell mx-auto w-full max-w-[1100px] px-6 py-12">
       <AppHeader />
       {children}
     </div>

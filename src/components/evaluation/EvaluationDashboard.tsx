@@ -21,25 +21,28 @@ export function EvaluationDashboard({
   const showHeatMap = meta.audio_available && result.heat_map !== null;
 
   return (
-    <article>
+    <article className="evaluation-report">
       <p
-        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
+        className="evaluation-report-eyebrow mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
       >
         Evaluation
       </p>
       <h1
-        className="mb-2 text-[36px] font-normal leading-tight tracking-tight md:text-[44px]"
+        className="evaluation-report-title mb-2 text-[36px] font-normal leading-tight tracking-tight md:text-[44px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
         {meta.sermon_title}
       </h1>
-      <p className="mb-6 text-lg italic" style={{ ...serifFont, color: "var(--sc-ink-soft)" }}>
+      <p
+        className="evaluation-report-scripture mb-6 text-lg italic"
+        style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+      >
         {meta.scripture_reference}
       </p>
 
       <div
-        className="mb-10 flex flex-wrap gap-x-6 gap-y-2 border-y py-3 text-[12px]"
+        className="evaluation-report-meta mb-10 flex flex-wrap gap-x-6 gap-y-2 border-y py-3 text-[12px]"
         style={{ ...uiFont, borderColor: "var(--sc-rule)", color: "var(--sc-ink-soft)" }}
       >
         <span>
