@@ -1,4 +1,3 @@
-import { formatDisplayScoreBare } from "@/lib/evaluation/display-score";
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { serifFont, splitVerdictImprovement, uiFont } from "./shared";
 
@@ -30,12 +29,6 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
           style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
         >
           {scoring.band}
-        </p>
-        <p
-          className="mb-3 text-[20px] leading-none"
-          style={{ ...uiFont, color: "#faf8f3" }}
-        >
-          {formatDisplayScoreBare(scoring.composite_weighted)}
         </p>
         <p
           className="evaluation-score-method-note text-[10px] tracking-[0.1em] uppercase"
