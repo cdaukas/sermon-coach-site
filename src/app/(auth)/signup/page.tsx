@@ -149,12 +149,25 @@ function SignupForm() {
       ) : null}
 
       {awaitingConfirmation ? (
-        <p
-          className="text-center text-sm"
-          style={{ fontFamily: "var(--font-ui)", color: "var(--sc-ink-soft)" }}
-        >
-          <AuthLink href={loginHref}>Go to sign in</AuthLink>
-        </p>
+        <div>
+          <p
+            className="mb-5 text-center text-sm leading-relaxed"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--sc-ink-soft)" }}
+          >
+            Check your spam or junk folder if it doesn't arrive within a minute.
+            Confirmation emails sometimes land there. Still nothing? Email Chris at{" "}
+            <AuthLink href="mailto:chris@sermoncoach.online">
+              chris@sermoncoach.online
+            </AuthLink>{" "}
+            and he'll sort it out.
+          </p>
+          <p
+            className="text-center text-sm"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--sc-ink-soft)" }}
+          >
+            <AuthLink href={loginHref}>Go to sign in</AuthLink>
+          </p>
+        </div>
       ) : (
         <AuthForm onSubmit={handleSubmit}>
           <AuthField
