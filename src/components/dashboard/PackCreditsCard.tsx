@@ -34,24 +34,12 @@ export function PackCreditsCard({
       }}
     >
       <p
-        className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em]"
+        className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.2em]"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
       >
         Pack credits
       </p>
-      {hasActiveSubscription ? (
-        <p
-          className="mb-2 text-[13px]"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-        >
-          Your monthly evaluations are used first. Pack credits kick in after those
-          run out.
-        </p>
-      ) : null}
-      <p
-        className="text-[18px] font-semibold"
-        style={{ ...uiFont, color: "var(--sc-ink)" }}
-      >
+      <p className="text-[18px] font-semibold" style={{ color: "var(--sc-ink)" }}>
         {totalRemaining} {creditWord} remaining
       </p>
       {expiryLabel ? (
@@ -60,6 +48,15 @@ export function PackCreditsCard({
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
           Soonest to expire: {expiryLabel}
+        </p>
+      ) : null}
+      {hasActiveSubscription ? (
+        <p
+          className="mt-1 text-[13px]"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          Your monthly evaluations are used first. Pack credits kick in after those
+          run out.
         </p>
       ) : null}
     </div>
