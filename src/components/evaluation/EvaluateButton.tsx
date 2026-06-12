@@ -8,6 +8,11 @@ import {
   useState,
   useTransition,
 } from "react";
+import {
+  normalizeSermonContext,
+  sermonContextStorageKey,
+  type SermonContext,
+} from "@/lib/evaluation/context";
 import { requestEvaluation } from "@/lib/evaluation/actions";
 import type { EvaluationEntitlement } from "@/lib/evaluation/quota";
 import { SubscribeToEvaluate } from "./SubscribeToEvaluate";
@@ -118,10 +123,27 @@ export function EvaluateButton({
     [checkStatus, stopPolling],
   );
 
+  function readStashedContext(): SermonContext | undefined {
+    const storageKey = sermonContextStorageKey(sermonId);
+    const raw = sessionStorage.getItem(storageKey);
+    sessionStorage.removeItem(storageKey);
+
+    if (!raw) {
+      return undefined;
+    }
+
+    try {
+      return normalizeSermonContext(JSON.parse(raw) as SermonContext);
+    } catch {
+      return undefined;
+    }
+  }
+
   function handleClick() {
     setError(null);
     startTransition(async () => {
-      const result = await requestEvaluation(sermonId);
+      const context = readStashedContext();
+      const result = await requestEvaluation(sermonId, context);
       if (!result.ok) {
         setError(result.error);
         return;

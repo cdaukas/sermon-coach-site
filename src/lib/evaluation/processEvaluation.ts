@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { SermonContext } from "./context";
 import { formatScoreBandStrict } from "./schema";
 import { recordEvaluationComplete } from "./quota";
 import { runEvaluation, EvaluationRunError } from "./runEvaluation";
@@ -8,6 +9,7 @@ export type ProcessEvaluationInput = {
   userId: string;
   sermonTitle: string;
   manuscript: string;
+  context?: SermonContext;
 };
 
 function userSafeError(error: unknown): string {
@@ -29,7 +31,7 @@ export async function processEvaluationJob(
   input: ProcessEvaluationInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const { evaluationId, userId, sermonTitle, manuscript } = input;
+  const { evaluationId, userId, sermonTitle, manuscript, context } = input;
 
   const { error: runningError } = await supabase
     .from("sermon_evaluations")
@@ -45,6 +47,7 @@ export async function processEvaluationJob(
     const { result, model, inputTokens, outputTokens } = await runEvaluation({
       sermonTitle,
       manuscript,
+      context,
     });
 
     const completedAt = new Date().toISOString();

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { buildContextPreamble, type SermonContext } from "./context";
 
 export const EVALUATION_PROMPT_VERSION = "v3.1";
 
@@ -61,12 +62,16 @@ ${STRUCTURAL_CONTRACT}`;
 export type EvaluationUserMessageInput = {
   sermonTitle: string;
   manuscript: string;
+  context?: SermonContext;
 };
 
 export function buildUserMessage({
   sermonTitle,
   manuscript,
+  context,
 }: EvaluationUserMessageInput): string {
+  const contextBlock = context ? `${buildContextPreamble(context)}\n\n---\n\n` : "";
+
   return `Evaluate this sermon manuscript.
 
 **Working title:** ${sermonTitle}
@@ -75,7 +80,7 @@ Infer preacher name, passage, length (~150 wpm from word count), and \`submissio
 
 ---
 
-## Manuscript
+${contextBlock}## Manuscript
 
 ${manuscript}`;
 }

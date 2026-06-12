@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { CreateSermonInput, CreateSermonResult } from "./types";
 
@@ -60,5 +59,5 @@ export async function createSermon(
     return { ok: false, error: versionError.message };
   }
 
-  redirect(`/dashboard/sermons/${sermon.id}`);
+  return { ok: true, sermonId: sermon.id };
 }

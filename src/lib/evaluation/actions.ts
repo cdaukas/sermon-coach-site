@@ -16,6 +16,7 @@ import {
   NO_EVALUATION_CREDITS_CODE,
 } from "./quota";
 import { isEvaluationStubEnabled } from "./stub";
+import type { SermonContext } from "./context";
 import type { RequestEvaluationResult } from "./types";
 
 async function runFixtureEvaluation(
@@ -60,6 +61,7 @@ function mapInsertError(message: string): string {
 
 export async function requestEvaluation(
   sermonId: string,
+  context?: SermonContext,
 ): Promise<RequestEvaluationResult> {
   const supabase = await createClient();
   const {
@@ -158,6 +160,7 @@ export async function requestEvaluation(
         userId: user.id,
         sermonTitle: sermon.title,
         manuscript: version.content,
+        context,
       });
     } catch {
       // Row updated to failed inside processEvaluationJob
