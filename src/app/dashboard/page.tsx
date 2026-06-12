@@ -11,6 +11,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 export default async function DashboardPage() {
   const sermons = await listSermons();
   const subscriptionStatus = await getSubscriptionStatus();
+  const hasActiveSubscription = subscriptionStatus?.kind === "subscription";
   const packCredits = await getPackCredits();
 
   return (
@@ -45,6 +46,7 @@ export default async function DashboardPage() {
         <PackCreditsCard
           totalRemaining={packCredits.totalRemaining}
           soonestExpiry={packCredits.soonestExpiry}
+          hasActiveSubscription={hasActiveSubscription}
         />
       ) : null}
 

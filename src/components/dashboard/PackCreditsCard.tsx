@@ -1,6 +1,7 @@
 type Props = {
   totalRemaining: number;
   soonestExpiry: string | null;
+  hasActiveSubscription?: boolean;
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -15,7 +16,11 @@ function formatExpiry(iso: string | null): string | null {
   });
 }
 
-export function PackCreditsCard({ totalRemaining, soonestExpiry }: Props) {
+export function PackCreditsCard({
+  totalRemaining,
+  soonestExpiry,
+  hasActiveSubscription,
+}: Props) {
   const expiryLabel = formatExpiry(soonestExpiry);
   const creditWord = totalRemaining === 1 ? "credit" : "credits";
 
@@ -34,6 +39,15 @@ export function PackCreditsCard({ totalRemaining, soonestExpiry }: Props) {
       >
         Pack credits
       </p>
+      {hasActiveSubscription ? (
+        <p
+          className="mb-2 text-[13px]"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          Your monthly evaluations are used first. Pack credits kick in after those
+          run out.
+        </p>
+      ) : null}
       <p
         className="text-[18px] font-semibold"
         style={{ ...uiFont, color: "var(--sc-ink)" }}
