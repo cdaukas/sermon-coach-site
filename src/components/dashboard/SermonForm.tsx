@@ -139,8 +139,15 @@ export function SermonForm() {
               fontStyle: "italic",
             }}
           >
-            A minute here sharpens the read. Skip it if you&apos;d rather just
-            see what I see.
+            A minute here sharpens the read.{" "}
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline border-0 bg-transparent p-0 text-[13px] not-italic underline-offset-2 transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            >
+              Skip it and just read it.
+            </button>
           </p>
         </div>
 
@@ -211,19 +218,9 @@ export function SermonForm() {
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center gap-4">
-        <AuthSubmit type="submit" disabled={loading} className="w-auto flex-1">
-          {loading ? "Saving…" : "Save sermon"}
-        </AuthSubmit>
-        <button
-          type="submit"
-          disabled={loading}
-          className="shrink-0 border-0 bg-transparent p-0 text-[13px] underline-offset-2 transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-        >
-          skip and just read it
-        </button>
-      </div>
+      <AuthSubmit type="submit" disabled={loading}>
+        {loading ? "Saving…" : "Save sermon"}
+      </AuthSubmit>
     </AuthForm>
   );
 }
