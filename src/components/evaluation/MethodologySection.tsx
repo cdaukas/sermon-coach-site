@@ -88,13 +88,97 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
               className="mt-2 text-[10px] tracking-[0.1em] uppercase"
               style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
             >
-              Grading bands · score calculation
+              Score calculation · grading bands
             </p>
           </div>
         </div>
       </summary>
 
       <div className="border-t px-6 pb-9 pt-2 md:px-9" style={{ borderColor: "var(--sc-rule)" }}>
+        <h3
+          className="mb-4 text-lg font-normal"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          How this sermon was scored
+        </h3>
+        <div
+          className="mb-6 rounded border px-6 py-6"
+          style={{
+            borderColor: "var(--sc-rule)",
+            background: "var(--sc-cream-tint)",
+          }}
+        >
+          <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
+            {formatDisplayScoreWithDenom(scoring.composite_weighted)}
+          </p>
+          <p
+            className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            Composite score (display)
+          </p>
+          <p
+            className="mt-4 text-[13px] leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+          >
+            Internal weighted score: <strong>{scoring.composite_weighted}/55</strong> · Simple
+            composite: <strong>{scoring.composite_simple}/55</strong>
+          </p>
+          <p
+            className="mt-2 font-mono text-[12px] leading-relaxed"
+            style={{ color: "var(--sc-ink-mid)" }}
+          >
+            weighted = round(weighted_raw × 55 / 70) = {scoring.composite_weighted}/55
+          </p>
+          <p
+            className="mt-2 text-[12px] leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+          >
+            Base-10 display converts weighted /55 ÷ 5.5 ({scoring.composite_weighted} ÷ 5.5 ={" "}
+            {formatDisplayScoreBare(scoring.composite_weighted)}).
+          </p>
+        </div>
+
+        <table className="mb-8 w-full max-w-md border-collapse text-[13px]">
+          <tbody>
+            {categories.map((row) => {
+              const subtotal = categorySubtotal(row.criteria);
+              const max = CATEGORY_MAX_POINTS[row.number] ?? subtotal;
+              return (
+                <tr key={row.id} style={{ ...serifFont, color: "var(--sc-ink)" }}>
+                  <td className="border-b py-2 pr-4" style={{ borderColor: "var(--sc-rule)" }}>
+                    {row.name}
+                  </td>
+                  <td
+                    className="border-b py-2 text-right font-medium"
+                    style={{ borderColor: "var(--sc-rule)" }}
+                  >
+                    {subtotal} / {max}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        <blockquote
+          className="mb-8 border-l-2 py-1 pl-5 text-[14px] leading-relaxed"
+          style={{
+            ...serifFont,
+            borderColor: "var(--sc-accent)",
+            color: "var(--sc-ink-soft)",
+          }}
+        >
+          <strong style={{ color: "var(--sc-ink)" }}>Why some criteria count twice.</strong>{" "}
+          Three of the eleven criteria carry double weight in the composite score: Fallen Condition
+          Focus, Gospel Clarity, and Application. These are the load-bearing tests of whether a
+          sermon actually preaches the gospel to real people — not just whether it handles the text
+          well, but whether it brings that text to bear on human fallenness, makes the good news
+          unmistakable, and lands it in the hearer&apos;s actual life. A sermon can score
+          respectably everywhere else and still miss the point if these three are weak, so the math
+          reflects what the pulpit reflects.
+        </blockquote>
+
         <h3
           className="mb-3 text-lg font-normal"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
@@ -110,7 +194,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
           use the internal weighted /55 score ({scoring.composite_weighted}/55).
         </p>
 
-        <div className="-mx-2 mb-8 overflow-x-auto">
+        <div className="-mx-2 overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-[13px]">
             <thead>
               <tr style={{ ...uiFont, color: "var(--sc-ink)" }}>
@@ -178,90 +262,6 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
             </tbody>
           </table>
         </div>
-
-        <blockquote
-          className="mb-8 border-l-2 py-1 pl-5 text-[14px] leading-relaxed"
-          style={{
-            ...serifFont,
-            borderColor: "var(--sc-accent)",
-            color: "var(--sc-ink-soft)",
-          }}
-        >
-          <strong style={{ color: "var(--sc-ink)" }}>Why some criteria count twice.</strong>{" "}
-          Three of the eleven criteria carry double weight in the composite score: Fallen Condition
-          Focus, Gospel Clarity, and Application. These are the load-bearing tests of whether a
-          sermon actually preaches the gospel to real people — not just whether it handles the text
-          well, but whether it brings that text to bear on human fallenness, makes the good news
-          unmistakable, and lands it in the hearer&apos;s actual life. A sermon can score
-          respectably everywhere else and still miss the point if these three are weak, so the math
-          reflects what the pulpit reflects.
-        </blockquote>
-
-        <h3
-          className="mb-4 text-lg font-normal"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          How this sermon was scored
-        </h3>
-        <div
-          className="mb-6 rounded border px-6 py-6"
-          style={{
-            borderColor: "var(--sc-rule)",
-            background: "var(--sc-cream-tint)",
-          }}
-        >
-          <p className="text-[40px] leading-none" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-            {formatDisplayScoreWithDenom(scoring.composite_weighted)}
-          </p>
-          <p
-            className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          >
-            Composite score (display)
-          </p>
-          <p
-            className="mt-4 text-[13px] leading-relaxed"
-            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
-          >
-            Internal weighted score: <strong>{scoring.composite_weighted}/55</strong> · Simple
-            composite: <strong>{scoring.composite_simple}/55</strong>
-          </p>
-          <p
-            className="mt-2 font-mono text-[12px] leading-relaxed"
-            style={{ color: "var(--sc-ink-mid)" }}
-          >
-            weighted = round(weighted_raw × 55 / 70) = {scoring.composite_weighted}/55
-          </p>
-          <p
-            className="mt-2 text-[12px] leading-relaxed"
-            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
-          >
-            Base-10 display converts weighted /55 ÷ 5.5 ({scoring.composite_weighted} ÷ 5.5 ={" "}
-            {formatDisplayScoreBare(scoring.composite_weighted)}).
-          </p>
-        </div>
-
-        <table className="w-full max-w-md border-collapse text-[13px]">
-          <tbody>
-            {categories.map((row) => {
-              const subtotal = categorySubtotal(row.criteria);
-              const max = CATEGORY_MAX_POINTS[row.number] ?? subtotal;
-              return (
-                <tr key={row.id} style={{ ...serifFont, color: "var(--sc-ink)" }}>
-                  <td className="border-b py-2 pr-4" style={{ borderColor: "var(--sc-rule)" }}>
-                    {row.name}
-                  </td>
-                  <td
-                    className="border-b py-2 text-right font-medium"
-                    style={{ borderColor: "var(--sc-rule)" }}
-                  >
-                    {subtotal} / {max}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
       </div>
     </details>
   );
