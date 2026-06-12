@@ -1,18 +1,26 @@
+import { GrowthTrendCard } from "@/components/dashboard/GrowthTrendCard";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SermonList } from "@/components/dashboard/SermonList";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
+import { toGrowthTrendPoints } from "@/lib/evaluation/growth-trend";
+import { listCompletedEvaluationsTrend } from "@/lib/evaluation/queries";
 import { listSermons } from "@/lib/sermons/queries";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
 export default async function DashboardPage() {
-  const sermons = await listSermons();
-  const subscriptionStatus = await getSubscriptionStatus();
+  const [sermons, subscriptionStatus, packCredits, completedEvaluations] =
+    await Promise.all([
+      listSermons(),
+      getSubscriptionStatus(),
+      getPackCredits(),
+      listCompletedEvaluationsTrend(),
+    ]);
+  const growthTrendPoints = toGrowthTrendPoints(completedEvaluations);
   const hasActiveSubscription = subscriptionStatus?.kind === "subscription";
-  const packCredits = await getPackCredits();
 
   return (
     <main
@@ -37,6 +45,8 @@ export default async function DashboardPage() {
           Your sermons
         </h1>
       </div>
+
+      <GrowthTrendCard points={growthTrendPoints} />
 
       {subscriptionStatus || packCredits ? (
         <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">

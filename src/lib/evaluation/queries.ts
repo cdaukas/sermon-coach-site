@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import type { GrowthTrendEvaluationRow } from "./growth-trend";
 import { parseEvaluationResult } from "./schema";
 import type {
   EvaluationStatus,
@@ -148,6 +149,26 @@ export async function getEvaluation(
   }
 
   return { evaluation, sermon };
+}
+
+export async function listCompletedEvaluationsTrend(): Promise<
+  GrowthTrendEvaluationRow[]
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("sermon_evaluations")
+    .select("id, overall_score, score_band, completed_at")
+    .eq("status", "complete")
+    .not("completed_at", "is", null)
+    .not("overall_score", "is", null)
+    .order("completed_at", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as GrowthTrendEvaluationRow[];
 }
 
 export async function listEvaluationsForSermon(
