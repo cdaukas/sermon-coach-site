@@ -139,15 +139,17 @@ export function SermonForm() {
               fontStyle: "italic",
             }}
           >
-            A minute here sharpens the read.{" "}
+            Before we begin, a minute of context sharpens the read. Optional, but
+            it helps. Or{" "}
             <button
               type="submit"
               disabled={loading}
               className="inline border-0 bg-transparent p-0 text-[13px] not-italic underline-offset-2 transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-60"
               style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
             >
-              Skip it and just read it.
+              skip it and start the evaluation
             </button>
+            .
           </p>
         </div>
 
