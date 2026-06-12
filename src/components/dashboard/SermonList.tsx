@@ -13,6 +13,45 @@ function formatDate(iso: string): string {
   );
 }
 
+function getMonthKey(iso: string): string {
+  const date = new Date(iso);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
+function formatMonthHeader(monthKey: string): string {
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(year, month - 1, 1);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function groupSermonsByMonth(
+  sermons: SermonListItem[],
+): { monthKey: string; sermons: SermonListItem[] }[] {
+  const groups = new Map<string, SermonListItem[]>();
+
+  for (const sermon of sermons) {
+    const monthKey = getMonthKey(sermon.created_at);
+    const bucket = groups.get(monthKey) ?? [];
+    bucket.push(sermon);
+    groups.set(monthKey, bucket);
+  }
+
+  return [...groups.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([monthKey, groupSermons]) => ({
+      monthKey,
+      sermons: groupSermons.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      ),
+    }));
+}
+
 type SermonListProps = {
   sermons: SermonListItem[];
 };
@@ -77,6 +116,7 @@ export function SermonList({ sermons }: SermonListProps) {
       : sermons.filter((sermon) =>
           sermon.title.toLowerCase().includes(normalizedQuery),
         );
+  const groupedSermons = groupSermonsByMonth(filteredSermons);
 
   return (
     <div>
@@ -100,11 +140,23 @@ export function SermonList({ sermons }: SermonListProps) {
           No sermons match that search.
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {filteredSermons.map((sermon) => (
-            <SermonCard key={sermon.id} sermon={sermon} />
+        <div className="flex flex-col gap-6">
+          {groupedSermons.map(({ monthKey, sermons: monthSermons }) => (
+            <section key={monthKey}>
+              <p
+                className="mb-3 text-[11px] font-semibold tracking-[0.16em]"
+                style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+              >
+                {formatMonthHeader(monthKey)}
+              </p>
+              <ul className="flex flex-col gap-3">
+                {monthSermons.map((sermon) => (
+                  <SermonCard key={sermon.id} sermon={sermon} />
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
