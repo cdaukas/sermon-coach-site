@@ -9,10 +9,10 @@ export function SubscriptionStatusCard({
 }) {
   const cardStyle: CSSProperties = {
     background: "var(--sc-accent-pale)",
-    border: "1px solid var(--sc-accent-soft)",
+    border: "1px solid var(--sc-rule)",
+    borderLeft: "3px solid var(--sc-accent)",
     borderRadius: "4px",
     padding: "20px 24px",
-    marginBottom: "24px",
     height: "100%",
   };
 

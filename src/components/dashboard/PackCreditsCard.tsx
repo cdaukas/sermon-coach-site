@@ -26,7 +26,7 @@ export function PackCreditsCard({
 
   return (
     <div
-      className="mb-8 rounded px-6 py-5"
+      className="h-full rounded px-6 py-5"
       style={{
         background: "var(--sc-accent-pale)",
         border: "1px solid var(--sc-rule)",
