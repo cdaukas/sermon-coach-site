@@ -38,16 +38,24 @@ export default async function DashboardPage() {
         </h1>
       </div>
 
-      {subscriptionStatus ? (
-        <SubscriptionStatusCard status={subscriptionStatus} />
-      ) : null}
+      {subscriptionStatus || packCredits ? (
+        <div className="mb-8 flex flex-col gap-6 sm:flex-row">
+          {subscriptionStatus ? (
+            <div className="min-w-0 flex-1">
+              <SubscriptionStatusCard status={subscriptionStatus} />
+            </div>
+          ) : null}
 
-      {packCredits ? (
-        <PackCreditsCard
-          totalRemaining={packCredits.totalRemaining}
-          soonestExpiry={packCredits.soonestExpiry}
-          hasActiveSubscription={hasActiveSubscription}
-        />
+          {packCredits ? (
+            <div className="min-w-0 flex-1">
+              <PackCreditsCard
+                totalRemaining={packCredits.totalRemaining}
+                soonestExpiry={packCredits.soonestExpiry}
+                hasActiveSubscription={hasActiveSubscription}
+              />
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <SermonList sermons={sermons} />
