@@ -129,7 +129,7 @@ export function SermonForm() {
             className="text-[22px] font-semibold leading-snug tracking-tight"
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
-            Before I read it, tell me about the room.
+            Before we begin, a minute of context sharpens the read.
           </h2>
           <p
             className="mt-2 text-base leading-relaxed"
@@ -139,8 +139,7 @@ export function SermonForm() {
               fontStyle: "italic",
             }}
           >
-            Before we begin, a minute of context sharpens the read. Optional, but
-            it helps. Or{" "}
+            Optional, but it helps. Or{" "}
             <button
               type="submit"
               disabled={loading}
