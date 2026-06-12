@@ -13,6 +13,7 @@ export function SubscriptionStatusCard({
     borderRadius: "4px",
     padding: "20px 24px",
     marginBottom: "24px",
+    height: "100%",
   };
 
   const labelStyle: CSSProperties = {
@@ -41,7 +42,7 @@ export function SubscriptionStatusCard({
     const word = status.remaining === 1 ? "evaluation" : "evaluations";
     return (
       <div style={cardStyle}>
-        <div style={labelStyle}>This month</div>
+        <div style={labelStyle}>Subscription · This Month</div>
         <div style={primaryStyle}>
           {status.remaining} of {status.limit} {word} left
         </div>

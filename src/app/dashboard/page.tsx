@@ -39,15 +39,15 @@ export default async function DashboardPage() {
       </div>
 
       {subscriptionStatus || packCredits ? (
-        <div className="mb-8 flex flex-col gap-6 sm:flex-row">
+        <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">
           {subscriptionStatus ? (
-            <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col">
               <SubscriptionStatusCard status={subscriptionStatus} />
             </div>
           ) : null}
 
           {packCredits ? (
-            <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
               <PackCreditsCard
                 totalRemaining={packCredits.totalRemaining}
                 soonestExpiry={packCredits.soonestExpiry}
