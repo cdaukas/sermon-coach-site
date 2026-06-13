@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import {
   handlePackCheckoutCompleted,
+  handleSubscriptionCheckoutCompleted,
   handleSubscriptionActivationEvent,
 } from "@/lib/billing/stripe-webhook";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -47,16 +48,22 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     try {
       const supabase = createAdminClient();
+      const deps = {
+        supabase,
+        stripe,
+        logError: (message: string, meta?: Record<string, unknown>) =>
+          console.error(message, meta ?? {}),
+      };
       await handlePackCheckoutCompleted(
         event.data.object as Stripe.Checkout.Session,
-        {
-          supabase,
-          stripe,
-          logError: (message, meta) => console.error(message, meta ?? {}),
-        },
+        deps,
+      );
+      await handleSubscriptionCheckoutCompleted(
+        event.data.object as Stripe.Checkout.Session,
+        deps,
       );
     } catch (err) {
-      console.error("Stripe pack webhook handler error:", err);
+      console.error("Stripe checkout webhook handler error:", err);
       return NextResponse.json({ error: "Handler failed" }, { status: 500 });
     }
     return NextResponse.json({ received: true });

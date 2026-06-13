@@ -1,10 +1,16 @@
-/** Coach subscription Stripe Payment Links — single source of truth for the app. */
-export const COACH_STRIPE_CHECKOUT_URLS = {
-  monthly: "https://buy.stripe.com/3cI28k09A8CidcUgAl04800",
-  annual: "https://buy.stripe.com/4gMcMY8G6bOuc8Q1Fr04801",
+/** Coach subscription Stripe price IDs for Checkout Sessions. */
+export const COACH_STRIPE_PRICE_IDS = {
+  monthly: "price_1Tdz8n2Ea1b3J5pTJDPg4g4D",
+  annual: "price_1TdzAO2Ea1b3J5pTp5UaMI85",
 } as const;
 
-export type CoachCadence = keyof typeof COACH_STRIPE_CHECKOUT_URLS;
+/**
+ * Retired Coach Payment Links (rollback reference only — do not wire back without review):
+ *   monthly: https://buy.stripe.com/3cI28k09A8CidcUgAl04800
+ *   annual:  https://buy.stripe.com/4gMcMY8G6bOuc8Q1Fr04801
+ */
+
+export type CoachCadence = keyof typeof COACH_STRIPE_PRICE_IDS;
 
 export type CoachCheckoutParams = {
   plan: "coach";
@@ -44,8 +50,12 @@ export function buildLoginPath(cadence: CoachCadence): string {
   return `/login?plan=coach&cadence=${cadence}`;
 }
 
-export function getCoachStripeCheckoutUrl(cadence: CoachCadence): string {
-  return COACH_STRIPE_CHECKOUT_URLS[cadence];
+export function getCoachPriceId(cadence: CoachCadence): string {
+  const fromEnv =
+    cadence === "monthly"
+      ? process.env.STRIPE_PRICE_COACH_MONTHLY
+      : process.env.STRIPE_PRICE_COACH_ANNUAL;
+  return fromEnv ?? COACH_STRIPE_PRICE_IDS[cadence];
 }
 
 export function buildAuthCallbackUrl(

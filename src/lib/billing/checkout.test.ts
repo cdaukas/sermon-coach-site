@@ -3,8 +3,8 @@ import { describe, it } from "node:test";
 import {
   buildAuthCallbackUrl,
   buildCheckoutPath,
-  COACH_STRIPE_CHECKOUT_URLS,
-  getCoachStripeCheckoutUrl,
+  COACH_STRIPE_PRICE_IDS,
+  getCoachPriceId,
   parseCoachCheckoutParams,
 } from "./checkout";
 
@@ -42,14 +42,14 @@ describe("checkout params", () => {
     );
   });
 
-  it("maps coach cadence to Stripe Payment Links", () => {
+  it("maps coach cadence to Stripe price IDs", () => {
     assert.equal(
-      getCoachStripeCheckoutUrl("monthly"),
-      COACH_STRIPE_CHECKOUT_URLS.monthly,
+      getCoachPriceId("monthly"),
+      COACH_STRIPE_PRICE_IDS.monthly,
     );
     assert.equal(
-      getCoachStripeCheckoutUrl("annual"),
-      COACH_STRIPE_CHECKOUT_URLS.annual,
+      getCoachPriceId("annual"),
+      COACH_STRIPE_PRICE_IDS.annual,
     );
   });
 });

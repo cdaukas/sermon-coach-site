@@ -60,6 +60,64 @@ async function activateProfile(
   }
 }
 
+function getSessionCustomerId(session: Stripe.Checkout.Session): string | null {
+  const customer = session.customer;
+  if (typeof customer === "string") {
+    return customer;
+  }
+  return customer?.id ?? null;
+}
+
+/** Activates subscription from Checkout Session via client_reference_id (Supabase user id). */
+export async function handleSubscriptionCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+  deps: StripeWebhookDeps,
+): Promise<void> {
+  if (session.mode !== "subscription") {
+    return;
+  }
+
+  const profileId = session.client_reference_id;
+  if (!profileId) {
+    deps.logError("Subscription checkout: missing client_reference_id", {
+      sessionId: session.id,
+    });
+    return;
+  }
+
+  const customerId = getSessionCustomerId(session);
+  if (!customerId) {
+    deps.logError("Subscription checkout: missing customer id", {
+      sessionId: session.id,
+      profileId,
+    });
+    return;
+  }
+
+  const { data: profile, error: profileError } = await deps.supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (profileError) {
+    throw new Error(
+      `Profile lookup by client_reference_id failed: ${profileError.message}`,
+    );
+  }
+
+  if (!profile) {
+    deps.logError("Subscription checkout: no profile for client_reference_id", {
+      sessionId: session.id,
+      profileId,
+      customerId,
+    });
+    return;
+  }
+
+  await activateProfile(deps.supabase, profile.id, customerId);
+}
+
 export async function handleSubscriptionActivationEvent(
   subscription: Stripe.Subscription,
   deps: StripeWebhookDeps,
@@ -74,6 +132,36 @@ export async function handleSubscriptionActivationEvent(
       subscriptionId: subscription.id,
     });
     return { matched: false };
+  }
+
+  const metadataUserId = subscription.metadata?.supabase_user_id;
+  if (metadataUserId) {
+    const { data: profileByMetadata, error: metadataLookupError } =
+      await deps.supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", metadataUserId)
+        .maybeSingle();
+
+    if (metadataLookupError) {
+      throw new Error(
+        `Profile lookup by subscription metadata failed: ${metadataLookupError.message}`,
+      );
+    }
+
+    if (profileByMetadata) {
+      await activateProfile(deps.supabase, profileByMetadata.id, customerId);
+      return { matched: true };
+    }
+
+    deps.logError(
+      "Stripe subscription: supabase_user_id metadata did not match a profile",
+      {
+        metadataUserId,
+        customerId,
+        subscriptionId: subscription.id,
+      },
+    );
   }
 
   const { data: byCustomerId, error: customerLookupError } = await deps.supabase
@@ -101,6 +189,15 @@ export async function handleSubscriptionActivationEvent(
     });
     return { matched: false };
   }
+
+  deps.logError(
+    "Subscription: using legacy email match fallback (retire when unused)",
+    {
+      email,
+      customerId,
+      subscriptionId: subscription.id,
+    },
+  );
 
   const { data: profileId, error: emailLookupError } = await deps.supabase.rpc(
     "find_profile_id_by_email",

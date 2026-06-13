@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   handleSubscriptionActivationEvent,
+  handleSubscriptionCheckoutCompleted,
   isActivatingSubscriptionStatus,
   resolveCustomerEmail,
 } from "./stripe-webhook";
@@ -24,6 +25,7 @@ type ProfileRow = { id: string; stripe_customer_id?: string | null };
 
 function makeSupabaseMock(handlers: {
   profileByCustomerId?: ProfileRow | null;
+  profileById?: string | null;
   profileIdByEmail?: string | null;
   updateError?: string;
 }) {
@@ -35,18 +37,22 @@ function makeSupabaseMock(handlers: {
       return {
         select() {
           return {
-            eq(_col: string, customerId: string) {
+            eq(col: string, value: string) {
               return {
                 async maybeSingle() {
+                  if (col === "id" && handlers.profileById === value) {
+                    return { data: { id: value }, error: null };
+                  }
                   if (
-                    handlers.profileByCustomerId?.stripe_customer_id ===
-                    customerId
+                    col === "stripe_customer_id" &&
+                    handlers.profileByCustomerId?.stripe_customer_id === value
                   ) {
                     return { data: handlers.profileByCustomerId, error: null };
                   }
                   if (
+                    col === "stripe_customer_id" &&
                     handlers.profileByCustomerId &&
-                    customerId === "cus_abc"
+                    value === "cus_abc"
                   ) {
                     return { data: handlers.profileByCustomerId, error: null };
                   }
@@ -161,6 +167,34 @@ describe("handleSubscriptionActivationEvent", () => {
     assert.equal(errors.length, 0);
   });
 
+  it("activates profile matched by subscription metadata supabase_user_id", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileById: "user-meta",
+    });
+
+    const result = await handleSubscriptionActivationEvent(
+      makeSubscription({
+        metadata: { supabase_user_id: "user-meta" },
+      }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.deepEqual(updates, [
+      {
+        id: "user-meta",
+        values: {
+          stripe_customer_id: "cus_abc",
+          subscription_status: "active",
+        },
+      },
+    ]);
+  });
+
   it("activates profile matched by stripe_customer_id", async () => {
     const { supabase, updates } = makeSupabaseMock({
       profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
@@ -184,12 +218,14 @@ describe("handleSubscriptionActivationEvent", () => {
     ]);
   });
 
-  it("bootstraps stripe_customer_id via email when no customer id match", async () => {
+  it("bootstraps stripe_customer_id via email when no metadata or customer id match", async () => {
     const { supabase, updates } = makeSupabaseMock({
       profileByCustomerId: null,
       profileIdByEmail: "user-2",
     });
 
+    const errors: Array<{ message: string; meta?: Record<string, unknown> }> =
+      [];
     const stripe = {
       customers: {
         retrieve: async () =>
@@ -205,10 +241,11 @@ describe("handleSubscriptionActivationEvent", () => {
     const result = await handleSubscriptionActivationEvent(makeSubscription(), {
       supabase,
       stripe,
-      logError: () => {},
+      logError: (message, meta) => errors.push({ message, meta }),
     });
 
     assert.equal(result.matched, true);
+    assert.match(errors[0].message, /legacy email match fallback/);
     assert.deepEqual(updates, [
       {
         id: "user-2",
@@ -248,9 +285,64 @@ describe("handleSubscriptionActivationEvent", () => {
 
     assert.equal(result.matched, false);
     assert.equal(updates.length, 0);
-    assert.equal(errors.length, 1);
-    assert.match(errors[0].message, /No Supabase profile match/);
-    assert.equal(errors[0].meta?.email, "unknown@church.org");
-    assert.equal(errors[0].meta?.customerId, "cus_abc");
+    assert.equal(errors.length, 2);
+    assert.match(errors[0].message, /legacy email match fallback/);
+    assert.match(errors[1].message, /No Supabase profile match/);
+    assert.equal(errors[1].meta?.email, "unknown@church.org");
+    assert.equal(errors[1].meta?.customerId, "cus_abc");
+  });
+});
+
+describe("handleSubscriptionCheckoutCompleted", () => {
+  it("activates profile from client_reference_id on subscription checkout", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileById: "user-checkout",
+    });
+
+    await handleSubscriptionCheckoutCompleted(
+      {
+        id: "cs_123",
+        object: "checkout.session",
+        mode: "subscription",
+        client_reference_id: "user-checkout",
+        customer: "cus_abc",
+      } as Stripe.Checkout.Session,
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.deepEqual(updates, [
+      {
+        id: "user-checkout",
+        values: {
+          stripe_customer_id: "cus_abc",
+          subscription_status: "active",
+        },
+      },
+    ]);
+  });
+
+  it("ignores non-subscription checkout sessions", async () => {
+    const { supabase, updates } = makeSupabaseMock({});
+
+    await handleSubscriptionCheckoutCompleted(
+      {
+        id: "cs_123",
+        object: "checkout.session",
+        mode: "payment",
+        client_reference_id: "user-checkout",
+        customer: "cus_abc",
+      } as Stripe.Checkout.Session,
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(updates.length, 0);
   });
 });
