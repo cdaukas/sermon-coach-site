@@ -1,4 +1,5 @@
 import { GrowthTrendCard } from "@/components/dashboard/GrowthTrendCard";
+import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SermonList } from "@/components/dashboard/SermonList";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
@@ -6,21 +7,34 @@ import { getPackCredits } from "@/lib/billing/pack-credits";
 import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
 import { toGrowthTrendPoints } from "@/lib/evaluation/growth-trend";
 import { listCompletedEvaluationsTrend } from "@/lib/evaluation/queries";
+import {
+  getSubscriptionStatus as getEvalSubscriptionStatus,
+  isSubscriptionActive,
+} from "@/lib/evaluation/subscription";
 import { listSermons } from "@/lib/sermons/queries";
+import { createClient } from "@/lib/supabase/server";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
 export default async function DashboardPage() {
-  const [sermons, subscriptionStatus, packCredits, completedEvaluations] =
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [sermons, subscriptionStatus, packCredits, completedEvaluations, evalSubStatus] =
     await Promise.all([
       listSermons(),
       getSubscriptionStatus(),
       getPackCredits(),
       listCompletedEvaluationsTrend(),
+      user ? getEvalSubscriptionStatus(user.id) : Promise.resolve(null),
     ]);
   const growthTrendPoints = toGrowthTrendPoints(completedEvaluations);
-  const hasActiveSubscription = subscriptionStatus?.kind === "subscription";
+  const hasActiveSubscription = isSubscriptionActive(evalSubStatus);
+  const showSubscribeCTA = !hasActiveSubscription;
+  const showStatusRow = subscriptionStatus || packCredits || showSubscribeCTA;
 
   return (
     <main
@@ -48,11 +62,17 @@ export default async function DashboardPage() {
 
       <GrowthTrendCard points={growthTrendPoints} />
 
-      {subscriptionStatus || packCredits ? (
+      {showStatusRow ? (
         <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">
           {subscriptionStatus ? (
             <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
               <SubscriptionStatusCard status={subscriptionStatus} />
+            </div>
+          ) : null}
+
+          {showSubscribeCTA ? (
+            <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
+              <DashboardSubscribeCTA />
             </div>
           ) : null}
 
