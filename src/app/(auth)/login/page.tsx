@@ -13,8 +13,11 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import {
   buildCheckoutPath,
+  buildPackCheckoutPath,
+  buildPackSignupPath,
   buildSignupPath,
   parseCoachCheckoutParams,
+  parsePackCheckoutParams,
 } from "@/lib/billing/checkout";
 
 const QUERY_MESSAGES: Record<string, { variant: "error" | "success"; text: string }> =
@@ -44,6 +47,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const checkoutParams = parseCoachCheckoutParams(searchParams);
+  const packParams = parsePackCheckoutParams(searchParams);
   const redirectTo = searchParams.get("redirectTo") ?? "/dashboard";
   const queryKey = searchParams.get("error") ?? searchParams.get("message");
   const queryBanner = queryKey ? QUERY_MESSAGES[queryKey] : undefined;
@@ -84,9 +88,11 @@ function LoginForm() {
     router.push(
       checkoutParams
         ? buildCheckoutPath(checkoutParams.cadence)
-        : redirectTo.startsWith("/")
-          ? redirectTo
-          : "/dashboard",
+        : packParams
+          ? buildPackCheckoutPath(packParams.pack)
+          : redirectTo.startsWith("/")
+            ? redirectTo
+            : "/dashboard",
     );
     router.refresh();
   }
@@ -102,7 +108,9 @@ function LoginForm() {
             href={
               checkoutParams
                 ? buildSignupPath(checkoutParams.cadence)
-                : "/signup"
+                : packParams
+                  ? buildPackSignupPath(packParams.pack)
+                  : "/signup"
             }
           >
             Create one

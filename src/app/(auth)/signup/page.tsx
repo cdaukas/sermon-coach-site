@@ -15,7 +15,10 @@ import {
   buildAuthCallbackUrl,
   buildCheckoutPath,
   buildLoginPath,
+  buildPackCheckoutPath,
+  buildPackLoginPath,
   parseCoachCheckoutParams,
+  parsePackCheckoutParams,
 } from "@/lib/billing/checkout";
 
 function friendlySignupError(message: string): string {
@@ -49,6 +52,12 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const checkoutParams = parseCoachCheckoutParams(searchParams);
+  const packParams = parsePackCheckoutParams(searchParams);
+  const postCheckoutPath = checkoutParams
+    ? buildCheckoutPath(checkoutParams.cadence)
+    : packParams
+      ? buildPackCheckoutPath(packParams.pack)
+      : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -61,7 +70,9 @@ function SignupForm() {
 
   const loginHref = checkoutParams
     ? buildLoginPath(checkoutParams.cadence)
-    : "/login";
+    : packParams
+      ? buildPackLoginPath(packParams.pack)
+      : "/login";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -87,11 +98,8 @@ function SignupForm() {
     setLoading(true);
     const supabase = createClient();
     const siteOrigin = getSiteOrigin();
-    const emailRedirectTo = checkoutParams
-      ? buildAuthCallbackUrl(
-          siteOrigin,
-          buildCheckoutPath(checkoutParams.cadence),
-        )
+    const emailRedirectTo = postCheckoutPath
+      ? buildAuthCallbackUrl(siteOrigin, postCheckoutPath)
       : `${siteOrigin}/login`;
 
     const { data, error } = await supabase.auth.signUp({
@@ -109,11 +117,7 @@ function SignupForm() {
     }
 
     if (data.session) {
-      router.push(
-        checkoutParams
-          ? buildCheckoutPath(checkoutParams.cadence)
-          : "/dashboard",
-      );
+      router.push(postCheckoutPath ?? "/dashboard");
       router.refresh();
       return;
     }
@@ -123,7 +127,9 @@ function SignupForm() {
       variant: "success",
       text: checkoutParams
         ? "Check your email to confirm your account. After you verify, you'll continue to Coach checkout."
-        : "Check your email to confirm your account, then sign in.",
+        : packParams
+          ? "Check your email to confirm your account. After you verify, you'll continue to pack checkout."
+          : "Check your email to confirm your account, then sign in.",
     });
   }
 
@@ -133,7 +139,9 @@ function SignupForm() {
       subtitle={
         checkoutParams
           ? "Create your account, then continue to Coach checkout."
-          : "Start building your private sermon library."
+          : packParams
+            ? "Create your account, then continue to pack checkout."
+            : "Start building your private sermon library."
       }
       footer={
         <>

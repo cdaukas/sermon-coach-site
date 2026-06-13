@@ -82,6 +82,10 @@ export function buildPackSignupPath(pack: PackSku): string {
   return `/signup?pack=${pack}`;
 }
 
+export function buildPackLoginPath(pack: PackSku): string {
+  return `/login?pack=${pack}`;
+}
+
 export function getCoachPriceId(cadence: CoachCadence): string {
   const fromEnv =
     cadence === "monthly"
