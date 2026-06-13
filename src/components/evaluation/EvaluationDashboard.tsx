@@ -5,7 +5,7 @@ import { HeatMapSection } from "./HeatMapSection";
 import { MethodologySection } from "./MethodologySection";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
-import { formatLengthMinutes, serifFont, uiFont } from "./shared";
+import { serifFont, uiFont } from "./shared";
 import { WorkingSection } from "./WorkingSection";
 
 type EvaluationDashboardProps = {
@@ -53,10 +53,6 @@ export function EvaluationDashboard({
             <strong style={{ color: "var(--sc-ink)" }}>Preacher:</strong> {meta.preacher_name}
           </span>
         ) : null}
-        <span>
-          <strong style={{ color: "var(--sc-ink)" }}>Length:</strong>{" "}
-          {formatLengthMinutes(meta.estimated_length_minutes)}
-        </span>
         <span>
           <strong style={{ color: "var(--sc-ink)" }}>Mode:</strong> {meta.submission_mode}
         </span>
