@@ -9,7 +9,7 @@ import {
 const uiFont = { fontFamily: "var(--font-ui)" };
 
 const primaryButtonClass =
-  "block w-full rounded border px-4 py-2.5 text-center text-[13px] font-semibold tracking-wide no-underline transition-all sm:w-auto";
+  "block w-full rounded border px-4 py-2.5 text-center text-[13px] font-semibold tracking-wide no-underline transition-all";
 
 const primaryButtonStyle = {
   ...uiFont,
@@ -19,7 +19,7 @@ const primaryButtonStyle = {
 } as const;
 
 const secondaryButtonClass =
-  "block w-full rounded border px-4 py-2.5 text-center text-[13px] font-medium no-underline transition-colors hover:border-[var(--sc-ink)] sm:w-auto";
+  "block w-full rounded border px-4 py-2.5 text-center text-[13px] font-medium no-underline transition-colors hover:border-[var(--sc-ink)]";
 
 const secondaryButtonStyle = {
   ...uiFont,
@@ -29,7 +29,7 @@ const secondaryButtonStyle = {
 } as const;
 
 const packButtonClass =
-  "block rounded border px-3 py-1.5 text-center text-[12px] font-medium no-underline transition-colors hover:border-[var(--sc-ink)]";
+  "block w-full rounded border px-3 py-1.5 text-center text-[12px] font-medium no-underline transition-colors hover:border-[var(--sc-ink)]";
 
 const packButtonStyle = {
   ...uiFont,
@@ -66,11 +66,11 @@ export function DashboardSubscribeCTA({
       >
         {hasActiveSubscription
           ? "Need extra evaluations?"
-          : "Already know you want it?"}
+          : "Preaching more often? Subscribe."}
       </p>
 
       {!hasActiveSubscription ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+        <div className="flex flex-col gap-2">
           <Link
             href={buildCheckoutPath("monthly")}
             className={primaryButtonClass}
@@ -79,21 +79,19 @@ export function DashboardSubscribeCTA({
             Subscribe monthly · $29/mo
           </Link>
 
-          <div className="flex flex-col items-stretch gap-1 sm:items-start">
-            <Link
-              href={buildCheckoutPath("annual")}
-              className={secondaryButtonClass}
-              style={secondaryButtonStyle}
-            >
-              Subscribe annually · $290/yr
-            </Link>
-            <p
-              className="text-center text-[12px] sm:text-left"
-              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-            >
-              2 months free
-            </p>
-          </div>
+          <Link
+            href={buildCheckoutPath("annual")}
+            className={secondaryButtonClass}
+            style={secondaryButtonStyle}
+          >
+            Subscribe annually · $290/yr
+          </Link>
+          <p
+            className="text-center text-[12px]"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            2 months free
+          </p>
         </div>
       ) : null}
 
@@ -112,7 +110,7 @@ export function DashboardSubscribeCTA({
         Preach less often? Buy a pack instead.
       </p>
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <div className="mt-3 flex flex-col gap-2">
         {PACK_OFFERS.map(({ pack, label }) => (
           <Link
             key={pack}
