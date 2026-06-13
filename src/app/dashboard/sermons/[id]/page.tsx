@@ -205,6 +205,7 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
         sermonId={sermon.id}
         entitlement={entitlement}
         hasActiveEvaluation={hasActiveEvaluation}
+        hasCompletedEvaluation={Boolean(latestComplete)}
       />
     </main>
   );

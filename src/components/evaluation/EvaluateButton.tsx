@@ -24,6 +24,7 @@ type EvaluateButtonProps = {
   sermonId: string;
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
+  hasCompletedEvaluation?: boolean;
 };
 
 function formatElapsed(seconds: number): string {
@@ -36,6 +37,7 @@ export function EvaluateButton({
   sermonId,
   entitlement,
   hasActiveEvaluation,
+  hasCompletedEvaluation = false,
 }: EvaluateButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -206,7 +208,9 @@ export function EvaluateButton({
           ? "Starting…"
           : polling
             ? "Evaluating…"
-            : "Evaluate sermon"}
+            : hasCompletedEvaluation
+              ? "Re-evaluate"
+              : "Evaluate sermon"}
       </button>
 
       {entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
