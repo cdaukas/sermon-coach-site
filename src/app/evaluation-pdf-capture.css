@@ -1,0 +1,15 @@
+/* Screen-fidelity PDF capture (?pdf=1) — keeps full-color dashboard styling. */
+html[data-pdf-capture="1"] .dashboard-app-header {
+  display: none !important;
+}
+
+html[data-pdf-capture="1"] .dashboard-shell {
+  max-width: none;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+html[data-pdf-capture="1"] .evaluation-page-main {
+  box-shadow: none !important;
+  border: none !important;
+}

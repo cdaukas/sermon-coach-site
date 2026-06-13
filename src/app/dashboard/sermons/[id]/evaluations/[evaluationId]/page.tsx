@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
+import { EvaluationPdfCapture } from "@/components/evaluation/EvaluationPdfCapture";
 import { EvaluationPrintButton } from "@/components/evaluation/EvaluationPrintButton";
 import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
 import { getEvaluation } from "@/lib/evaluation/queries";
+import "@/app/evaluation-pdf-capture.css";
 import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
 type EvaluationPageProps = {
   params: Promise<{ id: string; evaluationId: string }>;
+  searchParams: Promise<{ pdf?: string }>;
 };
 
 export async function generateMetadata({
@@ -26,8 +29,13 @@ export async function generateMetadata({
   return { title: `${data.evaluation.result.meta.sermon_title} — Evaluation` };
 }
 
-export default async function EvaluationPage({ params }: EvaluationPageProps) {
+export default async function EvaluationPage({
+  params,
+  searchParams,
+}: EvaluationPageProps) {
   const { id: sermonId, evaluationId } = await params;
+  const { pdf } = await searchParams;
+  const pdfCapture = pdf === "1";
   const data = await getEvaluation(evaluationId, sermonId);
 
   if (!data) {
@@ -83,37 +91,45 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
       className="evaluation-page-main rounded px-6 py-10 md:px-8"
       style={{
         background: "var(--sc-panel)",
-        border: "1px solid var(--sc-rule)",
-        boxShadow: "var(--sc-shadow-lift)",
+        border: pdfCapture ? undefined : "1px solid var(--sc-rule)",
+        boxShadow: pdfCapture ? undefined : "var(--sc-shadow-lift)",
       }}
     >
-      <div className="screen-only mb-8 flex flex-wrap items-center justify-between gap-4">
-        <Link
-          href={`/dashboard/sermons/${sermonId}`}
-          className="inline-block text-[13px] font-medium no-underline hover:underline"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
-        >
-          ← Back to {sermon.title}
-        </Link>
-        <EvaluationPrintButton />
-      </div>
+      {pdfCapture ? <EvaluationPdfCapture /> : null}
 
-      <EvaluationPrintHeader
-        pastorName={pastorName}
-        sermonTitle={sermon.title}
-        scriptureReference={scriptureReference}
-        evaluatedAt={evaluatedAt}
-      />
+      {!pdfCapture ? (
+        <div className="screen-only mb-8 flex flex-wrap items-center justify-between gap-4">
+          <Link
+            href={`/dashboard/sermons/${sermonId}`}
+            className="inline-block text-[13px] font-medium no-underline hover:underline"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            ← Back to {sermon.title}
+          </Link>
+          <EvaluationPrintButton />
+        </div>
+      ) : null}
+
+      {!pdfCapture ? (
+        <EvaluationPrintHeader
+          pastorName={pastorName}
+          sermonTitle={sermon.title}
+          scriptureReference={scriptureReference}
+          evaluatedAt={evaluatedAt}
+        />
+      ) : null}
 
       <EvaluationDashboard result={evaluation.result} sermonTitle={sermon.title} />
 
-      <footer
-        className="evaluation-print-footer print-only"
-        aria-hidden="true"
-        data-date={footerDate}
-      >
-        The Sermon Coach · sermoncoach.online · {footerDate}
-      </footer>
+      {!pdfCapture ? (
+        <footer
+          className="evaluation-print-footer print-only"
+          aria-hidden="true"
+          data-date={footerDate}
+        >
+          The Sermon Coach · sermoncoach.online · {footerDate}
+        </footer>
+      ) : null}
     </main>
   );
 }

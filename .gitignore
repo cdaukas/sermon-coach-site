@@ -34,6 +34,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local PDF export (auth cookies + generated files)
+.pdf-auth-cookies.json
+/output/
+
 # vercel
 .vercel
 
