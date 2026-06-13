@@ -36,5 +36,20 @@ export async function createStripeCheckoutSession(
     });
   }
 
+  if (params.type === "pack") {
+    return stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [{ price: params.priceId, quantity: 1 }],
+      customer: params.customerId,
+      client_reference_id: params.userId,
+      metadata: {
+        supabase_user_id: params.userId,
+        checkout_type: "pack",
+      },
+      success_url: params.successUrl,
+      cancel_url: params.cancelUrl,
+    });
+  }
+
   throw new Error(`Unsupported checkout type: ${params.type}`);
 }

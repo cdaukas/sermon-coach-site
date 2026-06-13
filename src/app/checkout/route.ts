@@ -1,8 +1,11 @@
 import { createStripeCheckoutSession } from "@/lib/billing/create-checkout-session";
 import {
+  buildPackSignupPath,
   buildSignupPath,
   getCoachPriceId,
+  getPackPriceId,
   parseCoachCheckoutParams,
+  parsePackCheckoutParams,
 } from "@/lib/billing/checkout";
 import { getOrCreateStripeCustomer } from "@/lib/billing/stripe-customer";
 import { createClient } from "@/lib/supabase/server";
@@ -12,9 +15,10 @@ import Stripe from "stripe";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  const checkoutParams = parseCoachCheckoutParams(requestUrl.searchParams);
+  const coachParams = parseCoachCheckoutParams(requestUrl.searchParams);
+  const packParams = parsePackCheckoutParams(requestUrl.searchParams);
 
-  if (!checkoutParams) {
+  if (!coachParams && !packParams) {
     return NextResponse.redirect(new URL("/pricing.html", requestUrl.origin));
   }
 
@@ -24,9 +28,10 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(
-      new URL(buildSignupPath(checkoutParams.cadence), requestUrl.origin),
-    );
+    const signupPath = coachParams
+      ? buildSignupPath(coachParams.cadence)
+      : buildPackSignupPath(packParams!.pack);
+    return NextResponse.redirect(new URL(signupPath, requestUrl.origin));
   }
 
   if (!user.email) {
@@ -49,14 +54,26 @@ export async function GET(request: Request) {
       email: user.email,
     });
 
-    const session = await createStripeCheckoutSession(stripe, {
-      type: "subscription",
-      priceId: getCoachPriceId(checkoutParams.cadence),
-      userId: user.id,
-      customerId,
-      successUrl: `${origin}/dashboard`,
-      cancelUrl: `${origin}/dashboard`,
-    });
+    const session = await createStripeCheckoutSession(
+      stripe,
+      coachParams
+        ? {
+            type: "subscription",
+            priceId: getCoachPriceId(coachParams.cadence),
+            userId: user.id,
+            customerId,
+            successUrl: `${origin}/dashboard`,
+            cancelUrl: `${origin}/dashboard`,
+          }
+        : {
+            type: "pack",
+            priceId: getPackPriceId(packParams!.pack),
+            userId: user.id,
+            customerId,
+            successUrl: `${origin}/dashboard`,
+            cancelUrl: `${origin}/dashboard`,
+          },
+    );
 
     if (!session.url) {
       throw new Error("Stripe checkout session missing url");

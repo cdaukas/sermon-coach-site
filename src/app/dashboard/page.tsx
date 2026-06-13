@@ -33,8 +33,8 @@ export default async function DashboardPage() {
     ]);
   const growthTrendPoints = toGrowthTrendPoints(completedEvaluations);
   const hasActiveSubscription = isSubscriptionActive(evalSubStatus);
-  const showSubscribeCTA = !hasActiveSubscription;
-  const showStatusRow = subscriptionStatus || packCredits || showSubscribeCTA;
+  const showPurchaseCard = true;
+  const showStatusRow = subscriptionStatus || packCredits || showPurchaseCard;
 
   return (
     <main
@@ -70,11 +70,9 @@ export default async function DashboardPage() {
             </div>
           ) : null}
 
-          {showSubscribeCTA ? (
-            <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
-              <DashboardSubscribeCTA />
-            </div>
-          ) : null}
+          <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
+            <DashboardSubscribeCTA hasActiveSubscription={hasActiveSubscription} />
+          </div>
 
           {packCredits ? (
             <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
