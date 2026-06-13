@@ -21,12 +21,12 @@ function CriterionScoreBar({ score }: { score: number }) {
 
   return (
     <div
-      className="relative hidden h-2.5 rounded-full md:block"
+      className="relative hidden h-2.5 overflow-hidden rounded-full md:block"
       style={{ background: "var(--sc-rule)" }}
       aria-hidden
     >
       <div
-        className="absolute inset-y-0 left-0 rounded-full"
+        className="h-full rounded-full"
         style={{ width: `${fillPercent}%`, background: color }}
       />
       <div
