@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
 import { EvaluationPdfCapture } from "@/components/evaluation/EvaluationPdfCapture";
-import { EvaluationPrintButton } from "@/components/evaluation/EvaluationPrintButton";
 import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
 import { getEvaluation } from "@/lib/evaluation/queries";
 import "@/app/evaluation-pdf-capture.css";
@@ -106,7 +105,6 @@ export default async function EvaluationPage({
           >
             ← Back to {sermon.title}
           </Link>
-          <EvaluationPrintButton />
         </div>
       ) : null}
 
@@ -119,7 +117,11 @@ export default async function EvaluationPage({
         />
       ) : null}
 
-      <EvaluationDashboard result={evaluation.result} sermonTitle={sermon.title} />
+      <EvaluationDashboard
+        result={evaluation.result}
+        sermonTitle={sermon.title}
+        showPrintActions={!pdfCapture}
+      />
 
       {!pdfCapture ? (
         <footer

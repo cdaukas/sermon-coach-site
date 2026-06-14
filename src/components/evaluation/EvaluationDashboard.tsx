@@ -5,17 +5,20 @@ import { HeatMapSection } from "./HeatMapSection";
 import { MethodologySection } from "./MethodologySection";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
+import { EvaluationPrintButtons } from "@/components/evaluation/EvaluationPrintButtons";
 import { serifFont, uiFont } from "./shared";
 import { WorkingSection } from "./WorkingSection";
 
 type EvaluationDashboardProps = {
   result: EvaluationResultStrict;
   sermonTitle: string;
+  showPrintActions?: boolean;
 };
 
 export function EvaluationDashboard({
   result,
   sermonTitle,
+  showPrintActions = true,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const showHeatMap = meta.audio_available && result.heat_map !== null;
@@ -67,6 +70,12 @@ export function EvaluationDashboard({
           </span>
         ) : null}
       </div>
+
+      {showPrintActions ? (
+        <div className="screen-only -mt-6 mb-10 flex justify-end gap-2">
+          <EvaluationPrintButtons />
+        </div>
+      ) : null}
 
       <HeadlineLockup scoring={result.scoring} verdict={result.verdict} />
 
