@@ -3,11 +3,11 @@
  *
  * Prerequisites:
  * 1. `npm run dev` running (default base URL http://localhost:3000)
- * 2. `.pdf-auth-cookies.json` at repo root — run `npm run pdf:auth-cookies` once
+ * 2. `.pdf-auth-cookies.json` at repo root — run `npm run pdf:auth-cookies` (tokens expire ~1h)
  *
  * Usage:
- *   npm run pdf:eval
  *   npm run pdf:eval -- <evaluationId> <sermonId>
+ *   PDF_EVALUATION_ID=... PDF_SERMON_ID=... npm run pdf:eval
  */
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -17,22 +17,70 @@ import puppeteer, { type CookieParam, type Page } from "puppeteer";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 
-const DEFAULT_SERMON_ID = "f5ef3af0-10c1-4d97-8064-4917ac03e77e";
-const DEFAULT_EVALUATION_ID = "65c356f1-d955-40fc-8bdb-7a34d5551a0c";
 const COOKIE_FILE = path.join(REPO_ROOT, ".pdf-auth-cookies.json");
 const OUTPUT_DIR = path.join(REPO_ROOT, "output", "eval-pdf");
+const AUTH_COOKIE_ERROR =
+  "Auth cookies expired or missing. Run: npm run pdf:auth-cookies";
 
 type StoredCookie = CookieParam & {
   name: string;
   value: string;
 };
 
+type SupabaseSessionPayload = {
+  expires_at?: number;
+};
+
 function parseArgs(): { evaluationId: string; sermonId: string } {
   const [, , evaluationIdArg, sermonIdArg] = process.argv;
-  return {
-    evaluationId: evaluationIdArg ?? DEFAULT_EVALUATION_ID,
-    sermonId: sermonIdArg ?? DEFAULT_SERMON_ID,
-  };
+  const evaluationId = evaluationIdArg ?? process.env.PDF_EVALUATION_ID;
+  const sermonId = sermonIdArg ?? process.env.PDF_SERMON_ID;
+
+  if (!evaluationId?.trim() || !sermonId?.trim()) {
+    throw new Error(
+      "Missing evaluationId and sermonId.\nUsage: npm run pdf:eval -- <evaluationId> <sermonId>\nOr set PDF_EVALUATION_ID and PDF_SERMON_ID.",
+    );
+  }
+
+  return { evaluationId: evaluationId.trim(), sermonId: sermonId.trim() };
+}
+
+function decodeSupabaseSession(value: string): SupabaseSessionPayload | null {
+  const encoded = value.startsWith("base64-")
+    ? value.slice("base64-".length)
+    : value;
+
+  try {
+    return JSON.parse(Buffer.from(encoded, "base64").toString("utf8")) as SupabaseSessionPayload;
+  } catch {
+    return null;
+  }
+}
+
+function findAuthTokenCookie(cookies: StoredCookie[]): StoredCookie | null {
+  return (
+    cookies.find((cookie) => /-auth-token$/.test(cookie.name)) ??
+    cookies.find((cookie) => /-auth-token\.\d+$/.test(cookie.name)) ??
+    cookies.find((cookie) => cookie.name.startsWith("sb-")) ??
+    null
+  );
+}
+
+function validateAuthCookies(cookies: StoredCookie[]): void {
+  const authCookie = findAuthTokenCookie(cookies);
+  if (!authCookie) {
+    throw new Error(AUTH_COOKIE_ERROR);
+  }
+
+  const session = decodeSupabaseSession(authCookie.value);
+  if (!session?.expires_at) {
+    throw new Error(AUTH_COOKIE_ERROR);
+  }
+
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  if (session.expires_at <= nowSeconds) {
+    throw new Error(AUTH_COOKIE_ERROR);
+  }
 }
 
 async function loadCookies(): Promise<StoredCookie[]> {
@@ -40,16 +88,12 @@ async function loadCookies(): Promise<StoredCookie[]> {
   try {
     raw = await fs.readFile(COOKIE_FILE, "utf8");
   } catch {
-    throw new Error(
-      `Missing ${path.relative(REPO_ROOT, COOKIE_FILE)}. Run: npm run pdf:auth-cookies`,
-    );
+    throw new Error(AUTH_COOKIE_ERROR);
   }
 
   const parsed: unknown = JSON.parse(raw);
   if (!Array.isArray(parsed) || parsed.length === 0) {
-    throw new Error(
-      `${path.relative(REPO_ROOT, COOKIE_FILE)} must be a non-empty JSON array of cookie objects.`,
-    );
+    throw new Error(AUTH_COOKIE_ERROR);
   }
 
   return parsed.map((cookie, index) => {
@@ -63,6 +107,29 @@ async function loadCookies(): Promise<StoredCookie[]> {
     }
     return cookie as StoredCookie;
   });
+}
+
+function toPuppeteerCookie(cookie: StoredCookie, baseUrl: string): CookieParam {
+  const mapped: CookieParam = {
+    name: cookie.name,
+    value: cookie.value,
+    url: baseUrl,
+  };
+
+  if (cookie.expires && cookie.expires > 0) {
+    mapped.expires = cookie.expires;
+  }
+  if (cookie.httpOnly) {
+    mapped.httpOnly = cookie.httpOnly;
+  }
+  if (cookie.secure) {
+    mapped.secure = cookie.secure;
+  }
+  if (cookie.sameSite) {
+    mapped.sameSite = cookie.sameSite;
+  }
+
+  return mapped;
 }
 
 async function waitForEvaluationRender(page: Page): Promise<void> {
@@ -82,8 +149,13 @@ async function main(): Promise<void> {
   const baseUrl = process.env.PDF_BASE_URL ?? "http://localhost:3000";
   const { evaluationId, sermonId } = parseArgs();
   const cookies = await loadCookies();
+  validateAuthCookies(cookies);
 
   const url = `${baseUrl}/dashboard/sermons/${sermonId}/evaluations/${evaluationId}?pdf=1`;
+  if (!url.includes("?pdf=1")) {
+    throw new Error(`Internal error: capture URL must include ?pdf=1 (got ${url})`);
+  }
+
   const outputPath = path.join(OUTPUT_DIR, `${evaluationId}.pdf`);
 
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
@@ -95,34 +167,36 @@ async function main(): Promise<void> {
     await page.emulateMediaType("screen");
     await page.setViewport({ width: 1100, height: 1400, deviceScaleFactor: 2 });
 
-    const cookieDomain = new URL(baseUrl).hostname;
-    await page.setCookie(
-      ...cookies.map((cookie) => ({
-        ...cookie,
-        domain: cookie.domain ?? cookieDomain,
-        path: cookie.path ?? "/",
-      })),
-    );
+    await page.setCookie(...cookies.map((cookie) => toPuppeteerCookie(cookie, baseUrl)));
 
     const response = await page.goto(url, {
       waitUntil: "networkidle0",
       timeout: 120_000,
     });
 
-    if (!response || !response.ok()) {
+    const finalUrl = page.url();
+    if (finalUrl.includes("/login")) {
       throw new Error(
-        `Failed to load ${url} (status ${response?.status() ?? "unknown"}). Is the dev server running and are cookies valid?`,
+        "Redirected to login — cookies invalid. Run: npm run pdf:auth-cookies",
       );
     }
 
-    const loginRedirect = page.url().includes("/login");
-    if (loginRedirect) {
+    const status = response?.status() ?? 0;
+    if (status === 404) {
       throw new Error(
-        "Redirected to /login — session cookies are missing or expired. Re-export .pdf-auth-cookies.json.",
+        `Evaluation not found (404) at ${url}. Auth passed but these sermon/eval IDs returned no row. Check IDs and RLS.`,
+      );
+    }
+
+    if (!response || !response.ok()) {
+      throw new Error(
+        `Failed to load ${url} (status ${status}). Is the dev server running?`,
       );
     }
 
     await waitForEvaluationRender(page);
+
+    await page.emulateMediaType("screen");
 
     await page.pdf({
       path: outputPath,
@@ -140,6 +214,7 @@ async function main(): Promise<void> {
     console.log(`  sermonId=${sermonId}`);
     console.log(`  evaluationId=${evaluationId}`);
     console.log(`  source=${url}`);
+    console.log("  capture=screen (?pdf=1 full-color render)");
   } finally {
     await browser.close();
   }

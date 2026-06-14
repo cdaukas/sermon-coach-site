@@ -33,7 +33,7 @@ function toStoredCookie(cookie: Cookie): StoredCookie {
     stored.expires = cookie.expires;
   }
   if (cookie.httpOnly) {
-    stored.httpOnly = cookie.httpOnly;
+    stored.httpOnly = true;
   }
   if (cookie.secure) {
     stored.secure = cookie.secure;
@@ -89,7 +89,7 @@ async function main(): Promise<void> {
     for (const cookie of stored) {
       console.log(`  ${cookie.name}`);
     }
-    console.log("Run: npm run pdf:eval");
+    console.log("Run: npm run pdf:eval -- <evaluationId> <sermonId>");
   } finally {
     await browser.close();
   }
