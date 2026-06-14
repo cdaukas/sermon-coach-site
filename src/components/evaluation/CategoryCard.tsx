@@ -15,29 +15,35 @@ type CategoryCardProps = {
   category: EvaluationResultStrict["categories"][number];
 };
 
+const SCORE_BAR_VIEWBOX_WIDTH = 220;
+const SCORE_BAR_HEIGHT = 10;
+
 function CriterionScoreBar({ score }: { score: number }) {
   const color = criterionScoreColor(score);
   const fillPercent = criterionScoreFillPercent(score);
+  const fillWidth = (SCORE_BAR_VIEWBOX_WIDTH * fillPercent) / 100;
 
   return (
-    <div
-      className="relative hidden h-2.5 overflow-hidden rounded-full md:block"
-      style={{
-        background: "var(--sc-rule)",
-        printColorAdjust: "exact",
-        WebkitPrintColorAdjust: "exact",
-      }}
-      aria-hidden
-    >
-      <div
-        className="h-full rounded-full"
-        style={{
-          width: `${fillPercent}%`,
-          background: color,
-          printColorAdjust: "exact",
-          WebkitPrintColorAdjust: "exact",
-        }}
-      />
+    <div className="relative hidden h-2.5 md:block" aria-hidden>
+      <svg
+        className="block h-full w-full"
+        viewBox={`0 0 ${SCORE_BAR_VIEWBOX_WIDTH} ${SCORE_BAR_HEIGHT}`}
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <rect
+          width={SCORE_BAR_VIEWBOX_WIDTH}
+          height={SCORE_BAR_HEIGHT}
+          rx={SCORE_BAR_HEIGHT / 2}
+          fill="var(--sc-rule)"
+        />
+        <rect
+          width={fillWidth}
+          height={SCORE_BAR_HEIGHT}
+          rx={SCORE_BAR_HEIGHT / 2}
+          fill={color}
+        />
+      </svg>
       <div
         className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-[var(--sc-panel)]"
         style={{ left: `${fillPercent}%`, borderColor: color }}
