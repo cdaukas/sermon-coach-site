@@ -136,7 +136,7 @@ export async function getEvaluation(
 
   const { data: sermon, error: sermonError } = await supabase
     .from("sermons")
-    .select("id, title")
+    .select("id, title, primary_passage")
     .eq("id", sermonId)
     .maybeSingle();
 

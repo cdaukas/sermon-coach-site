@@ -32,6 +32,7 @@ export function SermonForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [primaryPassage, setPrimaryPassage] = useState("");
   const [occasion, setOccasion] = useState("");
   const [audience, setAudience] = useState("");
   const [series, setSeries] = useState("");
@@ -51,7 +52,7 @@ export function SermonForm() {
     setLoading(true);
 
     try {
-      const result = await createSermon({ title, content });
+      const result = await createSermon({ title, content, primaryPassage });
 
       if (!result.ok) {
         setError(result.error);
@@ -151,6 +152,20 @@ export function SermonForm() {
             .
           </p>
         </div>
+
+        <AuthField
+          id="sermon-context-primary-passage"
+          label="Primary passage"
+          inputProps={{
+            name: "context-primary-passage",
+            type: "text",
+            autoComplete: "off",
+            value: primaryPassage,
+            onChange: (event) => setPrimaryPassage(event.target.value),
+            disabled: loading,
+            placeholder: "e.g. Hebrews 12:5-17",
+          }}
+        />
 
         <div className="flex flex-col gap-1.5">
           <AuthLabel htmlFor="sermon-context-occasion">

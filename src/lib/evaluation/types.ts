@@ -32,7 +32,7 @@ export type SermonEvaluationListItem = Pick<
 
 export type EvaluationWithSermon = {
   evaluation: SermonEvaluationRow;
-  sermon: { id: string; title: string };
+  sermon: { id: string; title: string; primary_passage: string | null };
 };
 
 export type RequestEvaluationResult =

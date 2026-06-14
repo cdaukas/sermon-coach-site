@@ -74,7 +74,7 @@ export async function requestEvaluation(
 
   const { data: sermon, error: sermonError } = await supabase
     .from("sermons")
-    .select("id, title")
+    .select("id, title, primary_passage")
     .eq("id", sermonId)
     .maybeSingle();
 
@@ -161,6 +161,7 @@ export async function requestEvaluation(
         sermonTitle: sermon.title,
         manuscript: version.content,
         context,
+        primaryPassage: sermon.primary_passage,
       });
     } catch {
       // Row updated to failed inside processEvaluationJob

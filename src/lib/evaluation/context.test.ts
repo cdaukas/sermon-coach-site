@@ -90,4 +90,20 @@ describe("buildUserMessage context injection", () => {
     assert.ok(occasionIndex > preambleIndex);
     assert.ok(manuscriptIndex > occasionIndex);
   });
+
+  it("injects the primary passage before the manuscript when provided", () => {
+    const message = buildUserMessage({
+      ...baseInput,
+      primaryPassage: "Hebrews 12:5-17",
+    });
+
+    const manuscriptIndex = message.indexOf("## Manuscript");
+    const passageIndex = message.indexOf(
+      "**Primary passage (provided by the preacher):** Hebrews 12:5-17",
+    );
+
+    assert.ok(passageIndex >= 0);
+    assert.ok(manuscriptIndex > passageIndex);
+    assert.match(message, /Use the preacher-provided primary passage above/);
+  });
 });

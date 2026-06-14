@@ -80,7 +80,9 @@ export default async function EvaluationPage({
   const evaluatedAt = evaluation.completed_at ?? evaluation.created_at;
   const pastorName = evaluation.result.meta.preacher_name;
   const scriptureReference =
-    evaluation.result.meta.scripture_reference.trim() || null;
+    sermon.primary_passage?.trim() ||
+    evaluation.result.meta.scripture_reference.trim() ||
+    null;
   const footerDate = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
   }).format(new Date(evaluatedAt));
@@ -120,6 +122,7 @@ export default async function EvaluationPage({
       <EvaluationDashboard
         result={evaluation.result}
         sermonTitle={sermon.title}
+        scriptureReference={scriptureReference}
         showPrintActions={!pdfCapture}
       />
 

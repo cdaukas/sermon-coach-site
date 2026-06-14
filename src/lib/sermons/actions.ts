@@ -3,6 +3,11 @@
 import { createClient } from "@/lib/supabase/server";
 import type { CreateSermonInput, CreateSermonResult } from "./types";
 
+function normalizePrimaryPassage(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
 function validateInput({ title, content }: CreateSermonInput): string | null {
   if (!title.trim()) {
     return "Title is required.";
@@ -20,6 +25,7 @@ export async function createSermon(
 ): Promise<CreateSermonResult> {
   const title = input.title.trim();
   const content = input.content.trim();
+  const primaryPassage = normalizePrimaryPassage(input.primaryPassage);
   const validationError = validateInput({ title, content });
 
   if (validationError) {
@@ -37,7 +43,7 @@ export async function createSermon(
 
   const { data: sermon, error: sermonError } = await supabase
     .from("sermons")
-    .insert({ user_id: user.id, title })
+    .insert({ user_id: user.id, title, primary_passage: primaryPassage })
     .select("id")
     .single();
 

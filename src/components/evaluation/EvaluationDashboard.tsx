@@ -12,16 +12,20 @@ import { WorkingSection } from "./WorkingSection";
 type EvaluationDashboardProps = {
   result: EvaluationResultStrict;
   sermonTitle: string;
+  scriptureReference?: string | null;
   showPrintActions?: boolean;
 };
 
 export function EvaluationDashboard({
   result,
   sermonTitle,
+  scriptureReference,
   showPrintActions = true,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const showHeatMap = meta.audio_available && result.heat_map !== null;
+  const displayScriptureReference =
+    scriptureReference?.trim() || meta.scripture_reference;
 
   return (
     <article className="evaluation-report">
@@ -41,7 +45,7 @@ export function EvaluationDashboard({
         className="evaluation-report-scripture mb-6 text-lg italic"
         style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
       >
-        {meta.scripture_reference}
+        {displayScriptureReference}
       </p>
 
       <div

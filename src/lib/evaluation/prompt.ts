@@ -63,24 +63,32 @@ export type EvaluationUserMessageInput = {
   sermonTitle: string;
   manuscript: string;
   context?: SermonContext;
+  primaryPassage?: string;
 };
 
 export function buildUserMessage({
   sermonTitle,
   manuscript,
   context,
+  primaryPassage,
 }: EvaluationUserMessageInput): string {
   const contextBlock = context ? `${buildContextPreamble(context)}\n\n---\n\n` : "";
+  const primaryPassageBlock = primaryPassage
+    ? `**Primary passage (provided by the preacher):** ${primaryPassage}\n\n`
+    : "";
+  const metaInstructions = primaryPassage
+    ? "Use the preacher-provided primary passage above for `meta.scripture_reference`. Infer preacher name, length (~150 wpm from word count), and `submission_mode` (`manuscript` or `transcript`) from the manuscript for `meta` when not stated explicitly."
+    : "Infer preacher name, passage, length (~150 wpm from word count), and `submission_mode` (`manuscript` or `transcript`) from the manuscript for `meta` when not stated explicitly.";
 
   return `Evaluate this sermon manuscript.
 
 **Working title:** ${sermonTitle}
 
-Infer preacher name, passage, length (~150 wpm from word count), and \`submission_mode\` (\`manuscript\` or \`transcript\`) from the manuscript for \`meta\` when not stated explicitly. Set \`meta.audio_available\` to \`false\` when only a manuscript is provided (no preached audio/video). Use snake_case field names from the tool schema.
+${metaInstructions} Set \`meta.audio_available\` to \`false\` when only a manuscript is provided (no preached audio/video). Use snake_case field names from the tool schema.
 
 ---
 
-${contextBlock}## Manuscript
+${primaryPassageBlock}${contextBlock}## Manuscript
 
 ${manuscript}`;
 }

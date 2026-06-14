@@ -10,6 +10,7 @@ export type ProcessEvaluationInput = {
   sermonTitle: string;
   manuscript: string;
   context?: SermonContext;
+  primaryPassage?: string | null;
 };
 
 function userSafeError(error: unknown): string {
@@ -31,7 +32,8 @@ export async function processEvaluationJob(
   input: ProcessEvaluationInput,
 ): Promise<void> {
   const supabase = await createClient();
-  const { evaluationId, userId, sermonTitle, manuscript, context } = input;
+  const { evaluationId, userId, sermonTitle, manuscript, context, primaryPassage } =
+    input;
 
   const { error: runningError } = await supabase
     .from("sermon_evaluations")
@@ -48,6 +50,7 @@ export async function processEvaluationJob(
       sermonTitle,
       manuscript,
       context,
+      primaryPassage: primaryPassage?.trim() || undefined,
     });
 
     const completedAt = new Date().toISOString();
