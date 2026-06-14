@@ -13,3 +13,7 @@ html[data-pdf-capture="1"] .evaluation-page-main {
   box-shadow: none !important;
   border: none !important;
 }
+
+html[data-pdf-capture="1"] nextjs-portal {
+  display: none !important;
+}
