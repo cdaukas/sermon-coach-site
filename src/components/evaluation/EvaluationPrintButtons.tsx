@@ -13,14 +13,6 @@ const primaryButtonStyle = {
   cursor: "pointer",
 } as const;
 
-const secondaryButtonStyle = {
-  ...uiFont,
-  background: "var(--sc-panel)",
-  borderColor: "var(--sc-rule)",
-  color: "var(--sc-ink)",
-  cursor: "pointer",
-} as const;
-
 function handlePrint() {
   document
     .querySelectorAll(".evaluation-report details")
@@ -31,23 +23,13 @@ function handlePrint() {
 
 export function EvaluationPrintButtons() {
   return (
-    <>
-      <button
-        type="button"
-        onClick={handlePrint}
-        className={primaryButtonClass}
-        style={primaryButtonStyle}
-      >
-        Print
-      </button>
-      <button
-        type="button"
-        onClick={handlePrint}
-        className={primaryButtonClass}
-        style={secondaryButtonStyle}
-      >
-        Download PDF
-      </button>
-    </>
+    <button
+      type="button"
+      onClick={handlePrint}
+      className={primaryButtonClass}
+      style={primaryButtonStyle}
+    >
+      Print / Save as PDF
+    </button>
   );
 }
