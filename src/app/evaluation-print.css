@@ -235,8 +235,6 @@
   }
 
   .evaluation-priorities {
-    break-inside: avoid;
-    page-break-inside: avoid;
     background: #fff !important;
     color: var(--sc-ink) !important;
     border: 1px solid var(--sc-rule) !important;
@@ -254,6 +252,11 @@
     background: var(--sc-accent-pale) !important;
     color: var(--sc-ink) !important;
     border-left: 2px solid var(--sc-accent) !important;
+  }
+
+  .evaluation-priorities article {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .evaluation-working-card {
@@ -276,6 +279,11 @@
 
   .evaluation-methodology > summary span[aria-hidden] {
     display: none !important;
+  }
+
+  .evaluation-methodology table tbody tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .evaluation-methodology > :not(summary),
