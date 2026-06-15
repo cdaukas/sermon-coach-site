@@ -8,7 +8,7 @@ type SectionTitleProps = {
 export function SectionTitle({ children }: SectionTitleProps) {
   return (
     <h2
-      className="mb-7 text-[32px] font-normal tracking-tight md:text-[36px]"
+      className="evaluation-section-title mb-7 text-[32px] font-normal tracking-tight md:text-[36px]"
       style={{ ...serifFont, color: "var(--sc-ink)" }}
     >
       {children}

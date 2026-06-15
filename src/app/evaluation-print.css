@@ -168,6 +168,8 @@
     color: var(--sc-ink) !important;
     border-bottom: 1px solid var(--sc-rule) !important;
     padding: 0.65rem 0.85rem !important;
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   .evaluation-category-card > header h2,
@@ -187,6 +189,8 @@
     grid-template-columns: unset !important;
     background: #fff !important;
     padding: 0.55rem 0.85rem !important;
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   .evaluation-criterion > summary span[aria-hidden] {
@@ -259,6 +263,20 @@
     page-break-inside: avoid;
   }
 
+  .evaluation-priorities > p:first-of-type,
+  .evaluation-priorities > h2,
+  .evaluation-priorities > p:nth-of-type(2),
+  .evaluation-priorities article > p,
+  .evaluation-priorities article h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .evaluation-section-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
   .evaluation-working-card {
     break-inside: avoid;
     page-break-inside: avoid;
@@ -279,6 +297,11 @@
 
   .evaluation-methodology > summary span[aria-hidden] {
     display: none !important;
+  }
+
+  .evaluation-methodology > summary {
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   .evaluation-methodology table tbody tr {

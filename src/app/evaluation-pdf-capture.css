@@ -27,3 +27,17 @@ html[data-pdf-capture="1"] .evaluation-methodology table tbody tr {
   break-inside: avoid;
   page-break-inside: avoid;
 }
+
+/* Keep section headers bonded to following content when paginating */
+html[data-pdf-capture="1"] .evaluation-category-card > header,
+html[data-pdf-capture="1"] .evaluation-criterion > summary,
+html[data-pdf-capture="1"] .evaluation-priorities > p:first-of-type,
+html[data-pdf-capture="1"] .evaluation-priorities > h2,
+html[data-pdf-capture="1"] .evaluation-priorities > p:nth-of-type(2),
+html[data-pdf-capture="1"] .evaluation-section-title,
+html[data-pdf-capture="1"] .evaluation-methodology > summary,
+html[data-pdf-capture="1"] .evaluation-priorities article > p,
+html[data-pdf-capture="1"] .evaluation-priorities article h3 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
