@@ -144,10 +144,12 @@ function SignupForm() {
             : "Start building your private sermon library."
       }
       footer={
-        <>
-          Already have an account?{" "}
-          <AuthLink href={loginHref}>Sign in</AuthLink>
-        </>
+        awaitingConfirmation ? undefined : (
+          <>
+            Already have an account?{" "}
+            <AuthLink href={loginHref}>Sign in</AuthLink>
+          </>
+        )
       }
     >
       {banner ? (
