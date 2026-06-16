@@ -1,12 +1,9 @@
-import { GrowthTrendCard } from "@/components/dashboard/GrowthTrendCard";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SermonList } from "@/components/dashboard/SermonList";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
-import { toGrowthTrendPoints } from "@/lib/evaluation/growth-trend";
-import { listCompletedEvaluationsTrend } from "@/lib/evaluation/queries";
 import {
   getSubscriptionStatus as getEvalSubscriptionStatus,
   isSubscriptionActive,
@@ -23,15 +20,13 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermons, subscriptionStatus, packCredits, completedEvaluations, evalSubStatus] =
+  const [sermons, subscriptionStatus, packCredits, evalSubStatus] =
     await Promise.all([
       listSermons(),
       getSubscriptionStatus(),
       getPackCredits(),
-      listCompletedEvaluationsTrend(),
       user ? getEvalSubscriptionStatus(user.id) : Promise.resolve(null),
     ]);
-  const growthTrendPoints = toGrowthTrendPoints(completedEvaluations);
   const hasActiveSubscription = isSubscriptionActive(evalSubStatus);
   const showPurchaseCard = true;
   const showStatusRow = subscriptionStatus || packCredits || showPurchaseCard;
@@ -59,8 +54,6 @@ export default async function DashboardPage() {
           Your sermons
         </h1>
       </div>
-
-      <GrowthTrendCard points={growthTrendPoints} />
 
       {showStatusRow ? (
         <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">
