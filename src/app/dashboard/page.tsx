@@ -67,19 +67,6 @@ export default async function DashboardPage() {
     </Link>
   ) : null;
 
-  function renderToolbar(searchInput?: React.ReactNode) {
-    if (!growthReportLink && !searchInput) {
-      return null;
-    }
-
-    return (
-      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        {growthReportLink}
-        {searchInput ? <div className="min-w-0 flex-1">{searchInput}</div> : null}
-      </div>
-    );
-  }
-
   return (
     <main
       className="rounded px-8 py-10"
@@ -113,23 +100,11 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
-      {sermons.length === 0 ? (
-        <>
-          {renderToolbar()}
-          {pageHeader}
-          <SermonList sermons={sermons} />
-        </>
-      ) : (
-        <SermonList
-          sermons={sermons}
-          leadingContent={(searchInput) => (
-            <>
-              {renderToolbar(searchInput)}
-              {pageHeader}
-            </>
-          )}
-        />
-      )}
+      <SermonList
+        sermons={sermons}
+        growthReportLink={growthReportLink}
+        header={pageHeader}
+      />
     </main>
   );
 }

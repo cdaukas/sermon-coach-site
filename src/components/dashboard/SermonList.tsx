@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { SermonListItem } from "@/lib/sermons/types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -54,7 +54,8 @@ function groupSermonsByMonth(
 
 type SermonListProps = {
   sermons: SermonListItem[];
-  leadingContent?: (searchInput: React.ReactNode) => React.ReactNode;
+  growthReportLink?: ReactNode;
+  header?: ReactNode;
 };
 
 function SermonCard({ sermon }: { sermon: SermonListItem }) {
@@ -82,31 +83,79 @@ function SermonCard({ sermon }: { sermon: SermonListItem }) {
   );
 }
 
-export function SermonList({ sermons, leadingContent }: SermonListProps) {
+function SermonSearchInput({
+  query,
+  onQueryChange,
+}: {
+  query: string;
+  onQueryChange: (value: string) => void;
+}) {
+  return (
+    <input
+      type="search"
+      value={query}
+      onChange={(event) => onQueryChange(event.target.value)}
+      placeholder="Search your sermons"
+      aria-label="Search your sermons"
+      className="w-full min-w-0 rounded border px-4 py-2.5 text-[15px] outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
+      style={{
+        ...uiFont,
+        background: "var(--sc-bg)",
+        borderColor: "var(--sc-rule)",
+        color: "var(--sc-ink)",
+      }}
+    />
+  );
+}
+
+function DashboardToolbar({
+  growthReportLink,
+  searchInput,
+}: {
+  growthReportLink?: ReactNode;
+  searchInput?: ReactNode;
+}) {
+  if (!growthReportLink && !searchInput) {
+    return null;
+  }
+
+  return (
+    <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+      {growthReportLink}
+      {searchInput ? <div className="min-w-0 flex-1">{searchInput}</div> : null}
+    </div>
+  );
+}
+
+export function SermonList({ sermons, growthReportLink, header }: SermonListProps) {
   const [query, setQuery] = useState("");
 
   if (sermons.length === 0) {
     return (
-      <div className="text-center">
-        <p
-          className="mb-6 text-lg leading-relaxed"
-          style={{ ...serifFont, color: "var(--sc-ink-soft)", fontStyle: "italic" }}
-        >
-          No sermons yet. Paste a manuscript to get started.
-        </p>
-        <Link
-          href="/dashboard/sermons/new"
-          className="inline-block rounded border px-7 py-3.5 text-sm font-semibold tracking-wide no-underline transition-all"
-          style={{
-            ...uiFont,
-            background: "var(--sc-ink)",
-            color: "var(--sc-bg)",
-            borderColor: "var(--sc-ink)",
-          }}
-        >
-          Submit your first sermon
-        </Link>
-      </div>
+      <>
+        <DashboardToolbar growthReportLink={growthReportLink} />
+        {header}
+        <div className="text-center">
+          <p
+            className="mb-6 text-lg leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink-soft)", fontStyle: "italic" }}
+          >
+            No sermons yet. Paste a manuscript to get started.
+          </p>
+          <Link
+            href="/dashboard/sermons/new"
+            className="inline-block rounded border px-7 py-3.5 text-sm font-semibold tracking-wide no-underline transition-all"
+            style={{
+              ...uiFont,
+              background: "var(--sc-ink)",
+              color: "var(--sc-bg)",
+              borderColor: "var(--sc-ink)",
+            }}
+          >
+            Submit your first sermon
+          </Link>
+        </div>
+      </>
     );
   }
 
@@ -119,54 +168,40 @@ export function SermonList({ sermons, leadingContent }: SermonListProps) {
         );
   const groupedSermons = groupSermonsByMonth(filteredSermons);
 
-  const searchInput = (
-    <input
-      type="search"
-      value={query}
-      onChange={(event) => setQuery(event.target.value)}
-      placeholder="Search your sermons"
-      aria-label="Search your sermons"
-      className="w-full min-w-0 rounded border px-4 py-2.5 text-[15px] outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
-      style={{
-        ...uiFont,
-        background: "var(--sc-bg)",
-        borderColor: "var(--sc-rule)",
-        color: "var(--sc-ink)",
-      }}
-    />
-  );
-
   return (
-    <div>
-      {leadingContent ? (
-        leadingContent(searchInput)
-      ) : (
-        <div className="mb-4">{searchInput}</div>
-      )}
-
-      {filteredSermons.length === 0 ? (
-        <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-          No sermons match that search.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-6">
-          {groupedSermons.map(({ monthKey, sermons: monthSermons }) => (
-            <section key={monthKey}>
-              <p
-                className="mb-3 text-[11px] font-semibold tracking-[0.16em]"
-                style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-              >
-                {formatMonthHeader(monthKey)}
-              </p>
-              <ul className="flex flex-col gap-3">
-                {monthSermons.map((sermon) => (
-                  <SermonCard key={sermon.id} sermon={sermon} />
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      )}
-    </div>
+    <>
+      <DashboardToolbar
+        growthReportLink={growthReportLink}
+        searchInput={
+          <SermonSearchInput query={query} onQueryChange={setQuery} />
+        }
+      />
+      {header}
+      <div>
+        {filteredSermons.length === 0 ? (
+          <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+            No sermons match that search.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {groupedSermons.map(({ monthKey, sermons: monthSermons }) => (
+              <section key={monthKey}>
+                <p
+                  className="mb-3 text-[11px] font-semibold tracking-[0.16em]"
+                  style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                >
+                  {formatMonthHeader(monthKey)}
+                </p>
+                <ul className="flex flex-col gap-3">
+                  {monthSermons.map((sermon) => (
+                    <SermonCard key={sermon.id} sermon={sermon} />
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
