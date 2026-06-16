@@ -58,6 +58,28 @@ const deltaToneStyles = {
   },
 } as const;
 
+const CRITERION_SCORE_COLUMN_WIDTH = "4.5rem";
+
+const criterionMovementTableClassName =
+  "w-full min-w-[520px] table-fixed border-collapse";
+
+const criterionMovementColGroup = (
+  <colgroup>
+    <col />
+    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
+    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
+    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
+  </colgroup>
+);
+
+const CRITERION_DISPLAY_LABELS: Record<string, string> = {
+  "Fallen Condition Focus": "Fallen condition focus",
+};
+
+function formatCriterionDisplayLabel(name: string): string {
+  return CRITERION_DISPLAY_LABELS[name] ?? name;
+}
+
 function OverallMovementPanel({
   headlines,
 }: {
@@ -132,9 +154,9 @@ function CriterionMovementRow({ row }: { row: GrowthReportCriterionDelta }) {
       }}
     >
       <td className="px-4 py-3 align-top">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="text-[14px] font-medium" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-            {row.name}
+            {formatCriterionDisplayLabel(row.name)}
           </span>
           {row.is_double_weighted ? (
             <span
@@ -224,7 +246,8 @@ function CriterionMovementTable({ data }: { data: GrowthReportPresentation }) {
               </header>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] border-collapse">
+                <table className={criterionMovementTableClassName}>
+                  {criterionMovementColGroup}
                   <thead>
                     <tr
                       className="border-b text-left"
