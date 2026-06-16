@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { EVALUATION_FIXTURE } from "./fixture";
 import {
+  buildCriterionDeltas,
+  buildGrowthReportHeadlines,
   buildQuotePairs,
+  enrichGrowthReportData,
   flattenCriteriaForPairing,
   MAX_QUOTE_PAIRS,
   orderGrowthReportSnapshotsByDate,
@@ -75,6 +78,72 @@ describe("orderGrowthReportSnapshotsByDate", () => {
     const natural = orderGrowthReportSnapshotsByDate(older, newer);
     assert.equal(natural.baseline.evaluationId, "eval-older");
     assert.equal(natural.current.evaluationId, "eval-newer");
+  });
+});
+
+describe("buildCriterionDeltas", () => {
+  it("returns all 11 criteria with score_a, score_b, and delta from stored results", () => {
+    const baselineResult = cloneFixture();
+    const currentResult = cloneFixture();
+    setCriterionScore(baselineResult, 3, 3);
+    setCriterionScore(currentResult, 3, 5);
+    setCriterionScore(baselineResult, 5, 4);
+    setCriterionScore(currentResult, 5, 4);
+
+    const baseline = makeSnapshot("eval-a", "2025-01-01T12:00:00.000Z", 35);
+    const current = makeSnapshot("eval-b", "2025-06-01T12:00:00.000Z", 39);
+    baseline.result = baselineResult;
+    current.result = currentResult;
+
+    const deltas = buildCriterionDeltas(baseline, current);
+
+    assert.equal(deltas.length, 11);
+    assert.deepEqual(
+      deltas.map((row) => row.id),
+      Array.from({ length: 11 }, (_, index) => index + 1),
+    );
+
+    const gospel = deltas.find((row) => row.id === 3);
+    assert.equal(gospel?.score_a, 3);
+    assert.equal(gospel?.score_b, 5);
+    assert.equal(gospel?.delta, 2);
+    assert.equal(gospel?.is_double_weighted, true);
+
+    const structure = deltas.find((row) => row.id === 5);
+    assert.equal(structure?.delta, 0);
+  });
+});
+
+describe("buildGrowthReportHeadlines", () => {
+  it("reads stored composite_weighted and formats display scores", () => {
+    const baseline = makeSnapshot("eval-a", "2025-01-01T12:00:00.000Z", 37);
+    const current = makeSnapshot("eval-b", "2025-06-01T12:00:00.000Z", 39);
+
+    const headlines = buildGrowthReportHeadlines(baseline, current);
+
+    assert.equal(headlines.composite_weighted_a, 37);
+    assert.equal(headlines.composite_weighted_b, 39);
+    assert.equal(headlines.composite_weighted_delta, 2);
+    assert.equal(headlines.display_score_a, "6.7");
+    assert.equal(headlines.display_score_b, "7.1");
+    assert.equal(headlines.band_a, "Strong");
+    assert.equal(headlines.band_b, "Strong");
+  });
+});
+
+describe("enrichGrowthReportData", () => {
+  it("attaches criterion deltas and headlines to ordered snapshots", () => {
+    const older = makeSnapshot("eval-a", "2025-01-01T12:00:00.000Z", 37);
+    const newer = makeSnapshot("eval-b", "2025-06-01T12:00:00.000Z", 39);
+
+    const report = enrichGrowthReportData(
+      orderGrowthReportSnapshotsByDate(newer, older),
+    );
+
+    assert.equal(report.baseline.evaluationId, "eval-a");
+    assert.equal(report.current.evaluationId, "eval-b");
+    assert.equal(report.criterionDeltas.length, 11);
+    assert.equal(report.headlines.composite_weighted_delta, 2);
   });
 });
 

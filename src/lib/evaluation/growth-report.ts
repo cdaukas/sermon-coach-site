@@ -1,4 +1,5 @@
 import { getEvaluationById } from "./queries";
+import { formatDisplayScoreBare } from "./display-score";
 import type { EvaluationResultStrict } from "./schema";
 import type { EvaluationWithSermon } from "./types";
 
@@ -15,6 +16,28 @@ export type GrowthReportEvaluationSnapshot = {
 export type GrowthReportData = {
   baseline: GrowthReportEvaluationSnapshot;
   current: GrowthReportEvaluationSnapshot;
+  criterionDeltas: GrowthReportCriterionDelta[];
+  headlines: GrowthReportHeadlines;
+};
+
+export type GrowthReportCriterionDelta = {
+  id: number;
+  name: string;
+  category: number;
+  score_a: number;
+  score_b: number;
+  delta: number;
+  is_double_weighted: boolean;
+};
+
+export type GrowthReportHeadlines = {
+  composite_weighted_a: number;
+  composite_weighted_b: number;
+  composite_weighted_delta: number;
+  display_score_a: string;
+  display_score_b: string;
+  band_a: EvaluationResultStrict["scoring"]["band"];
+  band_b: EvaluationResultStrict["scoring"]["band"];
 };
 
 export type CriterionScoreForPairing = {
@@ -77,7 +100,10 @@ function isGrowthReportReady(
 export function orderGrowthReportSnapshotsByDate(
   first: GrowthReportEvaluationSnapshot,
   second: GrowthReportEvaluationSnapshot,
-): GrowthReportData {
+): {
+  baseline: GrowthReportEvaluationSnapshot;
+  current: GrowthReportEvaluationSnapshot;
+} {
   const firstTime = Date.parse(first.completedAt);
   const secondTime = Date.parse(second.completedAt);
 
@@ -86,6 +112,73 @@ export function orderGrowthReportSnapshotsByDate(
   }
 
   return { baseline: second, current: first };
+}
+
+export function buildCriterionDeltas(
+  baseline: GrowthReportEvaluationSnapshot,
+  current: GrowthReportEvaluationSnapshot,
+): GrowthReportCriterionDelta[] {
+  const baselineById = new Map(
+    baseline.result.categories
+      .flatMap((category) => category.criteria)
+      .map((criterion) => [criterion.id, criterion]),
+  );
+  const currentById = new Map(
+    current.result.categories
+      .flatMap((category) => category.criteria)
+      .map((criterion) => [criterion.id, criterion]),
+  );
+
+  const deltas: GrowthReportCriterionDelta[] = [];
+
+  for (let id = 1; id <= 11; id++) {
+    const scoreA = baselineById.get(id);
+    const scoreB = currentById.get(id);
+    if (!scoreA || !scoreB) {
+      continue;
+    }
+
+    deltas.push({
+      id,
+      name: scoreA.name,
+      category: scoreA.category,
+      score_a: scoreA.score,
+      score_b: scoreB.score,
+      delta: scoreB.score - scoreA.score,
+      is_double_weighted: scoreA.is_double_weighted,
+    });
+  }
+
+  return deltas;
+}
+
+export function buildGrowthReportHeadlines(
+  baseline: GrowthReportEvaluationSnapshot,
+  current: GrowthReportEvaluationSnapshot,
+): GrowthReportHeadlines {
+  const composite_weighted_a = baseline.result.scoring.composite_weighted;
+  const composite_weighted_b = current.result.scoring.composite_weighted;
+
+  return {
+    composite_weighted_a,
+    composite_weighted_b,
+    composite_weighted_delta: composite_weighted_b - composite_weighted_a,
+    display_score_a: formatDisplayScoreBare(composite_weighted_a),
+    display_score_b: formatDisplayScoreBare(composite_weighted_b),
+    band_a: baseline.result.scoring.band,
+    band_b: current.result.scoring.band,
+  };
+}
+
+export function enrichGrowthReportData(data: {
+  baseline: GrowthReportEvaluationSnapshot;
+  current: GrowthReportEvaluationSnapshot;
+}): GrowthReportData {
+  return {
+    ...data,
+    criterionDeltas: buildCriterionDeltas(data.baseline, data.current),
+    headlines: buildGrowthReportHeadlines(data.baseline, data.current),
+  };
 }
 
 /** Loads full parsed evaluation results for a baseline/current pair. */
@@ -106,9 +199,11 @@ export async function loadGrowthReportData(
     return null;
   }
 
-  return orderGrowthReportSnapshotsByDate(
-    toSnapshot(baselineRow),
-    toSnapshot(currentRow),
+  return enrichGrowthReportData(
+    orderGrowthReportSnapshotsByDate(
+      toSnapshot(baselineRow),
+      toSnapshot(currentRow),
+    ),
   );
 }
 

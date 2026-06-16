@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { formatDisplayScoreBare } from "@/lib/evaluation/display-score";
 import {
   buildQuotePairsFromGrowthReport,
   type GrowthReportData,
@@ -131,15 +130,10 @@ function QuotePairCard({
 
 export function GrowthReportView({ data }: GrowthReportViewProps) {
   const quotePairs = buildQuotePairsFromGrowthReport(data);
-  const baselineScore = formatDisplayScoreBare(
-    data.baseline.result.scoring.composite_weighted,
-  );
-  const currentScore = formatDisplayScoreBare(
-    data.current.result.scoring.composite_weighted,
-  );
-  const delta =
-    data.current.result.scoring.composite_weighted -
-    data.baseline.result.scoring.composite_weighted;
+  const { headlines } = data;
+  const baselineScore = headlines.display_score_a;
+  const currentScore = headlines.display_score_b;
+  const delta = headlines.composite_weighted_delta;
 
   return (
     <main
@@ -190,7 +184,7 @@ export function GrowthReportView({ data }: GrowthReportViewProps) {
           </h2>
           <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
             {formatDate(data.baseline.completedAt)} · {baselineScore} / 10 ·{" "}
-            {data.baseline.result.scoring.band}
+            {headlines.band_a}
           </p>
         </section>
 
@@ -212,7 +206,7 @@ export function GrowthReportView({ data }: GrowthReportViewProps) {
           </h2>
           <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
             {formatDate(data.current.completedAt)} · {currentScore} / 10 ·{" "}
-            {data.current.result.scoring.band}
+            {headlines.band_b}
           </p>
         </section>
       </div>
