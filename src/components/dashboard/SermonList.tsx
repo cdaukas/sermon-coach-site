@@ -133,8 +133,8 @@ export function SermonList({ sermons, growthReportLink, header }: SermonListProp
   if (sermons.length === 0) {
     return (
       <>
-        <DashboardToolbar growthReportLink={growthReportLink} />
         {header}
+        <DashboardToolbar growthReportLink={growthReportLink} />
         <div className="text-center">
           <p
             className="mb-6 text-lg leading-relaxed"
@@ -170,13 +170,13 @@ export function SermonList({ sermons, growthReportLink, header }: SermonListProp
 
   return (
     <>
+      {header}
       <DashboardToolbar
         growthReportLink={growthReportLink}
         searchInput={
           <SermonSearchInput query={query} onQueryChange={setQuery} />
         }
       />
-      {header}
       <div>
         {filteredSermons.length === 0 ? (
           <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
