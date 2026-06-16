@@ -54,6 +54,7 @@ function groupSermonsByMonth(
 
 type SermonListProps = {
   sermons: SermonListItem[];
+  leadingContent?: (searchInput: React.ReactNode) => React.ReactNode;
 };
 
 function SermonCard({ sermon }: { sermon: SermonListItem }) {
@@ -81,7 +82,7 @@ function SermonCard({ sermon }: { sermon: SermonListItem }) {
   );
 }
 
-export function SermonList({ sermons }: SermonListProps) {
+export function SermonList({ sermons, leadingContent }: SermonListProps) {
   const [query, setQuery] = useState("");
 
   if (sermons.length === 0) {
@@ -118,22 +119,30 @@ export function SermonList({ sermons }: SermonListProps) {
         );
   const groupedSermons = groupSermonsByMonth(filteredSermons);
 
+  const searchInput = (
+    <input
+      type="search"
+      value={query}
+      onChange={(event) => setQuery(event.target.value)}
+      placeholder="Search your sermons"
+      aria-label="Search your sermons"
+      className="w-full min-w-0 rounded border px-4 py-2.5 text-[15px] outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
+      style={{
+        ...uiFont,
+        background: "var(--sc-bg)",
+        borderColor: "var(--sc-rule)",
+        color: "var(--sc-ink)",
+      }}
+    />
+  );
+
   return (
     <div>
-      <input
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search your sermons"
-        aria-label="Search your sermons"
-        className="mb-4 w-full rounded border px-4 py-2.5 text-[15px] outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
-        style={{
-          ...uiFont,
-          background: "var(--sc-bg)",
-          borderColor: "var(--sc-rule)",
-          color: "var(--sc-ink)",
-        }}
-      />
+      {leadingContent ? (
+        leadingContent(searchInput)
+      ) : (
+        <div className="mb-4">{searchInput}</div>
+      )}
 
       {filteredSermons.length === 0 ? (
         <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
