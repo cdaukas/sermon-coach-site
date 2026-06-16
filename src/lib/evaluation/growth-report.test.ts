@@ -12,6 +12,7 @@ import {
   type GrowthReportEvaluationSnapshot,
 } from "./growth-report";
 import {
+  compareEvaluationChronology,
   orderEvaluationIdsByCompletedAt,
   orderGrowthReportSnapshotsByDate,
 } from "./growth-report-ordering";
@@ -56,6 +57,7 @@ function makeSnapshot(
   evaluationId: string,
   completedAt: string,
   compositeWeighted: number,
+  createdAt: string = completedAt,
 ): GrowthReportEvaluationSnapshot {
   const result = cloneFixture();
   result.scoring.composite_weighted = compositeWeighted;
@@ -65,6 +67,7 @@ function makeSnapshot(
     sermonId: `sermon-${evaluationId}`,
     sermonTitle: `Sermon ${evaluationId}`,
     completedAt,
+    createdAt,
     result,
   };
 }
@@ -81,6 +84,30 @@ describe("orderGrowthReportSnapshotsByDate", () => {
     const natural = orderGrowthReportSnapshotsByDate(older, newer);
     assert.equal(natural.baseline.evaluationId, "eval-older");
     assert.equal(natural.current.evaluationId, "eval-newer");
+  });
+
+  it("orders same calendar day by full completedAt timestamp, not picker slot", () => {
+    const earlierSameDay = makeSnapshot(
+      "mission",
+      "2026-06-11T02:46:26.271+00:00",
+      42,
+      "2026-06-11T02:44:59.23562+00:00",
+    );
+    const laterSameDay = makeSnapshot(
+      "wait",
+      "2026-06-11T02:53:47.39+00:00",
+      39,
+      "2026-06-11T02:52:16.322202+00:00",
+    );
+
+    const ordered = orderGrowthReportSnapshotsByDate(laterSameDay, earlierSameDay);
+    assert.equal(ordered.baseline.evaluationId, "mission");
+    assert.equal(ordered.current.evaluationId, "wait");
+
+    const report = enrichGrowthReportData(ordered);
+    assert.equal(report.headlines.composite_weighted_a, 42);
+    assert.equal(report.headlines.composite_weighted_b, 39);
+    assert.equal(report.headlines.composite_weighted_delta, -3);
   });
 });
 
@@ -104,6 +131,69 @@ describe("orderEvaluationIdsByCompletedAt", () => {
     );
     assert.equal(swapped.baselineEvaluationId, "eval-older");
     assert.equal(swapped.currentEvaluationId, "eval-newer");
+  });
+
+  it("orders same calendar day by full completedAt timestamp, not date label", () => {
+    const sameDay = [
+      {
+        evaluationId: "eval-morning",
+        completedAt: "2025-06-10T10:15:00.000Z",
+        createdAt: "2025-06-10T09:00:00.000Z",
+      },
+      {
+        evaluationId: "eval-evening",
+        completedAt: "2025-06-10T20:45:00.000Z",
+        createdAt: "2025-06-10T19:00:00.000Z",
+      },
+    ];
+
+    const ordered = orderEvaluationIdsByCompletedAt(
+      sameDay,
+      "eval-evening",
+      "eval-morning",
+    );
+    assert.equal(ordered.baselineEvaluationId, "eval-morning");
+    assert.equal(ordered.currentEvaluationId, "eval-evening");
+  });
+
+  it("breaks identical completedAt ties with createdAt, then evaluationId", () => {
+    const tiedCompletedAt = "2025-06-10T12:00:00.000Z";
+    const earlierCreated = {
+      evaluationId: "eval-b",
+      completedAt: tiedCompletedAt,
+      createdAt: "2025-06-10T11:00:00.000Z",
+    };
+    const laterCreated = {
+      evaluationId: "eval-a",
+      completedAt: tiedCompletedAt,
+      createdAt: "2025-06-10T13:00:00.000Z",
+    };
+
+    assert.ok(
+      compareEvaluationChronology(earlierCreated, laterCreated) < 0,
+    );
+
+    const ordered = orderEvaluationIdsByCompletedAt(
+      [earlierCreated, laterCreated],
+      laterCreated.evaluationId,
+      earlierCreated.evaluationId,
+    );
+    assert.equal(ordered.baselineEvaluationId, "eval-b");
+    assert.equal(ordered.currentEvaluationId, "eval-a");
+
+    const lexTie = [
+      {
+        evaluationId: "eval-a",
+        completedAt: tiedCompletedAt,
+        createdAt: "2025-06-10T11:30:00.000Z",
+      },
+      {
+        evaluationId: "eval-b",
+        completedAt: tiedCompletedAt,
+        createdAt: "2025-06-10T11:30:00.000Z",
+      },
+    ];
+    assert.ok(compareEvaluationChronology(lexTie[0], lexTie[1]) < 0);
   });
 });
 

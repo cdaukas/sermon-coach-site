@@ -172,7 +172,7 @@ export async function listRecentCompleteEvaluations(
 
   let query = supabase
     .from("sermon_evaluations")
-    .select("id, completed_at, sermon_version_id, score_band")
+    .select("id, completed_at, created_at, sermon_version_id, score_band")
     .eq("status", "complete")
     .not("result", "is", null)
     .not("completed_at", "is", null)
@@ -236,6 +236,7 @@ export async function listRecentCompleteEvaluations(
       sermonTitle: sermon.title,
       primaryPassage: sermon.primary_passage ?? null,
       completedAt: row.completed_at,
+      createdAt: row.created_at,
       scoreBand: row.score_band ?? "—",
     });
   }

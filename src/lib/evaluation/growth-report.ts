@@ -34,6 +34,7 @@ export type GrowthReportEvaluationSnapshot = {
   sermonId: string;
   sermonTitle: string;
   completedAt: string;
+  createdAt: string;
   result: EvaluationResultStrict;
 };
 
@@ -68,6 +69,7 @@ function toSnapshot(
     sermonId: row.sermon.id,
     sermonTitle: row.sermon.title,
     completedAt,
+    createdAt: row.evaluation.created_at,
     result: row.evaluation.result,
   };
 }

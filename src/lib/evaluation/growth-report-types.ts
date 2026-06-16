@@ -6,6 +6,7 @@ export type RecentCompleteEvaluationItem = {
   sermonTitle: string;
   primaryPassage: string | null;
   completedAt: string;
+  createdAt: string;
   scoreBand: string;
 };
 
