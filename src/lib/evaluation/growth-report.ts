@@ -73,6 +73,21 @@ function isGrowthReportReady(
   );
 }
 
+/** Assign earlier completedAt to baseline (A), later to current (B). */
+export function orderGrowthReportSnapshotsByDate(
+  first: GrowthReportEvaluationSnapshot,
+  second: GrowthReportEvaluationSnapshot,
+): GrowthReportData {
+  const firstTime = Date.parse(first.completedAt);
+  const secondTime = Date.parse(second.completedAt);
+
+  if (firstTime <= secondTime) {
+    return { baseline: first, current: second };
+  }
+
+  return { baseline: second, current: first };
+}
+
 /** Loads full parsed evaluation results for a baseline/current pair. */
 export async function loadGrowthReportData(
   baselineEvaluationId: string,
@@ -91,10 +106,10 @@ export async function loadGrowthReportData(
     return null;
   }
 
-  return {
-    baseline: toSnapshot(baselineRow),
-    current: toSnapshot(currentRow),
-  };
+  return orderGrowthReportSnapshotsByDate(
+    toSnapshot(baselineRow),
+    toSnapshot(currentRow),
+  );
 }
 
 function anchoredQuoteText(

@@ -5,7 +5,9 @@ import {
   buildQuotePairs,
   flattenCriteriaForPairing,
   MAX_QUOTE_PAIRS,
+  orderGrowthReportSnapshotsByDate,
   type CriterionScoreForPairing,
+  type GrowthReportEvaluationSnapshot,
 } from "./growth-report";
 import type { EvaluationResultStrict } from "./schema";
 
@@ -43,6 +45,38 @@ function setCriterionQuote(
     }
   }
 }
+
+function makeSnapshot(
+  evaluationId: string,
+  completedAt: string,
+  compositeWeighted: number,
+): GrowthReportEvaluationSnapshot {
+  const result = cloneFixture();
+  result.scoring.composite_weighted = compositeWeighted;
+
+  return {
+    evaluationId,
+    sermonId: `sermon-${evaluationId}`,
+    sermonTitle: `Sermon ${evaluationId}`,
+    completedAt,
+    result,
+  };
+}
+
+describe("orderGrowthReportSnapshotsByDate", () => {
+  it("places the earlier eval in baseline regardless of argument order", () => {
+    const older = makeSnapshot("eval-older", "2025-01-01T12:00:00.000Z", 35);
+    const newer = makeSnapshot("eval-newer", "2025-06-01T12:00:00.000Z", 39);
+
+    const swapped = orderGrowthReportSnapshotsByDate(newer, older);
+    assert.equal(swapped.baseline.evaluationId, "eval-older");
+    assert.equal(swapped.current.evaluationId, "eval-newer");
+
+    const natural = orderGrowthReportSnapshotsByDate(older, newer);
+    assert.equal(natural.baseline.evaluationId, "eval-older");
+    assert.equal(natural.current.evaluationId, "eval-newer");
+  });
+});
 
 describe("flattenCriteriaForPairing", () => {
   it("reads anchored_quote.text from result.categories", () => {
