@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SermonList } from "@/components/dashboard/SermonList";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
+import { listRecentCompleteEvaluations } from "@/lib/evaluation/queries";
 import {
   getSubscriptionStatus as getEvalSubscriptionStatus,
   isSubscriptionActive,
@@ -20,16 +22,18 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermons, subscriptionStatus, packCredits, evalSubStatus] =
+  const [sermons, subscriptionStatus, packCredits, evalSubStatus, recentComplete] =
     await Promise.all([
       listSermons(),
       getSubscriptionStatus(),
       getPackCredits(),
       user ? getEvalSubscriptionStatus(user.id) : Promise.resolve(null),
+      listRecentCompleteEvaluations(2),
     ]);
   const hasActiveSubscription = isSubscriptionActive(evalSubStatus);
   const showPurchaseCard = true;
   const showStatusRow = subscriptionStatus || packCredits || showPurchaseCard;
+  const growthReportHref = recentComplete.length >= 2 ? "/dashboard/growth" : null;
 
   return (
     <main
@@ -54,6 +58,23 @@ export default async function DashboardPage() {
           Your sermons
         </h1>
       </div>
+
+      {growthReportHref ? (
+        <div className="mb-8">
+          <Link
+            href={growthReportHref}
+            className="inline-block rounded border px-5 py-3 text-[13px] font-semibold tracking-wide no-underline transition-colors hover:border-[var(--sc-accent)]"
+            style={{
+              ...uiFont,
+              background: "var(--sc-bg)",
+              borderColor: "var(--sc-rule)",
+              color: "var(--sc-ink)",
+            }}
+          >
+            View growth report →
+          </Link>
+        </div>
+      ) : null}
 
       {showStatusRow ? (
         <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">

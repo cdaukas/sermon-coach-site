@@ -97,6 +97,18 @@ export async function getEvaluation(
   evaluationId: string,
   sermonId: string,
 ): Promise<EvaluationWithSermon | null> {
+  const loaded = await getEvaluationById(evaluationId);
+
+  if (!loaded || loaded.sermon.id !== sermonId) {
+    return null;
+  }
+
+  return loaded;
+}
+
+export async function getEvaluationById(
+  evaluationId: string,
+): Promise<EvaluationWithSermon | null> {
   const supabase = await createClient();
 
   const { data: row, error } = await supabase
@@ -129,14 +141,14 @@ export async function getEvaluation(
     throw new Error(versionError.message);
   }
 
-  if (!version || version.sermon_id !== sermonId) {
+  if (!version) {
     return null;
   }
 
   const { data: sermon, error: sermonError } = await supabase
     .from("sermons")
     .select("id, title, primary_passage")
-    .eq("id", sermonId)
+    .eq("id", version.sermon_id)
     .maybeSingle();
 
   if (sermonError) {
@@ -148,6 +160,93 @@ export async function getEvaluation(
   }
 
   return { evaluation, sermon };
+}
+
+export type RecentCompleteEvaluationItem = {
+  evaluationId: string;
+  sermonId: string;
+  sermonTitle: string;
+  primaryPassage: string | null;
+  completedAt: string;
+  scoreBand: string;
+};
+
+export async function listRecentCompleteEvaluations(
+  limit?: number,
+): Promise<RecentCompleteEvaluationItem[]> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("sermon_evaluations")
+    .select("id, completed_at, sermon_version_id, score_band")
+    .eq("status", "complete")
+    .not("result", "is", null)
+    .not("completed_at", "is", null)
+    .order("completed_at", { ascending: false });
+
+  if (limit != null) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const rows = data ?? [];
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const versionIds = [...new Set(rows.map((row) => row.sermon_version_id))];
+  const { data: versions, error: versionsError } = await supabase
+    .from("sermon_versions")
+    .select("id, sermon_id")
+    .in("id", versionIds);
+
+  if (versionsError) {
+    throw new Error(versionsError.message);
+  }
+
+  const versionToSermonId = new Map(
+    (versions ?? []).map((version) => [version.id, version.sermon_id]),
+  );
+
+  const sermonIds = [...new Set(versionToSermonId.values())];
+  const { data: sermons, error: sermonsError } = await supabase
+    .from("sermons")
+    .select("id, title, primary_passage")
+    .in("id", sermonIds);
+
+  if (sermonsError) {
+    throw new Error(sermonsError.message);
+  }
+
+  const sermonById = new Map(
+    (sermons ?? []).map((sermon) => [sermon.id, sermon]),
+  );
+
+  const items: RecentCompleteEvaluationItem[] = [];
+
+  for (const row of rows) {
+    const sermonId = versionToSermonId.get(row.sermon_version_id);
+    const sermon = sermonId ? sermonById.get(sermonId) : undefined;
+    if (!sermonId || !sermon?.title || !row.completed_at) {
+      continue;
+    }
+
+    items.push({
+      evaluationId: row.id,
+      sermonId,
+      sermonTitle: sermon.title,
+      primaryPassage: sermon.primary_passage ?? null,
+      completedAt: row.completed_at,
+      scoreBand: row.score_band ?? "—",
+    });
+  }
+
+  return items;
 }
 
 export async function listEvaluationsForSermon(
