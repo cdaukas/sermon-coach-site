@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import type { RecentCompleteEvaluationItem } from "./growth-report-types";
 import { parseEvaluationResult } from "./schema";
+
+export type { RecentCompleteEvaluationItem } from "./growth-report-types";
 import type {
   EvaluationStatus,
   EvaluationWithSermon,
@@ -161,15 +164,6 @@ export async function getEvaluationById(
 
   return { evaluation, sermon };
 }
-
-export type RecentCompleteEvaluationItem = {
-  evaluationId: string;
-  sermonId: string;
-  sermonTitle: string;
-  primaryPassage: string | null;
-  completedAt: string;
-  scoreBand: string;
-};
 
 export async function listRecentCompleteEvaluations(
   limit?: number,

@@ -1,17 +1,16 @@
 import Link from "next/link";
-import {
-  buildQuotePairsFromGrowthReport,
-  type GrowthReportCriterionDelta,
-  type GrowthReportData,
-  type GrowthReportHeadlines,
-  type QuotePair,
-} from "@/lib/evaluation/growth-report";
+import type {
+  GrowthReportCriterionDelta,
+  GrowthReportHeadlines,
+  GrowthReportPresentation,
+  QuotePair,
+} from "@/lib/evaluation/growth-report-types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
 type GrowthReportViewProps = {
-  data: GrowthReportData;
+  data: GrowthReportPresentation;
 };
 
 function formatDate(iso: string): string {
@@ -173,7 +172,7 @@ function CriterionMovementRow({ row }: { row: GrowthReportCriterionDelta }) {
   );
 }
 
-function CriterionMovementTable({ data }: { data: GrowthReportData }) {
+function CriterionMovementTable({ data }: { data: GrowthReportPresentation }) {
   const deltasByCategory = new Map<number, GrowthReportCriterionDelta[]>();
 
   for (const row of data.criterionDeltas) {
@@ -199,7 +198,7 @@ function CriterionMovementTable({ data }: { data: GrowthReportData }) {
       </p>
 
       <div className="flex flex-col gap-5">
-        {data.baseline.result.categories.map((category) => {
+        {data.categories.map((category) => {
           const rows = deltasByCategory.get(category.number) ?? [];
 
           return (
@@ -300,7 +299,7 @@ function QuotePairCard({
   data,
 }: {
   pair: QuotePair;
-  data: GrowthReportData;
+  data: GrowthReportPresentation;
 }) {
   const baselineLabel = sermonLabel(
     data.baseline.sermonTitle,
@@ -375,8 +374,7 @@ function QuotePairCard({
 }
 
 export function GrowthReportView({ data }: GrowthReportViewProps) {
-  const quotePairs = buildQuotePairsFromGrowthReport(data);
-  const { headlines } = data;
+  const { headlines, quotePairs } = data;
   const baselineScore = headlines.display_score_a;
   const currentScore = headlines.display_score_b;
 

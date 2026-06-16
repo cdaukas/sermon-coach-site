@@ -1,6 +1,13 @@
 import { getEvaluationById } from "./queries";
 import { formatDisplayScoreBare } from "./display-score";
 import { orderGrowthReportSnapshotsByDate } from "./growth-report-ordering";
+import type {
+  GrowthReportCriterionDelta,
+  GrowthReportHeadlines,
+  GrowthReportPresentation,
+  QuotePair,
+  QuotePairState,
+} from "./growth-report-types";
 import type { EvaluationResultStrict } from "./schema";
 import type { EvaluationWithSermon } from "./types";
 
@@ -8,6 +15,17 @@ export {
   orderEvaluationIdsByCompletedAt,
   orderGrowthReportSnapshotsByDate,
 } from "./growth-report-ordering";
+
+export type {
+  GrowthReportCriterionDelta,
+  GrowthReportHeadlines,
+  GrowthReportPresentation,
+  GrowthReportCategorySection,
+  GrowthReportSermonSummary,
+  QuotePair,
+  QuotePairState,
+  RecentCompleteEvaluationItem,
+} from "./growth-report-types";
 
 export const MAX_QUOTE_PAIRS = 3;
 
@@ -24,26 +42,7 @@ export type GrowthReportData = {
   current: GrowthReportEvaluationSnapshot;
   criterionDeltas: GrowthReportCriterionDelta[];
   headlines: GrowthReportHeadlines;
-};
-
-export type GrowthReportCriterionDelta = {
-  id: number;
-  name: string;
-  category: number;
-  score_a: number;
-  score_b: number;
-  delta: number;
-  is_double_weighted: boolean;
-};
-
-export type GrowthReportHeadlines = {
-  composite_weighted_a: number;
-  composite_weighted_b: number;
-  composite_weighted_delta: number;
-  display_score_a: string;
-  display_score_b: string;
-  band_a: EvaluationResultStrict["scoring"]["band"];
-  band_b: EvaluationResultStrict["scoring"]["band"];
+  quotePairs: QuotePair[];
 };
 
 export type CriterionScoreForPairing = {
@@ -52,18 +51,6 @@ export type CriterionScoreForPairing = {
   score: number;
   anchoredQuote: string | null;
   isDoubleWeighted: boolean;
-};
-
-export type QuotePairState = "pair" | "baseline_only" | "current_only";
-
-export type QuotePair = {
-  criterionId: number;
-  criterionName: string;
-  delta: number;
-  isDoubleWeighted: boolean;
-  baselineQuote: string | null;
-  currentQuote: string | null;
-  pairState: QuotePairState;
 };
 
 function toSnapshot(
@@ -162,10 +149,40 @@ export function enrichGrowthReportData(data: {
   baseline: GrowthReportEvaluationSnapshot;
   current: GrowthReportEvaluationSnapshot;
 }): GrowthReportData {
-  return {
+  const enriched = {
     ...data,
     criterionDeltas: buildCriterionDeltas(data.baseline, data.current),
     headlines: buildGrowthReportHeadlines(data.baseline, data.current),
+    quotePairs: buildQuotePairs(
+      flattenCriteriaForPairing(data.baseline.result),
+      flattenCriteriaForPairing(data.current.result),
+    ),
+  };
+
+  return enriched;
+}
+
+/** Strips server-only evaluation payloads for presentational components. */
+export function toGrowthReportPresentation(
+  data: GrowthReportData,
+): GrowthReportPresentation {
+  return {
+    baseline: {
+      sermonTitle: data.baseline.sermonTitle,
+      completedAt: data.baseline.completedAt,
+    },
+    current: {
+      sermonTitle: data.current.sermonTitle,
+      completedAt: data.current.completedAt,
+    },
+    categories: data.baseline.result.categories.map((category) => ({
+      id: category.id,
+      number: category.number,
+      name: category.name,
+    })),
+    criterionDeltas: data.criterionDeltas,
+    headlines: data.headlines,
+    quotePairs: data.quotePairs,
   };
 }
 

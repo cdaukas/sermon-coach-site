@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { orderEvaluationIdsByCompletedAt } from "@/lib/evaluation/growth-report-ordering";
-import type { RecentCompleteEvaluationItem } from "@/lib/evaluation/queries";
+import type { RecentCompleteEvaluationItem } from "@/lib/evaluation/growth-report-types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };

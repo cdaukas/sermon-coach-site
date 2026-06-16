@@ -5,6 +5,7 @@ import { GrowthReportPicker } from "@/components/dashboard/GrowthReportPicker";
 import { GrowthReportView } from "@/components/dashboard/GrowthReportView";
 import {
   loadGrowthReportData,
+  toGrowthReportPresentation,
 } from "@/lib/evaluation/growth-report";
 import { orderEvaluationIdsByCompletedAt } from "@/lib/evaluation/growth-report-ordering";
 import { listRecentCompleteEvaluations } from "@/lib/evaluation/queries";
@@ -193,7 +194,9 @@ export default async function GrowthReportPage({
         ) : null}
       </main>
 
-      {reportData ? <GrowthReportView data={reportData} /> : null}
+      {reportData ? (
+        <GrowthReportView data={toGrowthReportPresentation(reportData)} />
+      ) : null}
     </>
   );
 }
