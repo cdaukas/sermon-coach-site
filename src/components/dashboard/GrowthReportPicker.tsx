@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { orderEvaluationIdsByCompletedAt } from "@/lib/evaluation/growth-report-ordering";
 import type { RecentCompleteEvaluationItem } from "@/lib/evaluation/queries";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -69,7 +70,15 @@ export function GrowthReportPicker({
       return;
     }
 
-    router.push(`/dashboard/growth?baseline=${baselineId}&current=${currentId}`);
+    const ordered = orderEvaluationIdsByCompletedAt(
+      options,
+      baselineId,
+      currentId,
+    );
+
+    router.push(
+      `/dashboard/growth?baseline=${ordered.baselineEvaluationId}&current=${ordered.currentEvaluationId}`,
+    );
   }
 
   return (

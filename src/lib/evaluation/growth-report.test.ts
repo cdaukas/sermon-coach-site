@@ -8,10 +8,13 @@ import {
   enrichGrowthReportData,
   flattenCriteriaForPairing,
   MAX_QUOTE_PAIRS,
-  orderGrowthReportSnapshotsByDate,
   type CriterionScoreForPairing,
   type GrowthReportEvaluationSnapshot,
 } from "./growth-report";
+import {
+  orderEvaluationIdsByCompletedAt,
+  orderGrowthReportSnapshotsByDate,
+} from "./growth-report-ordering";
 import type { EvaluationResultStrict } from "./schema";
 
 function cloneFixture(): EvaluationResultStrict {
@@ -78,6 +81,29 @@ describe("orderGrowthReportSnapshotsByDate", () => {
     const natural = orderGrowthReportSnapshotsByDate(older, newer);
     assert.equal(natural.baseline.evaluationId, "eval-older");
     assert.equal(natural.current.evaluationId, "eval-newer");
+  });
+});
+
+describe("orderEvaluationIdsByCompletedAt", () => {
+  const options = [
+    {
+      evaluationId: "eval-older",
+      completedAt: "2025-01-01T12:00:00.000Z",
+    },
+    {
+      evaluationId: "eval-newer",
+      completedAt: "2025-06-01T12:00:00.000Z",
+    },
+  ];
+
+  it("returns earlier eval as baseline regardless of argument order", () => {
+    const swapped = orderEvaluationIdsByCompletedAt(
+      options,
+      "eval-newer",
+      "eval-older",
+    );
+    assert.equal(swapped.baselineEvaluationId, "eval-older");
+    assert.equal(swapped.currentEvaluationId, "eval-newer");
   });
 });
 

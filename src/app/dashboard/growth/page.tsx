@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { GrowthReportPicker } from "@/components/dashboard/GrowthReportPicker";
 import { GrowthReportView } from "@/components/dashboard/GrowthReportView";
-import { loadGrowthReportData } from "@/lib/evaluation/growth-report";
+import {
+  loadGrowthReportData,
+} from "@/lib/evaluation/growth-report";
+import { orderEvaluationIdsByCompletedAt } from "@/lib/evaluation/growth-report-ordering";
 import { listRecentCompleteEvaluations } from "@/lib/evaluation/queries";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -76,8 +80,24 @@ export default async function GrowthReportPage({
   }
 
   const { baseline, current } = await searchParams;
-  const defaultBaselineId = options[1].evaluationId;
-  const defaultCurrentId = options[0].evaluationId;
+
+  if (baseline?.trim() && current?.trim()) {
+    const ordered = orderEvaluationIdsByCompletedAt(
+      options,
+      baseline.trim(),
+      current.trim(),
+    );
+
+    if (
+      ordered.baselineEvaluationId !== baseline.trim() ||
+      ordered.currentEvaluationId !== current.trim()
+    ) {
+      redirect(
+        `/dashboard/growth?baseline=${ordered.baselineEvaluationId}&current=${ordered.currentEvaluationId}`,
+      );
+    }
+  }
+
   const selectedBaselineId = resolveSelectedEvaluationId(
     options,
     baseline,

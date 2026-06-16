@@ -1,7 +1,13 @@
 import { getEvaluationById } from "./queries";
 import { formatDisplayScoreBare } from "./display-score";
+import { orderGrowthReportSnapshotsByDate } from "./growth-report-ordering";
 import type { EvaluationResultStrict } from "./schema";
 import type { EvaluationWithSermon } from "./types";
+
+export {
+  orderEvaluationIdsByCompletedAt,
+  orderGrowthReportSnapshotsByDate,
+} from "./growth-report-ordering";
 
 export const MAX_QUOTE_PAIRS = 3;
 
@@ -94,24 +100,6 @@ function isGrowthReportReady(
     row.evaluation.result != null &&
     row.evaluation.completed_at != null
   );
-}
-
-/** Assign earlier completedAt to baseline (A), later to current (B). */
-export function orderGrowthReportSnapshotsByDate(
-  first: GrowthReportEvaluationSnapshot,
-  second: GrowthReportEvaluationSnapshot,
-): {
-  baseline: GrowthReportEvaluationSnapshot;
-  current: GrowthReportEvaluationSnapshot;
-} {
-  const firstTime = Date.parse(first.completedAt);
-  const secondTime = Date.parse(second.completedAt);
-
-  if (firstTime <= secondTime) {
-    return { baseline: first, current: second };
-  }
-
-  return { baseline: second, current: first };
 }
 
 export function buildCriterionDeltas(
