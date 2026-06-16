@@ -2,10 +2,13 @@ import type { EvaluationResultStrict } from "./schema";
 
 export type EvaluationStatus = "pending" | "running" | "complete" | "failed";
 
+export type ReportMode = "diagnostic" | "coaching";
+
 export type SermonEvaluationRow = {
   id: string;
   sermon_version_id: string;
   status: EvaluationStatus;
+  report_mode: ReportMode;
   error_message: string | null;
   model: string | null;
   prompt_version: string;

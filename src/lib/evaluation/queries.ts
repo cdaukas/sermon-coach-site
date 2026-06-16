@@ -6,6 +6,7 @@ export type { RecentCompleteEvaluationItem } from "./growth-report-types";
 import type {
   EvaluationStatus,
   EvaluationWithSermon,
+  ReportMode,
   SermonEvaluationListItem,
   SermonEvaluationRow,
 } from "./types";
@@ -28,6 +29,7 @@ function mapEvaluationRow(
     id: row.id as string,
     sermon_version_id: row.sermon_version_id as string,
     status: row.status as SermonEvaluationRow["status"],
+    report_mode: (row.report_mode as ReportMode | undefined) ?? "diagnostic",
     error_message: (row.error_message as string | null) ?? null,
     model: (row.model as string | null) ?? null,
     prompt_version: row.prompt_version as string,
