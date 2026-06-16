@@ -134,38 +134,45 @@ export default async function GrowthReportPage({
   return (
     <>
       <main
-        className="mb-6 rounded px-8 py-10"
+        className={`mb-6 rounded px-8 ${reportData ? "py-4" : "py-10"}`}
         style={{
           background: "var(--sc-panel)",
           border: "1px solid var(--sc-rule)",
           boxShadow: "var(--sc-shadow-lift)",
         }}
       >
-        <Link
-          href="/dashboard"
-          className="mb-8 inline-block text-[13px] font-medium no-underline hover:underline"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
-        >
-          ← Back to library
-        </Link>
+        {!reportData ? (
+          <>
+            <Link
+              href="/dashboard"
+              className="mb-8 inline-block text-[13px] font-medium no-underline hover:underline"
+              style={{ ...uiFont, color: "var(--sc-accent)" }}
+            >
+              ← Back to library
+            </Link>
 
-        <p
-          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
-        >
-          Growth report
-        </p>
-        <h1
-          className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          How your preaching is moving
-        </h1>
+            <p
+              className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+              style={{ ...uiFont, color: "var(--sc-accent)" }}
+            >
+              Growth report
+            </p>
+            <h1
+              className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
+              style={{ ...serifFont, color: "var(--sc-ink)" }}
+            >
+              How your preaching is moving
+            </h1>
+          </>
+        ) : null}
 
         <GrowthReportPicker
           options={options}
           selectedBaselineId={selectedBaselineId}
           selectedCurrentId={selectedCurrentId}
+          reportVisible={Boolean(reportData)}
+          baselineTitle={reportData?.baseline.sermonTitle}
+          currentTitle={reportData?.current.sermonTitle}
         />
 
         {hasGenerateParams && sameSermonSelected ? (

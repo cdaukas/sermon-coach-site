@@ -22,6 +22,9 @@ type GrowthReportPickerProps = {
   options: RecentCompleteEvaluationItem[];
   selectedBaselineId: string;
   selectedCurrentId: string;
+  reportVisible?: boolean;
+  baselineTitle?: string;
+  currentTitle?: string;
 };
 
 function formatDate(iso: string): string {
@@ -41,15 +44,25 @@ export function GrowthReportPicker({
   options,
   selectedBaselineId,
   selectedCurrentId,
+  reportVisible = false,
+  baselineTitle,
+  currentTitle,
 }: GrowthReportPickerProps) {
   const router = useRouter();
   const [baselineId, setBaselineId] = useState(selectedBaselineId);
   const [currentId, setCurrentId] = useState(selectedCurrentId);
+  const [pickerExpanded, setPickerExpanded] = useState(!reportVisible);
 
   useEffect(() => {
     setBaselineId(selectedBaselineId);
     setCurrentId(selectedCurrentId);
   }, [selectedBaselineId, selectedCurrentId]);
+
+  useEffect(() => {
+    if (reportVisible) {
+      setPickerExpanded(false);
+    }
+  }, [reportVisible, selectedBaselineId, selectedCurrentId]);
 
   const baselineOption = useMemo(
     () => options.find((option) => option.evaluationId === baselineId),
@@ -78,6 +91,40 @@ export function GrowthReportPicker({
 
     router.push(
       `/dashboard/growth?baseline=${ordered.baselineEvaluationId}&current=${ordered.currentEvaluationId}`,
+    );
+  }
+
+  if (reportVisible && !pickerExpanded && baselineTitle && currentTitle) {
+    return (
+      <section
+        className="flex flex-wrap items-center justify-between gap-3 rounded border px-4 py-3"
+        style={{ borderColor: "var(--sc-rule)", background: "var(--sc-bg)" }}
+      >
+        <p className="text-[14px] leading-relaxed" style={{ ...uiFont, color: "var(--sc-ink)" }}>
+          Comparing{" "}
+          <span className="font-semibold" style={{ ...serifFont }}>
+            {baselineTitle}
+          </span>
+          <span className="mx-2" style={{ color: "var(--sc-ink-soft)" }} aria-hidden>
+            →
+          </span>
+          <span className="font-semibold" style={{ ...serifFont }}>
+            {currentTitle}
+          </span>
+        </p>
+        <button
+          type="button"
+          className="rounded px-3 py-1.5 text-[13px] font-medium no-underline transition-opacity hover:opacity-80"
+          style={{
+            ...uiFont,
+            color: "var(--sc-accent)",
+            background: "var(--sc-accent-pale)",
+          }}
+          onClick={() => setPickerExpanded(true)}
+        >
+          Change selection
+        </button>
+      </section>
     );
   }
 
