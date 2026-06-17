@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import {
   EvaluationAccessGate,
   EvaluationCreditNotice,
 } from "@/components/evaluation/EvaluationAccessGate";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
-import type { StashedReportMode } from "@/lib/evaluation/context";
-import { ReportTypeToggle } from "./ReportTypeToggle";
 import { SermonForm } from "./SermonForm";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -18,8 +15,6 @@ type NewSermonWorkspaceProps = {
 };
 
 export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
-  const [reportMode, setReportMode] = useState<StashedReportMode>("diagnostic");
-
   return (
     <>
       <div className="mb-8">
@@ -29,15 +24,12 @@ export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
         >
           Submit
         </p>
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
-          <h1
-            className="text-[32px] font-semibold leading-tight tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            New Sermon
-          </h1>
-          <ReportTypeToggle value={reportMode} onChange={setReportMode} />
-        </div>
+        <h1
+          className="text-[32px] font-semibold leading-tight tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          New Sermon
+        </h1>
         <p
           className="mt-3 text-base leading-relaxed"
           style={{
@@ -54,7 +46,7 @@ export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
       <EvaluationAccessGate entitlement={entitlement} className="mb-8" />
       <EvaluationCreditNotice entitlement={entitlement} className="mb-6" />
 
-      <SermonForm reportMode={reportMode} />
+      <SermonForm />
     </>
   );
 }

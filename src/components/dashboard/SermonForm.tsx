@@ -12,8 +12,6 @@ import {
 import {
   normalizeSermonContext,
   sermonContextStorageKey,
-  sermonReportModeStorageKey,
-  type StashedReportMode,
 } from "@/lib/evaluation/context";
 import { createSermon } from "@/lib/sermons/actions";
 
@@ -30,11 +28,7 @@ const contextFieldStyle = {
   color: "var(--sc-ink)",
 };
 
-type SermonFormProps = {
-  reportMode: StashedReportMode;
-};
-
-export function SermonForm({ reportMode }: SermonFormProps) {
+export function SermonForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -78,11 +72,6 @@ export function SermonForm({ reportMode }: SermonFormProps) {
           JSON.stringify(context),
         );
       }
-
-      sessionStorage.setItem(
-        sermonReportModeStorageKey(result.sermonId),
-        reportMode,
-      );
 
       router.push(`/dashboard/sermons/${result.sermonId}`);
     } finally {

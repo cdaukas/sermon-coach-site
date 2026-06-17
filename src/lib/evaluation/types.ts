@@ -28,6 +28,7 @@ export type SermonEvaluationListItem = Pick<
   SermonEvaluationRow,
   | "id"
   | "status"
+  | "report_mode"
   | "overall_score"
   | "score_band"
   | "prompt_version"
