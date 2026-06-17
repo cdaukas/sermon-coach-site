@@ -1,24 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type PlanTier = "coach" | "cohort";
+import type {
+  EvaluationBlockedReason,
+  EvaluationCreditSource,
+  EvaluationEntitlement,
+  EvaluationUsage,
+  PlanTier,
+} from "./entitlement-types";
 
-export type EvaluationCreditSource = "free" | "subscription" | "pack";
-
-export type EvaluationUsage = {
-  planTier: PlanTier;
-  used: number;
-  limit: number;
-  periodStart: string;
-};
-
-export type EvaluationEntitlement = {
-  freeRemaining: number;
-  subscriptionActive: boolean;
-  usage: EvaluationUsage | null;
-  canEvaluate: boolean;
-  creditSource: EvaluationCreditSource | null;
-};
+export type {
+  EvaluationBlockedReason,
+  EvaluationCreditSource,
+  EvaluationEntitlement,
+  EvaluationUsage,
+  PlanTier,
+} from "./entitlement-types";
 
 const COOLDOWN_MS = 60_000;
 
@@ -154,11 +151,11 @@ function checkCooldown(
   return null;
 }
 
-async function userHasLivePackCredit(userId: string): Promise<boolean> {
+async function countLivePackCredits(userId: string): Promise<number> {
   const supabase = await createClient();
-  const { count, error } = await supabase
+  const { data, error } = await supabase
     .from("eval_credit_grants")
-    .select("id", { count: "exact", head: true })
+    .select("quantity_remaining")
     .eq("user_id", userId)
     .gt("quantity_remaining", 0)
     .gt("expires_at", new Date().toISOString());
@@ -167,42 +164,22 @@ async function userHasLivePackCredit(userId: string): Promise<boolean> {
     throw new Error(error.message);
   }
 
-  return (count ?? 0) > 0;
+  return (data ?? []).reduce((sum, row) => sum + row.quantity_remaining, 0);
 }
 
-type ResolvedEvaluationCredit =
-  | { canEvaluate: true; creditSource: EvaluationCreditSource }
-  | { canEvaluate: false; creditSource: null };
+type EvaluationBillingContext = {
+  profile: ProfileBillingRow;
+  subscriptionActive: boolean;
+  freeRemaining: number;
+  packRemaining: number;
+  usage: EvaluationUsage | null;
+};
 
-/** Free credits, then subscription monthly quota, then pack credits. */
-async function resolveEvaluationCredit(
-  profile: ProfileBillingRow,
+async function loadEvaluationBillingContext(
   userId: string,
-): Promise<ResolvedEvaluationCredit> {
-  if (profile.free_evaluations_remaining > 0) {
-    return { canEvaluate: true, creditSource: "free" };
-  }
-
-  if (profile.subscription_status === "active") {
-    const usage = buildUsageFromProfile(profile);
-    if (usage.used < usage.limit) {
-      return { canEvaluate: true, creditSource: "subscription" };
-    }
-  }
-
-  if (await userHasLivePackCredit(userId)) {
-    return { canEvaluate: true, creditSource: "pack" };
-  }
-
-  return { canEvaluate: false, creditSource: null };
-}
-
-/**
- * Production eligibility: free credit first, then subscription monthly quota, then pack credits.
- */
-export async function checkEvaluationEligibility(
-  userId: string,
-): Promise<EligibilityGuardResult> {
+): Promise<
+  { ok: true; context: EvaluationBillingContext } | { ok: false; error: string }
+> {
   const refreshed = await refreshEvaluationPeriodIfNeeded(userId);
   if (!refreshed.ok) {
     return refreshed;
@@ -215,13 +192,88 @@ export async function checkEvaluationEligibility(
 
   const { profile } = loaded;
   const subscriptionActive = profile.subscription_status === "active";
+  const packRemaining = await countLivePackCredits(userId);
+
+  return {
+    ok: true,
+    context: {
+      profile,
+      subscriptionActive,
+      freeRemaining: profile.free_evaluations_remaining,
+      packRemaining,
+      usage: subscriptionActive ? buildUsageFromProfile(profile) : null,
+    },
+  };
+}
+
+function deriveBlockedReason(
+  cooldownBlock: EligibilityGuardResult | null,
+  resolved: ResolvedEvaluationCredit,
+  subscriptionActive: boolean,
+  usage: EvaluationUsage | null,
+): EvaluationBlockedReason {
+  if (cooldownBlock) {
+    return "cooldown";
+  }
+
+  if (resolved.canEvaluate) {
+    return "none";
+  }
+
+  if (subscriptionActive && usage && usage.used >= usage.limit) {
+    return "monthly_limit";
+  }
+
+  return "no_credits";
+}
+
+type ResolvedEvaluationCredit =
+  | { canEvaluate: true; creditSource: EvaluationCreditSource }
+  | { canEvaluate: false; creditSource: null };
+
+/** Free credits, then subscription monthly quota, then pack credits. */
+function resolveEvaluationCredit(
+  profile: ProfileBillingRow,
+  packRemaining: number,
+): ResolvedEvaluationCredit {
+  if (profile.free_evaluations_remaining > 0) {
+    return { canEvaluate: true, creditSource: "free" };
+  }
+
+  if (profile.subscription_status === "active") {
+    const usage = buildUsageFromProfile(profile);
+    if (usage.used < usage.limit) {
+      return { canEvaluate: true, creditSource: "subscription" };
+    }
+  }
+
+  if (packRemaining > 0) {
+    return { canEvaluate: true, creditSource: "pack" };
+  }
+
+  return { canEvaluate: false, creditSource: null };
+}
+
+/**
+ * Production eligibility: free credit first, then subscription monthly quota, then pack credits.
+ */
+export async function checkEvaluationEligibility(
+  userId: string,
+): Promise<EligibilityGuardResult> {
+  const loaded = await loadEvaluationBillingContext(userId);
+  if (!loaded.ok) {
+    return loaded;
+  }
+
+  const { context } = loaded;
+  const { profile, subscriptionActive } = context;
 
   const cooldownBlock = checkCooldown(profile.last_evaluation_at);
   if (cooldownBlock) {
     return cooldownBlock;
   }
 
-  const resolved = await resolveEvaluationCredit(profile, userId);
+  const resolved = resolveEvaluationCredit(profile, context.packRemaining);
   if (resolved.canEvaluate) {
     return {
       ok: true,
@@ -396,28 +448,32 @@ export async function recordEvaluationComplete(
 export async function getEvaluationEntitlement(
   userId: string,
 ): Promise<EvaluationEntitlement | null> {
-  const refreshed = await refreshEvaluationPeriodIfNeeded(userId);
-  if (!refreshed.ok) {
-    return null;
-  }
-
-  const loaded = await loadProfileBilling(userId);
+  const loaded = await loadEvaluationBillingContext(userId);
   if (!loaded.ok) {
     return null;
   }
 
-  const { profile } = loaded;
-  const subscriptionActive = profile.subscription_status === "active";
-  const freeRemaining = profile.free_evaluations_remaining;
-  const usage = subscriptionActive ? buildUsageFromProfile(profile) : null;
-  const resolved = await resolveEvaluationCredit(profile, userId);
+  const { context } = loaded;
+  const { profile, subscriptionActive, freeRemaining, packRemaining, usage } =
+    context;
+
+  const cooldownBlock = checkCooldown(profile.last_evaluation_at);
+  const resolved = resolveEvaluationCredit(profile, packRemaining);
+  const blockedReason = deriveBlockedReason(
+    cooldownBlock,
+    resolved,
+    subscriptionActive,
+    usage,
+  );
 
   return {
     freeRemaining,
+    packRemaining,
     subscriptionActive,
     usage,
-    canEvaluate: resolved.canEvaluate,
-    creditSource: resolved.creditSource,
+    canEvaluate: blockedReason === "none",
+    creditSource: resolved.canEvaluate ? resolved.creditSource : null,
+    blockedReason,
   };
 }
 
