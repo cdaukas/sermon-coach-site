@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { RecentCompleteEvaluationItem } from "./growth-report-types";
+import type { CoachingNarrative } from "./coaching-schema";
 import { parseEvaluationResult } from "./schema";
 
 export type { RecentCompleteEvaluationItem } from "./growth-report-types";
@@ -30,6 +31,7 @@ function mapEvaluationRow(
     sermon_version_id: row.sermon_version_id as string,
     status: row.status as SermonEvaluationRow["status"],
     report_mode: (row.report_mode as ReportMode | undefined) ?? "diagnostic",
+    coaching_narrative: (row.coaching_narrative as CoachingNarrative | null) ?? null,
     error_message: (row.error_message as string | null) ?? null,
     model: (row.model as string | null) ?? null,
     prompt_version: row.prompt_version as string,

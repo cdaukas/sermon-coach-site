@@ -1,4 +1,5 @@
 import type { EvaluationResultStrict } from "./schema";
+import type { CoachingNarrative } from "./coaching-schema";
 
 export type EvaluationStatus = "pending" | "running" | "complete" | "failed";
 
@@ -9,6 +10,7 @@ export type SermonEvaluationRow = {
   sermon_version_id: string;
   status: EvaluationStatus;
   report_mode: ReportMode;
+  coaching_narrative: CoachingNarrative | null;
   error_message: string | null;
   model: string | null;
   prompt_version: string;
