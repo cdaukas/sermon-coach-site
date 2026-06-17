@@ -271,7 +271,7 @@ export async function listEvaluationsForSermon(
   const { data, error } = await supabase
     .from("sermon_evaluations")
     .select(
-      "id, status, overall_score, score_band, prompt_version, created_at, completed_at",
+      "id, status, report_mode, overall_score, score_band, prompt_version, created_at, completed_at",
     )
     .in("sermon_version_id", versionIds)
     .order("created_at", { ascending: false });
@@ -280,7 +280,16 @@ export async function listEvaluationsForSermon(
     throw new Error(error.message);
   }
 
-  return data ?? [];
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    status: row.status as EvaluationStatus,
+    report_mode: (row.report_mode as ReportMode | undefined) ?? "diagnostic",
+    overall_score: row.overall_score,
+    score_band: row.score_band,
+    prompt_version: row.prompt_version,
+    created_at: row.created_at,
+    completed_at: row.completed_at,
+  }));
 }
 
 export async function sermonHasActiveEvaluation(

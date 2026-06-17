@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { EvaluateButton } from "@/components/evaluation/EvaluateButton";
+import { SermonDetailEvaluationActions } from "@/components/dashboard/SermonDetailEvaluationActions";
 import { SermonManuscript } from "@/components/dashboard/SermonManuscript";
+import { createClient } from "@/lib/supabase/server";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import {
   listEvaluationsForSermon,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/evaluation/queries";
 import { formatDisplayScoreBare } from "@/lib/evaluation/display-score";
 import { formatStoredScoreBand } from "@/lib/evaluation/schema";
+import type { ReportMode, SermonEvaluationListItem } from "@/lib/evaluation/types";
 import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
 /** Long-running Claude evaluation (see STEP_6_PLAN §B). */
@@ -30,6 +31,10 @@ function formatDate(iso: string): string {
   }).format(new Date(iso));
 }
 
+function reportModeLabel(reportMode: ReportMode): string {
+  return reportMode === "coaching" ? "Mentor" : "Personal";
+}
+
 function parseEvaluationCardLabels(
   scoreBand: string | null,
   overallScore: number | null,
@@ -42,6 +47,69 @@ function parseEvaluationCardLabels(
     : formatted;
 
   return { bandLabel: bandLabel || "View", tierLabel };
+}
+
+function evaluationDate(evaluation: SermonEvaluationListItem): string {
+  return formatDate(evaluation.completed_at ?? evaluation.created_at);
+}
+
+function EvaluationScoreSummary({
+  evaluation,
+  large = false,
+}: {
+  evaluation: SermonEvaluationListItem;
+  large?: boolean;
+}) {
+  const { bandLabel, tierLabel } = parseEvaluationCardLabels(
+    evaluation.score_band,
+    evaluation.overall_score,
+  );
+  const scoreDisplay =
+    evaluation.overall_score != null
+      ? formatDisplayScoreBare(evaluation.overall_score)
+      : null;
+
+  return (
+    <>
+      <p
+        className={large ? "text-[48px] leading-none italic sm:text-[52px]" : "text-[28px] leading-none italic"}
+        style={{ ...serifFont, color: large ? "var(--sc-accent-soft)" : "var(--sc-accent)" }}
+      >
+        {bandLabel}
+      </p>
+      <div className={`flex flex-wrap items-baseline gap-x-4 gap-y-1 ${large ? "mt-4" : "mt-2"}`}>
+        {tierLabel ? (
+          <p
+            className={large ? "text-[15px] font-medium" : "text-[13px] font-medium"}
+            style={{
+              ...uiFont,
+              color: large ? "rgba(250,248,243,0.85)" : "var(--sc-ink-soft)",
+            }}
+          >
+            {tierLabel}
+          </p>
+        ) : null}
+        {scoreDisplay ? (
+          <p
+            className={
+              large
+                ? "text-[28px] font-semibold leading-none sm:text-[32px]"
+                : "text-[20px] font-semibold leading-none"
+            }
+            style={{ ...uiFont, color: large ? "#faf8f3" : "var(--sc-ink)" }}
+          >
+            {scoreDisplay}
+            <span
+              className={`ml-1 font-medium ${large ? "text-[15px]" : "text-[12px]"}`}
+              style={{ color: large ? "rgba(250,248,243,0.55)" : "var(--sc-ink-soft)" }}
+            >
+              / 10
+            </span>
+          </p>
+        ) : null}
+      </div>
+    </>
+  );
 }
 
 export async function generateMetadata({
@@ -77,20 +145,10 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
   }
 
   const { latest_version: version } = sermon;
-  const latestComplete = evaluations.find((e) => e.status === "complete");
-  const evaluationHref = latestComplete
-    ? `/dashboard/sermons/${sermon.id}/evaluations/${latestComplete.id}`
-    : null;
-  const { bandLabel, tierLabel } = latestComplete
-    ? parseEvaluationCardLabels(
-        latestComplete.score_band,
-        latestComplete.overall_score,
-      )
-    : { bandLabel: "", tierLabel: null };
-  const scoreDisplay =
-    latestComplete?.overall_score != null
-      ? formatDisplayScoreBare(latestComplete.overall_score)
-      : null;
+  const completeEvaluations = evaluations.filter(
+    (evaluation) => evaluation.status === "complete",
+  );
+  const [primaryEvaluation, ...olderEvaluations] = completeEvaluations;
 
   return (
     <main
@@ -109,7 +167,7 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
         ← Back to library
       </Link>
 
-      <div className={latestComplete ? "mb-6" : "mb-8"}>
+      <div className={primaryEvaluation ? "mb-6" : "mb-8"}>
         <p
           className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
           style={{ ...uiFont, color: "var(--sc-accent)" }}
@@ -127,61 +185,88 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
         </p>
       </div>
 
-      {latestComplete && evaluationHref ? (
-        <Link
-          href={evaluationHref}
-          className="mb-6 block rounded no-underline transition-opacity hover:opacity-95"
-          style={{
-            background: "linear-gradient(165deg, #1a2332 0%, #2a3548 100%)",
-            border: "1px solid var(--sc-rule)",
-            boxShadow: "var(--sc-shadow-lift)",
-          }}
-        >
-          <div className="px-8 py-8">
-            <p
-              className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em]"
-              style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
-            >
-              Latest evaluation
-            </p>
-            <p
-              className="text-[48px] leading-none italic sm:text-[52px]"
-              style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
-            >
-              {bandLabel}
-            </p>
-            <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              {tierLabel ? (
+      {primaryEvaluation ? (
+        <div className="mb-6">
+          <Link
+            href={`/dashboard/sermons/${sermon.id}/evaluations/${primaryEvaluation.id}`}
+            className="block rounded no-underline transition-opacity hover:opacity-95"
+            style={{
+              background: "linear-gradient(165deg, #1a2332 0%, #2a3548 100%)",
+              border: "1px solid var(--sc-rule)",
+              boxShadow: "var(--sc-shadow-lift)",
+            }}
+          >
+            <div className="px-8 py-8">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p
-                  className="text-[15px] font-medium"
-                  style={{ ...uiFont, color: "rgba(250,248,243,0.85)" }}
+                  className="text-[11px] font-semibold uppercase tracking-[0.2em]"
+                  style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
                 >
-                  {tierLabel}
+                  Latest evaluation
                 </p>
-              ) : null}
-              {scoreDisplay ? (
                 <p
-                  className="text-[28px] font-semibold leading-none sm:text-[32px]"
-                  style={{ ...uiFont, color: "#faf8f3" }}
+                  className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                  style={{ ...uiFont, color: "rgba(250,248,243,0.75)" }}
                 >
-                  {scoreDisplay}
-                  <span
-                    className="ml-1 text-[15px] font-medium"
-                    style={{ color: "rgba(250,248,243,0.55)" }}
-                  >
-                    / 10
-                  </span>
+                  {reportModeLabel(primaryEvaluation.report_mode)}
                 </p>
-              ) : null}
+              </div>
+              <EvaluationScoreSummary evaluation={primaryEvaluation} large />
+              <p
+                className="mt-2 text-[12px]"
+                style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
+              >
+                {evaluationDate(primaryEvaluation)}
+              </p>
+              <p
+                className="mt-6 text-[13px] font-medium"
+                style={{ ...uiFont, color: "var(--sc-accent-soft)" }}
+              >
+                View full report →
+              </p>
             </div>
-            <p
-              className="mt-6 text-[13px] font-medium"
-              style={{ ...uiFont, color: "var(--sc-accent-soft)" }}
-            >
-              View full report →
-            </p>
-          </div>
-        </Link>
+          </Link>
+
+          {olderEvaluations.length > 0 ? (
+            <div className="mt-4 flex flex-col gap-3">
+              <p
+                className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+              >
+                Earlier evaluations
+              </p>
+              {olderEvaluations.map((evaluation) => (
+                <Link
+                  key={evaluation.id}
+                  href={`/dashboard/sermons/${sermon.id}/evaluations/${evaluation.id}`}
+                  className="block rounded border px-5 py-4 no-underline transition-colors hover:border-[var(--sc-accent)]"
+                  style={{
+                    background: "var(--sc-bg)",
+                    borderColor: "var(--sc-rule)",
+                  }}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p
+                        className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                        style={{ ...uiFont, color: "var(--sc-accent)" }}
+                      >
+                        {reportModeLabel(evaluation.report_mode)}
+                      </p>
+                      <EvaluationScoreSummary evaluation={evaluation} />
+                    </div>
+                    <p
+                      className="text-[12px]"
+                      style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                    >
+                      {evaluationDate(evaluation)}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <details className="group mb-2">
@@ -201,11 +286,10 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
         </div>
       </details>
 
-      <EvaluateButton
+      <SermonDetailEvaluationActions
         sermonId={sermon.id}
         entitlement={entitlement}
         hasActiveEvaluation={hasActiveEvaluation}
-        hasCompletedEvaluation={Boolean(latestComplete)}
       />
     </main>
   );

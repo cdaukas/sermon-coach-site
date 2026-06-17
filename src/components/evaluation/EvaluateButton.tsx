@@ -10,10 +10,9 @@ import {
 } from "react";
 import {
   normalizeSermonContext,
-  normalizeReportMode,
   sermonContextStorageKey,
-  sermonReportModeStorageKey,
   type SermonContext,
+  type StashedReportMode,
 } from "@/lib/evaluation/context";
 import { requestEvaluation } from "@/lib/evaluation/actions";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
@@ -26,7 +25,8 @@ type EvaluateButtonProps = {
   sermonId: string;
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
-  hasCompletedEvaluation?: boolean;
+  reportMode: StashedReportMode;
+  embedded?: boolean;
 };
 
 function formatElapsed(seconds: number): string {
@@ -39,7 +39,8 @@ export function EvaluateButton({
   sermonId,
   entitlement,
   hasActiveEvaluation,
-  hasCompletedEvaluation = false,
+  reportMode,
+  embedded = false,
 }: EvaluateButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -143,18 +144,10 @@ export function EvaluateButton({
     }
   }
 
-  function readStashedReportMode() {
-    const storageKey = sermonReportModeStorageKey(sermonId);
-    const raw = sessionStorage.getItem(storageKey);
-    sessionStorage.removeItem(storageKey);
-    return normalizeReportMode(raw);
-  }
-
   function handleClick() {
     setError(null);
     startTransition(async () => {
       const context = readStashedContext();
-      const reportMode = readStashedReportMode();
       const result = await requestEvaluation(sermonId, context, reportMode);
       if (!result.ok) {
         setError(result.error);
@@ -167,17 +160,18 @@ export function EvaluateButton({
   const busy = pending || polling;
   const canEvaluate = entitlement?.canEvaluate ?? false;
   const usage = entitlement?.usage;
+  const rootClassName = embedded ? "" : "mt-8";
 
   if (!canEvaluate) {
     return (
-      <div className="mt-8">
+      <div className={rootClassName}>
         <EvaluationAccessGate entitlement={entitlement} />
       </div>
     );
   }
 
   return (
-    <div className="mt-8">
+    <div className={rootClassName}>
       {polling ? (
         <div
           className="mb-4 rounded border px-5 py-4"
@@ -207,20 +201,14 @@ export function EvaluateButton({
         type="button"
         onClick={handleClick}
         disabled={busy || hasActiveEvaluation}
-        className="rounded px-5 py-2.5 text-[13px] font-semibold transition-opacity disabled:opacity-60"
+        className="w-full rounded px-5 py-2.5 text-[13px] font-semibold transition-opacity disabled:opacity-60 lg:w-auto"
         style={{
           ...uiFont,
           background: "var(--sc-ink)",
           color: "#faf8f3",
         }}
       >
-        {pending
-          ? "Starting…"
-          : polling
-            ? "Evaluating…"
-            : hasCompletedEvaluation
-              ? "Re-evaluate"
-              : "Evaluate sermon"}
+        {pending ? "Starting…" : polling ? "Evaluating…" : "Run Evaluation"}
       </button>
 
       {entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
