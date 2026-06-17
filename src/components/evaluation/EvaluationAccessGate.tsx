@@ -69,22 +69,13 @@ function MonthlyLimitGatePanel({
         you need to evaluate a sermon before then, a pack adds evaluations to your
         account right away, with no change to your subscription.
       </p>
-      <div className="mt-4 flex flex-wrap items-center gap-4">
-        <Link
-          href="/pricing.html#packs"
-          className={primaryButtonClassName}
-          style={primaryButtonStyle}
-        >
-          Buy a pack
-        </Link>
-        <Link
-          href="/pricing.html"
-          className="text-[13px] font-medium no-underline hover:underline"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-        >
-          See plans
-        </Link>
-      </div>
+      <Link
+        href="/pricing.html#packs"
+        className={`mt-4 ${primaryButtonClassName}`}
+        style={primaryButtonStyle}
+      >
+        Buy a pack
+      </Link>
     </div>
   );
 }
