@@ -21,21 +21,12 @@ export type CoachingNarrativePresentation = {
   };
 };
 
-export type CoachingReportCategoryPresentation = {
-  id: string;
-  number: number;
-  name: string;
-  band: string;
-  scoreLabel: string;
-  averageLabel: string;
-};
-
 export type CoachingReportPresentation = {
   sermonTitle: string;
   scriptureReference: string;
   evaluatedAt: string;
   preacherName: string | null;
   submissionMode: string;
-  categories: CoachingReportCategoryPresentation[];
+  overallBand: string;
   coachingNarrative: CoachingNarrativePresentation | null;
 };

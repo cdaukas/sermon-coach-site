@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import type {
   CoachingNarrativePresentation,
-  CoachingReportCategoryPresentation,
   CoachingReportPresentation,
   CoachingStrengthPresentation,
 } from "@/lib/evaluation/coaching-report-types";
+import { EvaluationPrintButtons } from "@/components/evaluation/EvaluationPrintButtons";
 import { serifFont, uiFont } from "./shared";
 
 type CoachingReportViewProps = {
   data: CoachingReportPresentation;
+  showPrintActions?: boolean;
 };
 
 function formatEvaluatedDate(iso: string): string {
@@ -27,91 +27,6 @@ function SectionHeading({ children }: { children: string }) {
     >
       {children}
     </h2>
-  );
-}
-
-function ScoreReveal({
-  categoryId,
-  band,
-  scoreLabel,
-  averageLabel,
-  revealed,
-  onToggle,
-}: {
-  categoryId: string;
-  band: string;
-  scoreLabel: string;
-  averageLabel: string;
-  revealed: boolean;
-  onToggle: (categoryId: string) => void;
-}) {
-  return (
-    <div className="text-right">
-      <p
-        className="text-xl italic leading-none"
-        style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
-      >
-        {band}
-      </p>
-      {revealed ? (
-        <p
-          className="mt-2 text-[11px] tracking-[0.08em] uppercase"
-          style={{ ...uiFont, color: "rgba(250,248,243,0.85)" }}
-        >
-          Average {averageLabel} · {scoreLabel}
-        </p>
-      ) : (
-        <button
-          type="button"
-          onClick={() => onToggle(categoryId)}
-          className="mt-2 cursor-pointer border-0 bg-transparent p-0 text-[11px] font-medium tracking-[0.06em] underline decoration-dotted underline-offset-[3px] transition-opacity hover:opacity-80"
-          style={{ ...uiFont, color: "rgba(250,248,243,0.75)" }}
-        >
-          Show score
-        </button>
-      )}
-    </div>
-  );
-}
-
-function CoachingCategoryCard({
-  category,
-  revealed,
-  onToggleScore,
-}: {
-  category: CoachingReportCategoryPresentation;
-  revealed: boolean;
-  onToggleScore: (categoryId: string) => void;
-}) {
-  return (
-    <section
-      className="evaluation-category-card mb-7"
-      style={{
-        background: "var(--sc-panel)",
-        boxShadow: "var(--sc-shadow)",
-      }}
-    >
-      <header
-        className="flex flex-wrap items-center justify-between gap-4 px-8 py-5"
-        style={{
-          background: "linear-gradient(165deg, #1a2332 0%, #2a3548 100%)",
-          color: "#faf8f3",
-        }}
-      >
-        <h3 className="text-2xl font-normal" style={serifFont}>
-          <span style={{ color: "var(--sc-accent-soft)" }}>{category.number} ·</span>{" "}
-          {category.name}
-        </h3>
-        <ScoreReveal
-          categoryId={category.id}
-          band={category.band}
-          scoreLabel={category.scoreLabel}
-          averageLabel={category.averageLabel}
-          revealed={revealed}
-          onToggle={onToggleScore}
-        />
-      </header>
-    </section>
   );
 }
 
@@ -156,7 +71,7 @@ function CoachingNarrativeSections({
   return (
     <>
       <section className="mb-7">
-        <SectionHeading>Lead With This</SectionHeading>
+        <SectionHeading>Where It&apos;s Strong</SectionHeading>
         <div className="space-y-5">
           {narrative.lead_with_this.map((strength) => (
             <StrengthItem key={strength.claim} strength={strength} />
@@ -259,16 +174,10 @@ function CoachingNarrativeSections({
   );
 }
 
-export function CoachingReportView({ data }: CoachingReportViewProps) {
-  const [revealedScores, setRevealedScores] = useState<Record<string, boolean>>({});
-
-  function toggleScore(categoryId: string) {
-    setRevealedScores((current) => ({
-      ...current,
-      [categoryId]: true,
-    }));
-  }
-
+export function CoachingReportView({
+  data,
+  showPrintActions = true,
+}: CoachingReportViewProps) {
   return (
     <article className="evaluation-report">
       <p
@@ -313,14 +222,25 @@ export function CoachingReportView({ data }: CoachingReportViewProps) {
         </span>
       </div>
 
-      {data.categories.map((category) => (
-        <CoachingCategoryCard
-          key={category.id}
-          category={category}
-          revealed={Boolean(revealedScores[category.id])}
-          onToggleScore={toggleScore}
-        />
-      ))}
+      {showPrintActions ? (
+        <div className="screen-only -mt-6 mb-10 flex justify-end gap-2">
+          <EvaluationPrintButtons />
+        </div>
+      ) : null}
+
+      <section
+        className="evaluation-headline-lockup mb-10 px-8 py-6"
+        style={{
+          background: "var(--sc-panel)",
+          boxShadow: "var(--sc-shadow)",
+        }}
+      >
+        <p className="text-[19px] leading-relaxed" style={{ ...serifFont, color: "var(--sc-ink)" }}>
+          This sermon reads as{" "}
+          <em style={{ fontStyle: "italic", color: "var(--sc-accent)" }}>{data.overallBand}</em>{" "}
+          overall.
+        </p>
+      </section>
 
       {data.coachingNarrative ? (
         <CoachingNarrativeSections narrative={data.coachingNarrative} />

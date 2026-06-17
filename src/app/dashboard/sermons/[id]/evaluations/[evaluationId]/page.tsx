@@ -122,7 +122,10 @@ export default async function EvaluationPage({
       ) : null}
 
       {evaluation.report_mode === "coaching" ? (
-        <CoachingReportView data={toCoachingReportPresentation({ evaluation, sermon })} />
+        <CoachingReportView
+          data={toCoachingReportPresentation({ evaluation, sermon })}
+          showPrintActions={!pdfCapture}
+        />
       ) : (
         <EvaluationDashboard
           result={evaluation.result}
