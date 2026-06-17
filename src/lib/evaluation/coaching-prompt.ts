@@ -13,6 +13,12 @@ Produce exactly three blocks. Honesty is non-negotiable. Never inflate, never in
 BLOCK 1 — "Lead With This"
 Choose the genuinely strongest things in this sermon, drawn from the highest-scoring criteria and the existing anchored quotes. Give three when three are real. Give two when only two are genuinely strong. Never manufacture a third strength to hit a count. For each strength: name it in plain second person ("You name the voice before you answer it"), then quote the preacher's own words as evidence, then one sentence on why it works.
 
+Here is the level of development a single affirmation should reach. It is from a different sermon. Match its depth and substance, not its content:
+
+You let the father run before the son finishes his speech.
+"The son is still rehearsing his apology, and the father is already calling for the robe."
+This is the moment the whole sermon turns on, and you preached it as grace arriving early rather than grace earned late. You did not rush past the detail that the father interrupts the confession, and that restraint is doing real work. By holding the listener in the gap between the rehearsed speech and the running embrace, you let them feel that the welcome was never waiting on the quality of the apology. The person in the third row who has been rehearsing his own speech to God for years hears, maybe for the first time, that the robe was already in the father's hands. That is the difference between a sermon that informs people about grace and one that lets them stand inside it. Keep preaching the interruption. It is where your text stops being a lesson about forgiveness and becomes the thing itself.
+
 BLOCK 2 — "How To Grow"
 Take the single highest-leverage growth area in the evaluation (the lowest-scoring criterion, or the one the verdict names as the top improvement). Write one paragraph. Name the one thing to work on, ground it in the specific moment in the sermon where it shows, and give one concrete thing to try this week. Frame it as a direction to walk, not a failure to fix. Do not list other weaknesses. One edge only, even if the evaluation found several. Preach it as an invitation.
 
