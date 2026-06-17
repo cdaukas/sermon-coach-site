@@ -166,8 +166,35 @@ async function userHasLivePackCredit(userId: string): Promise<boolean> {
   if (error) {
     throw new Error(error.message);
   }
-  
+
   return (count ?? 0) > 0;
+}
+
+type ResolvedEvaluationCredit =
+  | { canEvaluate: true; creditSource: EvaluationCreditSource }
+  | { canEvaluate: false; creditSource: null };
+
+/** Free credits, then subscription monthly quota, then pack credits. */
+async function resolveEvaluationCredit(
+  profile: ProfileBillingRow,
+  userId: string,
+): Promise<ResolvedEvaluationCredit> {
+  if (profile.free_evaluations_remaining > 0) {
+    return { canEvaluate: true, creditSource: "free" };
+  }
+
+  if (profile.subscription_status === "active") {
+    const usage = buildUsageFromProfile(profile);
+    if (usage.used < usage.limit) {
+      return { canEvaluate: true, creditSource: "subscription" };
+    }
+  }
+
+  if (await userHasLivePackCredit(userId)) {
+    return { canEvaluate: true, creditSource: "pack" };
+  }
+
+  return { canEvaluate: false, creditSource: null };
 }
 
 /**
@@ -188,41 +215,19 @@ export async function checkEvaluationEligibility(
 
   const { profile } = loaded;
   const subscriptionActive = profile.subscription_status === "active";
-  const freeRemaining = profile.free_evaluations_remaining;
 
   const cooldownBlock = checkCooldown(profile.last_evaluation_at);
   if (cooldownBlock) {
     return cooldownBlock;
   }
 
-  if (freeRemaining > 0) {
+  const resolved = await resolveEvaluationCredit(profile, userId);
+  if (resolved.canEvaluate) {
     return {
       ok: true,
-      creditSource: "free",
-      freeRemaining,
-      subscriptionActive,
-      usage: subscriptionActive ? buildUsageFromProfile(profile) : null,
-    };
-  }
-
-  if (subscriptionActive) {
-    const usage = buildUsageFromProfile(profile);
-    if (usage.used < usage.limit) {
-      return {
-        ok: true,
-        creditSource: "subscription",
-        freeRemaining: 0,
-        subscriptionActive: true,
-        usage,
-      };
-    }
-  }
-
-  if (await userHasLivePackCredit(userId)) {
-    return {
-      ok: true,
-      creditSource: "pack",
-      freeRemaining: 0,
+      creditSource: resolved.creditSource,
+      freeRemaining:
+        resolved.creditSource === "free" ? profile.free_evaluations_remaining : 0,
       subscriptionActive,
       usage: subscriptionActive ? buildUsageFromProfile(profile) : null,
     };
@@ -405,21 +410,14 @@ export async function getEvaluationEntitlement(
   const subscriptionActive = profile.subscription_status === "active";
   const freeRemaining = profile.free_evaluations_remaining;
   const usage = subscriptionActive ? buildUsageFromProfile(profile) : null;
-
-  let canEvaluate = freeRemaining > 0;
-  let creditSource: EvaluationCreditSource | null = canEvaluate ? "free" : null;
-
-  if (!canEvaluate && subscriptionActive && usage) {
-    canEvaluate = usage.used < usage.limit;
-    creditSource = canEvaluate ? "subscription" : null;
-  }
+  const resolved = await resolveEvaluationCredit(profile, userId);
 
   return {
     freeRemaining,
     subscriptionActive,
     usage,
-    canEvaluate,
-    creditSource,
+    canEvaluate: resolved.canEvaluate,
+    creditSource: resolved.creditSource,
   };
 }
 
