@@ -15,12 +15,12 @@ describe("coachingNarrativeSchema", () => {
         {
           claim: "You name the wound before you answer it.",
           quote: "Why is this happening to me?",
-          why: "The refrain gives the gospel a real place to land.",
+          development: "The refrain gives the gospel a real place to land.",
         },
         {
           claim: "You preach propitiation, not pep talk.",
           quote: "Jesus has propitiated God's wrath.",
-          why: "Sonship stays tied to the cross.",
+          development: "Sonship stays tied to the cross.",
         },
       ],
       how_to_grow: {

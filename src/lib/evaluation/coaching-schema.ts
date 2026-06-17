@@ -4,7 +4,7 @@ import type { Tool } from "@anthropic-ai/sdk/resources/messages/messages";
 export const coachingStrengthSchema = z.object({
   claim: z.string().min(1),
   quote: z.string().min(1),
-  why: z.string().min(1),
+  development: z.string().min(1),
 });
 
 export const coachingNarrativeSchema = z.object({
@@ -26,7 +26,7 @@ export type CoachingNarrative = z.infer<typeof coachingNarrativeSchema>;
 export const submitCoachingNarrativeTool: Tool = {
   name: "submit_coaching_narrative",
   description:
-    "Submit the coaching narrative JSON for a completed sermon evaluation.",
+    "Submit the coaching narrative JSON for a completed sermon evaluation. Each lead_with_this item uses development for the affirmation prose paragraph.",
   input_schema: {
     type: "object",
     additionalProperties: false,
@@ -39,11 +39,15 @@ export const submitCoachingNarrativeTool: Tool = {
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["claim", "quote", "why"],
+          required: ["claim", "quote", "development"],
           properties: {
             claim: { type: "string" },
             quote: { type: "string" },
-            why: { type: "string" },
+            development: {
+              type: "string",
+              description:
+                "A full developed paragraph that names what the preacher did, grounds it in the quoted moment, and explains what it accomplishes for the listener and why it is worth keeping.",
+            },
           },
         },
       },

@@ -3,7 +3,9 @@
 export type CoachingStrengthPresentation = {
   claim: string;
   quote: string;
-  why: string;
+  development?: string;
+  /** @deprecated Legacy cached coaching rows store affirmation prose as `why`. */
+  why?: string;
 };
 
 export type CoachingNarrativePresentation = {
