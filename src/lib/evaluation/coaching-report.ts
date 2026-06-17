@@ -1,17 +1,6 @@
 import type { CoachingNarrative } from "./coaching-schema";
 import type { CoachingReportPresentation } from "./coaching-report-types";
-import {
-  CATEGORY_MAX_POINTS,
-  categoryAverage,
-  categorySubtotal,
-  deriveBandFromWeighted,
-} from "./schema";
 import type { EvaluationWithSermon } from "./types";
-
-function deriveBandFromCategorySubtotal(subtotal: number, max: number): string {
-  const equivalentWeighted = Math.round((subtotal / max) * 55);
-  return deriveBandFromWeighted(equivalentWeighted);
-}
 
 function toNarrativePresentation(
   narrative: CoachingNarrative | null,
@@ -57,28 +46,13 @@ export function toCoachingReportPresentation(
     result.meta.scripture_reference.trim() ||
     "";
 
-  const categories = result.categories.map((category) => {
-    const subtotal = categorySubtotal(category.criteria);
-    const max = CATEGORY_MAX_POINTS[category.number] ?? subtotal;
-    const average = categoryAverage(category.criteria);
-
-    return {
-      id: category.id,
-      number: category.number,
-      name: category.name,
-      band: deriveBandFromCategorySubtotal(subtotal, max),
-      scoreLabel: `${subtotal}/${max}`,
-      averageLabel: `${average} / 5`,
-    };
-  });
-
   return {
     sermonTitle: sermon.title,
     scriptureReference,
     evaluatedAt,
     preacherName: result.meta.preacher_name,
     submissionMode: result.meta.submission_mode,
-    categories,
+    overallBand: result.scoring.band,
     coachingNarrative: toNarrativePresentation(evaluation.coaching_narrative),
   };
 }
