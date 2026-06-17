@@ -142,7 +142,7 @@ function StrengthItem({ strength }: { strength: CoachingStrengthPresentation }) 
         {strength.quote}
       </blockquote>
       <p className="text-[14px] leading-relaxed" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-        {strength.why}
+        {strength.development ?? strength.why}
       </p>
     </article>
   );

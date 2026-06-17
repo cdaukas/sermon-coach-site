@@ -21,11 +21,18 @@ function toNarrativePresentation(
   }
 
   return {
-    lead_with_this: narrative.lead_with_this.map((strength) => ({
-      claim: strength.claim,
-      quote: strength.quote,
-      why: strength.why,
-    })),
+    lead_with_this: narrative.lead_with_this.map((strength) => {
+      const row = strength as CoachingNarrative["lead_with_this"][number] & {
+        why?: string;
+      };
+
+      return {
+        claim: row.claim,
+        quote: row.quote,
+        development: row.development,
+        why: row.why,
+      };
+    }),
     how_to_grow: {
       edge: narrative.how_to_grow.edge,
       this_week: narrative.how_to_grow.this_week,
