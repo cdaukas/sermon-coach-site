@@ -10,7 +10,9 @@ import {
 } from "react";
 import {
   normalizeSermonContext,
+  normalizeReportMode,
   sermonContextStorageKey,
+  sermonReportModeStorageKey,
   type SermonContext,
 } from "@/lib/evaluation/context";
 import { requestEvaluation } from "@/lib/evaluation/actions";
@@ -141,11 +143,19 @@ export function EvaluateButton({
     }
   }
 
+  function readStashedReportMode() {
+    const storageKey = sermonReportModeStorageKey(sermonId);
+    const raw = sessionStorage.getItem(storageKey);
+    sessionStorage.removeItem(storageKey);
+    return normalizeReportMode(raw);
+  }
+
   function handleClick() {
     setError(null);
     startTransition(async () => {
       const context = readStashedContext();
-      const result = await requestEvaluation(sermonId, context);
+      const reportMode = readStashedReportMode();
+      const result = await requestEvaluation(sermonId, context, reportMode);
       if (!result.ok) {
         setError(result.error);
         return;

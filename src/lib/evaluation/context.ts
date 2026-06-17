@@ -12,8 +12,18 @@ export type SermonContextInput = {
   other?: string;
 };
 
+export type StashedReportMode = "diagnostic" | "coaching";
+
 export function sermonContextStorageKey(sermonId: string): string {
   return `sermonContext:${sermonId}`;
+}
+
+export function sermonReportModeStorageKey(sermonId: string): string {
+  return `sermonReportMode:${sermonId}`;
+}
+
+export function normalizeReportMode(value: unknown): StashedReportMode {
+  return value === "coaching" ? "coaching" : "diagnostic";
 }
 
 function trimField(value: string | undefined): string | undefined {

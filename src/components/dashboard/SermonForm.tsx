@@ -12,6 +12,8 @@ import {
 import {
   normalizeSermonContext,
   sermonContextStorageKey,
+  sermonReportModeStorageKey,
+  type StashedReportMode,
 } from "@/lib/evaluation/context";
 import { createSermon } from "@/lib/sermons/actions";
 
@@ -37,6 +39,7 @@ export function SermonForm() {
   const [audience, setAudience] = useState("");
   const [series, setSeries] = useState("");
   const [other, setOther] = useState("");
+  const [reportMode, setReportMode] = useState<StashedReportMode>("diagnostic");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -72,6 +75,11 @@ export function SermonForm() {
           JSON.stringify(context),
         );
       }
+
+      sessionStorage.setItem(
+        sermonReportModeStorageKey(result.sermonId),
+        reportMode,
+      );
 
       router.push(`/dashboard/sermons/${result.sermonId}`);
     } finally {
@@ -232,6 +240,60 @@ export function SermonForm() {
             style={contextFieldStyle}
           />
         </div>
+      </section>
+
+      <section
+        className="flex flex-col gap-2 border-t pt-6"
+        style={{ borderColor: "var(--sc-rule)" }}
+        aria-labelledby="report-mode-heading"
+      >
+        <p
+          id="report-mode-heading"
+          className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          Report type
+        </p>
+        <div
+          className="inline-flex w-full max-w-md rounded border p-1 sm:w-auto"
+          style={{ borderColor: "var(--sc-rule)", background: "var(--sc-bg)" }}
+          role="radiogroup"
+          aria-labelledby="report-mode-heading"
+        >
+          {(
+            [
+              { value: "diagnostic", label: "Diagnostic report" },
+              { value: "coaching", label: "Coaching report" },
+            ] as const
+          ).map((option) => {
+            const selected = reportMode === option.value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                disabled={loading}
+                onClick={() => setReportMode(option.value)}
+                className="flex-1 rounded px-4 py-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+                style={{
+                  ...uiFont,
+                  background: selected ? "var(--sc-panel)" : "transparent",
+                  color: selected ? "var(--sc-ink)" : "var(--sc-ink-soft)",
+                  boxShadow: selected ? "var(--sc-shadow-lift)" : "none",
+                }}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+        {reportMode === "coaching" ? (
+          <p className="text-[13px] leading-relaxed" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+            Same evaluation, framed for someone you are mentoring.
+          </p>
+        ) : null}
       </section>
 
       <AuthSubmit type="submit" disabled={loading}>

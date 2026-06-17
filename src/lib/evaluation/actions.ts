@@ -17,11 +17,12 @@ import {
 } from "./quota";
 import { isEvaluationStubEnabled } from "./stub";
 import type { SermonContext } from "./context";
-import type { RequestEvaluationResult } from "./types";
+import type { ReportMode, RequestEvaluationResult } from "./types";
 
 async function runFixtureEvaluation(
   sermonId: string,
   versionId: string,
+  reportMode: ReportMode = "diagnostic",
 ): Promise<RequestEvaluationResult> {
   const supabase = await createClient();
   const now = new Date().toISOString();
@@ -36,6 +37,7 @@ async function runFixtureEvaluation(
       result: EVALUATION_FIXTURE,
       overall_score: scoring.composite_weighted,
       score_band: formatScoreBandStrict(scoring),
+      report_mode: reportMode,
       started_at: now,
       completed_at: now,
     })
@@ -62,6 +64,7 @@ function mapInsertError(message: string): string {
 export async function requestEvaluation(
   sermonId: string,
   context?: SermonContext,
+  reportMode: ReportMode = "diagnostic",
 ): Promise<RequestEvaluationResult> {
   const supabase = await createClient();
   const {
@@ -103,7 +106,7 @@ export async function requestEvaluation(
   }
 
   if (isEvaluationStubEnabled()) {
-    return runFixtureEvaluation(sermonId, version.id);
+    return runFixtureEvaluation(sermonId, version.id, reportMode);
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -138,6 +141,7 @@ export async function requestEvaluation(
       status: "pending",
       prompt_version: EVALUATION_PROMPT_VERSION,
       credit_source: eligibility.creditSource,
+      report_mode: reportMode,
     })
     .select("id")
     .single();
