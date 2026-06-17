@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CoachingReportView } from "@/components/evaluation/CoachingReportView";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
 import { EvaluationPdfCapture } from "@/components/evaluation/EvaluationPdfCapture";
 import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
+import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
 import { getEvaluation } from "@/lib/evaluation/queries";
 import "@/app/evaluation-pdf-capture.css";
 import "@/app/evaluation-print.css";
@@ -119,12 +121,16 @@ export default async function EvaluationPage({
         />
       ) : null}
 
-      <EvaluationDashboard
-        result={evaluation.result}
-        sermonTitle={sermon.title}
-        scriptureReference={scriptureReference}
-        showPrintActions={!pdfCapture}
-      />
+      {evaluation.report_mode === "coaching" ? (
+        <CoachingReportView data={toCoachingReportPresentation({ evaluation, sermon })} />
+      ) : (
+        <EvaluationDashboard
+          result={evaluation.result}
+          sermonTitle={sermon.title}
+          scriptureReference={scriptureReference}
+          showPrintActions={!pdfCapture}
+        />
+      )}
 
       {!pdfCapture ? (
         <footer
