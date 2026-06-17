@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SermonForm } from "@/components/dashboard/SermonForm";
-import { SubscribeToEvaluate } from "@/components/evaluation/SubscribeToEvaluate";
+import { NewSermonWorkspace } from "@/components/dashboard/NewSermonWorkspace";
 import { createClient } from "@/lib/supabase/server";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
-const serifFont = { fontFamily: "var(--font-serif)" };
 
 export default async function NewSermonPage() {
   const supabase = await createClient();
@@ -20,7 +18,6 @@ export default async function NewSermonPage() {
   const entitlement = user
     ? await getEvaluationEntitlement(user.id)
     : null;
-  const canEvaluate = entitlement?.canEvaluate ?? false;
 
   return (
     <main
@@ -39,46 +36,7 @@ export default async function NewSermonPage() {
         ← Back to library
       </Link>
 
-      <div className="mb-8">
-        <p
-          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
-        >
-          Submit
-        </p>
-        <h1
-          className="text-[32px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          New Sermon
-        </h1>
-        <p
-          className="mt-3 text-base leading-relaxed"
-          style={{
-            ...serifFont,
-            color: "var(--sc-ink-soft)",
-            fontStyle: "italic",
-          }}
-        >
-          Select all, copy, and paste your manuscript or transcript below. Don&apos;t
-          worry about formatting. Save the sermon, then run an evaluation.
-        </p>
-      </div>
-
-      {!canEvaluate ? (
-        <SubscribeToEvaluate className="mb-8" />
-      ) : entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
-        <p
-          className="mb-6 text-[13px]"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-        >
-          {entitlement.freeRemaining} free evaluation
-          {entitlement.freeRemaining === 1 ? "" : "s"} remaining — save a sermon,
-          then run your evaluation.
-        </p>
-      ) : null}
-
-      <SermonForm />
+      <NewSermonWorkspace entitlement={entitlement} />
     </main>
   );
 }

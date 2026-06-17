@@ -16,8 +16,8 @@ import {
   type SermonContext,
 } from "@/lib/evaluation/context";
 import { requestEvaluation } from "@/lib/evaluation/actions";
-import type { EvaluationEntitlement } from "@/lib/evaluation/quota";
-import { SubscribeToEvaluate } from "./SubscribeToEvaluate";
+import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
+import { EvaluationAccessGate } from "./EvaluationAccessGate";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const POLL_MS = 3000;
@@ -171,7 +171,7 @@ export function EvaluateButton({
   if (!canEvaluate) {
     return (
       <div className="mt-8">
-        <SubscribeToEvaluate />
+        <EvaluationAccessGate entitlement={entitlement} />
       </div>
     );
   }
@@ -227,6 +227,13 @@ export function EvaluateButton({
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {entitlement.freeRemaining} free evaluation
           {entitlement.freeRemaining === 1 ? "" : "s"} remaining
+        </p>
+      ) : null}
+
+      {entitlement?.packRemaining != null && entitlement.packRemaining > 0 ? (
+        <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+          {entitlement.packRemaining} pack evaluation
+          {entitlement.packRemaining === 1 ? "" : "s"} remaining
         </p>
       ) : null}
 
