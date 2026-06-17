@@ -70,7 +70,7 @@ function CoachingNarrativeSections({
 }) {
   return (
     <>
-      <section className="mb-7">
+      <section className="evaluation-coaching-movement mb-7">
         <SectionHeading>Where It&apos;s Strong</SectionHeading>
         <div className="space-y-5">
           {narrative.lead_with_this.map((strength) => (
@@ -79,7 +79,7 @@ function CoachingNarrativeSections({
         </div>
       </section>
 
-      <section className="mb-7">
+      <section className="evaluation-coaching-movement mb-7">
         <SectionHeading>How To Grow</SectionHeading>
         <article
           className="border-t-[3px] px-6 py-6"
@@ -107,7 +107,7 @@ function CoachingNarrativeSections({
         </article>
       </section>
 
-      <section className="mb-7">
+      <section className="evaluation-coaching-movement mb-7">
         <SectionHeading>What It Looks Like</SectionHeading>
         <article
           className="px-6 py-6"

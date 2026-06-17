@@ -263,6 +263,11 @@
     page-break-inside: avoid;
   }
 
+  .evaluation-coaching-movement {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   .evaluation-priorities > p:first-of-type,
   .evaluation-priorities > h2,
   .evaluation-priorities > p:nth-of-type(2),

@@ -245,23 +245,21 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
                     borderColor: "var(--sc-rule)",
                   }}
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p
-                        className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                        style={{ ...uiFont, color: "var(--sc-accent)" }}
-                      >
-                        {reportModeLabel(evaluation.report_mode)}
-                      </p>
-                      <EvaluationScoreSummary evaluation={evaluation} />
-                    </div>
+                  <div className="mb-3 flex justify-end">
                     <p
-                      className="text-[12px]"
-                      style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                      className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                      style={{ ...uiFont, color: "var(--sc-accent)" }}
                     >
-                      {evaluationDate(evaluation)}
+                      {reportModeLabel(evaluation.report_mode)}
                     </p>
                   </div>
+                  <EvaluationScoreSummary evaluation={evaluation} />
+                  <p
+                    className="mt-2 text-[12px]"
+                    style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                  >
+                    {evaluationDate(evaluation)}
+                  </p>
                 </Link>
               ))}
             </div>
