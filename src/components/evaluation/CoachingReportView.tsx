@@ -228,20 +228,6 @@ export function CoachingReportView({
         </div>
       ) : null}
 
-      <section
-        className="evaluation-headline-lockup mb-10 px-8 py-6"
-        style={{
-          background: "var(--sc-panel)",
-          boxShadow: "var(--sc-shadow)",
-        }}
-      >
-        <p className="text-[19px] leading-relaxed" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-          This sermon reads as{" "}
-          <em style={{ fontStyle: "italic", color: "var(--sc-accent)" }}>{data.overallBand}</em>{" "}
-          overall.
-        </p>
-      </section>
-
       {data.coachingNarrative ? (
         <CoachingNarrativeSections narrative={data.coachingNarrative} />
       ) : (
