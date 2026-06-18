@@ -63,14 +63,14 @@ function SermonCard({ sermon }: { sermon: SermonListItem }) {
     <li>
       <Link
         href={`/dashboard/sermons/${sermon.id}`}
-        className="block rounded border px-5 py-4 no-underline transition-colors hover:border-[var(--sc-accent)]"
+        className="block rounded border px-7 py-6 no-underline shadow-[var(--sc-shadow)] transition-all duration-[0.18s] ease-in-out hover:shadow-[var(--sc-shadow-lift)]"
         style={{
-          background: "var(--sc-bg)",
+          background: "var(--sc-panel)",
           borderColor: "var(--sc-rule)",
         }}
       >
         <p
-          className="mb-2 text-[22px] font-semibold leading-[1.2] tracking-[-0.01em]"
+          className="mb-3 text-[22px] font-semibold leading-[1.2] tracking-[-0.01em]"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
           {sermon.title}
@@ -195,7 +195,7 @@ export function SermonList({ sermons, growthReportLink, header }: SermonListProp
                 >
                   {formatMonthHeader(monthKey)}
                 </p>
-                <ul className="flex flex-col gap-3">
+                <ul className="flex flex-col gap-4">
                   {monthSermons.map((sermon) => (
                     <SermonCard key={sermon.id} sermon={sermon} />
                   ))}
