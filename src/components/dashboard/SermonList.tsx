@@ -70,12 +70,15 @@ function SermonCard({ sermon }: { sermon: SermonListItem }) {
         }}
       >
         <p
-          className="mb-1 text-lg font-semibold leading-snug"
+          className="mb-2 text-[22px] font-semibold leading-[1.2] tracking-[-0.01em]"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
           {sermon.title}
         </p>
-        <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+        <p
+          className="text-[13px] leading-normal"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
           Saved {formatDate(sermon.created_at)}
         </p>
       </Link>
