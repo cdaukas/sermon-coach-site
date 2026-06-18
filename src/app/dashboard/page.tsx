@@ -1,15 +1,11 @@
 import Link from "next/link";
-import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SermonList } from "@/components/dashboard/SermonList";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
 import { listRecentCompleteEvaluations } from "@/lib/evaluation/queries";
-import {
-  getSubscriptionStatus as getEvalSubscriptionStatus,
-  isSubscriptionActive,
-} from "@/lib/evaluation/subscription";
+import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { listSermons } from "@/lib/sermons/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,17 +18,16 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermons, subscriptionStatus, packCredits, evalSubStatus, recentComplete] =
+  const [sermons, subscriptionStatus, packCredits, entitlement, recentComplete] =
     await Promise.all([
       listSermons(),
       getSubscriptionStatus(),
       getPackCredits(),
-      user ? getEvalSubscriptionStatus(user.id) : Promise.resolve(null),
+      user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
       listRecentCompleteEvaluations(2),
     ]);
-  const hasActiveSubscription = isSubscriptionActive(evalSubStatus);
-  const showPurchaseCard = true;
-  const showStatusRow = subscriptionStatus || packCredits || showPurchaseCard;
+  const hasActiveSubscription = entitlement?.subscriptionActive === true;
+  const showStatusRow = subscriptionStatus || packCredits;
   const growthReportHref = recentComplete.length >= 2 ? "/dashboard/growth" : null;
 
   const pageHeader = (
@@ -84,10 +79,6 @@ export default async function DashboardPage() {
             </div>
           ) : null}
 
-          <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
-            <DashboardSubscribeCTA hasActiveSubscription={hasActiveSubscription} />
-          </div>
-
           {packCredits ? (
             <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
               <PackCreditsCard
@@ -97,8 +88,30 @@ export default async function DashboardPage() {
               />
             </div>
           ) : null}
+
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
+            <Link
+              href="/dashboard/buy"
+              className="inline-block text-[13px] font-medium no-underline hover:underline"
+              style={{ ...uiFont, color: "var(--sc-accent)" }}
+            >
+              {hasActiveSubscription
+                ? "Need more evaluations? Visit Buy →"
+                : "Subscribe or buy a pack →"}
+            </Link>
+          </div>
         </div>
-      ) : null}
+      ) : (
+        <p className="mb-8">
+          <Link
+            href="/dashboard/buy"
+            className="text-[13px] font-medium no-underline hover:underline"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            Subscribe or buy a pack →
+          </Link>
+        </p>
+      )}
 
       <SermonList
         sermons={sermons}
