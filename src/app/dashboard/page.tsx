@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   const growthReportHref = recentComplete.length >= 2 ? "/dashboard/growth" : null;
 
   const pageHeader = (
-    <div className="mb-8">
+    <div className="mt-12 mb-6">
       <p
         className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
