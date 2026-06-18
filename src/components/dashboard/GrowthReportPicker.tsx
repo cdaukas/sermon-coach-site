@@ -8,12 +8,22 @@ import type { RecentCompleteEvaluationItem } from "@/lib/evaluation/growth-repor
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
+const selectChevronSvg =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%234a5568' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")";
+
 const selectClassName =
-  "w-full rounded border px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20";
+  "w-full cursor-pointer rounded border px-[14px] py-[11px] pr-10 text-[15px] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[var(--sc-accent)] focus-visible:border-[var(--sc-accent)] focus-visible:ring-2 focus-visible:ring-[var(--sc-accent)]/20";
 
 const selectStyle = {
   ...uiFont,
-  background: "var(--sc-panel)",
+  appearance: "none",
+  WebkitAppearance: "none",
+  MozAppearance: "none",
+  backgroundColor: "var(--sc-panel)",
+  backgroundImage: selectChevronSvg,
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 14px center",
+  backgroundSize: "12px 12px",
   borderColor: "var(--sc-rule)",
   color: "var(--sc-ink)",
 };
