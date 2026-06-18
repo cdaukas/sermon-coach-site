@@ -8,11 +8,10 @@ export function SubscriptionStatusCard({
   status: SubscriptionStatus;
 }) {
   const cardStyle: CSSProperties = {
-    background: "var(--sc-accent-pale)",
+    background: "var(--sc-panel)",
     border: "1px solid var(--sc-rule)",
-    borderLeft: "3px solid var(--sc-accent)",
     borderRadius: "4px",
-    padding: "20px 24px",
+    padding: "12px 16px",
     height: "100%",
   };
 
@@ -21,21 +20,27 @@ export function SubscriptionStatusCard({
     fontSize: "11px",
     letterSpacing: "0.16em",
     textTransform: "uppercase",
-    color: "var(--sc-accent)",
+    color: "var(--sc-ink-soft)",
     fontWeight: 600,
-    marginBottom: "6px",
+    marginBottom: "4px",
   };
 
   const primaryStyle: CSSProperties = {
-    fontSize: "18px",
+    fontSize: "16px",
     fontWeight: 600,
     color: "var(--sc-ink)",
+    lineHeight: 1.3,
+  };
+
+  const accentNumberStyle: CSSProperties = {
+    color: "var(--sc-accent)",
   };
 
   const subStyle: CSSProperties = {
-    fontSize: "14px",
+    fontSize: "13px",
     color: "var(--sc-ink-soft)",
     marginTop: "2px",
+    lineHeight: 1.4,
   };
 
   if (status.kind === "subscription") {
@@ -44,9 +49,10 @@ export function SubscriptionStatusCard({
       <div style={cardStyle}>
         <div style={labelStyle}>Subscription · This Month</div>
         <div style={primaryStyle}>
-          {status.remaining} of {status.limit} {word} left
+          <span style={accentNumberStyle}>{status.remaining}</span> of {status.limit}{" "}
+          {word} left
         </div>
-        <div style={subStyle}>Resets at the start of your next billing cycle.</div>
+        <div style={subStyle}>Resets at the start of next month.</div>
       </div>
     );
   }
@@ -57,7 +63,8 @@ export function SubscriptionStatusCard({
     <div style={cardStyle}>
       <div style={labelStyle}>Free to try</div>
       <div style={primaryStyle}>
-        {status.freeRemaining} free {word} available
+        <span style={accentNumberStyle}>{status.freeRemaining}</span> free {word}{" "}
+        available
       </div>
       <div style={subStyle}>Run a sermon to see the full evaluation.</div>
     </div>
