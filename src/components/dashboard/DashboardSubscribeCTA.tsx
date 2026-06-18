@@ -46,11 +46,17 @@ const PACK_OFFERS: { pack: PackSku; label: string }[] = [
 
 type DashboardSubscribeCTAProps = {
   hasActiveSubscription: boolean;
+  surface?: "dashboard" | "buy";
 };
 
 export function DashboardSubscribeCTA({
   hasActiveSubscription,
+  surface = "dashboard",
 }: DashboardSubscribeCTAProps) {
+  const onBuySurface = surface === "buy";
+  const showSubscribeHeadline = !onBuySurface || !hasActiveSubscription;
+  const showPackSubhead = !onBuySurface || !hasActiveSubscription;
+
   return (
     <div
       className="h-full rounded px-6 py-5"
@@ -60,14 +66,16 @@ export function DashboardSubscribeCTA({
         borderLeft: "3px solid var(--sc-accent)",
       }}
     >
-      <p
-        className="mb-4 text-[15px] font-medium"
-        style={{ ...uiFont, color: "var(--sc-ink)" }}
-      >
-        {hasActiveSubscription
-          ? "Need extra evaluations?"
-          : "Preaching more often? Subscribe."}
-      </p>
+      {showSubscribeHeadline ? (
+        <p
+          className="mb-4 text-[15px] font-medium"
+          style={{ ...uiFont, color: "var(--sc-ink)" }}
+        >
+          {hasActiveSubscription
+            ? "Need extra evaluations?"
+            : "Preaching more often? Subscribe."}
+        </p>
+      ) : null}
 
       {!hasActiveSubscription ? (
         <div className="flex flex-col gap-2">
@@ -103,14 +111,16 @@ export function DashboardSubscribeCTA({
         />
       ) : null}
 
-      <p
-        className={`text-[13px] font-medium ${hasActiveSubscription ? "" : "mb-3"}`}
-        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-      >
-        Preach less often? Buy a pack instead.
-      </p>
+      {showPackSubhead ? (
+        <p
+          className={`text-[13px] font-medium ${hasActiveSubscription ? "" : "mb-3"}`}
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          Preach less often? Buy a pack instead.
+        </p>
+      ) : null}
 
-      <div className="mt-3 flex flex-col gap-2">
+      <div className={`flex flex-col gap-2 ${showPackSubhead ? "mt-3" : ""}`}>
         {PACK_OFFERS.map(({ pack, label }) => (
           <Link
             key={pack}

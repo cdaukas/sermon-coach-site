@@ -29,6 +29,7 @@ const primaryButtonStyle = {
 export function AppHeader() {
   const pathname = usePathname();
   const onDashboard = pathname === "/dashboard";
+  const onBuy = pathname === "/dashboard/buy";
   const onNewSermon = pathname === "/dashboard/sermons/new";
 
   return (
@@ -53,6 +54,16 @@ export function AppHeader() {
             style={secondaryButtonStyle}
           >
             Dashboard
+          </Link>
+        ) : null}
+
+        {!onBuy ? (
+          <Link
+            href="/dashboard/buy"
+            className={secondaryButtonClass}
+            style={secondaryButtonStyle}
+          >
+            Buy
           </Link>
         ) : null}
 
