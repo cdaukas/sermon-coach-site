@@ -22,6 +22,7 @@ html[data-pdf-capture="1"] nextjs-portal {
 html[data-pdf-capture="1"] .evaluation-criterion,
 html[data-pdf-capture="1"] .evaluation-working-card,
 html[data-pdf-capture="1"] .evaluation-priorities article,
+html[data-pdf-capture="1"] .evaluation-coaching-movement,
 html[data-pdf-capture="1"] .evaluation-rewrite,
 html[data-pdf-capture="1"] .evaluation-methodology table tbody tr {
   break-inside: avoid;
