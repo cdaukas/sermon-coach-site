@@ -90,7 +90,7 @@ function CoachingNarrativeSections({
           }}
         >
           <p
-            className="mb-4 text-[17px] leading-relaxed"
+            className="mb-4 text-[14px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
             {narrative.how_to_grow.edge}
