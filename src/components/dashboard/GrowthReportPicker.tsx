@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { orderEvaluationIdsByCompletedAt } from "@/lib/evaluation/growth-report-ordering";
 import type { RecentCompleteEvaluationItem } from "@/lib/evaluation/growth-report-types";
 
@@ -14,7 +14,7 @@ const selectChevronSvg =
 const selectClassName =
   "w-full cursor-pointer rounded border px-[14px] py-[11px] pr-10 text-[15px] outline-none transition-[border-color,box-shadow] duration-150 hover:border-[var(--sc-accent)] focus-visible:border-[var(--sc-accent)] focus-visible:ring-2 focus-visible:ring-[var(--sc-accent)]/20";
 
-const selectStyle = {
+const selectStyle: CSSProperties = {
   ...uiFont,
   appearance: "none",
   WebkitAppearance: "none",
