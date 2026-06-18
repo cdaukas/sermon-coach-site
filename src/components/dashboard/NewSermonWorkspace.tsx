@@ -15,6 +15,8 @@ type NewSermonWorkspaceProps = {
 };
 
 export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
+  const canEvaluate = entitlement?.canEvaluate ?? true;
+
   return (
     <>
       <div className="mb-8">
@@ -46,7 +48,7 @@ export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
       <EvaluationAccessGate entitlement={entitlement} className="mb-8" />
       <EvaluationCreditNotice entitlement={entitlement} className="mb-6" />
 
-      <SermonForm />
+      {canEvaluate ? <SermonForm /> : null}
     </>
   );
 }
