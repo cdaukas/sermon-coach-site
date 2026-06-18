@@ -14,7 +14,7 @@ const REPORT_TYPE_OPTIONS = [
 
 const REPORT_TYPE_DESCRIPTORS: Record<StashedReportMode, string> = {
   diagnostic: "An assessment of your own preaching.",
-  coaching: "An assessment for a preacher you're developing.",
+  coaching: "An assessment to hand the preacher you're mentoring. Same rubric, written as a coaching report.",
 };
 
 type ReportTypeToggleProps = {
