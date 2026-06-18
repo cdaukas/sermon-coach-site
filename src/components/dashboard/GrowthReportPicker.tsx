@@ -37,7 +37,7 @@ export function formatGrowthReportOptionLabel(
   item: RecentCompleteEvaluationItem,
 ): string {
   const passage = item.primaryPassage?.trim() || "No passage";
-  return `${item.sermonTitle} · ${passage} · ${formatDate(item.completedAt)} · ${item.scoreBand}`;
+  return `${item.sermonTitle} · ${passage} · ${formatDate(item.completedAt)}`;
 }
 
 export function GrowthReportPicker({
