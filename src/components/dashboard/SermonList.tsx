@@ -137,26 +137,28 @@ export function SermonList({ sermons, growthReportLink, header }: SermonListProp
     return (
       <>
         {header}
-        <DashboardToolbar growthReportLink={growthReportLink} />
-        <div className="text-center">
-          <p
-            className="mb-6 text-lg leading-relaxed"
-            style={{ ...serifFont, color: "var(--sc-ink-soft)", fontStyle: "italic" }}
-          >
-            No sermons yet. Paste a manuscript to get started.
-          </p>
-          <Link
-            href="/dashboard/sermons/new"
-            className="inline-block rounded border px-7 py-3.5 text-sm font-semibold tracking-wide no-underline transition-all"
-            style={{
-              ...uiFont,
-              background: "var(--sc-ink)",
-              color: "var(--sc-bg)",
-              borderColor: "var(--sc-ink)",
-            }}
-          >
-            Submit your first sermon
-          </Link>
+        <div>
+          <DashboardToolbar growthReportLink={growthReportLink} />
+          <div className="text-center">
+            <p
+              className="mb-6 text-lg leading-relaxed"
+              style={{ ...serifFont, color: "var(--sc-ink-soft)", fontStyle: "italic" }}
+            >
+              No sermons yet. Paste a manuscript to get started.
+            </p>
+            <Link
+              href="/dashboard/sermons/new"
+              className="inline-block rounded border px-7 py-3.5 text-sm font-semibold tracking-wide no-underline transition-all"
+              style={{
+                ...uiFont,
+                background: "var(--sc-ink)",
+                color: "var(--sc-bg)",
+                borderColor: "var(--sc-ink)",
+              }}
+            >
+              Submit your first sermon
+            </Link>
+          </div>
         </div>
       </>
     );
@@ -174,36 +176,38 @@ export function SermonList({ sermons, growthReportLink, header }: SermonListProp
   return (
     <>
       {header}
-      <DashboardToolbar
-        growthReportLink={growthReportLink}
-        searchInput={
-          <SermonSearchInput query={query} onQueryChange={setQuery} />
-        }
-      />
       <div>
-        {filteredSermons.length === 0 ? (
-          <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-            No sermons match that search.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-6">
-            {groupedSermons.map(({ monthKey, sermons: monthSermons }) => (
-              <section key={monthKey}>
-                <p
-                  className="mb-3 text-[11px] font-semibold tracking-[0.16em]"
-                  style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-                >
-                  {formatMonthHeader(monthKey)}
-                </p>
-                <ul className="flex flex-col gap-4">
-                  {monthSermons.map((sermon) => (
-                    <SermonCard key={sermon.id} sermon={sermon} />
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        )}
+        <DashboardToolbar
+          growthReportLink={growthReportLink}
+          searchInput={
+            <SermonSearchInput query={query} onQueryChange={setQuery} />
+          }
+        />
+        <div>
+          {filteredSermons.length === 0 ? (
+            <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+              No sermons match that search.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-8">
+              {groupedSermons.map(({ monthKey, sermons: monthSermons }) => (
+                <section key={monthKey}>
+                  <p
+                    className="mb-2 text-[11px] font-semibold tracking-[0.16em]"
+                    style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                  >
+                    {formatMonthHeader(monthKey)}
+                  </p>
+                  <ul className="flex flex-col gap-4">
+                    {monthSermons.map((sermon) => (
+                      <SermonCard key={sermon.id} sermon={sermon} />
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
