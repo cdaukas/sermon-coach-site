@@ -42,6 +42,9 @@ export default async function BuyPage() {
 
   const hasActiveSubscription = entitlement?.subscriptionActive === true;
   const showStatusRow = subscriptionStatus || packCredits;
+  const usage = entitlement?.usage ?? null;
+  const subscriberDepleted =
+    hasActiveSubscription && usage !== null && usage.used >= usage.limit;
 
   return (
     <main
@@ -102,6 +105,16 @@ export default async function BuyPage() {
             surface="buy"
           />
         </div>
+      ) : null}
+
+      {subscriberDepleted ? (
+        <p
+          className="mt-6 max-w-3xl text-[14px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          role="status"
+        >
+          Out of evaluations until next month? A pack carries you through. Credits stack on top of your subscription, get used only after your monthly ten, and stay good for 18 months. Nothing you buy goes to waste.
+        </p>
       ) : null}
 
       <div className="mt-6 max-w-3xl">
