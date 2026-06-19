@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
@@ -99,6 +100,10 @@ export default async function BuyPage() {
           hasActiveSubscription={hasActiveSubscription}
           surface="buy"
         />
+      </div>
+
+      <div className="mt-6 max-w-3xl">
+        <BuyPackCards />
       </div>
     </main>
   );

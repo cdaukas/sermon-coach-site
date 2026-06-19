@@ -111,7 +111,7 @@ export function DashboardSubscribeCTA({
         />
       ) : null}
 
-      {showPackSubhead ? (
+      {!onBuySurface && showPackSubhead ? (
         <p
           className={`text-[13px] font-medium ${hasActiveSubscription ? "" : "mb-3"}`}
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
@@ -120,18 +120,20 @@ export function DashboardSubscribeCTA({
         </p>
       ) : null}
 
-      <div className={`flex flex-col gap-2 ${showPackSubhead ? "mt-3" : ""}`}>
-        {PACK_OFFERS.map(({ pack, label }) => (
-          <Link
-            key={pack}
-            href={buildPackCheckoutPath(pack)}
-            className={packButtonClass}
-            style={packButtonStyle}
-          >
-            {label}
-          </Link>
-        ))}
-      </div>
+      {!onBuySurface ? (
+        <div className={`flex flex-col gap-2 ${showPackSubhead ? "mt-3" : ""}`}>
+          {PACK_OFFERS.map(({ pack, label }) => (
+            <Link
+              key={pack}
+              href={buildPackCheckoutPath(pack)}
+              className={packButtonClass}
+              style={packButtonStyle}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
