@@ -95,12 +95,14 @@ export default async function BuyPage() {
         </div>
       ) : null}
 
-      <div className="max-w-md">
-        <DashboardSubscribeCTA
-          hasActiveSubscription={hasActiveSubscription}
-          surface="buy"
-        />
-      </div>
+      {!hasActiveSubscription ? (
+        <div className="max-w-md">
+          <DashboardSubscribeCTA
+            hasActiveSubscription={hasActiveSubscription}
+            surface="buy"
+          />
+        </div>
+      ) : null}
 
       <div className="mt-6 max-w-3xl">
         <BuyPackCards />
