@@ -54,64 +54,63 @@ export function DashboardSubscribeCTA({
   surface = "dashboard",
 }: DashboardSubscribeCTAProps) {
   const onBuySurface = surface === "buy";
-  const showSubscribeHeadline = !onBuySurface || !hasActiveSubscription;
   const showPackSubhead = !onBuySurface || !hasActiveSubscription;
 
   return (
     <div
-      className="h-full rounded px-6 py-5"
+      className="flex h-full flex-col rounded border px-5 pb-5"
       style={{
-        background: "var(--sc-accent-pale)",
-        border: "1px solid var(--sc-rule)",
-        borderLeft: "3px solid var(--sc-accent)",
+        background: "var(--sc-panel)",
+        borderColor: "var(--sc-rule)",
+        paddingTop: "20px",
+        boxShadow: "0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04)",
       }}
     >
-      {showSubscribeHeadline ? (
-        <p
-          className="mb-4 text-[15px] font-medium"
-          style={{ ...uiFont, color: "var(--sc-ink)" }}
-        >
-          {hasActiveSubscription
-            ? "Need extra evaluations?"
-            : "Preaching more often? Subscribe."}
-        </p>
-      ) : null}
+      <div className="text-[18px] font-semibold" style={{ ...uiFont, color: "var(--sc-ink)" }}>
+        Coach
+      </div>
 
-      {!hasActiveSubscription ? (
-        <div className="flex flex-col gap-2">
-          <Link
-            href={buildCheckoutPath("monthly")}
-            className={primaryButtonClass}
-            style={primaryButtonStyle}
-          >
-            Subscribe monthly · $29/mo
-          </Link>
+      <p className="mt-2 text-[13px] italic" style={{ color: "var(--sc-ink-soft)" }}>
+        For the pastor in the pulpit most weeks.
+      </p>
 
-          <Link
-            href={buildCheckoutPath("annual")}
-            className={secondaryButtonClass}
-            style={secondaryButtonStyle}
-          >
-            Subscribe annually · $290/yr
-          </Link>
-          <p
-            className="text-center text-[12px]"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          >
-            2 months free
-          </p>
-        </div>
-      ) : null}
+      <div className="mt-3 flex items-baseline gap-2">
+        <span className="text-[26px] font-semibold" style={{ ...uiFont, color: "var(--sc-ink)" }}>
+          $29
+        </span>
+        <span className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+          /mo
+        </span>
+      </div>
+      <div className="text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+        $290/yr · 2 months free
+      </div>
 
-      {!hasActiveSubscription ? (
-        <div
-          className="my-5 border-t"
-          style={{ borderColor: "var(--sc-rule)" }}
-          aria-hidden
-        />
-      ) : null}
+      <ul className="mt-3 mb-4 flex-grow list-none space-y-2">
+        {[
+          "10 evaluations every month",
+          "Full 11-criterion rubric",
+          "A private library of every evaluation",
+        ].map((line, i) => (
+          <li key={i} className="relative pl-5 text-[13px]" style={{ color: "var(--sc-ink-mid)" }}>
+            <span className="absolute left-0 font-bold" style={{ ...uiFont, color: "var(--sc-accent)" }}>
+              {"\u2713"}
+            </span>
+            {line}
+          </li>
+        ))}
+      </ul>
 
-      {showPackSubhead ? (
+      <div className="flex flex-col gap-2">
+        <Link href={buildCheckoutPath("monthly")} className={primaryButtonClass} style={primaryButtonStyle}>
+          Subscribe monthly
+        </Link>
+        <Link href={buildCheckoutPath("annual")} className={secondaryButtonClass} style={secondaryButtonStyle}>
+          Subscribe annually
+        </Link>
+      </div>
+
+      {!onBuySurface && showPackSubhead ? (
         <p
           className={`text-[13px] font-medium ${hasActiveSubscription ? "" : "mb-3"}`}
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
@@ -120,18 +119,20 @@ export function DashboardSubscribeCTA({
         </p>
       ) : null}
 
-      <div className={`flex flex-col gap-2 ${showPackSubhead ? "mt-3" : ""}`}>
-        {PACK_OFFERS.map(({ pack, label }) => (
-          <Link
-            key={pack}
-            href={buildPackCheckoutPath(pack)}
-            className={packButtonClass}
-            style={packButtonStyle}
-          >
-            {label}
-          </Link>
-        ))}
-      </div>
+      {!onBuySurface ? (
+        <div className={`flex flex-col gap-2 ${showPackSubhead ? "mt-3" : ""}`}>
+          {PACK_OFFERS.map(({ pack, label }) => (
+            <Link
+              key={pack}
+              href={buildPackCheckoutPath(pack)}
+              className={packButtonClass}
+              style={packButtonStyle}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

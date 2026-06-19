@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
@@ -94,11 +95,17 @@ export default async function BuyPage() {
         </div>
       ) : null}
 
-      <div className="max-w-md">
-        <DashboardSubscribeCTA
-          hasActiveSubscription={hasActiveSubscription}
-          surface="buy"
-        />
+      {!hasActiveSubscription ? (
+        <div className="max-w-md">
+          <DashboardSubscribeCTA
+            hasActiveSubscription={hasActiveSubscription}
+            surface="buy"
+          />
+        </div>
+      ) : null}
+
+      <div className="mt-6 max-w-3xl">
+        <BuyPackCards />
       </div>
     </main>
   );
