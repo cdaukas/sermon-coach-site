@@ -64,12 +64,13 @@ export function BuyPackCards() {
       {BUY_PACK_CARDS.map((card) => (
         <div
           key={card.packKey}
-          className="relative flex flex-col rounded border px-5 py-5"
+          className="relative flex flex-col rounded border px-5 pb-5"
           style={{
             background: "var(--sc-panel)",
             borderColor: "var(--sc-rule)",
             borderTopWidth: card.featured ? "3px" : "1px",
             borderTopColor: card.featured ? "var(--sc-accent-soft)" : "var(--sc-rule)",
+            paddingTop: card.featured ? "30px" : "20px",
             boxShadow: card.featured
               ? "0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06)"
               : "0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04)",
