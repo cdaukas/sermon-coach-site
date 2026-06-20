@@ -213,10 +213,9 @@ export function GrowthReportPicker({
 
       <button
         type="button"
-        className="mt-6 rounded px-5 py-3 text-[13px] font-semibold tracking-wide transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-6 rounded px-5 py-3 text-[13px] font-semibold tracking-wide bg-[var(--sc-accent)] hover:bg-[#8a6624] transition-colors disabled:cursor-not-allowed disabled:opacity-50"
         style={{
           ...uiFont,
-          background: "var(--sc-accent)",
           color: "var(--sc-panel)",
         }}
         disabled={sameSermon}
