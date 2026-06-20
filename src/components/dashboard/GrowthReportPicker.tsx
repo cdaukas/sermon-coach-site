@@ -157,8 +157,8 @@ export function GrowthReportPicker({
         different sermons, then generate the report.
       </p>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <label className="block">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-4">
+        <label className="block md:flex-1">
           <span
             className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em]"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
@@ -179,7 +179,26 @@ export function GrowthReportPicker({
           </select>
         </label>
 
-        <label className="block">
+        <div
+          aria-hidden="true"
+          className="flex shrink-0 items-center justify-center rotate-90 md:mt-3 md:rotate-0"
+          style={{ color: "var(--sc-accent-soft)" }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </div>
+
+        <label className="block md:flex-1">
           <span
             className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em]"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
