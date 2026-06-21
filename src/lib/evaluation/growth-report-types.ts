@@ -10,6 +10,14 @@ export type RecentCompleteEvaluationItem = {
   scoreBand: string;
 };
 
+export type TrendArcEvaluationItem = {
+  evaluationId: string;
+  sermonTitle: string;
+  completedAt: string;
+  createdAt: string;
+  compositeWeighted: number;
+};
+
 export type GrowthReportCriterionDelta = {
   id: number;
   name: string;
