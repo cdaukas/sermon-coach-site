@@ -363,6 +363,131 @@
   .tier.featured .tier-cta { background: var(--accent); border-color: var(--accent); }
   .tier.featured .tier-cta:hover { background: #8a6624; border-color: #8a6624; }
 
+  /* ---------- INTENSIVE ---------- */
+  .intensive-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+  }
+  .intensive-card {
+    background: var(--panel);
+    box-shadow: var(--shadow-lift);
+    border-top: 4px solid var(--accent);
+    border-radius: 4px;
+    padding: 40px;
+    position: relative;
+  }
+  .intensive-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .intensive-name {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .intensive-tagline {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+  .intensive-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .intensive-price {
+    font-size: 46px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .intensive-price .currency {
+    font-size: 26px;
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+  .intensive-period {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .intensive-note {
+    font-size: 12.5px;
+    color: var(--accent);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 24px;
+  }
+  .intensive-features {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+  .intensive-features li {
+    padding: 10px 0;
+    padding-left: 24px;
+    position: relative;
+    font-size: 14.5px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink-mid);
+  }
+  .intensive-features li:last-child { border-bottom: none; }
+  .intensive-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .intensive-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 13px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    text-align: center;
+    letter-spacing: 0.02em;
+    transition: all 0.15s ease;
+    border: 1px solid var(--accent);
+    display: block;
+  }
+  .intensive-cta:hover { background: #8a6624; border-color: #8a6624; }
+  .intensive-capacity {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    margin-top: 16px;
+  }
+  @media (max-width: 720px) {
+    .intensive-card { padding: 32px 24px; }
+    .intensive-price { font-size: 40px; }
+  }
+
   /* ---------- DIVIDER ---------- */
   .or-divider {
     max-width: 600px;
@@ -794,6 +919,33 @@
   </div>
 
 </section>
+
+<!-- INTENSIVE -->
+<div class="section-header" style="margin-top: 56px;">
+  <h2>Or work one on one.</h2>
+  <p>A personal preaching intensive. The whole arc of how you preach, not just a single sermon.</p>
+</div>
+
+<div class="intensive-wrap">
+  <div class="intensive-card">
+    <div class="intensive-badge">By application</div>
+    <div class="intensive-name">Intensive</div>
+    <div class="intensive-tagline">Several sermons, one deep evaluation, and a live conversation. Led by a trained Sermon Coach mentor.</div>
+    <div class="intensive-price-row">
+      <span class="intensive-price"><span class="currency">$</span>449</span>
+      <span class="intensive-period">one-time</span>
+    </div>
+    <div class="intensive-note">One-time engagement</div>
+    <ul class="intensive-features">
+      <li>A short intake on how you think about preaching</li>
+      <li>A pattern report across three to five of your sermons, read side by side &mdash; the habits and tendencies a single evaluation can't surface</li>
+      <li>One in-depth Sermon Coach evaluation</li>
+      <li>A 20-minute Zoom call, walking through that sermon together</li>
+    </ul>
+    <a href="REPLACE_WITH_APPLICATION_FORM_URL" class="intensive-cta">Apply for a spot</a>
+    <div class="intensive-capacity">A few spots open each month. Apply, and we'll reply about fit and timing.</div>
+  </div>
+</div>
 
 <!-- OR DIVIDER -->
 <div class="or-divider"><span>Or</span></div>
