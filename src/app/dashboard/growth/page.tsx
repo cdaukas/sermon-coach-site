@@ -3,12 +3,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { GrowthReportPicker } from "@/components/dashboard/GrowthReportPicker";
 import { GrowthReportView } from "@/components/dashboard/GrowthReportView";
+import { GrowthTrendArc } from "@/components/dashboard/GrowthTrendArc";
 import {
   loadGrowthReportData,
   toGrowthReportPresentation,
 } from "@/lib/evaluation/growth-report";
 import { orderEvaluationIdsByCompletedAt } from "@/lib/evaluation/growth-report-ordering";
-import { listRecentCompleteEvaluations } from "@/lib/evaluation/queries";
+import {
+  listCompleteEvaluationsForTrendArc,
+  listRecentCompleteEvaluations,
+} from "@/lib/evaluation/queries";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -58,6 +62,33 @@ function GrowthReportUnavailable() {
   );
 }
 
+function GrowthReportHeadline() {
+  return (
+    <>
+      <Link
+        href="/dashboard"
+        className="mb-8 inline-block text-[13px] font-medium no-underline hover:underline"
+        style={{ ...uiFont, color: "var(--sc-accent)" }}
+      >
+        ← Back to library
+      </Link>
+
+      <p
+        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+        style={{ ...uiFont, color: "var(--sc-accent)" }}
+      >
+        Growth report
+      </p>
+      <h1
+        className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
+      >
+        How your preaching is moving
+      </h1>
+    </>
+  );
+}
+
 function resolveSelectedEvaluationId(
   options: { evaluationId: string }[],
   requestedId: string | undefined,
@@ -74,10 +105,36 @@ function resolveSelectedEvaluationId(
 export default async function GrowthReportPage({
   searchParams,
 }: GrowthReportPageProps) {
-  const options = await listRecentCompleteEvaluations();
+  const [options, trendPoints] = await Promise.all([
+    listRecentCompleteEvaluations(),
+    listCompleteEvaluationsForTrendArc(),
+  ]);
 
-  if (options.length < 2) {
+  if (trendPoints.length === 0) {
     return <GrowthReportUnavailable />;
+  }
+
+  if (trendPoints.length === 1) {
+    return (
+      <main
+        className="rounded px-8 py-10"
+        style={{
+          background: "var(--sc-panel)",
+          border: "1px solid var(--sc-rule)",
+          boxShadow: "var(--sc-shadow-lift)",
+        }}
+      >
+        <GrowthReportHeadline />
+        <GrowthTrendArc points={trendPoints} />
+        <p
+          className="text-[14px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          role="status"
+        >
+          Run another and the arc begins.
+        </p>
+      </main>
+    );
   }
 
   const { baseline, current } = await searchParams;
@@ -141,30 +198,9 @@ export default async function GrowthReportPage({
           boxShadow: "var(--sc-shadow-lift)",
         }}
       >
-        {!reportData ? (
-          <>
-            <Link
-              href="/dashboard"
-              className="mb-8 inline-block text-[13px] font-medium no-underline hover:underline"
-              style={{ ...uiFont, color: "var(--sc-accent)" }}
-            >
-              ← Back to library
-            </Link>
+        {!reportData ? <GrowthReportHeadline /> : null}
 
-            <p
-              className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-              style={{ ...uiFont, color: "var(--sc-accent)" }}
-            >
-              Growth report
-            </p>
-            <h1
-              className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
-              style={{ ...serifFont, color: "var(--sc-ink)" }}
-            >
-              How your preaching is moving
-            </h1>
-          </>
-        ) : null}
+        <GrowthTrendArc points={trendPoints} />
 
         <GrowthReportPicker
           options={options}

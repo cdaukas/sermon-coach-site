@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import type { RecentCompleteEvaluationItem } from "./growth-report-types";
+import type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./growth-report-types";
 import type { CoachingNarrative } from "./coaching-schema";
 import { parseEvaluationResult } from "./schema";
 
-export type { RecentCompleteEvaluationItem } from "./growth-report-types";
+export type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./growth-report-types";
 import type {
   EvaluationStatus,
   EvaluationWithSermon,
@@ -242,6 +242,80 @@ export async function listRecentCompleteEvaluations(
       completedAt: row.completed_at,
       createdAt: row.created_at,
       scoreBand: row.score_band ?? "—",
+    });
+  }
+
+  return items;
+}
+
+export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEvaluationItem[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("sermon_evaluations")
+    .select("id, completed_at, created_at, sermon_version_id, overall_score")
+    .eq("status", "complete")
+    .not("result", "is", null)
+    .not("completed_at", "is", null)
+    .not("overall_score", "is", null);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const rows = data ?? [];
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const versionIds = [...new Set(rows.map((row) => row.sermon_version_id))];
+  const { data: versions, error: versionsError } = await supabase
+    .from("sermon_versions")
+    .select("id, sermon_id")
+    .in("id", versionIds);
+
+  if (versionsError) {
+    throw new Error(versionsError.message);
+  }
+
+  const versionToSermonId = new Map(
+    (versions ?? []).map((version) => [version.id, version.sermon_id]),
+  );
+
+  const sermonIds = [...new Set(versionToSermonId.values())];
+  const { data: sermons, error: sermonsError } = await supabase
+    .from("sermons")
+    .select("id, title")
+    .in("id", sermonIds);
+
+  if (sermonsError) {
+    throw new Error(sermonsError.message);
+  }
+
+  const sermonById = new Map(
+    (sermons ?? []).map((sermon) => [sermon.id, sermon]),
+  );
+
+  const items: TrendArcEvaluationItem[] = [];
+
+  for (const row of rows) {
+    const sermonId = versionToSermonId.get(row.sermon_version_id);
+    const sermon = sermonId ? sermonById.get(sermonId) : undefined;
+    if (
+      !sermonId ||
+      !sermon?.title ||
+      !row.completed_at ||
+      row.overall_score == null
+    ) {
+      continue;
+    }
+
+    items.push({
+      evaluationId: row.id,
+      sermonTitle: sermon.title,
+      completedAt: row.completed_at,
+      createdAt: row.created_at,
+      compositeWeighted: row.overall_score,
     });
   }
 
