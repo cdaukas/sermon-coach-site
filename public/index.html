@@ -806,6 +806,130 @@
     .hero-cta-row { flex-direction: column; align-items: stretch; }
     .btn-primary, .btn-secondary { text-align: center; }
   }
+
+  /* ---------- EVAL PREVIEW (ported from sample eval page) ---------- */
+  :root {
+    --green: #4a7c59;
+    --green-soft: #7ba886;
+    --amber: #c9892e;
+    --slider-track: #ebe5d5;
+    --cream-tint: #faf6ed;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .preview-lead {
+    max-width: 620px;
+    margin: 0 auto 32px;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-align: center;
+  }
+  .eval-preview {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .eval-preview .cat { background: var(--panel); box-shadow: var(--shadow); margin: 28px 0; margin-bottom: 24px; }
+  .eval-preview .cat-head {
+    background: linear-gradient(160deg, #1a2332, #283449);
+    color: #fff;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .eval-preview .cat-head .ct { font-size: 21px; font-weight: 600; }
+  .eval-preview .cat-head .ct .n { color: var(--accent-soft); margin-right: 10px; }
+  .eval-preview .cat-head .avg {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+  }
+  .eval-preview details.crit { border-bottom: 1px solid var(--rule); }
+  .eval-preview details.crit:last-child { border-bottom: none; }
+  .eval-preview summary.crit-row {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .eval-preview summary.crit-row::-webkit-details-marker { display: none; }
+  .eval-preview .chev {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--accent);
+    transition: transform 0.18s;
+    flex: 0 0 12px;
+  }
+  .eval-preview details[open] .chev { transform: rotate(90deg); }
+  .eval-preview .crit-name { flex: 1; font-size: 16.5px; }
+  .eval-preview .crit-name .src { font-style: italic; color: var(--ink-soft); font-size: 14px; }
+  .eval-preview .slider {
+    flex: 0 0 150px;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--slider-track);
+    position: relative;
+  }
+  .eval-preview .slider .fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-radius: 5px;
+  }
+  .eval-preview .slider .thumb {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    border: 2px solid #fff;
+  }
+  .eval-preview .crit-score {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    flex: 0 0 30px;
+    text-align: right;
+  }
+  .eval-preview .lead-card {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    border-top: 3px solid var(--green);
+    padding: 22px 24px;
+  }
+  .eval-preview .lead-card h3 { color: var(--green); font-size: 19px; font-weight: 600; margin-bottom: 10px; }
+  .eval-preview .lead-card p { font-size: 15px; }
+  .eval-preview .lead-card blockquote {
+    border-left: 2px solid var(--green-soft);
+    padding-left: 14px;
+    margin: 10px 0;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+  .eval-preview .tag {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 600;
+    display: block;
+    margin-top: 10px;
+  }
+  .preview-cta-note {
+    text-align: center;
+    margin-top: 24px;
+    color: var(--ink-soft);
+    font-size: 0.95em;
+  }
+  @media (max-width: 720px) {
+    .eval-preview .slider { flex-basis: 90px; }
+  }
 </style>
 </head>
 <body>
@@ -914,6 +1038,52 @@
     <div class="audience-cta">
       <a href="/signup" class="btn-primary">Get Your First Evaluation Free</a>
     </div>
+  </div>
+</section>
+
+<!-- EVAL PREVIEW -->
+<section class="block">
+  <div class="block-inner">
+    <div class="section-eyebrow">What You Get Back</div>
+    <h2>This is what lands in your account.</h2>
+    <p class="preview-lead">One category and one highlighted quote from a real evaluation, scored against the rubric. Every preacher who uses The Sermon Coach receives a full version of this.</p>
+
+    <div class="eval-preview">
+      <section class="cat">
+        <div class="cat-head"><div class="ct"><span class="n">1</span>Text &amp; Theology</div>
+          <div class="avg">Average 4.3 / 5 · 13 / 15</div></div>
+
+        <details class="crit"><summary class="crit-row">
+          <span class="chev">▸</span>
+          <span class="crit-name">Textual fidelity &amp; exegesis <span class="src">(Simeon Trust)</span></span>
+          <span class="slider"><span class="fill" style="width:80%;background:var(--green)"></span><span class="thumb" style="left:80%;background:var(--green)"></span></span>
+          <span class="crit-score">4/5</span></summary>
+        </details>
+
+        <details class="crit"><summary class="crit-row">
+          <span class="chev">▸</span>
+          <span class="crit-name">Christ-centered / redemptive arc <span class="src">(Chapell)</span></span>
+          <span class="slider"><span class="fill" style="width:100%;background:var(--green)"></span><span class="thumb" style="left:100%;background:var(--green)"></span></span>
+          <span class="crit-score">5/5</span></summary>
+        </details>
+
+        <details class="crit"><summary class="crit-row">
+          <span class="chev">▸</span>
+          <span class="crit-name">Gospel clarity <span class="src">(Desiring God / Piper)</span></span>
+          <span class="slider"><span class="fill" style="width:80%;background:var(--green)"></span><span class="thumb" style="left:80%;background:var(--green)"></span></span>
+          <span class="crit-score">4/5</span></summary>
+        </details>
+      </section>
+
+      <div class="lead-card">
+        <h3>Faithfulness without the willpower trap</h3>
+        <p>You named both ditches — moralism and "just let go of the rope" passivity — and steered between them. A sanctification sermon that stayed gospel the whole way through.</p>
+        <blockquote>"we are found faithful in him by grace alone through faith alone."</blockquote>
+        <span class="tag">Christ-centered · 5/5</span>
+      </div>
+    </div>
+
+    <p class="preview-cta-note">See all eleven criteria, the anchored quotes, and the priorities below.</p>
   </div>
 </section>
 
