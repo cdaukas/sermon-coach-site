@@ -897,6 +897,22 @@
     flex: 0 0 30px;
     text-align: right;
   }
+  .eval-preview .crit-detail { padding: 2px 28px 22px 56px; }
+  .eval-preview .crit-detail .box {
+    background: var(--cream-tint);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+  }
+  .eval-preview .ptag {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .eval-preview .crit-detail p { font-size: 15.5px; }
   .eval-preview .lead-card {
     background: var(--panel);
     box-shadow: var(--shadow);
@@ -929,6 +945,7 @@
   }
   @media (max-width: 720px) {
     .eval-preview .slider { flex-basis: 90px; }
+    .eval-preview .crit-detail { padding-left: 28px; }
   }
 </style>
 </head>
@@ -1053,11 +1070,15 @@
         <div class="cat-head"><div class="ct"><span class="n">1</span>Text &amp; Theology</div>
           <div class="avg">Average 4.3 / 5 · 13 / 15</div></div>
 
-        <details class="crit"><summary class="crit-row">
+        <details class="crit" open><summary class="crit-row">
           <span class="chev">▸</span>
           <span class="crit-name">Textual fidelity &amp; exegesis <span class="src">(Simeon Trust)</span></span>
           <span class="slider"><span class="fill" style="width:80%;background:var(--green)"></span><span class="thumb" style="left:80%;background:var(--green)"></span></span>
           <span class="crit-score">4/5</span></summary>
+          <div class="crit-detail"><div class="box">
+            <div class="ptag">Simeon Trust · Let the text drive</div>
+            <p>Your three points are the text's three hortatory imperatives — "Let us draw near. Let us hold fast. Let us stir up. That is how we make the climb" — so the spine rises straight out of vv.22–24 rather than being imposed. The temple-curtain handling is accurate, and the Ezekiel 36:25–26 link for "sprinkled clean… washed with pure water" is a real intertextual echo, not a reach. What softens it: you open by framing the whole sermon as coming "to Mount Zion" — that's Hebrews 12:22 imported over a Hebrews 10 text, and at points the climbing image reads the passage rather than the passage generating the image.</p>
+          </div></div>
         </details>
 
         <details class="crit"><summary class="crit-row">
