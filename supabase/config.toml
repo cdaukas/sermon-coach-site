@@ -3,3 +3,6 @@ project_id = "gskxtjfzqaitcruhbwgq"
 
 [db]
 major_version = 15
+
+[functions.lifecycle-welcome]
+verify_jwt = false
