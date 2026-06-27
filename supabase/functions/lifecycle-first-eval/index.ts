@@ -185,7 +185,21 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Invalid JSON body" }, 400);
   }
 
-  if (!isEvaluationCompletionEvent(payload)) {
+  console.log(
+    "[first-eval] payload",
+    JSON.stringify({
+      type: payload.type,
+      record_status: payload.record?.status,
+      record_completed_at: payload.record?.completed_at,
+      old_status: payload.old_record?.status,
+      old_record_present: payload.old_record !== null,
+    }),
+  );
+
+  const isCompletionEvent = isEvaluationCompletionEvent(payload);
+  console.log("[first-eval] isEvaluationCompletionEvent", isCompletionEvent);
+
+  if (!isCompletionEvent) {
     return jsonResponse({ skipped: true, reason: "not_completion_event" });
   }
 
