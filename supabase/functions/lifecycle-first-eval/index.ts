@@ -70,7 +70,7 @@ function isEvaluationCompletionEvent(payload: DbWebhookPayload): boolean {
 
 function buildFeedbackHtml(): string {
   return [
-    "<p>Hi,</p>",
+    "<p>Hey there,</p>",
     "<p>You ran your first sermon through the rubric yesterday. I'm curious about one thing.</p>",
     "<p>Did anything in the evaluation surprise you? Something it caught that you hadn't noticed, or something you'd push back on?</p>",
     "<p>I read every reply myself. Just hit reply and tell me.</p>",
