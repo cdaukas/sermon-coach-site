@@ -6,3 +6,6 @@ major_version = 15
 
 [functions.lifecycle-welcome]
 verify_jwt = false
+
+[functions.lifecycle-first-eval]
+verify_jwt = false
