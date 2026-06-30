@@ -9,7 +9,7 @@ type WorkingSectionProps = {
 export function WorkingSection({ whatsWorking }: WorkingSectionProps) {
   return (
     <section className="mb-7">
-      <SectionTitle>Lead with these</SectionTitle>
+      <SectionTitle>Where It&apos;s Strong</SectionTitle>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {whatsWorking.map((card) => (
           <article
