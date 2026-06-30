@@ -132,6 +132,7 @@ export default async function EvaluationPage({
           sermonTitle={sermon.title}
           scriptureReference={scriptureReference}
           showPrintActions={!pdfCapture}
+          howItPreaches={evaluation.how_it_preaches}
         />
       )}
 

@@ -36,7 +36,7 @@ const html = renderToStaticMarkup(
 );
 
 assert(html.includes("Boasting That Sounds Like Defeat"), "missing sermon title");
-assert(html.includes("Lead with these"), "missing whats_working section");
+assert(html.includes("Where It's Strong"), "missing whats_working section");
 assert(html.includes("Where You Can Grow"), "missing priorities section");
 assert(html.includes("Methodology"), "missing methodology section");
 assert(

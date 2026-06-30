@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./growth-report-types";
 import type { CoachingNarrative } from "./coaching-schema";
+import { howItPreachesSchema } from "./hip-schema";
 import { parseEvaluationResult } from "./schema";
 
 export type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./growth-report-types";
@@ -11,6 +12,14 @@ import type {
   SermonEvaluationListItem,
   SermonEvaluationRow,
 } from "./types";
+
+function parseHowItPreaches(value: unknown) {
+  if (value == null) {
+    return null;
+  }
+  const parsed = howItPreachesSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
 
 function mapEvaluationRow(
   row: Record<string, unknown>,
@@ -32,6 +41,7 @@ function mapEvaluationRow(
     status: row.status as SermonEvaluationRow["status"],
     report_mode: (row.report_mode as ReportMode | undefined) ?? "diagnostic",
     coaching_narrative: (row.coaching_narrative as CoachingNarrative | null) ?? null,
+    how_it_preaches: parseHowItPreaches(row.how_it_preaches),
     error_message: (row.error_message as string | null) ?? null,
     model: (row.model as string | null) ?? null,
     prompt_version: row.prompt_version as string,

@@ -139,7 +139,7 @@ The heat map subsection is **omitted entirely** from rendered output when null. 
 
 These are render-layer concerns, but the schema should not return alternate titles. Lock them:
 
-- `"Lead with these"` — What's Working
+- `"Where It's Strong"` — What's Working
 - `"Where You Can Grow"` — Top 3 Priorities
 - `"What Improvement Looks Like"` — Suggested Rewrites
 

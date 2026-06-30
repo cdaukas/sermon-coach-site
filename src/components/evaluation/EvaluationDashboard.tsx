@@ -1,7 +1,9 @@
+import type { HowItPreaches } from "@/lib/evaluation/hip-schema";
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { CategoryCard } from "./CategoryCard";
 import { HeadlineLockup } from "./HeadlineLockup";
 import { HeatMapSection } from "./HeatMapSection";
+import { HowItPreachesSection } from "./HowItPreachesSection";
 import { MethodologySection } from "./MethodologySection";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
@@ -14,6 +16,7 @@ type EvaluationDashboardProps = {
   sermonTitle: string;
   scriptureReference?: string | null;
   showPrintActions?: boolean;
+  howItPreaches?: HowItPreaches | null;
 };
 
 export function EvaluationDashboard({
@@ -21,6 +24,7 @@ export function EvaluationDashboard({
   sermonTitle,
   scriptureReference,
   showPrintActions = true,
+  howItPreaches = null,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const showHeatMap = meta.audio_available && result.heat_map !== null;
@@ -93,6 +97,8 @@ export function EvaluationDashboard({
           fallbackTotalMinutes={meta.estimated_length_minutes}
         />
       ) : null}
+
+      {howItPreaches ? <HowItPreachesSection howItPreaches={howItPreaches} /> : null}
 
       <WorkingSection whatsWorking={result.whats_working} />
 
