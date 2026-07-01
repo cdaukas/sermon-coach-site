@@ -189,3 +189,41 @@ export async function runHowItPreaches(
     "schema",
   );
 }
+
+export type HowItPreachesLogContext = {
+  evaluationId: string;
+  userId: string;
+};
+
+export type RunHowItPreachesBestEffortResult = {
+  howItPreaches: HowItPreaches | null;
+  inputTokens: number;
+  outputTokens: number;
+};
+
+/** Always invoked for evals; failures are logged and degraded to null. */
+export async function runHowItPreachesBestEffort(
+  input: HowItPreachesPromptInput,
+  logContext: HowItPreachesLogContext,
+  options?: RunHowItPreachesOptions,
+): Promise<RunHowItPreachesBestEffortResult> {
+  try {
+    const hip = await runHowItPreaches(input, options);
+    return {
+      howItPreaches: hip.howItPreaches,
+      inputTokens: hip.inputTokens,
+      outputTokens: hip.outputTokens,
+    };
+  } catch (error) {
+    console.error("[how-it-preaches] Non-fatal generation failed.", {
+      evaluationId: logContext.evaluationId,
+      userId: logContext.userId,
+      error,
+    });
+    return {
+      howItPreaches: null,
+      inputTokens: 0,
+      outputTokens: 0,
+    };
+  }
+}
