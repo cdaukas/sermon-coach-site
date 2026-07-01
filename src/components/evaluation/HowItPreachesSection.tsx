@@ -64,13 +64,6 @@ export function HowItPreachesSection({ howItPreaches }: HowItPreachesSectionProp
           </article>
         ))}
       </div>
-
-      <p
-        className="mt-5 text-center text-xs italic"
-        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-      >
-        A craft read, not a grade. Your scored evaluation above is unchanged.
-      </p>
     </section>
   );
 }
