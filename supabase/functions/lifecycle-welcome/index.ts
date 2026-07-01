@@ -54,8 +54,7 @@ function isEmailConfirmationTransition(payload: DbWebhookUpdatePayload): boolean
 
 function buildWelcomeHtml(dashboardUrl: string): string {
   return [
-    "<p>Hi,</p>",
-    "<p>You're in. Here's your next step: paste your sermon manuscript (or a transcript, if it's a message you've already preached) into your dashboard and save.</p>",
+    "<p>You're set. Here's your next step: paste your sermon manuscript (or a transcript, if it's a message you've already preached) into your dashboard and save.</p>",
     "<p>You can sharpen an upcoming message or test the rubric on an old one on purpose. Before you run the report, choose Personal for your own study, or Mentoring if you're walking alongside another preacher. Your evaluation comes back in a few minutes.</p>",
     `<p><a href="${dashboardUrl}">Submit your first sermon →</a></p>`,
     "<p>— Chris</p>",
