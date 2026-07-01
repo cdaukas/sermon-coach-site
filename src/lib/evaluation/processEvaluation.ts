@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import type { SermonContext } from "./context";
-import { isHowItPreachesEnabled } from "./feature-flags";
 import {
   CoachingNarrativeError,
   runCoachingNarrative,
 } from "./runCoachingNarrative";
-import { HowItPreachesError, runHowItPreaches } from "./runHowItPreaches";
+import { runHowItPreachesBestEffort } from "./runHowItPreaches";
 import { formatScoreBandStrict } from "./schema";
 import { recordEvaluationComplete } from "./quota";
 import { runEvaluation, EvaluationRunError } from "./runEvaluation";
@@ -33,13 +32,6 @@ function userSafeError(error: unknown): string {
       return "We couldn't generate a valid coaching report. Please try again.";
     }
     return "The coaching narrative service is temporarily unavailable. Please try again.";
-  }
-
-  if (error instanceof HowItPreachesError) {
-    if (error.code === "schema" || error.code === "tool") {
-      return "We couldn't generate a valid How It Preaches read. Please try again.";
-    }
-    return "The How It Preaches service is temporarily unavailable. Please try again.";
   }
 
   if (error instanceof Error) {
@@ -105,17 +97,18 @@ export async function processEvaluationJob(
 
     let howItPreaches = null;
 
-    if (isHowItPreachesEnabled(userId)) {
-      const hip = await runHowItPreaches({
+    const hip = await runHowItPreachesBestEffort(
+      {
         manuscript,
         sermonTitle,
         primaryPassage,
         context,
-      });
-      howItPreaches = hip.howItPreaches;
-      billedInputTokens += hip.inputTokens;
-      billedOutputTokens += hip.outputTokens;
-    }
+      },
+      { evaluationId, userId },
+    );
+    howItPreaches = hip.howItPreaches;
+    billedInputTokens += hip.inputTokens;
+    billedOutputTokens += hip.outputTokens;
 
     const completedAt = new Date().toISOString();
 
