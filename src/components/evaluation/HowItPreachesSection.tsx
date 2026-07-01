@@ -25,9 +25,7 @@ export function HowItPreachesSection({ howItPreaches }: HowItPreachesSectionProp
           className="max-w-[680px] text-[13.5px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          The rubric measures whether the sermon is faithful. This reads how it actually moves —
-          the craft of the thing, start to finish. No scores here. Just an honest read of how it
-          carries, in five movements from the open to the landing.
+          How the sermon actually moves. The craft of it, in five movements from the open to the landing.
         </p>
       </div>
 
