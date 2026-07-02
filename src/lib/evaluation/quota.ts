@@ -153,12 +153,13 @@ function checkCooldown(
 
 async function countLivePackCredits(userId: string): Promise<number> {
   const supabase = await createClient();
+  const nowIso = new Date().toISOString();
   const { data, error } = await supabase
     .from("eval_credit_grants")
     .select("quantity_remaining")
     .eq("user_id", userId)
     .gt("quantity_remaining", 0)
-    .gt("expires_at", new Date().toISOString());
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
 
   if (error) {
     throw new Error(error.message);
