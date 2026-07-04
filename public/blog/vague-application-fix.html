@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Why Your Application Still Feels Vague — The Sermon Coach</title>
+<meta name="description" content="Why sermon application lands soft — and the one-person test that fixes it before Sunday.">
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .wordmark-accent { color: var(--accent); }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .nav-cta {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+  }
+
+  .post-header {
+    max-width: 720px;
+    margin: 24px auto 0;
+    padding: 0 24px 32px;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 18px;
+    color: var(--ink);
+  }
+  .byline {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .byline .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--rule); }
+
+  .post-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px 8px;
+  }
+  .post-body p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--ink-mid);
+    margin-bottom: 22px;
+  }
+  .emphasis-line {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 22px;
+  }
+
+  .cta-block {
+    max-width: 720px;
+    margin: 40px auto 64px;
+    padding: 0 24px;
+  }
+  .cta-inner {
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 28px 32px;
+  }
+  .cta-inner p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin: 0 0 16px;
+  }
+  .cta-inner strong { color: var(--ink); font-weight: 600; }
+  .cta-button {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 12px 22px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .series-nav {
+    max-width: 720px;
+    margin: 0 auto 64px;
+    padding: 24px 24px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .series-label {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .series-links { display: flex; flex-direction: column; gap: 10px; }
+  .series-links a {
+    font-size: 15px;
+    color: var(--ink-mid);
+    text-decoration: none;
+  }
+  .series-links a:hover { color: var(--accent); }
+  .series-links .current { color: var(--accent); font-weight: 600; }
+
+  footer {
+    margin-top: 40px;
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 30px; }
+    .post-body p, .emphasis-line { font-size: 16.5px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="wordmark">The Sermon <span class="wordmark-accent">Coach</span>&trade;</a>
+  <div class="nav-links">
+    <a href="/blog/vague-application-fix" class="nav-link">Blog</a>
+    <a href="/pricing.html" class="nav-link">Pricing</a>
+    <a href="/faq.html" class="nav-link">FAQ</a>
+    <a href="/login" class="nav-cta">Log in</a>
+  </div>
+</nav>
+
+<header class="post-header">
+  <div class="eyebrow">The Rubric, One Criterion at a Time</div>
+  <h1>Why your application still feels vague</h1>
+  <div class="byline">
+    <span>Dr. Christopher Daukas</span>
+    <span class="dot"></span>
+    <span>Week 1 &middot; Application to present audience</span>
+  </div>
+</header>
+
+<main class="post-body">
+  <p>I used to end almost every sermon the same way. After nailing the exegesis and making the theological case, I'd then tell people how to live it out this week. It looked something like this: 1) Pray with fervor. 2) Trust God when things get difficult. 3) Don't forget to give thanks.</p>
+
+  <p>Those might very well have been true, but they just aren't specific enough. What does praying with fervor look like on Wednesday during the board meeting? What does trusting God in difficulty look like when your son is lonely and doesn't want to leave his room? How can someone cultivate a practice of giving thanks?</p>
+
+  <p class="emphasis-line">Without specificity, my application was more like suggestions. And suggestions don't make it home from church and into daily practice.</p>
+
+  <p>I was strong on content as most seminary-trained pastors are. What I didn't see for years was how often my application landed soft. True, biblical, and forgettable by Tuesday. "We all struggle with idolatry" is a sentence nobody argues with and nobody remembers. It touches everyone and changes no one.</p>
+
+  <p>Here's the test I run now, every week, before I preach: I picture one real person in the room. One person, in one situation, this Sunday. Then write the sentence in a way that would make that person sit up.</p>
+
+  <p>Example: Trusting God &mdash; "If you're the dad who can't stop checking work email at the dinner table, this text is speaking directly to you. Close the computer or put your phone down as an act of worship to God." That's a different impact than "we all struggle with idolatry." It's narrower, and it's also the only version that actually lands.</p>
+
+  <p>The gap between those two examples is the whole ballgame. One application is true in general. The other is true of somebody, this week, in the room who needs to hear from God and be shown how to live it out.</p>
+
+  <p class="emphasis-line">Preach to the one person you can see, not a nameless crowd you're guessing at.</p>
+</main>
+
+<div class="cta-block">
+  <div class="cta-inner">
+    <p><strong>Run your next sermon through the Sermon Coach tool before Sunday.</strong> New here? Your first evaluation's free &mdash; no card, no commitment. Paste in a manuscript or transcript, get the full assessment back in a few minutes, and see if it's useful before you decide anything.</p>
+    <a href="/start" class="cta-button">Run an evaluation</a>
+  </div>
+</div>
+
+<div class="series-nav">
+  <div class="series-label">This week in the rubric series</div>
+  <div class="series-links">
+    <a href="/blog/vague-application-fix" class="current">1. Application to present audience &mdash; you are here</a>
+    <a href="#">2. Textual fidelity &amp; exegesis &mdash; next Friday</a>
+    <a href="#">3. Fallen Condition Focus</a>
+  </div>
+</div>
+
+<footer>
+  The Sermon Coach&trade; &middot; Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> &middot; Phoenix, Arizona
+</footer>
+
+</body>
+</html>
