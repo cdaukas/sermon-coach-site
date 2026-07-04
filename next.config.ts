@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         source: "/welcome",
         destination: "/welcome.html",
       },
+      {
+        source: "/blog/:slug",
+        destination: "/blog/:slug.html",
+      },
     ];
   },
 };

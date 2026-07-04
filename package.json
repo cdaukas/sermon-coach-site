@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:unit": "tsx --test src/lib/evaluation/*.test.ts src/lib/billing/*.test.ts",
+    "test:unit": "tsx --test src/lib/evaluation/*.test.ts src/lib/billing/*.test.ts src/lib/email/*.test.ts",
     "verify:billing-lock": "tsx scripts/verify-profiles-billing-lock.mts",
     "pdf:auth-cookies": "tsx scripts/capture-pdf-auth-cookies.mts",
-    "pdf:eval": "tsx scripts/generate-eval-pdf.mts"
+    "pdf:eval": "tsx scripts/generate-eval-pdf.mts",
+    "blog:send": "tsx scripts/send-blog-email.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
