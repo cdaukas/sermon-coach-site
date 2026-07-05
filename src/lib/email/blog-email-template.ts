@@ -2,7 +2,8 @@ import {
   BLOG_EMAIL_CTA_BUTTON_LABEL,
   BLOG_EMAIL_CTA_PARAGRAPH,
   BLOG_EMAIL_CTA_URL,
-  BLOG_EMAIL_FOOTER,
+  BLOG_EMAIL_FOOTER_LINE_1,
+  BLOG_EMAIL_MAILING_ADDRESS,
 } from "./constants";
 import type { BlogEmailWeekContent } from "./blog-email-types";
 
@@ -26,7 +27,8 @@ export function renderBlogEmailHtml(params: RenderBlogEmailParams): string {
   const ctaUrl = escapeHtml(BLOG_EMAIL_CTA_URL);
   const ctaParagraph = escapeHtml(BLOG_EMAIL_CTA_PARAGRAPH);
   const ctaButtonLabel = escapeHtml(BLOG_EMAIL_CTA_BUTTON_LABEL);
-  const footer = escapeHtml(BLOG_EMAIL_FOOTER);
+  const footerLine1 = escapeHtml(BLOG_EMAIL_FOOTER_LINE_1);
+  const mailingAddress = escapeHtml(BLOG_EMAIL_MAILING_ADDRESS);
   const unsubscribe = escapeHtml(unsubscribeUrl);
 
   return `<!DOCTYPE html>
@@ -82,7 +84,8 @@ export function renderBlogEmailHtml(params: RenderBlogEmailParams): string {
           </tr>
           <tr>
             <td style="padding:20px 32px 28px;border-top:1px solid #d4cfc1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;line-height:1.6;color:#4a5568;">
-              <p style="margin:0 0 8px;">${footer}</p>
+              <p style="margin:0 0 8px;">${footerLine1}</p>
+              <p style="margin:0 0 8px;">${mailingAddress}</p>
               <p style="margin:0;">
                 <a href="${unsubscribe}" style="color:#4a5568;text-decoration:underline;">Unsubscribe</a>
                 from weekly blog emails.
