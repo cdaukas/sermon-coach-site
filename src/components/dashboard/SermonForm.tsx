@@ -64,10 +64,7 @@ export function SermonForm() {
   const [youtubeFetching, setYoutubeFetching] = useState(false);
   const [contentFromYoutube, setContentFromYoutube] = useState(false);
 
-  async function handleFetchYoutubeTranscript(
-    event: React.FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
+  async function handleFetchYoutubeTranscript() {
     setYoutubeError(null);
 
     const trimmedUrl = youtubeUrl.trim();
@@ -183,10 +180,7 @@ export function SermonForm() {
           </h2>
         </div>
 
-        <form
-          className="flex flex-col gap-3"
-          onSubmit={handleFetchYoutubeTranscript}
-        >
+        <div className="flex flex-col gap-3">
           <AuthField
             id="sermon-youtube-url"
             label="Paste a YouTube link"
@@ -196,14 +190,21 @@ export function SermonForm() {
               autoComplete: "off",
               value: youtubeUrl,
               onChange: (event) => setYoutubeUrl(event.target.value),
+              onKeyDown: (event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void handleFetchYoutubeTranscript();
+                }
+              },
               disabled: formDisabled,
               placeholder: "https://www.youtube.com/watch?v=…",
             }}
           />
 
           <button
-            type="submit"
+            type="button"
             disabled={formDisabled}
+            onClick={() => void handleFetchYoutubeTranscript()}
             className="self-start rounded border px-5 py-2.5 text-sm font-semibold tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-60"
             style={{
               ...uiFont,
@@ -214,7 +215,7 @@ export function SermonForm() {
           >
             {youtubeFetching ? "Fetching captions…" : "Fetch transcript"}
           </button>
-        </form>
+        </div>
 
         {youtubeError ? (
           <AuthMessage variant="error">{youtubeError}</AuthMessage>
