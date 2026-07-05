@@ -96,6 +96,8 @@ export async function fetchYoutubeTranscriptFromSupadata(
     return mockTranscriptForUrl(url);
   }
 
+  // mode=native: captions only (1 credit). Supadata defaults to auto, which
+  // falls back to AI transcription (2 credits/min) — never omit or change this.
   const params = new URLSearchParams({
     url,
     text: "true",
