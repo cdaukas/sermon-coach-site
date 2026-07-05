@@ -6,6 +6,7 @@
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/newsletter-signup.css">
 <title>Why I Built The Sermon Coach</title>
 <style>
   :root {
@@ -476,6 +477,17 @@
 </div>
 
 <!-- FOOTER -->
+<section class="newsletter-signup newsletter-signup--footer" data-newsletter-source="story">
+  <p class="newsletter-signup-lead">Get the Friday rubric post in your inbox — free, no account.</p>
+  <form class="newsletter-signup-form" novalidate>
+    <label class="newsletter-signup-label" for="newsletter-email-story">Email</label>
+    <div class="newsletter-signup-row">
+      <input id="newsletter-email-story" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
+      <button type="submit" class="newsletter-signup-btn">Subscribe</button>
+    </div>
+  </form>
+  <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
+</section>
 <footer>
   <div class="footer-tagline">Strengthen the Local Church. Train the Global Church.</div>
   <div class="footer-meta">
@@ -515,6 +527,7 @@
   });
 })();
 </script>
+<script src="/newsletter-signup.js"></script>
 
 </body>
 </html>

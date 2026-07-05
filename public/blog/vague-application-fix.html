@@ -6,6 +6,7 @@
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/newsletter-signup.css">
 <title>Why Your Application Still Feels Vague — The Sermon Coach</title>
 <meta name="description" content="Why sermon application lands soft — and the one-person test that fixes it before Sunday.">
 <style>
@@ -228,6 +229,20 @@
   <p class="emphasis-line">Preach to the one person you can see, not a nameless crowd you're guessing at.</p>
 </main>
 
+<section class="newsletter-signup newsletter-signup--inline" data-newsletter-source="blog_post_inline">
+  <div class="newsletter-signup-inner">
+    <p class="newsletter-signup-lead"><strong>Not ready to run an evaluation?</strong> Get the Friday post — one criterion from the rubric, free, no account required.</p>
+    <form class="newsletter-signup-form" novalidate>
+      <label class="newsletter-signup-label" for="newsletter-email-inline">Email</label>
+      <div class="newsletter-signup-row">
+        <input id="newsletter-email-inline" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
+        <button type="submit" class="newsletter-signup-btn">Get the Friday post</button>
+      </div>
+    </form>
+    <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
+  </div>
+</section>
+
 <div class="cta-block">
   <div class="cta-inner">
     <p><strong>Run your next sermon through the Sermon Coach tool before Sunday.</strong> New here? Your first evaluation's free &mdash; no card, no commitment. Paste in a manuscript or transcript, get the full assessment back in a few minutes, and see if it's useful before you decide anything.</p>
@@ -244,9 +259,23 @@
   </div>
 </div>
 
+<section class="newsletter-signup newsletter-signup--footer" data-newsletter-source="blog_footer">
+  <p class="newsletter-signup-lead">Get the Friday rubric post in your inbox — free, no account.</p>
+  <form class="newsletter-signup-form" novalidate>
+    <label class="newsletter-signup-label" for="newsletter-email-footer-blog">Email</label>
+    <div class="newsletter-signup-row">
+      <input id="newsletter-email-footer-blog" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
+      <button type="submit" class="newsletter-signup-btn">Subscribe</button>
+    </div>
+  </form>
+  <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
+</section>
+
 <footer>
-  The Sermon Coach&trade; &middot; Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> &middot; Phoenix, Arizona
+  The Sermon Coach&trade; &middot; Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> &middot; Phoenix, Arizona<br>
+  Daukas Group, LLC &middot; 9572 W Frank Ave, Peoria, AZ 85382
 </footer>
 
+<script src="/newsletter-signup.js"></script>
 </body>
 </html>
