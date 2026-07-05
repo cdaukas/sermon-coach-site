@@ -16,6 +16,20 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### YouTube transcript fetch
+
+Dashboard users can import captions from a YouTube URL on **New Sermon** (`/dashboard/sermons/new`).
+
+Add to `.env.local` (server-only — never expose to the client):
+
+```bash
+SUPADATA_API_KEY=your_supadata_key
+```
+
+Restart the dev server after changing env vars. Without a key, the API returns mock transcript text for local UI work.
+
+Apply migration `supabase/migrations/20260707120000_youtube_transcript_fetches.sql` for per-user rate limits (10s cooldown, 20 fetches/day).
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
