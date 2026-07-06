@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         destination: "/welcome.html",
       },
       {
+        source: "/blog",
+        destination: "/blog/index.html",
+      },
+      {
         source: "/blog/:slug",
         destination: "/blog/:slug.html",
       },
