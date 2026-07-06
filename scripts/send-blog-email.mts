@@ -18,6 +18,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolveEligibleBlogRecipients } from "../src/lib/email/blog-recipients";
 import { renderBlogEmailHtml } from "../src/lib/email/blog-email-template";
 import type { BlogEmailWeekContent } from "../src/lib/email/blog-email-types";
+import { BLOG_EMAIL_FROM } from "../src/lib/email/constants";
 import { sendResendEmail } from "../src/lib/email/resend-send";
 import { buildUnsubscribeUrl } from "../src/lib/email/unsubscribe";
 import { createAdminClient } from "../src/lib/supabase/admin";
@@ -307,7 +308,7 @@ async function main(): Promise<void> {
     sent += 1;
     if (mode === "test") {
       console.log(`Sent via Resend: ${sendResult.id}`);
-      console.log(`From: Chris Daukas <chris@sermoncoach.online>`);
+      console.log(`From: ${BLOG_EMAIL_FROM}`);
       return;
     }
 

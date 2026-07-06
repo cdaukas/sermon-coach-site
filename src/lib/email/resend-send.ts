@@ -1,4 +1,4 @@
-import { RESEND_API_URL, RESEND_FROM, RESEND_REPLY_TO } from "./constants";
+import { BLOG_EMAIL_FROM, RESEND_API_URL, RESEND_REPLY_TO } from "./constants";
 
 export type SendResendEmailParams = {
   apiKey: string;
@@ -21,7 +21,7 @@ export async function sendResendEmail(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: RESEND_FROM,
+      from: BLOG_EMAIL_FROM,
       to: params.to,
       reply_to: RESEND_REPLY_TO,
       subject: params.subject,
