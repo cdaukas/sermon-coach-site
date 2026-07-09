@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AuthMessage } from "@/components/auth/AuthMessage";
@@ -10,6 +10,10 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import {
+  EmailExistsMessage,
+  isDuplicateSignupError,
+} from "@/lib/auth/signup-errors";
 import { createClient } from "@/lib/supabase/client";
 import {
   buildAuthCallbackUrl,
@@ -23,9 +27,6 @@ import {
 
 function friendlySignupError(message: string): string {
   const lower = message.toLowerCase();
-  if (lower.includes("already registered") || lower.includes("already exists")) {
-    return "An account with this email already exists. Try signing in.";
-  }
   if (lower.includes("password")) {
     return message;
   }
@@ -63,7 +64,7 @@ function SignupForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [banner, setBanner] = useState<{
     variant: "error" | "success";
-    text: string;
+    text: ReactNode;
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -97,13 +98,28 @@ function SignupForm() {
 
     setLoading(true);
     const supabase = createClient();
+    const trimmedEmail = email.trim();
     const siteOrigin = getSiteOrigin();
     const emailRedirectTo = postCheckoutPath
       ? buildAuthCallbackUrl(siteOrigin, postCheckoutPath)
       : `${siteOrigin}/login`;
 
+    const { data: available, error: checkError } = await supabase.rpc(
+      "email_available",
+      { p_email: trimmedEmail },
+    );
+    console.error("email_available check:", available, checkError);
+    if (!checkError && available === false) {
+      setLoading(false);
+      setBanner({
+        variant: "error",
+        text: <EmailExistsMessage loginHref={loginHref} />,
+      });
+      return;
+    }
+
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: trimmedEmail,
       password,
       options: {
         emailRedirectTo,
@@ -112,7 +128,14 @@ function SignupForm() {
     setLoading(false);
 
     if (error) {
-      setBanner({ variant: "error", text: friendlySignupError(error.message) });
+      setBanner({
+        variant: "error",
+        text: isDuplicateSignupError(error.message) ? (
+          <EmailExistsMessage loginHref={loginHref} />
+        ) : (
+          friendlySignupError(error.message)
+        ),
+      });
       return;
     }
 
