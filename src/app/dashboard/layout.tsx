@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { LastActiveTracker } from "@/components/auth/LastActiveTracker";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { createClient } from "@/lib/supabase/server";
 
@@ -38,6 +39,7 @@ export default async function DashboardLayout({
       className="flex min-h-full flex-col"
       style={{ background: "var(--sc-bg)" }}
     >
+      <LastActiveTracker />
       <DashboardShell>{children}</DashboardShell>
     </div>
   );
