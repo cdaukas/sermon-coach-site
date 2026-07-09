@@ -1,13 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { ModeSelector } from "@/components/dashboard/ModeSelector";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { EvaluateButton } from "@/components/evaluation/EvaluateButton";
 import { EvaluationCreditLine } from "@/components/evaluation/EvaluationCreditLine";
 import type { StashedReportMode } from "@/lib/evaluation/context";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import {
-  getSmartDefaultRunMode,
   groupCompleteEvaluationsByMode,
   modeDisplayName,
 } from "@/lib/evaluation/group-sermon-evaluations";
@@ -18,6 +16,7 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 type SermonDetailEvaluationActionsProps = {
   sermonId: string;
   completeEvaluations: SermonEvaluationListItem[];
+  reportMode: StashedReportMode;
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
 };
@@ -25,6 +24,7 @@ type SermonDetailEvaluationActionsProps = {
 export function SermonDetailEvaluationActions({
   sermonId,
   completeEvaluations,
+  reportMode,
   entitlement,
   hasActiveEvaluation,
 }: SermonDetailEvaluationActionsProps) {
@@ -32,18 +32,14 @@ export function SermonDetailEvaluationActions({
     () => groupCompleteEvaluationsByMode(completeEvaluations),
     [completeEvaluations],
   );
-  const [reportMode, setReportMode] = useState<StashedReportMode>(() =>
-    getSmartDefaultRunMode(grouped),
-  );
   const [rerunPromptMode, setRerunPromptMode] =
     useState<StashedReportMode | null>(null);
   const pendingRunRef = useRef<(() => void) | null>(null);
 
-  function handleModeChange(mode: StashedReportMode) {
-    setReportMode(mode);
+  useEffect(() => {
     setRerunPromptMode(null);
     pendingRunRef.current = null;
-  }
+  }, [reportMode]);
 
   function handleRunClick(run: () => void) {
     if (grouped[reportMode].latest) {
@@ -67,15 +63,10 @@ export function SermonDetailEvaluationActions({
   }
 
   const showRerunPrompt = rerunPromptMode === reportMode;
+  const runButtonLabel = `Run ${modeDisplayName(reportMode)} evaluation`;
 
   return (
-    <div className="mt-8 flex max-w-xl flex-col items-start gap-6">
-      <ModeSelector
-        value={reportMode}
-        onChange={handleModeChange}
-        disabled={hasActiveEvaluation}
-      />
-
+    <div className="mt-8 flex max-w-xl flex-col items-start gap-4">
       {showRerunPrompt ? (
         <div className="w-full">
           <p
@@ -118,7 +109,7 @@ export function SermonDetailEvaluationActions({
           reportMode={reportMode}
           embedded
           hideCreditLine
-          buttonLabel="Run evaluation"
+          buttonLabel={runButtonLabel}
           onRunClick={handleRunClick}
           disabled={showRerunPrompt}
         />

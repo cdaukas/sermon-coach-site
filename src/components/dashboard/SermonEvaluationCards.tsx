@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { StashedReportMode } from "@/lib/evaluation/context";
 import { formatDisplayScoreBare, parseEvaluationCardLabels } from "@/lib/evaluation/display-score";
 import {
-  getDefaultEvaluationCardTab,
   groupCompleteEvaluationsByMode,
   modeDisplayName,
   type EvaluationsByMode,
@@ -26,6 +25,8 @@ const CARD_TABS = [
 type SermonEvaluationCardsProps = {
   sermonId: string;
   completeEvaluations: SermonEvaluationListItem[];
+  selectedMode: StashedReportMode;
+  onModeChange: (mode: StashedReportMode) => void;
 };
 
 function formatEvaluationDate(iso: string): string {
@@ -181,16 +182,15 @@ function EvaluationLightCard({
 function EvaluationEmptyCard({ mode }: { mode: StashedReportMode }) {
   return (
     <div
-      className="rounded px-8 py-8"
+      className="rounded border px-8 py-8"
       style={{
-        background: "linear-gradient(165deg, #1a2332 0%, #2a3548 100%)",
-        border: "1px solid var(--sc-rule)",
-        boxShadow: "var(--sc-shadow-lift)",
+        background: "var(--sc-bg)",
+        borderColor: "var(--sc-rule)",
       }}
     >
       <p
         className="text-[15px] leading-relaxed"
-        style={{ ...uiFont, color: "rgba(250,248,243,0.75)" }}
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
         Not yet run in {modeDisplayName(mode)} mode.
       </p>
@@ -239,13 +239,12 @@ function ModeEvaluationPanel({
 export function SermonEvaluationCards({
   sermonId,
   completeEvaluations,
+  selectedMode,
+  onModeChange,
 }: SermonEvaluationCardsProps) {
   const grouped = useMemo(
     () => groupCompleteEvaluationsByMode(completeEvaluations),
     [completeEvaluations],
-  );
-  const [activeTab, setActiveTab] = useState<StashedReportMode>(() =>
-    getDefaultEvaluationCardTab(completeEvaluations),
   );
 
   return (
@@ -254,10 +253,10 @@ export function SermonEvaluationCards({
         className="mb-4 inline-flex w-full rounded border p-1 sm:w-auto"
         style={{ borderColor: "var(--sc-rule)", background: "var(--sc-bg)" }}
         role="tablist"
-        aria-label="Evaluation history by mode"
+        aria-label="Evaluation mode"
       >
         {CARD_TABS.map((tab) => {
-          const selected = activeTab === tab.value;
+          const selected = selectedMode === tab.value;
 
           return (
             <button
@@ -265,7 +264,7 @@ export function SermonEvaluationCards({
               type="button"
               role="tab"
               aria-selected={selected}
-              onClick={() => setActiveTab(tab.value)}
+              onClick={() => onModeChange(tab.value)}
               className="flex-1 rounded px-4 py-2.5 text-[13px] font-medium transition-colors sm:flex-none"
               style={{
                 ...uiFont,
@@ -284,7 +283,7 @@ export function SermonEvaluationCards({
         <div
           key={tab.value}
           role="tabpanel"
-          hidden={activeTab !== tab.value}
+          hidden={selectedMode !== tab.value}
         >
           <ModeEvaluationPanel
             sermonId={sermonId}

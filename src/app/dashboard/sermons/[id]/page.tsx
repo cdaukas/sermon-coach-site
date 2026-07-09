@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SermonDetailEvaluationActions } from "@/components/dashboard/SermonDetailEvaluationActions";
+import { SermonDetailEvalSection } from "@/components/dashboard/SermonDetailEvalSection";
 import { SermonDetailManuscript } from "@/components/dashboard/SermonDetailManuscript";
-import { SermonEvaluationCards } from "@/components/dashboard/SermonEvaluationCards";
 import { createClient } from "@/lib/supabase/server";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import {
@@ -101,12 +100,7 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
         </p>
       </div>
 
-      <SermonEvaluationCards
-        sermonId={sermon.id}
-        completeEvaluations={completeEvaluations}
-      />
-
-      <SermonDetailEvaluationActions
+      <SermonDetailEvalSection
         sermonId={sermon.id}
         completeEvaluations={completeEvaluations}
         entitlement={entitlement}
