@@ -10,6 +10,7 @@ import {
   AuthSubmit,
 } from "@/components/auth/AuthForm";
 import { ModeSelector } from "@/components/dashboard/ModeSelector";
+import { EvaluationCreditLine } from "@/components/evaluation/EvaluationCreditLine";
 import {
   normalizeSermonContext,
   sermonContextStorageKey,
@@ -77,26 +78,6 @@ function estimateSermonMinutes(wordCount: number): number {
   return rounded > 0 ? rounded : 5;
 }
 
-function formatCreditLine(entitlement: EvaluationEntitlement | null): string | null {
-  if (!entitlement?.canEvaluate) {
-    return null;
-  }
-
-  if (entitlement.creditSource === "subscription" && entitlement.usage) {
-    return `${entitlement.usage.used} of ${entitlement.usage.limit} evaluations used this month`;
-  }
-
-  if (entitlement.creditSource === "pack" && entitlement.packRemaining > 0) {
-    return `${entitlement.packRemaining} pack credit${entitlement.packRemaining === 1 ? "" : "s"} remaining`;
-  }
-
-  if (entitlement.creditSource === "free" && entitlement.freeRemaining > 0) {
-    return "Your first evaluation is free.";
-  }
-
-  return null;
-}
-
 export function SermonForm({ entitlement }: SermonFormProps) {
   const router = useRouter();
   const [inputMethod, setInputMethod] = useState<InputMethod>("paste");
@@ -117,7 +98,6 @@ export function SermonForm({ entitlement }: SermonFormProps) {
 
   const wordCount = useMemo(() => countWords(content), [content]);
   const sermonMinutes = useMemo(() => estimateSermonMinutes(wordCount), [wordCount]);
-  const creditLine = formatCreditLine(entitlement);
 
   async function handleFetchYoutubeTranscript() {
     setYoutubeError(null);
@@ -462,14 +442,7 @@ export function SermonForm({ entitlement }: SermonFormProps) {
         <AuthSubmit type="submit" disabled={formDisabled}>
           {loading ? "Saving…" : "Save sermon"}
         </AuthSubmit>
-        {creditLine ? (
-          <p
-            className="mt-2 text-[12px] leading-relaxed"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          >
-            {creditLine}
-          </p>
-        ) : null}
+        <EvaluationCreditLine entitlement={entitlement} />
       </div>
     </AuthForm>
   );
