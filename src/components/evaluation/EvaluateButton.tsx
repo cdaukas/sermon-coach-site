@@ -27,6 +27,10 @@ type EvaluateButtonProps = {
   hasActiveEvaluation: boolean;
   reportMode: StashedReportMode;
   embedded?: boolean;
+  hideCreditLine?: boolean;
+  buttonLabel?: string;
+  onRunClick?: (run: () => void) => void;
+  disabled?: boolean;
 };
 
 function formatElapsed(seconds: number): string {
@@ -41,6 +45,10 @@ export function EvaluateButton({
   hasActiveEvaluation,
   reportMode,
   embedded = false,
+  hideCreditLine = false,
+  buttonLabel = "Run Evaluation",
+  onRunClick,
+  disabled = false,
 }: EvaluateButtonProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -144,7 +152,7 @@ export function EvaluateButton({
     }
   }
 
-  function handleClick() {
+  function runEvaluation() {
     setError(null);
     startTransition(async () => {
       const context = readStashedContext();
@@ -155,6 +163,15 @@ export function EvaluateButton({
       }
       startPolling(result.evaluationId, result.sermonId);
     });
+  }
+
+  function handleClick() {
+    if (onRunClick) {
+      onRunClick(runEvaluation);
+      return;
+    }
+
+    runEvaluation();
   }
 
   const busy = pending || polling;
@@ -200,7 +217,7 @@ export function EvaluateButton({
       <button
         type="button"
         onClick={handleClick}
-        disabled={busy || hasActiveEvaluation}
+        disabled={busy || hasActiveEvaluation || disabled}
         className="w-full rounded px-5 py-2.5 text-[13px] font-semibold transition-opacity disabled:opacity-60 lg:w-auto"
         style={{
           ...uiFont,
@@ -208,24 +225,24 @@ export function EvaluateButton({
           color: "#faf8f3",
         }}
       >
-        {pending ? "Starting…" : polling ? "Evaluating…" : "Run Evaluation"}
+        {pending ? "Starting…" : polling ? "Evaluating…" : buttonLabel}
       </button>
 
-      {entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
+      {!hideCreditLine && entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {entitlement.freeRemaining} free evaluation
           {entitlement.freeRemaining === 1 ? "" : "s"} remaining
         </p>
       ) : null}
 
-      {entitlement?.packRemaining != null && entitlement.packRemaining > 0 ? (
+      {!hideCreditLine && entitlement?.packRemaining != null && entitlement.packRemaining > 0 ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {entitlement.packRemaining} pack evaluation
           {entitlement.packRemaining === 1 ? "" : "s"} remaining
         </p>
       ) : null}
 
-      {usage && entitlement?.creditSource === "subscription" ? (
+      {!hideCreditLine && usage && entitlement?.creditSource === "subscription" ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {usage.used} of {usage.limit} evaluations used this month
         </p>
