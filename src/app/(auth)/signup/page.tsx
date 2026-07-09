@@ -11,7 +11,6 @@ import {
   AuthSubmit,
 } from "@/components/auth/AuthForm";
 import {
-  checkEmailAvailable,
   EmailExistsMessage,
   isDuplicateSignupError,
 } from "@/lib/auth/signup-errors";
@@ -105,8 +104,12 @@ function SignupForm() {
       ? buildAuthCallbackUrl(siteOrigin, postCheckoutPath)
       : `${siteOrigin}/login`;
 
-    const emailAvailable = await checkEmailAvailable(supabase, trimmedEmail);
-    if (emailAvailable === false) {
+    const { data: available, error: checkError } = await supabase.rpc(
+      "email_available",
+      { p_email: trimmedEmail },
+    );
+    console.error("email_available check:", available, checkError);
+    if (!checkError && available === false) {
       setLoading(false);
       setBanner({
         variant: "error",
