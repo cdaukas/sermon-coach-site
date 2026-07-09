@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  EvaluationAccessGate,
-  EvaluationCreditNotice,
-} from "@/components/evaluation/EvaluationAccessGate";
+import { EvaluationAccessGate } from "@/components/evaluation/EvaluationAccessGate";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { SermonForm } from "./SermonForm";
 
@@ -46,9 +43,8 @@ export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
       </div>
 
       <EvaluationAccessGate entitlement={entitlement} className="mb-8" />
-      <EvaluationCreditNotice entitlement={entitlement} className="mb-6" />
 
-      {canEvaluate ? <SermonForm /> : null}
+      {canEvaluate ? <SermonForm entitlement={entitlement} /> : null}
     </>
   );
 }

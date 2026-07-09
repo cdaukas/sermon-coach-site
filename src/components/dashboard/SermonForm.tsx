@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AuthMessage } from "@/components/auth/AuthMessage";
 import {
   AuthField,
@@ -9,15 +9,19 @@ import {
   AuthLabel,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import { ModeSelector } from "@/components/dashboard/ModeSelector";
 import {
   normalizeSermonContext,
   sermonContextStorageKey,
+  type StashedReportMode,
 } from "@/lib/evaluation/context";
+import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { createSermon } from "@/lib/sermons/actions";
 import type { TranscriptErrorCode } from "@/lib/transcripts/types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
+const WORDS_PER_MINUTE = 140;
 
 const contextFieldClassName =
   "w-full resize-y rounded border px-3 py-2.5 text-[15px] leading-relaxed outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20";
@@ -48,8 +52,54 @@ type YoutubeTranscriptResponse =
   | { ok: true; transcript: string }
   | { ok: false; error: TranscriptErrorCode; message?: string };
 
-export function SermonForm() {
+type InputMethod = "paste" | "youtube";
+
+type SermonFormProps = {
+  entitlement: EvaluationEntitlement | null;
+};
+
+function countWords(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return 0;
+  }
+
+  return trimmed.split(/\s+/).length;
+}
+
+function estimateSermonMinutes(wordCount: number): number {
+  if (wordCount === 0) {
+    return 0;
+  }
+
+  const rawMinutes = wordCount / WORDS_PER_MINUTE;
+  const rounded = Math.round(rawMinutes / 5) * 5;
+  return rounded > 0 ? rounded : 5;
+}
+
+function formatCreditLine(entitlement: EvaluationEntitlement | null): string | null {
+  if (!entitlement?.canEvaluate) {
+    return null;
+  }
+
+  if (entitlement.creditSource === "subscription" && entitlement.usage) {
+    return `${entitlement.usage.used} of ${entitlement.usage.limit} evaluations used this month`;
+  }
+
+  if (entitlement.creditSource === "pack" && entitlement.packRemaining > 0) {
+    return `${entitlement.packRemaining} pack credit${entitlement.packRemaining === 1 ? "" : "s"} remaining`;
+  }
+
+  if (entitlement.creditSource === "free" && entitlement.freeRemaining > 0) {
+    return "Your first evaluation is free.";
+  }
+
+  return null;
+}
+
+export function SermonForm({ entitlement }: SermonFormProps) {
   const router = useRouter();
+  const [inputMethod, setInputMethod] = useState<InputMethod>("paste");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [primaryPassage, setPrimaryPassage] = useState("");
@@ -57,12 +107,17 @@ export function SermonForm() {
   const [audience, setAudience] = useState("");
   const [series, setSeries] = useState("");
   const [other, setOther] = useState("");
+  const [reportMode, setReportMode] = useState<StashedReportMode>("diagnostic");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [youtubeError, setYoutubeError] = useState<string | null>(null);
   const [youtubeFetching, setYoutubeFetching] = useState(false);
   const [contentFromYoutube, setContentFromYoutube] = useState(false);
+
+  const wordCount = useMemo(() => countWords(content), [content]);
+  const sermonMinutes = useMemo(() => estimateSermonMinutes(wordCount), [wordCount]);
+  const creditLine = formatCreditLine(entitlement);
 
   async function handleFetchYoutubeTranscript() {
     setYoutubeError(null);
@@ -98,6 +153,7 @@ export function SermonForm() {
       setContent(data.transcript);
       setContentFromYoutube(true);
       setYoutubeError(null);
+      setInputMethod("paste");
     } catch {
       setYoutubeError(YOUTUBE_ERROR_MESSAGES.PROVIDER_ERROR);
     } finally {
@@ -150,37 +206,91 @@ export function SermonForm() {
     <AuthForm onSubmit={handleSubmit}>
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
 
-      <AuthField
-        id="sermon-title"
-        label="Title"
-        inputProps={{
-          name: "title",
-          type: "text",
-          autoComplete: "off",
-          required: true,
-          value: title,
-          onChange: (event) => setTitle(event.target.value),
-          disabled: formDisabled,
-          placeholder: "e.g. The God Who Hears",
-        }}
-      />
+      <div className="flex flex-col gap-4">
+        <div
+          className="inline-flex w-full rounded border p-1 sm:w-auto"
+          style={{ borderColor: "var(--sc-rule)", background: "var(--sc-bg)" }}
+          role="tablist"
+          aria-label="Input method"
+        >
+          {(
+            [
+              { value: "paste", label: "Paste manuscript" },
+              { value: "youtube", label: "YouTube link" },
+            ] as const
+          ).map((tab) => {
+            const selected = inputMethod === tab.value;
 
-      <section
-        className="flex flex-col gap-3 border-t pt-6"
-        style={{ borderColor: "var(--sc-rule)" }}
-        aria-labelledby="youtube-transcript-heading"
-      >
-        <div>
-          <h2
-            id="youtube-transcript-heading"
-            className="text-[18px] font-semibold leading-snug tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            Or fetch from YouTube
-          </h2>
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                disabled={formDisabled}
+                onClick={() => setInputMethod(tab.value)}
+                className="flex-1 rounded px-4 py-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+                style={{
+                  ...uiFont,
+                  background: selected ? "var(--sc-panel)" : "transparent",
+                  color: selected ? "var(--sc-ink)" : "var(--sc-ink-soft)",
+                  boxShadow: selected ? "var(--sc-shadow-lift)" : "none",
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div
+          role="tabpanel"
+          hidden={inputMethod !== "paste"}
+          className="flex flex-col gap-1.5"
+        >
+          {contentFromYoutube ? (
+            <p
+              className="text-[13px] leading-relaxed"
+              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            >
+              Captions often include announcements and worship. Trim to just the
+              sermon for the most accurate evaluation.
+            </p>
+          ) : null}
+          <textarea
+            id="sermon-content"
+            name="content"
+            required
+            value={content}
+            onChange={(event) => {
+              setContent(event.target.value);
+              if (contentFromYoutube) {
+                setContentFromYoutube(false);
+              }
+            }}
+            disabled={formDisabled}
+            rows={16}
+            placeholder="Paste your manuscript or transcript here..."
+            className="w-full resize-y rounded border px-3 py-2.5 text-[15px] leading-relaxed outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
+            style={{
+              ...uiFont,
+              background: "var(--sc-panel)",
+              borderColor: "var(--sc-rule)",
+              color: "var(--sc-ink)",
+            }}
+          />
+          {wordCount > 0 ? (
+            <p
+              className="text-[13px] leading-relaxed"
+              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            >
+              {wordCount.toLocaleString()} words, about a {sermonMinutes}-minute
+              sermon
+            </p>
+          ) : null}
+        </div>
+
+        <div role="tabpanel" hidden={inputMethod !== "youtube"} className="flex flex-col gap-3">
           <AuthField
             id="sermon-youtube-url"
             label="Paste a YouTube link"
@@ -215,166 +325,152 @@ export function SermonForm() {
           >
             {youtubeFetching ? "Fetching captions…" : "Fetch transcript"}
           </button>
+
+          {youtubeError ? (
+            <AuthMessage variant="error">{youtubeError}</AuthMessage>
+          ) : null}
         </div>
+      </div>
 
-        {youtubeError ? (
-          <AuthMessage variant="error">{youtubeError}</AuthMessage>
-        ) : null}
-      </section>
+      <AuthField
+        id="sermon-title"
+        label="Title"
+        inputProps={{
+          name: "title",
+          type: "text",
+          autoComplete: "off",
+          required: true,
+          value: title,
+          onChange: (event) => setTitle(event.target.value),
+          disabled: formDisabled,
+          placeholder: "e.g. The God Who Hears",
+        }}
+      />
 
-      <div className="flex flex-col gap-1.5">
-        <AuthLabel htmlFor="sermon-content">Manuscript</AuthLabel>
-        {contentFromYoutube ? (
-          <p
-            className="text-[13px] leading-relaxed"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          >
-            Captions often include announcements and worship. Trim to just the
-            sermon for the most accurate evaluation.
-          </p>
-        ) : null}
-        <textarea
-          id="sermon-content"
-          name="content"
-          required
-          value={content}
-          onChange={(event) => {
-            setContent(event.target.value);
-            if (contentFromYoutube) {
-              setContentFromYoutube(false);
-            }
-          }}
-          disabled={formDisabled}
-          rows={16}
-          placeholder="Paste your manuscript or transcript here..."
-          className="w-full resize-y rounded border px-3 py-2.5 text-[15px] leading-relaxed outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
+      <AuthField
+        id="sermon-primary-passage"
+        label="Primary passage (recommended)"
+        inputProps={{
+          name: "primary-passage",
+          type: "text",
+          autoComplete: "off",
+          value: primaryPassage,
+          onChange: (event) => setPrimaryPassage(event.target.value),
+          disabled: formDisabled,
+          placeholder: "e.g. Hebrews 12:5-17",
+        }}
+      />
+
+      <details className="group">
+        <summary
+          className="cursor-pointer list-none rounded border px-5 py-4 transition-colors hover:border-[var(--sc-ink)] [&::-webkit-details-marker]:hidden"
           style={{
             ...uiFont,
-            background: "var(--sc-panel)",
+            background: "var(--sc-bg)",
             borderColor: "var(--sc-rule)",
             color: "var(--sc-ink)",
           }}
-        />
-      </div>
+        >
+          <span className="block text-[15px] font-semibold" style={serifFont}>
+            Add context (optional)
+          </span>
+          <span
+            className="mt-1 block text-[13px] font-normal leading-relaxed"
+            style={{ color: "var(--sc-ink-soft)" }}
+          >
+            A minute of context sharpens the read. Skip it and the evaluation
+            still runs.
+          </span>
+        </summary>
 
-      <section
-        className="flex flex-col gap-5 border-t pt-6"
-        style={{ borderColor: "var(--sc-rule)" }}
-        aria-labelledby="sermon-context-heading"
-      >
-        <div>
-          <h2
-            id="sermon-context-heading"
-            className="text-[22px] font-semibold leading-snug tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            Before we begin, a minute of context sharpens the read.
-          </h2>
-          <p
-            className="mt-2 text-base leading-relaxed"
-            style={{
-              ...serifFont,
-              color: "var(--sc-ink-soft)",
-              fontStyle: "italic",
-            }}
-          >
-            Optional, but it helps. Or{" "}
-            <button
-              type="submit"
+        <div className="mt-4 flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <AuthLabel htmlFor="sermon-context-occasion">
+              What&apos;s the occasion?
+            </AuthLabel>
+            <textarea
+              id="sermon-context-occasion"
+              name="context-occasion"
+              value={occasion}
+              onChange={(event) => setOccasion(event.target.value)}
               disabled={formDisabled}
-              className="inline border-0 bg-transparent p-0 text-[13px] not-italic underline-offset-2 transition-colors hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-            >
-              skip it and start the evaluation
-            </button>
-            .
+              rows={2}
+              placeholder="Sunday morning, a funeral, a conference, a guest pulpit, a chapel service."
+              className={contextFieldClassName}
+              style={contextFieldStyle}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <AuthLabel htmlFor="sermon-context-audience">
+              Who&apos;s in the seats?
+            </AuthLabel>
+            <textarea
+              id="sermon-context-audience"
+              name="context-audience"
+              value={audience}
+              onChange={(event) => setAudience(event.target.value)}
+              disabled={formDisabled}
+              rows={2}
+              placeholder="A rural plant, a college town, a Reformed church, a mixed-belief crowd on Easter."
+              className={contextFieldClassName}
+              style={contextFieldStyle}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <AuthLabel htmlFor="sermon-context-series">Part of a series?</AuthLabel>
+            <textarea
+              id="sermon-context-series"
+              name="context-series"
+              value={series}
+              onChange={(event) => setSeries(event.target.value)}
+              disabled={formDisabled}
+              rows={2}
+              placeholder="If this is week three of six, say so. It explains what you don't have to re-establish."
+              className={contextFieldClassName}
+              style={contextFieldStyle}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <AuthLabel htmlFor="sermon-context-other">
+              Anything else I should know?
+            </AuthLabel>
+            <textarea
+              id="sermon-context-other"
+              name="context-other"
+              value={other}
+              onChange={(event) => setOther(event.target.value)}
+              disabled={formDisabled}
+              rows={2}
+              placeholder="The thing you'd tell a friend before he read your manuscript."
+              className={contextFieldClassName}
+              style={contextFieldStyle}
+            />
+          </div>
+        </div>
+      </details>
+
+      <ModeSelector
+        value={reportMode}
+        onChange={setReportMode}
+        disabled={formDisabled}
+      />
+
+      <div>
+        <AuthSubmit type="submit" disabled={formDisabled}>
+          {loading ? "Saving…" : "Save sermon"}
+        </AuthSubmit>
+        {creditLine ? (
+          <p
+            className="mt-2 text-[12px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            {creditLine}
           </p>
-        </div>
-
-        <AuthField
-          id="sermon-context-primary-passage"
-          label="Primary passage"
-          inputProps={{
-            name: "context-primary-passage",
-            type: "text",
-            autoComplete: "off",
-            value: primaryPassage,
-            onChange: (event) => setPrimaryPassage(event.target.value),
-            disabled: formDisabled,
-            placeholder: "e.g. Hebrews 12:5-17",
-          }}
-        />
-
-        <div className="flex flex-col gap-1.5">
-          <AuthLabel htmlFor="sermon-context-occasion">
-            What&apos;s the occasion?
-          </AuthLabel>
-          <textarea
-            id="sermon-context-occasion"
-            name="context-occasion"
-            value={occasion}
-            onChange={(event) => setOccasion(event.target.value)}
-            disabled={formDisabled}
-            rows={2}
-            placeholder="Sunday morning, a funeral, a conference, a guest pulpit, a chapel service."
-            className={contextFieldClassName}
-            style={contextFieldStyle}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <AuthLabel htmlFor="sermon-context-audience">
-            Who&apos;s in the seats?
-          </AuthLabel>
-          <textarea
-            id="sermon-context-audience"
-            name="context-audience"
-            value={audience}
-            onChange={(event) => setAudience(event.target.value)}
-            disabled={formDisabled}
-            rows={2}
-            placeholder="A rural plant, a college town, a Reformed church, a mixed-belief crowd on Easter."
-            className={contextFieldClassName}
-            style={contextFieldStyle}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <AuthLabel htmlFor="sermon-context-series">Part of a series?</AuthLabel>
-          <textarea
-            id="sermon-context-series"
-            name="context-series"
-            value={series}
-            onChange={(event) => setSeries(event.target.value)}
-            disabled={formDisabled}
-            rows={2}
-            placeholder="If this is week three of six, say so. It explains what you don't have to re-establish."
-            className={contextFieldClassName}
-            style={contextFieldStyle}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <AuthLabel htmlFor="sermon-context-other">
-            Anything else I should know?
-          </AuthLabel>
-          <textarea
-            id="sermon-context-other"
-            name="context-other"
-            value={other}
-            onChange={(event) => setOther(event.target.value)}
-            disabled={formDisabled}
-            rows={2}
-            placeholder="The thing you'd tell a friend before he read your manuscript."
-            className={contextFieldClassName}
-            style={contextFieldStyle}
-          />
-        </div>
-      </section>
-
-      <AuthSubmit type="submit" disabled={formDisabled}>
-        {loading ? "Saving…" : "Save sermon"}
-      </AuthSubmit>
+        ) : null}
+      </div>
     </AuthForm>
   );
 }
