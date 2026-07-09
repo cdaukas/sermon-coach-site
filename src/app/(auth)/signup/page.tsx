@@ -108,7 +108,6 @@ function SignupForm() {
       "email_available",
       { p_email: trimmedEmail },
     );
-    console.error("email_available check:", available, checkError);
     if (!checkError && available === false) {
       setLoading(false);
       setBanner({
