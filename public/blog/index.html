@@ -21,11 +21,14 @@
     --accent-soft: #c9a55c;
     --accent-pale: #faf6ed;
     --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+    --spine: 700px;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --serif: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    font-family: var(--serif);
     background: var(--bg);
     color: var(--ink);
     line-height: 1.6;
@@ -41,7 +44,7 @@
     align-items: center;
   }
   .wordmark {
-    font-family: 'Iowan Old Style', Georgia, serif;
+    font-family: var(--serif);
     font-size: 20px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -91,7 +94,7 @@
     align-items: center;
   }
   .nav-link {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--sans);
     font-size: 13px;
     font-weight: 500;
     color: var(--ink-soft);
@@ -100,7 +103,7 @@
   }
   .nav-link:hover { color: var(--accent); }
   .nav-start {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--sans);
     font-size: 13px;
     font-weight: 600;
     background: var(--ink);
@@ -117,86 +120,226 @@
     border-color: var(--ink-mid);
   }
 
-  .hero {
-    max-width: 720px;
+  .blog-spine {
+    max-width: var(--spine);
     margin: 0 auto;
-    padding: 32px 24px 40px;
+    padding: 0 24px 56px;
+  }
+
+  .hero {
+    padding: 20px 0 28px;
     text-align: center;
   }
   .eyebrow {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--sans);
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--accent);
     font-weight: 600;
-    margin-bottom: 24px;
+    margin-bottom: 14px;
   }
   h1 {
-    font-size: 42px;
+    font-family: var(--serif);
+    font-size: 46px;
     line-height: 1.1;
     font-weight: 600;
     letter-spacing: -0.02em;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     color: var(--ink);
   }
   .hero-sub {
-    font-size: 18px;
-    line-height: 1.55;
+    font-size: 17px;
+    line-height: 1.5;
     color: var(--ink-soft);
-    max-width: 580px;
+    max-width: 520px;
     margin: 0 auto;
     font-style: italic;
   }
 
-  .post-list {
-    max-width: 720px;
-    margin: 0 auto 64px;
-    padding: 0 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-  }
-  .post-list-item {
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--rule);
-  }
-  .post-list-item:last-child {
-    padding-bottom: 0;
-    border-bottom: none;
-  }
-  .post-date {
+  .featured-card {
     display: block;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    border: 1px solid var(--ink);
+    border-radius: 8px;
+    padding: 40px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease;
+  }
+  .featured-card:hover {
+    border-color: var(--accent-soft);
+  }
+  .featured-card:hover .featured-title {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 3px;
+  }
+  .featured-date {
+    display: block;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .featured-title {
+    font-family: var(--serif);
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 16px;
+    text-decoration: none;
+  }
+  .featured-excerpt {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin-bottom: 18px;
+  }
+  .featured-meta {
+    font-family: var(--sans);
     font-size: 13px;
     color: var(--ink-soft);
-    margin-bottom: 8px;
+    margin-bottom: 20px;
   }
-  .post-title {
-    font-size: 24px;
+  .featured-link {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .archive-list {
+    margin-top: 48px;
+  }
+  .archive-list:empty {
+    display: none;
+  }
+  .archive-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--ink);
+  }
+  .archive-row:first-child {
+    border-top: 1px solid var(--ink);
+  }
+  .archive-date {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding-top: 4px;
+  }
+  .archive-title {
+    font-family: var(--serif);
+    font-size: 22px;
     line-height: 1.25;
     font-weight: 600;
     letter-spacing: -0.01em;
+    margin-bottom: 8px;
   }
-  .post-title a {
+  .archive-title a {
     color: var(--ink);
     text-decoration: none;
     transition: color 0.15s ease;
   }
-  .post-title a:hover { color: var(--accent); }
+  .archive-title a:hover {
+    color: var(--accent);
+  }
+  .archive-excerpt {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .eval-cta {
+    margin-top: 56px;
+  }
+  .eval-cta p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin-bottom: 20px;
+  }
+  .eval-cta-btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 12px 22px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.15s ease;
+  }
+  .eval-cta-btn:hover {
+    background: var(--ink-mid);
+  }
+
+  .newsletter-band {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 48px 24px;
+    margin-top: 56px;
+  }
+  .newsletter-band-inner {
+    max-width: var(--spine);
+    margin: 0 auto;
+  }
+  .newsletter-band .newsletter-signup-lead {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--bg);
+    margin: 0 0 20px;
+    text-align: left;
+  }
+  .newsletter-band .newsletter-signup-lead strong {
+    color: var(--bg);
+  }
+  .newsletter-band .newsletter-signup-row {
+    justify-content: flex-start;
+  }
+  .newsletter-band .newsletter-signup-input {
+    background: var(--bg);
+    border-color: var(--bg);
+    color: var(--ink);
+  }
+  .newsletter-band .newsletter-signup-input::placeholder {
+    color: var(--ink-soft);
+  }
+  .newsletter-band .newsletter-signup-btn {
+    background: var(--accent);
+    color: var(--ink);
+  }
+  .newsletter-band .newsletter-signup-btn:hover {
+    opacity: 0.92;
+  }
+  .newsletter-band .newsletter-signup-message--success {
+    color: var(--bg);
+  }
+  .newsletter-band .newsletter-signup-message--error {
+    color: #f5c6c6;
+  }
 
   footer {
     margin-top: 40px;
     padding: 40px 24px;
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--sans);
     font-size: 13px;
     color: var(--ink-soft);
     border-top: 1px solid var(--rule);
   }
   footer a { color: var(--accent); text-decoration: none; }
   .footer-tagline {
-    font-family: 'Iowan Old Style', Georgia, serif;
+    font-family: var(--serif);
     font-size: 16px;
     font-weight: 600;
     color: var(--ink);
@@ -205,7 +348,7 @@
   }
   .footer-legal {
     margin-top: 16px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--sans);
     font-size: 12px;
     color: var(--ink-soft);
   }
@@ -277,9 +420,23 @@
   }
 
   @media (max-width: 640px) {
+    .blog-spine {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
     h1 { font-size: 32px; }
     .hero-sub { font-size: 16px; }
-    .post-title { font-size: 21px; }
+    .hero { padding-bottom: 24px; }
+    .featured-card { padding: 24px; }
+    .featured-title { font-size: 26px; }
+    .featured-excerpt { font-size: 16px; }
+    .archive-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .newsletter-band {
+      padding: 40px 20px;
+    }
   }
 </style>
 </head>
@@ -303,30 +460,45 @@
   </div>
 </nav>
 
-<header class="hero">
-  <div class="eyebrow">Blog</div>
-  <h1>The Friday post</h1>
-  <p class="hero-sub">A short word on sharper preaching, published most Fridays.</p>
-</header>
+<div class="blog-spine">
+  <header class="hero">
+    <div class="eyebrow">Blog</div>
+    <h1>The Friday post</h1>
+    <p class="hero-sub">A short word on sharper preaching, published most Fridays.</p>
+  </header>
 
-<main class="post-list">
-  <!-- Week 1 -->
-  <article class="post-list-item">
-    <time class="post-date" datetime="2026-07-04">July 4, 2026</time>
-    <h2 class="post-title"><a href="/blog/vague-application-fix">Why your sermon's application still feels vague</a></h2>
-  </article>
-</main>
+  <!-- Week 1 (featured) — move to .archive-list when week 2 ships -->
+  <a class="featured-card" href="/blog/vague-application-fix">
+    <time class="featured-date" datetime="2026-07-04">July 4, 2026</time>
+    <h2 class="featured-title">Why your sermon's application still feels vague</h2>
+    <p class="featured-excerpt">I used to end almost every sermon the same way. After nailing the exegesis and making the theological case, I'd then tell people how to live it out this week.</p>
+    <p class="featured-meta">1 min read</p>
+    <span class="featured-link">Read the post &rarr;</span>
+  </a>
 
-<section class="newsletter-signup newsletter-signup--footer" data-newsletter-source="blog_index">
-  <p class="newsletter-signup-lead"><strong>Someone send you this?</strong> Get the Friday post yourself. A short word on sharper preaching, free, no account required.</p>
-  <form class="newsletter-signup-form" novalidate>
-    <label class="newsletter-signup-label" for="newsletter-email-blog-index">Email</label>
-    <div class="newsletter-signup-row">
-      <input id="newsletter-email-blog-index" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
-      <button type="submit" class="newsletter-signup-btn">Get the Friday post</button>
+  <!-- When week 2 ships: move week 1 into .archive-list as an .archive-row, add week 2 as .featured-card -->
+  <section class="archive-list" aria-label="Earlier posts"></section>
+
+  <section class="eval-cta">
+    <p>Run your next sermon through The Sermon Coach tool before Sunday. New here? Your first evaluation's free — no card, no commitment. Paste in a manuscript or transcript, get the full assessment back in a few minutes, and see if it's useful before you decide anything. Pass along to your pastor friends who preach!</p>
+    <a href="/start" class="eval-cta-btn">Run an evaluation</a>
+  </section>
+</div>
+
+<section class="newsletter-band">
+  <div class="newsletter-band-inner">
+    <div class="newsletter-signup" data-newsletter-source="blog_index">
+      <p class="newsletter-signup-lead">Not ready to run an evaluation? Get the Friday post — a short word on sharper preaching, free, no account required.</p>
+      <form class="newsletter-signup-form" novalidate>
+        <label class="newsletter-signup-label" for="newsletter-email-blog-index">Email</label>
+        <div class="newsletter-signup-row">
+          <input id="newsletter-email-blog-index" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
+          <button type="submit" class="newsletter-signup-btn">Get the Friday post</button>
+        </div>
+      </form>
+      <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
     </div>
-  </form>
-  <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
+  </div>
 </section>
 
 <footer>
