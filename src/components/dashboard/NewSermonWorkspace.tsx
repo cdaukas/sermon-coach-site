@@ -37,8 +37,8 @@ export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
             fontStyle: "italic",
           }}
         >
-          Select all, copy, and paste your manuscript or transcript below. Don&apos;t
-          worry about formatting. Save the sermon, then run an evaluation.
+          Paste your manuscript or transcript. Formatting doesn&apos;t matter. We
+          work from the words.
         </p>
       </div>
 

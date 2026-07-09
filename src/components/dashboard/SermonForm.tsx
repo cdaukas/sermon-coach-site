@@ -206,9 +206,9 @@ export function SermonForm({ entitlement }: SermonFormProps) {
     <AuthForm onSubmit={handleSubmit}>
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col items-start gap-2">
         <div
-          className="inline-flex w-full rounded border p-1 sm:w-auto"
+          className="inline-flex rounded border p-1"
           style={{ borderColor: "var(--sc-rule)", background: "var(--sc-bg)" }}
           role="tablist"
           aria-label="Input method"
@@ -229,7 +229,7 @@ export function SermonForm({ entitlement }: SermonFormProps) {
                 aria-selected={selected}
                 disabled={formDisabled}
                 onClick={() => setInputMethod(tab.value)}
-                className="flex-1 rounded px-4 py-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+                className="rounded px-4 py-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 style={{
                   ...uiFont,
                   background: selected ? "var(--sc-panel)" : "transparent",
@@ -246,7 +246,7 @@ export function SermonForm({ entitlement }: SermonFormProps) {
         <div
           role="tabpanel"
           hidden={inputMethod !== "paste"}
-          className="flex flex-col gap-1.5"
+          className="w-full flex flex-col gap-1.5"
         >
           {contentFromYoutube ? (
             <p
@@ -290,7 +290,7 @@ export function SermonForm({ entitlement }: SermonFormProps) {
           ) : null}
         </div>
 
-        <div role="tabpanel" hidden={inputMethod !== "youtube"} className="flex flex-col gap-3">
+        <div role="tabpanel" hidden={inputMethod !== "youtube"} className="w-full flex flex-col gap-3">
           <AuthField
             id="sermon-youtube-url"
             label="Paste a YouTube link"
