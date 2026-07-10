@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<!-- Blog post template: copy to public/blog/{slug}.html, add content/blog/week-N.json, add rewrite is automatic via /blog/:slug. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/newsletter-signup.css">
+<title>When Your Sermon Could Have Come From Any Text — The Sermon Coach</title>
+<meta name="description" content="A sermon can be orthodox, warm, and true, and still not belong to the passage you are preaching. A test for whether the text is driving your outline.">
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .wordmark-accent { color: var(--accent); }
+  .nav-toggle {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .nav-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .nav-toggle-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 1px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .nav.is-open .nav-toggle-bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .nav.is-open .nav-toggle-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .nav.is-open .nav-toggle-bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .nav-link:hover { color: var(--accent); }
+  .nav-start {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--ink);
+    transition: all 0.15s ease;
+    letter-spacing: 0.02em;
+  }
+  .nav-start:hover {
+    background: var(--ink-mid);
+    border-color: var(--ink-mid);
+  }
+
+  .post-header {
+    max-width: 720px;
+    margin: 24px auto 0;
+    padding: 0 24px 32px;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 18px;
+    color: var(--ink);
+  }
+  .byline {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .byline .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--rule); }
+
+  .post-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px 8px;
+  }
+  .post-body p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--ink-mid);
+    margin-bottom: 22px;
+  }
+  .emphasis-line {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 22px;
+  }
+
+  .cta-block {
+    max-width: 720px;
+    margin: 40px auto 64px;
+    padding: 0 24px;
+  }
+  .cta-inner {
+    background: var(--accent-pale);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 28px 32px;
+  }
+  .cta-inner p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-mid);
+    margin: 0 0 16px;
+  }
+  .cta-inner strong { color: var(--ink); font-weight: 600; }
+  .cta-button {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 12px 22px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .series-nav {
+    max-width: 720px;
+    margin: 0 auto 64px;
+    padding: 24px 24px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .series-label {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .series-links { display: flex; flex-direction: column; gap: 10px; }
+  .series-links a {
+    font-size: 15px;
+    color: var(--ink-mid);
+    text-decoration: none;
+  }
+  .series-links a:hover { color: var(--accent); }
+  .series-links .current { color: var(--accent); font-weight: 600; }
+
+  footer {
+    margin-top: 40px;
+    padding: 40px 24px;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+
+
+  @media (max-width: 720px) {
+    .nav {
+      position: relative;
+      padding: 20px;
+      gap: 12px;
+    }
+    .wordmark {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      font-size: clamp(13px, 4.1vw, 20px);
+    }
+    .nav-toggle {
+      display: flex;
+      flex-direction: column;
+    }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      margin: 0;
+      padding: 8px 20px 20px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--rule);
+      box-shadow: var(--shadow);
+    }
+    .nav.is-open .nav-links {
+      display: flex;
+    }
+    .nav-link {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      font-size: 15px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-link:last-of-type {
+      border-bottom: none;
+    }
+    .nav-start {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 12px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+    .nav-start:hover {
+      background: var(--ink-mid);
+      color: var(--bg);
+      border-color: var(--ink-mid);
+    }
+  }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 30px; }
+    .post-body p, .emphasis-line { font-size: 16.5px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="wordmark">The Sermon <span class="wordmark-accent">Coach</span>&trade;</a>
+  <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+  </button>
+  <div class="nav-links" id="nav-menu">
+    <a href="/how-its-scored.html" class="nav-link">How It's Scored</a>
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/pricing.html" class="nav-link">Pricing</a>
+    <a href="/faq.html" class="nav-link">FAQ</a>
+    <a href="/story.html" class="nav-link">Story</a>
+    <a href="/login" class="nav-link">Log in</a>
+    <a href="/start" class="nav-start">Start free</a>
+  </div>
+</nav>
+
+<header class="post-header">
+  <div class="eyebrow">The Rubric, One Criterion at a Time</div>
+  <h1>When your sermon could have come from any text</h1>
+  <div class="byline">
+    <span>Dr. Christopher M. Daukas</span>
+    <span class="dot"></span>
+    <span>Textual fidelity &amp; exegesis</span>
+  </div>
+</header>
+
+<main class="post-body">
+  <p>Early in my preaching I noticed a habit in others that sometimes showed itself in me. A preacher would study the passage all week, find a doctrine they loved somewhere inside it, and they preached the doctrine. The text got them into the pulpit, but it didn't stay around for the sermon.</p>
+
+  <p>It's difficult to spot the problem because everything that was said was true. The theology was orthodox. The outline was clean. The people were fed. And at the same time, this was also true: the sermon preached could have come from ten other passages. The text that was read at the start was a launching pad for the sermon, not a foundation.</p>
+
+  <p class="emphasis-line">A sermon can be biblical in general and still unfaithful to the preached text in particular.</p>
+
+  <p>The Simeon Trust workshops drilled a question into me that I now ask every week: does the structure and emphasis of my sermon match the structure and emphasis of the passage? Not touch it. Match it. If the passage spends six verses on God's character and one verse on our response, and my sermon spends thirty minutes on our response, I've preached my proportions instead of the author's.</p>
+
+  <p>Here's a test you can run on this Sunday's outline. Cover up the Scripture reference at the top and hand your three points to another preacher. Ask him which passage they came from. If he names five candidates before he names yours, the text might not be driving your sermon.</p>
+
+  <p class="emphasis-line">The text always has a better sermon in it than the one you are bringing to it.</p>
+
+  <p>Your people don't need your best material this Sunday. They need the specific passage's material, empowered by the Spirit, and preached by you.</p>
+
+  <p>Preach the sermon that exposits the text and stand back to watch God work.</p>
+</main>
+
+<div class="cta-block">
+  <div class="cta-inner">
+    <p><strong>Run your next sermon through The Sermon Coach tool before Sunday.</strong> If you are new here, your first evaluation's free. No card, no commitment. Paste in a manuscript or transcript (YouTube link), get the full assessment back in a few minutes, and see if it's useful before you decide anything. If it's helpful, pass it along to your pastor friends who preach!</p>
+    <a href="/start" class="cta-button">Run an evaluation</a>
+  </div>
+</div>
+
+<section class="newsletter-signup newsletter-signup--inline" data-newsletter-source="blog_post_inline">
+  <div class="newsletter-signup-inner">
+    <p class="newsletter-signup-lead"><strong>Someone send you this?</strong> Get the Friday post yourself. A short word on sharper preaching, free, no account required.</p>
+    <form class="newsletter-signup-form" novalidate>
+      <label class="newsletter-signup-label" for="newsletter-email-inline">Email</label>
+      <div class="newsletter-signup-row">
+        <input id="newsletter-email-inline" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
+        <button type="submit" class="newsletter-signup-btn">Get the Friday post</button>
+      </div>
+    </form>
+    <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
+  </div>
+</section>
+
+<div class="series-nav">
+  <div class="series-label">This week in the rubric series</div>
+  <div class="series-links">
+    <a href="/blog/vague-application-fix">1. Application to present audience</a>
+    <a href="/blog/any-text-sermon-fix" class="current">2. Textual fidelity &amp; exegesis &mdash; you are here</a>
+    <a href="#">3. Fallen Condition Focus &mdash; next Friday</a>
+  </div>
+</div>
+
+<section class="newsletter-signup newsletter-signup--footer" data-newsletter-source="blog_footer">
+  <p class="newsletter-signup-lead"><strong>Someone send you this?</strong> Get the Friday post yourself. A short word on sharper preaching, free, no account required.</p>
+  <form class="newsletter-signup-form" novalidate>
+    <label class="newsletter-signup-label" for="newsletter-email-footer-blog">Email</label>
+    <div class="newsletter-signup-row">
+      <input id="newsletter-email-footer-blog" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
+      <button type="submit" class="newsletter-signup-btn">Get the Friday post</button>
+    </div>
+  </form>
+  <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
+</section>
+
+<footer>
+  The Sermon Coach&trade; &middot; Built by <a href="mailto:chris@sermoncoach.online">Dr. Christopher Daukas</a> &middot; Phoenix, Arizona<br>
+  Daukas Group, LLC &middot; 9572 W Frank Ave, Peoria, AZ 85382
+</footer>
+
+<script>
+(function () {
+  var nav = document.querySelector('.nav');
+  var toggle = document.querySelector('.nav-toggle');
+  if (!nav || !toggle) return;
+
+  function setOpen(open) {
+    nav.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  toggle.addEventListener('click', function () {
+    setOpen(!nav.classList.contains('is-open'));
+  });
+
+  toggle.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setOpen(!nav.classList.contains('is-open'));
+    }
+  });
+
+  nav.querySelectorAll('.nav-link, .nav-start').forEach(function (link) {
+    link.addEventListener('click', function () {
+      setOpen(false);
+    });
+  });
+})();
+</script>
+<script src="/newsletter-signup.js"></script>
+</body>
+</html>
