@@ -115,12 +115,10 @@ export function SermonForm({
   );
 
   const handleEvalFailed = useCallback(
-    (message: string) => {
+    (_message: string) => {
       const sermonId = savedSermonIdRef.current;
       if (sermonId) {
-        router.push(
-          `/dashboard/sermons/${sermonId}?evalError=${evalErrorParamForStartFailure(message)}`,
-        );
+        router.push(`/dashboard/sermons/${sermonId}?evalError=poll`);
       }
     },
     [router],
