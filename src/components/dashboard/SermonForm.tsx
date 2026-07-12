@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { AuthMessage } from "@/components/auth/AuthMessage";
 import {
   AuthField,
@@ -11,11 +11,15 @@ import {
 } from "@/components/auth/AuthForm";
 import { ModeSelector } from "@/components/dashboard/ModeSelector";
 import { EvaluationCreditLine } from "@/components/evaluation/EvaluationCreditLine";
+import { EvaluationPollingStatus } from "@/components/evaluation/EvaluationPollingStatus";
+import { useEvaluationPolling } from "@/components/evaluation/useEvaluationPolling";
+import { requestEvaluation } from "@/lib/evaluation/actions";
 import {
   normalizeSermonContext,
   sermonContextStorageKey,
   type StashedReportMode,
 } from "@/lib/evaluation/context";
+import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-errors";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { createSermon } from "@/lib/sermons/actions";
 import type { TranscriptErrorCode } from "@/lib/transcripts/types";
@@ -57,6 +61,7 @@ type InputMethod = "paste" | "youtube";
 
 type SermonFormProps = {
   entitlement: EvaluationEntitlement | null;
+  defaultReportMode: StashedReportMode;
 };
 
 function countWords(text: string): number {
@@ -78,8 +83,12 @@ function estimateSermonMinutes(wordCount: number): number {
   return rounded > 0 ? rounded : 5;
 }
 
-export function SermonForm({ entitlement }: SermonFormProps) {
+export function SermonForm({
+  entitlement,
+  defaultReportMode,
+}: SermonFormProps) {
   const router = useRouter();
+  const savedSermonIdRef = useRef<string | null>(null);
   const [inputMethod, setInputMethod] = useState<InputMethod>("paste");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -88,13 +97,39 @@ export function SermonForm({ entitlement }: SermonFormProps) {
   const [audience, setAudience] = useState("");
   const [series, setSeries] = useState("");
   const [other, setOther] = useState("");
-  const [reportMode, setReportMode] = useState<StashedReportMode>("diagnostic");
+  const [reportMode, setReportMode] = useState<StashedReportMode>(defaultReportMode);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [youtubeError, setYoutubeError] = useState<string | null>(null);
   const [youtubeFetching, setYoutubeFetching] = useState(false);
   const [contentFromYoutube, setContentFromYoutube] = useState(false);
+
+  const canEvaluate = entitlement?.canEvaluate ?? false;
+
+  const handleEvalComplete = useCallback(
+    (evaluationId: string, sermonId: string) => {
+      router.push(`/dashboard/sermons/${sermonId}/evaluations/${evaluationId}`);
+    },
+    [router],
+  );
+
+  const handleEvalFailed = useCallback(
+    (message: string) => {
+      const sermonId = savedSermonIdRef.current;
+      if (sermonId) {
+        router.push(
+          `/dashboard/sermons/${sermonId}?evalError=${evalErrorParamForStartFailure(message)}`,
+        );
+      }
+    },
+    [router],
+  );
+
+  const { polling, elapsed, startPolling } = useEvaluationPolling({
+    onComplete: handleEvalComplete,
+    onFailed: handleEvalFailed,
+  });
 
   const wordCount = useMemo(() => countWords(content), [content]);
   const sermonMinutes = useMemo(() => estimateSermonMinutes(wordCount), [wordCount]);
@@ -141,46 +176,122 @@ export function SermonForm({ entitlement }: SermonFormProps) {
     }
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
+  function buildContext() {
+    return normalizeSermonContext({
+      occasion,
+      audience,
+      series,
+      other,
+    });
+  }
 
+  function validateForm(): string | null {
     if (!title.trim() || !content.trim()) {
-      setError("Title and manuscript are required.");
-      return;
+      return "Title and manuscript are required.";
     }
 
-    setLoading(true);
+    return null;
+  }
+
+  async function saveSermon(): Promise<
+    { ok: true; sermonId: string } | { ok: false; error: string }
+  > {
+    const validationError = validateForm();
+    if (validationError) {
+      return { ok: false, error: validationError };
+    }
+
+    return createSermon({ title, content, primaryPassage });
+  }
+
+  function stashContext(sermonId: string) {
+    const context = buildContext();
+
+    if (context) {
+      sessionStorage.setItem(
+        sermonContextStorageKey(sermonId),
+        JSON.stringify(context),
+      );
+    }
+  }
+
+  async function handleSaveWithoutRunning() {
+    setError(null);
+
+    setSaving(true);
 
     try {
-      const result = await createSermon({ title, content, primaryPassage });
+      const result = await saveSermon();
 
       if (!result.ok) {
         setError(result.error);
         return;
       }
 
-      const context = normalizeSermonContext({
-        occasion,
-        audience,
-        series,
-        other,
-      });
-
-      if (context) {
-        sessionStorage.setItem(
-          sermonContextStorageKey(result.sermonId),
-          JSON.stringify(context),
-        );
-      }
-
+      stashContext(result.sermonId);
       router.push(`/dashboard/sermons/${result.sermonId}`);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }
 
-  const formDisabled = loading || youtubeFetching;
+  async function handleSaveAndRun() {
+    setError(null);
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const result = await saveSermon();
+
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+
+      savedSermonIdRef.current = result.sermonId;
+      const context = buildContext();
+
+      // requestEvaluation may redirect to /pricing.html if credits were
+      // exhausted between page load and this call.
+      const evalResult = await requestEvaluation(
+        result.sermonId,
+        context,
+        reportMode,
+      );
+
+      if (!evalResult.ok) {
+        router.push(
+          `/dashboard/sermons/${result.sermonId}?evalError=${evalErrorParamForStartFailure(evalResult.error)}`,
+        );
+        return;
+      }
+
+      startPolling(evalResult.evaluationId, evalResult.sermonId);
+    } catch {
+      setError("Something went wrong. Try again in a minute.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void handleSaveAndRun();
+  }
+
+  const formDisabled = saving || polling || youtubeFetching;
+  const primaryDisabled = formDisabled || !canEvaluate;
+  const primaryLabel = polling
+    ? "Evaluating…"
+    : saving
+      ? "Saving…"
+      : "Save and run evaluation";
 
   return (
     <AuthForm onSubmit={handleSubmit}>
@@ -439,9 +550,24 @@ export function SermonForm({ entitlement }: SermonFormProps) {
       />
 
       <div>
-        <AuthSubmit type="submit" disabled={formDisabled}>
-          {loading ? "Saving…" : "Save sermon"}
+        {polling ? <EvaluationPollingStatus elapsed={elapsed} /> : null}
+
+        <AuthSubmit type="submit" disabled={primaryDisabled}>
+          {primaryLabel}
         </AuthSubmit>
+
+        <p className="mt-3 text-center">
+          <button
+            type="button"
+            disabled={formDisabled}
+            onClick={() => void handleSaveWithoutRunning()}
+            className="border-0 bg-transparent p-0 text-[13px] underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            Save without running
+          </button>
+        </p>
+
         <EvaluationCreditLine entitlement={entitlement} />
       </div>
     </AuthForm>

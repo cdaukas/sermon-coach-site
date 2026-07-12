@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NewSermonWorkspace } from "@/components/dashboard/NewSermonWorkspace";
 import { createClient } from "@/lib/supabase/server";
+import { getMostRecentReportModeForUser } from "@/lib/evaluation/queries";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 
 export const metadata: Metadata = {
@@ -18,6 +19,9 @@ export default async function NewSermonPage() {
   const entitlement = user
     ? await getEvaluationEntitlement(user.id)
     : null;
+  const defaultReportMode = user
+    ? await getMostRecentReportModeForUser(user.id)
+    : "diagnostic";
 
   return (
     <main
@@ -36,7 +40,10 @@ export default async function NewSermonPage() {
         ← Back to library
       </Link>
 
-      <NewSermonWorkspace entitlement={entitlement} />
+      <NewSermonWorkspace
+        entitlement={entitlement}
+        defaultReportMode={defaultReportMode}
+      />
     </main>
   );
 }

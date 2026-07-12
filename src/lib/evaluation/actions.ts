@@ -17,6 +17,7 @@ import {
 } from "./quota";
 import { isEvaluationStubEnabled } from "./stub";
 import type { SermonContext } from "./context";
+import { ACTIVE_EVAL_IN_PROGRESS_ERROR } from "./eval-start-errors";
 import type { ReportMode, RequestEvaluationResult } from "./types";
 
 async function runFixtureEvaluation(
@@ -129,8 +130,7 @@ export async function requestEvaluation(
   if (activeCount > 0) {
     return {
       ok: false,
-      error:
-        "You already have an evaluation in progress. Wait for it to finish before starting another.",
+      error: ACTIVE_EVAL_IN_PROGRESS_ERROR,
     };
   }
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SermonDetailEvalErrorBanner } from "@/components/dashboard/SermonDetailEvalErrorBanner";
 import { SermonDetailEvalSection } from "@/components/dashboard/SermonDetailEvalSection";
 import { SermonDetailManuscript } from "@/components/dashboard/SermonDetailManuscript";
 import { createClient } from "@/lib/supabase/server";
@@ -19,6 +20,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 type SermonDetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ evalError?: string }>;
 };
 
 function formatDate(iso: string): string {
@@ -41,8 +43,12 @@ export async function generateMetadata({
   return { title: sermon.title };
 }
 
-export default async function SermonDetailPage({ params }: SermonDetailPageProps) {
+export default async function SermonDetailPage({
+  params,
+  searchParams,
+}: SermonDetailPageProps) {
   const { id } = await params;
+  const { evalError = null } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -99,6 +105,8 @@ export default async function SermonDetailPage({ params }: SermonDetailPageProps
           Saved {formatDate(version.created_at)}
         </p>
       </div>
+
+      <SermonDetailEvalErrorBanner evalError={evalError} />
 
       <SermonDetailEvalSection
         sermonId={sermon.id}

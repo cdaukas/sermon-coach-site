@@ -1,10 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   useCallback,
-  useEffect,
-  useRef,
   useState,
   useTransition,
 } from "react";
@@ -17,9 +14,10 @@ import {
 import { requestEvaluation } from "@/lib/evaluation/actions";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { EvaluationAccessGate } from "./EvaluationAccessGate";
+import { EvaluationPollingStatus } from "./EvaluationPollingStatus";
+import { useEvaluationPolling } from "./useEvaluationPolling";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
-const POLL_MS = 3000;
 
 type EvaluateButtonProps = {
   sermonId: string;
@@ -33,12 +31,6 @@ type EvaluateButtonProps = {
   disabled?: boolean;
 };
 
-function formatElapsed(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-}
-
 export function EvaluateButton({
   sermonId,
   entitlement,
@@ -50,91 +42,16 @@ export function EvaluateButton({
   onRunClick,
   disabled = false,
 }: EvaluateButtonProps) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [polling, setPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [elapsed, setElapsed] = useState(0);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const stopPolling = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    setPolling(false);
+  const handlePollFailed = useCallback((message: string) => {
+    setError(message);
   }, []);
 
-  useEffect(() => () => stopPolling(), [stopPolling]);
-
-  const checkStatus = useCallback(
-    async (evaluationId: string, expectedSermonId: string) => {
-      const response = await fetch(`/api/evaluations/${evaluationId}`);
-
-      if (!response.ok) {
-        throw new Error("Could not check evaluation status.");
-      }
-
-      const data = (await response.json()) as {
-        status: string;
-        errorMessage: string | null;
-        sermonId: string;
-      };
-
-      if (data.status === "complete") {
-        stopPolling();
-        router.push(
-          `/dashboard/sermons/${expectedSermonId}/evaluations/${evaluationId}`,
-        );
-        return;
-      }
-
-      if (data.status === "failed") {
-        stopPolling();
-        setError(
-          data.errorMessage ?? "We couldn't generate a valid evaluation.",
-        );
-      }
-    },
-    [router, stopPolling],
-  );
-
-  const startPolling = useCallback(
-    (evaluationId: string, expectedSermonId: string) => {
-      setPolling(true);
-      setElapsed(0);
-
-      timerRef.current = setInterval(() => {
-        setElapsed((seconds) => seconds + 1);
-      }, 1000);
-
-      void checkStatus(evaluationId, expectedSermonId).catch((pollError) => {
-        stopPolling();
-        setError(
-          pollError instanceof Error
-            ? pollError.message
-            : "Something went wrong while waiting.",
-        );
-      });
-
-      pollRef.current = setInterval(() => {
-        void checkStatus(evaluationId, expectedSermonId).catch((pollError) => {
-          stopPolling();
-          setError(
-            pollError instanceof Error
-              ? pollError.message
-              : "Something went wrong while waiting.",
-          );
-        });
-      }, POLL_MS);
-    },
-    [checkStatus, stopPolling],
-  );
+  const { polling, elapsed, startPolling } = useEvaluationPolling({
+    onFailed: handlePollFailed,
+  });
 
   function readStashedContext(): SermonContext | undefined {
     const storageKey = sermonContextStorageKey(sermonId);
@@ -189,30 +106,7 @@ export function EvaluateButton({
 
   return (
     <div className={rootClassName}>
-      {polling ? (
-        <div
-          className="mb-4 rounded border px-5 py-4"
-          style={{
-            background: "var(--sc-accent-pale)",
-            borderColor: "var(--sc-rule)",
-          }}
-          role="status"
-          aria-live="polite"
-        >
-          <p
-            className="text-[13px] font-semibold"
-            style={{ ...uiFont, color: "var(--sc-ink)" }}
-          >
-            Evaluating your sermon…
-          </p>
-          <p className="mt-1 text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-            This usually takes 2–4 minutes. Keep this tab open.
-          </p>
-          <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-            Elapsed: {formatElapsed(elapsed)}
-          </p>
-        </div>
-      ) : null}
+      {polling ? <EvaluationPollingStatus elapsed={elapsed} /> : null}
 
       <button
         type="button"

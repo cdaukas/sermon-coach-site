@@ -376,6 +376,58 @@ export async function listEvaluationsForSermon(
   }));
 }
 
+export async function getMostRecentReportModeForUser(
+  userId: string,
+): Promise<ReportMode> {
+  const supabase = await createClient();
+
+  const { data: sermons, error: sermonsError } = await supabase
+    .from("sermons")
+    .select("id")
+    .eq("user_id", userId);
+
+  if (sermonsError) {
+    throw new Error(sermonsError.message);
+  }
+
+  const sermonIds = (sermons ?? []).map((sermon) => sermon.id);
+  if (sermonIds.length === 0) {
+    return "diagnostic";
+  }
+
+  const { data: versions, error: versionsError } = await supabase
+    .from("sermon_versions")
+    .select("id")
+    .in("sermon_id", sermonIds);
+
+  if (versionsError) {
+    throw new Error(versionsError.message);
+  }
+
+  const versionIds = (versions ?? []).map((version) => version.id);
+  if (versionIds.length === 0) {
+    return "diagnostic";
+  }
+
+  const { data: evaluation, error } = await supabase
+    .from("sermon_evaluations")
+    .select("report_mode")
+    .in("sermon_version_id", versionIds)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!evaluation) {
+    return "diagnostic";
+  }
+
+  return (evaluation.report_mode as ReportMode | undefined) ?? "diagnostic";
+}
+
 export async function sermonHasActiveEvaluation(
   sermonId: string,
 ): Promise<boolean> {

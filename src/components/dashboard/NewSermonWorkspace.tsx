@@ -1,6 +1,7 @@
 "use client";
 
 import { EvaluationAccessGate } from "@/components/evaluation/EvaluationAccessGate";
+import type { StashedReportMode } from "@/lib/evaluation/context";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { SermonForm } from "./SermonForm";
 
@@ -9,9 +10,13 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
+  defaultReportMode: StashedReportMode;
 };
 
-export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
+export function NewSermonWorkspace({
+  entitlement,
+  defaultReportMode,
+}: NewSermonWorkspaceProps) {
   const canEvaluate = entitlement?.canEvaluate ?? true;
 
   return (
@@ -44,7 +49,12 @@ export function NewSermonWorkspace({ entitlement }: NewSermonWorkspaceProps) {
 
       <EvaluationAccessGate entitlement={entitlement} className="mb-8" />
 
-      {canEvaluate ? <SermonForm entitlement={entitlement} /> : null}
+      {canEvaluate ? (
+        <SermonForm
+          entitlement={entitlement}
+          defaultReportMode={defaultReportMode}
+        />
+      ) : null}
     </>
   );
 }
