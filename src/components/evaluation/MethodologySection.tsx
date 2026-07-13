@@ -71,7 +71,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
       >
         <div className="flex gap-3">
           <span
-            className="mt-1.5 shrink-0 text-[12px] leading-none transition-transform group-open:rotate-90"
+            className="evaluation-disclosure-chevron mt-1.5 shrink-0 text-[12px] leading-none transition-transform group-open:rotate-90"
             style={{ color: "var(--sc-ink-soft)" }}
             aria-hidden
           >

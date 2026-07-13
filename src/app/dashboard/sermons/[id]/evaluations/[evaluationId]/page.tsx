@@ -3,6 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CoachingReportView } from "@/components/evaluation/CoachingReportView";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
+import {
+  EvaluationPdfCover,
+  type EvaluationPdfCoverVariant,
+} from "@/components/evaluation/EvaluationPdfCover";
 import { EvaluationPdfCapture } from "@/components/evaluation/EvaluationPdfCapture";
 import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
 import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
@@ -14,7 +18,7 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 
 type EvaluationPageProps = {
   params: Promise<{ id: string; evaluationId: string }>;
-  searchParams: Promise<{ pdf?: string }>;
+  searchParams: Promise<{ pdf?: string; for?: string; variant?: string; preacher?: string }>;
 };
 
 export async function generateMetadata({
@@ -35,8 +39,13 @@ export default async function EvaluationPage({
   searchParams,
 }: EvaluationPageProps) {
   const { id: sermonId, evaluationId } = await params;
-  const { pdf } = await searchParams;
+  const { pdf, for: preparedForParam, variant: variantParam, preacher: preacherParam } =
+    await searchParams;
   const pdfCapture = pdf === "1";
+  const preparedFor = preparedForParam?.trim() ?? "";
+  const showCover = pdfCapture && preparedFor.length > 0;
+  const coverVariant: EvaluationPdfCoverVariant =
+    variantParam === "mine" ? "mine" : "theirs";
   const data = await getEvaluation(evaluationId, sermonId);
 
   if (!data) {
@@ -81,6 +90,8 @@ export default async function EvaluationPage({
 
   const evaluatedAt = evaluation.completed_at ?? evaluation.created_at;
   const pastorName = evaluation.result.meta.preacher_name;
+  const coverPreacher =
+    pastorName?.trim() || preacherParam?.trim() || null;
   const scriptureReference =
     sermon.primary_passage?.trim() ||
     evaluation.result.meta.scripture_reference.trim() ||
@@ -99,6 +110,18 @@ export default async function EvaluationPage({
       }}
     >
       {pdfCapture ? <EvaluationPdfCapture /> : null}
+
+      {showCover ? (
+        <EvaluationPdfCover
+          preparedFor={preparedFor}
+          variant={coverVariant}
+          sermonTitle={sermon.title}
+          scriptureReference={scriptureReference}
+          preacherName={coverPreacher}
+          seriesName={evaluation.result.meta.series_name}
+          submissionMode={evaluation.result.meta.submission_mode}
+        />
+      ) : null}
 
       {!pdfCapture ? (
         <div className="screen-only mb-8 flex flex-wrap items-center justify-between gap-4">

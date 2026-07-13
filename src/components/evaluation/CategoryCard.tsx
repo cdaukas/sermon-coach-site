@@ -96,7 +96,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
               className="grid cursor-pointer list-none grid-cols-[24px_1fr_auto] items-center gap-3 px-8 py-4 transition-colors hover:bg-[var(--sc-accent-pale)] md:grid-cols-[24px_1fr_220px_56px] md:gap-4 [&::-webkit-details-marker]:hidden"
             >
               <span
-                className="text-sm leading-none transition-transform group-open:rotate-90"
+                className="evaluation-disclosure-chevron text-sm leading-none transition-transform group-open:rotate-90"
                 style={{ color: "var(--sc-accent)" }}
                 aria-hidden
               >

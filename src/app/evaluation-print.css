@@ -129,7 +129,7 @@
     color: var(--sc-ink) !important;
   }
 
-  .evaluation-score-panel p:first-child {
+  .evaluation-score-panel-band {
     color: var(--sc-accent) !important;
     font-size: 24pt !important;
     font-weight: 600 !important;

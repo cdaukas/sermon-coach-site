@@ -18,6 +18,264 @@ html[data-pdf-capture="1"] nextjs-portal {
   display: none !important;
 }
 
+/* Global scale-down for PDF capture: fewer pages, still readable */
+html[data-pdf-capture="1"] body {
+  zoom: 0.88;
+}
+
+/* Each scoring section opens on a fresh page — Chromium honors forced breaks
+   (it ignores break-after/before: avoid, but break-before: page works). */
+html[data-pdf-capture="1"] .evaluation-category-card {
+  break-before: page;
+  page-break-before: always;
+}
+html[data-pdf-capture="1"] .evaluation-category-card:first-of-type {
+  break-before: auto;
+  page-break-before: auto;
+}
+
+/* Cover page — exactly one letter page, then the report */
+html[data-pdf-capture="1"] .evaluation-pdf-cover {
+  display: flex;
+  flex-direction: column;
+  min-height: 10in;
+  break-after: page;
+  page-break-after: always;
+  background: var(--sc-panel);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-band {
+  background: var(--sc-ink);
+  padding: 0.55in 0.65in 0.45in;
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-wordmark {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sc-accent-soft);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-band-rule {
+  margin-top: 0.45rem;
+  width: 2.5rem;
+  height: 2px;
+  background: var(--sc-accent);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0.65in 0.65in 0.5in;
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-eyebrow {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sc-accent);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--sc-ink);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-passage {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--sc-ink-soft);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem 1.5rem;
+  margin: 1.35rem 0 1.5rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--sc-rule);
+  border-bottom: 1px solid var(--sc-rule);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-facts dt {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-facts dd {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--sc-ink);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-prepared {
+  margin: 0 0 1.1rem;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--sc-ink-soft);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-prepared span {
+  color: var(--sc-ink);
+  font-weight: 600;
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-copy p {
+  margin: 0 0 0.85rem;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-copy p:last-child {
+  margin-bottom: 0;
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-spacer {
+  flex: 1;
+  min-height: 0.35in;
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-cta {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--sc-accent);
+  background: var(--sc-accent-pale);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-cta-lead {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--sc-ink);
+}
+
+html[data-pdf-capture="1"] .evaluation-pdf-cover-cta-url {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--sc-accent);
+}
+
+/* Hide headline band badge in capture — score belongs in the narrative */
+html[data-pdf-capture="1"] .evaluation-score-panel-band,
+html[data-pdf-capture="1"] .evaluation-score-method-note {
+  display: none !important;
+}
+
+.evaluation-score-panel-label {
+  display: none;
+}
+
+html[data-pdf-capture="1"] .evaluation-score-panel-label {
+  display: block !important;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #faf8f3;
+}
+
+/* Methodology section on its own page */
+html[data-pdf-capture="1"] .evaluation-methodology {
+  break-before: page;
+  page-break-before: always;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  line-height: 1.35;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > summary {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > div {
+  padding-top: 0.35rem;
+  padding-bottom: 1rem;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > div > h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > div > div.rounded {
+  margin-bottom: 0.6rem !important;
+  padding: 0.65rem 0.85rem !important;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > div > div.rounded > p:first-child {
+  font-size: 28px !important;
+  line-height: 1 !important;
+  margin-top: 0 !important;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > div > div.rounded > p {
+  margin-top: 0.35rem !important;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > div > table {
+  margin-bottom: 0.6rem !important;
+  font-size: 0.85em;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology table th,
+html[data-pdf-capture="1"] .evaluation-methodology table td {
+  padding: 0.3rem 0.5rem !important;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology blockquote {
+  margin: 0.5rem 0 0.65rem !important;
+  font-size: 0.85em;
+  line-height: 1.35;
+}
+
+html[data-pdf-capture="1"] .evaluation-methodology > div > p {
+  margin-bottom: 0.5rem !important;
+  line-height: 1.35;
+}
+
+/* Custom disclosure chevrons (not native ::marker) */
+html[data-pdf-capture="1"] .evaluation-disclosure-chevron {
+  display: none !important;
+}
+
+html[data-pdf-capture="1"] .evaluation-criterion > summary {
+  grid-template-columns: 1fr auto !important;
+}
+
+@media (min-width: 768px) {
+  html[data-pdf-capture="1"] .evaluation-criterion > summary {
+    grid-template-columns: 1fr 220px 56px !important;
+  }
+}
+
 /* Keep atomic report blocks intact when paginating to PDF */
 html[data-pdf-capture="1"] .evaluation-criterion,
 html[data-pdf-capture="1"] .evaluation-working-card,
@@ -41,4 +299,14 @@ html[data-pdf-capture="1"] .evaluation-priorities article > p,
 html[data-pdf-capture="1"] .evaluation-priorities article h3 {
   break-after: avoid;
   page-break-after: avoid;
+}
+
+html[data-pdf-capture="1"] summary {
+  list-style: none !important;
+}
+
+html[data-pdf-capture="1"] summary::marker,
+html[data-pdf-capture="1"] summary::-webkit-details-marker {
+  display: none !important;
+  content: none !important;
 }

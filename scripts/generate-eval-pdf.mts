@@ -8,6 +8,8 @@
  * Usage:
  *   npm run pdf:eval -- <evaluationId> <sermonId>
  *   PDF_EVALUATION_ID=... PDF_SERMON_ID=... npm run pdf:eval
+ *   PDF_PREPARED_FOR="Pastor Name" PDF_COVER_VARIANT=theirs|mine npm run pdf:eval
+ *   PDF_PREACHER="Preacher Name" npm run pdf:eval
  */
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -43,6 +45,81 @@ function parseArgs(): { evaluationId: string; sermonId: string } {
   }
 
   return { evaluationId: evaluationId.trim(), sermonId: sermonId.trim() };
+}
+
+function stripLeadingHonorific(name: string): string {
+  return name
+    .trim()
+    .replace(/^(?:pastor|rev\.?|reverend|dr\.?|pr\.?)\s+/i, "")
+    .trim();
+}
+
+function theirsPreacherNamesMatch(preacher: string, preparedFor: string): boolean {
+  return (
+    stripLeadingHonorific(preacher).toLowerCase() ===
+    stripLeadingHonorific(preparedFor).toLowerCase()
+  );
+}
+
+function warnTheirsPreacherMismatch(preacher: string, preparedFor: string): void {
+  console.warn("");
+  console.warn(
+    `WARNING: variant=theirs but preacher (${preacher}) != preparedFor (${preparedFor}). On 'theirs' the sermon should be`,
+  );
+  console.warn(
+    "the recipient's own. Check your IDs — you may be sending someone else's evaluation.",
+  );
+  console.warn("");
+}
+
+function buildCaptureUrl(
+  baseUrl: string,
+  sermonId: string,
+  evaluationId: string,
+): {
+  url: string;
+  preparedFor: string | null;
+  coverVariant: "theirs" | "mine" | null;
+  preacher: string | null;
+} {
+  const params = new URLSearchParams({ pdf: "1" });
+  const preparedFor = process.env.PDF_PREPARED_FOR?.trim() ?? "";
+  const preacherEnv = process.env.PDF_PREACHER?.trim() ?? "";
+  let coverVariant: "theirs" | "mine" | null = null;
+  let resolvedPreacher: string | null = preacherEnv || null;
+
+  if (preparedFor) {
+    params.set("for", preparedFor);
+    coverVariant =
+      process.env.PDF_COVER_VARIANT?.trim() === "mine" ? "mine" : "theirs";
+    params.set("variant", coverVariant);
+
+    if (coverVariant === "theirs") {
+      if (preacherEnv) {
+        if (!theirsPreacherNamesMatch(preacherEnv, preparedFor)) {
+          warnTheirsPreacherMismatch(preacherEnv, preparedFor);
+        }
+        resolvedPreacher = preacherEnv;
+      } else {
+        resolvedPreacher = stripLeadingHonorific(preparedFor);
+      }
+    } else {
+      resolvedPreacher = preacherEnv || null;
+    }
+  } else if (preacherEnv) {
+    resolvedPreacher = preacherEnv;
+  }
+
+  if (resolvedPreacher) {
+    params.set("preacher", resolvedPreacher);
+  }
+
+  return {
+    url: `${baseUrl}/dashboard/sermons/${sermonId}/evaluations/${evaluationId}?${params.toString()}`,
+    preparedFor: preparedFor || null,
+    coverVariant,
+    preacher: resolvedPreacher,
+  };
 }
 
 function decodeSupabaseSession(value: string): SupabaseSessionPayload | null {
@@ -142,6 +219,36 @@ async function waitForEvaluationRender(page: Page): Promise<void> {
       .querySelectorAll(".evaluation-report details")
       .forEach((node) => node.setAttribute("open", ""));
   });
+  await page.evaluate(() => {
+    const cards = document.querySelectorAll(".evaluation-category-card");
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      const header = card.querySelector(":scope > header");
+      if (!header) continue;
+      const next = header.nextElementSibling; // the AVERAGE bar
+      if (!next) continue;
+      const bond = document.createElement("div");
+      bond.setAttribute("data-pdf-bond", "1");
+      header.parentNode!.insertBefore(bond, header);
+      bond.appendChild(header);
+      bond.appendChild(next);
+    }
+  });
+
+  await page.addStyleTag({
+    content: `
+    [data-pdf-bond="1"] {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+    html[data-pdf-capture="1"] .evaluation-category-card > header,
+    [data-pdf-bond="1"] > header {
+      min-height: 0 !important;
+      height: auto !important;
+    }
+  `,
+  });
+
   await new Promise((resolve) => setTimeout(resolve, 500));
 }
 
@@ -151,10 +258,37 @@ async function main(): Promise<void> {
   const cookies = await loadCookies();
   validateAuthCookies(cookies);
 
-  const url = `${baseUrl}/dashboard/sermons/${sermonId}/evaluations/${evaluationId}?pdf=1`;
+  const { url, preparedFor, coverVariant, preacher } = buildCaptureUrl(
+    baseUrl,
+    sermonId,
+    evaluationId,
+  );
   if (!url.includes("?pdf=1")) {
     throw new Error(`Internal error: capture URL must include ?pdf=1 (got ${url})`);
   }
+
+  console.log(
+    "PDF_PREPARED_FOR:",
+    process.env.PDF_PREPARED_FOR === undefined
+      ? "(undefined)"
+      : JSON.stringify(process.env.PDF_PREPARED_FOR),
+  );
+  console.log(
+    "PDF_COVER_VARIANT:",
+    process.env.PDF_COVER_VARIANT === undefined
+      ? "(undefined)"
+      : JSON.stringify(process.env.PDF_COVER_VARIANT),
+  );
+  console.log(
+    "PDF_PREACHER:",
+    process.env.PDF_PREACHER === undefined
+      ? "(undefined)"
+      : JSON.stringify(process.env.PDF_PREACHER),
+  );
+  console.log(
+    `PDF resolved: variant=${coverVariant ?? "(none)"} preparedFor=${preparedFor ?? "(none)"} preacher=${preacher ?? "(none)"}`,
+  );
+  console.log("CAPTURE URL:", url);
 
   const outputPath = path.join(OUTPUT_DIR, `${evaluationId}.pdf`);
 
@@ -194,6 +328,14 @@ async function main(): Promise<void> {
       );
     }
 
+    const coverCheck = await page.evaluate(() => {
+      return {
+        coverEl: document.querySelectorAll(".evaluation-pdf-cover").length,
+        searchParams: window.location.search,
+      };
+    });
+    console.log("COVER CHECK:", JSON.stringify(coverCheck));
+
     await waitForEvaluationRender(page);
 
     await page.emulateMediaType("screen");
@@ -202,10 +344,13 @@ async function main(): Promise<void> {
       path: outputPath,
       format: "Letter",
       printBackground: true,
+      displayHeaderFooter: true,
+      headerTemplate: "<div></div>",
+      footerTemplate: `<div style="width:100%;font-size:8px;font-family:-apple-system,sans-serif;color:#4a5568;padding:0 0.55in;display:flex;justify-content:space-between;"><span>The Sermon Coach™</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>`,
       margin: {
         top: "0.5in",
         right: "0.5in",
-        bottom: "0.5in",
+        bottom: "0.7in",
         left: "0.5in",
       },
     });
@@ -213,6 +358,13 @@ async function main(): Promise<void> {
     console.log(`Wrote ${outputPath}`);
     console.log(`  sermonId=${sermonId}`);
     console.log(`  evaluationId=${evaluationId}`);
+    if (preparedFor) {
+      console.log(`  preparedFor=${preparedFor}`);
+      console.log(`  coverVariant=${coverVariant}`);
+    }
+    if (preacher) {
+      console.log(`  preacher=${preacher}`);
+    }
     console.log(`  source=${url}`);
     console.log("  capture=screen (?pdf=1 full-color render)");
   } finally {

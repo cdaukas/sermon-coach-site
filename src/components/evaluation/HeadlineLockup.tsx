@@ -25,11 +25,12 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
         }}
       >
         <p
-          className="mb-3 text-[52px] leading-none italic"
+          className="evaluation-score-panel-band mb-3 text-[52px] leading-none italic"
           style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
         >
           {scoring.band}
         </p>
+        <p className="evaluation-score-panel-label">Summary</p>
         <p
           className="evaluation-score-method-note text-[10px] tracking-[0.1em] uppercase"
           style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
