@@ -179,6 +179,12 @@ html[data-pdf-capture="1"] .evaluation-pdf-cover-cta-url {
   color: var(--sc-accent);
 }
 
+html[data-pdf-capture="1"] .evaluation-pdf-cover-cta-url a {
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+}
+
 /* Hide headline band badge in capture — score belongs in the narrative */
 html[data-pdf-capture="1"] .evaluation-score-panel-band,
 html[data-pdf-capture="1"] .evaluation-score-method-note {
