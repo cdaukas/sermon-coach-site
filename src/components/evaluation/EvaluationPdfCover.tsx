@@ -5,13 +5,13 @@ const COVER_INTRO =
 
 const COVER_COPY_THEIRS = [
   "Now there is. I ran one of yours through it. It was very encouraging!",
-  "This is what The Sermon Coach returned within minutes on your sermon. It shows where it was strong, where it could grow, how it preached, and the changes that would most strengthen it before you step into the pulpit. It assesses against the strongest principles in expositional preaching, drawn from the public work of some of the most respected pastors and authors we have.",
+  "This is what The Sermon Coach returned within minutes on your sermon. It shows where it was strong, where it could grow, how it preaches, and the changes that would most strengthen it before you step into the pulpit. It assesses against the strongest principles in expositional preaching, drawn from the public work of some of the most respected pastors and authors we have.",
   "Personally, I use it on every sermon before I finalize my draft. It finds the soft spots in my sermon before the church is forced to sit through them.",
 ] as const;
 
 const COVER_COPY_MINE = [
   "I don't have one of your sermons yet, so let me show you one of mine.",
-  "This is what The Sermon Coach returned within minutes on a sermon I preached. It shows where it was strong, where it could grow, how it preached, and the changes that would most strengthen it before I stepped into the pulpit. It assesses against the strongest principles in expositional preaching, drawn from the public work of some of the most respected pastors and authors we have.",
+  "This is what The Sermon Coach returned within minutes on a sermon I preached. It shows where it was strong, where it could grow, how it preaches, and the changes that would most strengthen it before I stepped into the pulpit. It assesses against the strongest principles in expositional preaching, drawn from the public work of some of the most respected pastors and authors we have.",
   "Personally, I use it on every sermon before I finalize my draft. It finds the soft spots in my sermon before the church is forced to sit through them.",
 ] as const;
 
