@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildContextPreamble, type SermonContext } from "./context";
 
-export const EVALUATION_PROMPT_VERSION = "v3.2";
+export const EVALUATION_PROMPT_VERSION = "v3.3";
 
 /** Rows below this prompt_version use read-grandfather verdict caps (no 60/32 on dashboard parse). */
 export const VERDICT_STRICT_CAPS_FROM = "v2.3";
