@@ -1,0 +1,10 @@
+/*
+ * Dashboard route-group heading convention.
+ * Scoped to .dashboard-shell so marketing pages and evaluation display stay untouched.
+ * Page chrome (nav, labels, CTAs) keeps --font-ui via inline styles.
+ */
+.dashboard-shell h1,
+.dashboard-shell h2,
+.dashboard-shell .sc-heading {
+  font-family: var(--font-serif);
+}
