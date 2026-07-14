@@ -85,7 +85,10 @@ export function BuyPackCards() {
             </div>
           ) : null}
 
-          <div className="text-[18px] font-semibold" style={{ ...uiFont, color: "var(--sc-ink)" }}>
+          <div
+            className="sc-heading text-[18px] font-semibold"
+            style={{ color: "var(--sc-ink)" }}
+          >
             {card.name}
           </div>
 

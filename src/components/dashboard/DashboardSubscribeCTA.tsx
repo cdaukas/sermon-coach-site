@@ -66,7 +66,10 @@ export function DashboardSubscribeCTA({
         boxShadow: "0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04)",
       }}
     >
-      <div className="text-[18px] font-semibold" style={{ ...uiFont, color: "var(--sc-ink)" }}>
+      <div
+        className="sc-heading text-[18px] font-semibold"
+        style={{ color: "var(--sc-ink)" }}
+      >
         Coach
       </div>
 

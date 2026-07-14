@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { LastActiveTracker } from "@/components/auth/LastActiveTracker";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { createClient } from "@/lib/supabase/server";
+import "./dashboard.css";
 
 export const metadata: Metadata = {
   title: "Dashboard — The Sermon Coach",
