@@ -18,6 +18,12 @@
   --sc-green-soft: #7ba886;
   --sc-amber: #c9892e;
   --sc-red: #a04848;
+  --sc-gold: #8a6624;
+  --sc-gold-soft: #f5efe3;
+  --sc-olive: #4a5a38;
+  --sc-olive-soft: #eef1ea;
+  --sc-rust: #8f4a32;
+  --sc-rust-soft: #f6ece7;
   --sc-cream-tint: #faf6ed;
   --sc-shadow: 0 1px 3px rgba(26, 35, 50, 0.06), 0 1px 2px rgba(26, 35, 50, 0.04);
   --sc-shadow-lift: 0 12px 32px rgba(26, 35, 50, 0.1),

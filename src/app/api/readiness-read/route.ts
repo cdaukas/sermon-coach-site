@@ -4,7 +4,8 @@
 // Body: { primary_passage?, outline_form?, ache, big_idea, gospel_turn, points, one_person, ending }
 // outline_form: "outline" | "manuscript" — tunes closing line only
 // one_person field stores THE ONE THING (Monday change); key kept for schema continuity
-// Returns: { read: string }  — markdown, telemetry block stripped
+// Returns: { read: string, status: { ache?, big_idea?, ... } }
+// Telemetry persists server-side to readiness_reads; not returned to the client.
 //
 // Auth matches the existing pattern in src/app/api/evaluations/[evaluationId]/route.ts:
 // cookie session via createClient() from @/lib/supabase/server, then auth.getUser().
@@ -18,7 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs"; // readFileSync + longer model call
 
-const PROMPT_VERSION = "v2.8";
+const PROMPT_VERSION = "v2.9";
 const MODEL = "claude-opus-4-8";
 
 // Read once at module scope, not per request.
@@ -58,6 +59,8 @@ type OutlineForm = keyof typeof OUTLINE_FORMS;
 
 const STATUSES = new Set<Status>(["solid", "thin", "seam"]);
 
+type StatusMap = Partial<Record<Field, Status>>;
+
 type Telemetry = Partial<
   Record<`status_${Field}`, Status> & {
     mode: Mode;
@@ -65,6 +68,63 @@ type Telemetry = Partial<
     seam_spokes: string[];
   }
 >;
+
+function statusFromTelemetry(telemetry: Telemetry): StatusMap {
+  const out: StatusMap = {};
+  for (const f of FIELDS) {
+    const v = telemetry[`status_${f}`];
+    if (v) out[f] = v;
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Split model output into the human-facing read and the telemetry row.
+//
+// Defensive on purpose: the model will occasionally trail prose after the JSON
+// or omit the block entirely. Neither should cost the preacher his read, and
+// neither should write a garbage row.
+// ---------------------------------------------------------------------------
+function splitRead(raw: string): {
+  read: string;
+  telemetry: Telemetry;
+  status: StatusMap;
+} {
+  const fence = /```json\s*([\s\S]*?)```/gi;
+  let last: RegExpExecArray | null = null;
+  let m: RegExpExecArray | null;
+
+  while ((m = fence.exec(raw)) !== null) last = m;
+
+  if (!last) {
+    console.warn("no telemetry block emitted");
+    return { read: stripProseGlance(raw), telemetry: {}, status: {} };
+  }
+
+  // Strip a leftover prose AT A GLANCE if the model still emits one —
+  // the report table is driven only by the telemetry `status` object.
+  const read = stripProseGlance(raw.slice(0, last.index).trim());
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(last[1].trim());
+  } catch (err) {
+    console.warn("telemetry block did not parse", err);
+    return { read, telemetry: {}, status: {} };
+  }
+
+  const telemetry = normalize(parsed);
+  return { read, telemetry, status: statusFromTelemetry(telemetry) };
+}
+
+function stripProseGlance(read: string): string {
+  return read
+    .replace(
+      /\*\*AT A GLANCE\*\*[\s\S]*?(?=\*\*(?:WHAT'S SOLID|THE ONE THING))/i,
+      "",
+    )
+    .trim();
+}
 
 export async function POST(request: Request) {
   // --- auth (same shape as the evaluations route) --------------------------
@@ -169,7 +229,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { read, telemetry } = splitRead(raw);
+  const { read, telemetry, status } = splitRead(raw);
 
   // --- write, but never at the preacher's expense --------------------------
   // The read is the product. Telemetry is ours. A failed insert gets logged and
@@ -194,39 +254,9 @@ export async function POST(request: Request) {
     console.error("readiness_reads insert threw", err);
   }
 
-  return NextResponse.json({ read });
-}
-
-// ---------------------------------------------------------------------------
-// Split model output into the human-facing read and the telemetry row.
-//
-// Defensive on purpose: the model will occasionally trail prose after the JSON
-// or omit the block entirely. Neither should cost the preacher his read, and
-// neither should write a garbage row.
-// ---------------------------------------------------------------------------
-function splitRead(raw: string): { read: string; telemetry: Telemetry } {
-  const fence = /```json\s*([\s\S]*?)```/gi;
-  let last: RegExpExecArray | null = null;
-  let m: RegExpExecArray | null;
-
-  while ((m = fence.exec(raw)) !== null) last = m;
-
-  if (!last) {
-    console.warn("no telemetry block emitted");
-    return { read: raw, telemetry: {} };
-  }
-
-  const read = raw.slice(0, last.index).trim();
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(last[1].trim());
-  } catch (err) {
-    console.warn("telemetry block did not parse", err);
-    return { read, telemetry: {} };
-  }
-
-  return { read, telemetry: normalize(parsed) };
+  // status is the six-area object for the report table. Telemetry stays
+  // server-side (DB insert above); do not return the full telemetry row.
+  return NextResponse.json({ read, status });
 }
 
 // Trust nothing. A bad enum fails the CHECK constraint and takes the whole
