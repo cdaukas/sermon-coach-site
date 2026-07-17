@@ -1,7 +1,9 @@
 // src/app/api/readiness-read/route.ts
 //
 // POST /api/readiness-read
-// Body: { primary_passage?, ache, big_idea, gospel_turn, points, one_person, ending }
+// Body: { primary_passage?, outline_form?, ache, big_idea, gospel_turn, points, one_person, ending }
+// outline_form: "outline" | "manuscript" — tunes closing line only
+// one_person field stores THE ONE THING (Monday change); key kept for schema continuity
 // Returns: { read: string }  — markdown, telemetry block stripped
 //
 // Auth matches the existing pattern in src/app/api/evaluations/[evaluationId]/route.ts:
@@ -16,7 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs"; // readFileSync + longer model call
 
-const PROMPT_VERSION = "v2.4";
+const PROMPT_VERSION = "v2.5";
 const MODEL = "claude-opus-4-8";
 
 // Read once at module scope, not per request.
@@ -43,9 +45,16 @@ const LABELS: Record<Field, string> = {
   big_idea: "THE BIG IDEA",
   gospel_turn: "THE GOSPEL TURN",
   points: "THE POINTS",
-  one_person: "THE ONE PERSON",
+  one_person: "THE ONE THING",
   ending: "THE LAST NINETY SECONDS",
 };
+
+const OUTLINE_FORMS = {
+  outline: "This is the outline I'll preach from",
+  manuscript: "I'm still heading toward a manuscript",
+} as const;
+
+type OutlineForm = keyof typeof OUTLINE_FORMS;
 
 const STATUSES = new Set<Status>(["solid", "thin", "seam"]);
 
@@ -94,8 +103,17 @@ export async function POST(request: Request) {
 
   const primaryPassage = String(body.primary_passage ?? "").trim() || null;
 
+  const outlineFormRaw = String(body.outline_form ?? "").trim().toLowerCase();
+  const outlineForm: OutlineForm | null =
+    outlineFormRaw === "outline" || outlineFormRaw === "manuscript"
+      ? outlineFormRaw
+      : null;
+
   const intake = [
     primaryPassage ? `THE PASSAGE\n${primaryPassage}` : null,
+    outlineForm
+      ? `OUTLINE FORM\n${OUTLINE_FORMS[outlineForm]}`
+      : null,
     ...FIELDS.map((f) => `${LABELS[f]}\n${answers[f]}`),
   ]
     .filter(Boolean)
