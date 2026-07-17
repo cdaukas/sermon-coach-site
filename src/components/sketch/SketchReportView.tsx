@@ -11,9 +11,9 @@ import {
   type SketchStatusMap,
 } from "@/lib/sketch/types";
 
-/** Matches bare HE/YOU, optional ** wrapping, colon in/out of bold, inline or split question. */
+/** Matches bare HE/YOU/TO SETTLE, optional ** wrapping, colon in/out of bold, inline or split question. */
 const QUESTION_LINE_RE =
-  /^(?:\*\*)?\s*THE QUESTION (?:HE|YOU) MUST ANSWER:?\s*(?:\*\*)?:?\s*(.*)$/i;
+  /^(?:\*\*)?\s*THE QUESTION (?:(?:HE|YOU) MUST ANSWER|TO SETTLE):?\s*(?:\*\*)?:?\s*(.*)$/i;
 
 function matchQuestionLine(line: string): string | null {
   const m = line.match(QUESTION_LINE_RE);
