@@ -15,7 +15,7 @@ export const BLOG_EMAIL_CTA_PARAGRAPH =
 export const BLOG_EMAIL_CTA_BUTTON_LABEL = "Run an evaluation";
 
 export const BLOG_EMAIL_FOOTER_LINE_1 =
-  "The Sermon Coach™ · Built by Dr. Christopher Daukas · Phoenix, Arizona";
+  "The Sermon Coach™ · Built by Dr. Christopher M. Daukas · Phoenix, Arizona";
 
 export const BLOG_EMAIL_MAILING_ADDRESS =
   "Daukas Group, LLC · 9572 W Frank Ave, Peoria, AZ 85382";

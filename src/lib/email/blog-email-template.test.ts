@@ -23,7 +23,7 @@ describe("blog email template", () => {
     assert.match(html, /First paragraph/);
     assert.match(html, /Run an evaluation/);
     assert.match(html, new RegExp(BLOG_EMAIL_CTA_URL.replaceAll("/", "\\/")));
-    assert.match(html, /Built by Dr\. Christopher Daukas · Phoenix, Arizona/);
+    assert.match(html, /Built by Dr\. Christopher M\. Daukas · Phoenix, Arizona/);
     assert.match(html, new RegExp(BLOG_EMAIL_MAILING_ADDRESS.replaceAll(".", "\\.")));
     assert.match(html, /Read the full post/);
     assert.match(html, /Unsubscribe/);
