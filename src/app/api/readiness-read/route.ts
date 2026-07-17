@@ -18,7 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs"; // readFileSync + longer model call
 
-const PROMPT_VERSION = "v2.5";
+const PROMPT_VERSION = "v2.6";
 const MODEL = "claude-opus-4-8";
 
 // Read once at module scope, not per request.
