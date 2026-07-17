@@ -433,11 +433,11 @@ export function SketchReportView({
       >
         <Link
           href="/start"
-          className="mb-6 block rounded border px-5 py-4 text-[15px] font-medium leading-snug no-underline transition-colors hover:border-[var(--sc-ink)]"
+          className="mb-6 inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline transition-opacity hover:opacity-90"
           style={{
-            background: "var(--sc-bg)",
-            borderColor: "var(--sc-rule)",
-            color: "var(--sc-ink)",
+            background: "var(--sc-ink)",
+            borderColor: "var(--sc-ink)",
+            color: "var(--sc-bg)",
           }}
         >
           Ready for the full evaluation? Run it on your finished outline,
