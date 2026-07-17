@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { StartLanding } from "@/components/start/StartLanding";
 import { StartRedirect } from "@/components/start/StartRedirect";
-import { START_DESTINATION } from "@/lib/auth/start";
+import { FIRST_EVAL_PATH } from "@/lib/auth/start";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default async function StartPage() {
       .maybeSingle();
 
     if (profile?.acquisition_source_at) {
-      redirect(START_DESTINATION);
+      redirect(FIRST_EVAL_PATH);
     }
 
     return <StartRedirect />;

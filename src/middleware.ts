@@ -1,5 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  isDashboardPath,
+  needsAcquisitionAttribution,
+} from "@/lib/auth/acquisition-gate";
+import { START_PATH } from "@/lib/auth/start";
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -35,7 +40,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  if (!user && pathname.startsWith("/dashboard")) {
+  if (!user && isDashboardPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", pathname);
@@ -59,9 +64,19 @@ export async function middleware(request: NextRequest) {
     }
 
     const url = request.nextUrl.clone();
-    url.pathname = "/start";
+    url.pathname = START_PATH;
     url.search = "";
     return NextResponse.redirect(url);
+  }
+
+  if (user && isDashboardPath(pathname)) {
+    const needsAttribution = await needsAcquisitionAttribution(supabase);
+    if (needsAttribution) {
+      const url = request.nextUrl.clone();
+      url.pathname = START_PATH;
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;
