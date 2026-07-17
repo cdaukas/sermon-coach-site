@@ -15,23 +15,38 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 
 const PILL_STYLE: Record<
   SketchStatus,
-  { color: string; background: string; border: string }
+  { color: string; background: string; swatch: string }
 > = {
   solid: {
     color: "var(--sc-olive)",
-    background: "var(--sc-olive-soft)",
-    border: "var(--sc-olive)",
+    background: "rgba(74,90,56,0.10)",
+    swatch: "var(--sc-olive)",
   },
   thin: {
     color: "var(--sc-gold)",
-    background: "var(--sc-gold-soft)",
-    border: "var(--sc-gold)",
+    background: "rgba(138,102,36,0.10)",
+    swatch: "var(--sc-accent-soft)",
   },
   seam: {
     color: "var(--sc-rust)",
-    background: "var(--sc-rust-soft)",
-    border: "var(--sc-rust)",
+    background: "rgba(143,74,50,0.10)",
+    swatch: "var(--sc-rust)",
   },
+};
+
+const LEGEND: Array<{ status: SketchStatus; text: string }> = [
+  { status: "solid", text: "Solid, it's here and holding" },
+  { status: "thin", text: "Thin, present but light" },
+  { status: "seam", text: "In tension, something to resolve" },
+];
+
+const SECTION_TITLES: Record<string, string> = {
+  "WHAT'S SOLID": "What's solid",
+  "THE ONE THING TO FIND": "The one thing to find",
+  "THE ONE THING TO PRESS": "The one thing to press",
+  "TWO SMALLER THINGS": "Two smaller things",
+  "ONE SMALLER THING": "One smaller thing",
+  "A SMALLER THING": "One smaller thing",
 };
 
 type SketchReportViewProps = {
@@ -49,9 +64,7 @@ function inlineMarkdown(text: string): ReactNode[] {
   let key = 0;
 
   while ((m = re.exec(text)) !== null) {
-    if (m.index > last) {
-      parts.push(text.slice(last, m.index));
-    }
+    if (m.index > last) parts.push(text.slice(last, m.index));
     const token = m[0];
     if (token.startsWith("**")) {
       parts.push(<strong key={key++}>{token.slice(2, -2)}</strong>);
@@ -65,7 +78,52 @@ function inlineMarkdown(text: string): ReactNode[] {
   return parts;
 }
 
-function renderProseBlocks(markdown: string): ReactNode {
+function SectionTitle({ title, muted }: { title: string; muted?: string }) {
+  return (
+    <h2
+      className="mt-10 mb-3 flex items-baseline gap-3 border-b pb-2 text-[20px] font-semibold tracking-tight"
+      style={{
+        ...serifFont,
+        color: "var(--sc-ink)",
+        borderColor: "var(--sc-rule)",
+      }}
+    >
+      {title}
+      {muted ? (
+        <span
+          className="text-[11px] font-semibold tracking-[0.14em] uppercase"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          {muted}
+        </span>
+      ) : null}
+    </h2>
+  );
+}
+
+function CardHeader({ children }: { children: ReactNode }) {
+  return (
+    <p
+      className="mt-4 mb-1.5 text-[12px] font-semibold tracking-[0.12em] uppercase"
+      style={{ ...uiFont, color: "var(--sc-gold)" }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function Body({ children }: { children: ReactNode }) {
+  return (
+    <p
+      className="mb-3 text-[16px] leading-[1.7]"
+      style={{ ...serifFont, color: "var(--sc-ink)" }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
   const lines = markdown.replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
   let i = 0;
@@ -80,44 +138,62 @@ function renderProseBlocks(markdown: string): ReactNode {
 
     const heading = line.match(/^\*\*(.+?)\*\*$/);
     if (heading) {
-      const title = heading[1];
-      if (
-        title.startsWith("THE ONE THING TO FIND") ||
-        title.startsWith("THE ONE THING TO PRESS") ||
-        title === "WHAT'S SOLID" ||
-        title.startsWith("TWO SMALLER THINGS") ||
-        title === "CLOSING LINE"
-      ) {
-        blocks.push(
-          <h2
-            key={key++}
-            className="mt-10 mb-4 text-[22px] font-semibold tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            {title.replace(/\s*—\s*.*$/, "")}
-          </h2>,
-        );
+      const raw = heading[1].replace(/\s*—\s*.*$/, "").trim();
+      const sectionKey = Object.keys(SECTION_TITLES).find((k) =>
+        raw.toUpperCase().startsWith(k),
+      );
+
+      if (sectionKey) {
+        if (
+          sectionKey === "WHAT'S SOLID" ||
+          sectionKey.startsWith("THE ONE THING")
+        ) {
+          const muted =
+            sectionKey === "WHAT'S SOLID"
+              ? solidCount > 0
+                ? `${solidCount} of six`
+                : undefined
+              : "before Sunday";
+          blocks.push(
+            <SectionTitle
+              key={key++}
+              title={SECTION_TITLES[sectionKey]}
+              muted={muted}
+            />,
+          );
+        } else {
+          blocks.push(
+            <SectionTitle key={key++} title={SECTION_TITLES[sectionKey]} />,
+          );
+        }
         i += 1;
         continue;
       }
 
-      // Bold card lead-in for WHAT'S SOLID / smaller things
-      blocks.push(
-        <p
-          key={key++}
-          className="mt-5 mb-2 text-[17px] font-semibold leading-snug"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          {title}
-        </p>,
-      );
+      if (raw.toUpperCase().startsWith("CLOSING LINE")) {
+        // No heading for the closing line; the italic paragraph follows.
+        i += 1;
+        continue;
+      }
+
+      // Card header (bold lead-in) — may carry inline prose after an em-dash.
+      const full = heading[1];
+      const dash = full.indexOf(" — ");
+      if (dash !== -1) {
+        blocks.push(<CardHeader key={key++}>{full.slice(0, dash)}</CardHeader>);
+        blocks.push(
+          <Body key={key++}>{inlineMarkdown(full.slice(dash + 3))}</Body>,
+        );
+      } else {
+        blocks.push(<CardHeader key={key++}>{full}</CardHeader>);
+      }
       i += 1;
       continue;
     }
 
     if (/^THE QUESTION HE MUST ANSWER/i.test(line)) {
-      const question = line.replace(/^THE QUESTION HE MUST ANSWER:?\s*/i, "");
-      const rest: string[] = question ? [question] : [];
+      const first = line.replace(/^THE QUESTION HE MUST ANSWER:?\s*/i, "");
+      const rest: string[] = first ? [first] : [];
       i += 1;
       while (i < lines.length && lines[i].trim()) {
         rest.push(lines[i].trim());
@@ -126,17 +202,14 @@ function renderProseBlocks(markdown: string): ReactNode {
       blocks.push(
         <aside
           key={key++}
-          className="my-6 rounded border-l-4 px-5 py-4"
+          className="my-6 rounded-r px-5 py-4"
           style={{
-            borderLeftColor: "var(--sc-gold)",
-            background: "var(--sc-gold-soft)",
-            borderTop: "1px solid var(--sc-rule)",
-            borderRight: "1px solid var(--sc-rule)",
-            borderBottom: "1px solid var(--sc-rule)",
+            borderLeft: "3px solid var(--sc-gold)",
+            background: "rgba(138,102,36,0.055)",
           }}
         >
           <div
-            className="mb-2 text-[11px] font-semibold tracking-[0.14em] uppercase"
+            className="mb-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase"
             style={{ ...uiFont, color: "var(--sc-gold)" }}
           >
             The question to settle
@@ -152,10 +225,14 @@ function renderProseBlocks(markdown: string): ReactNode {
       continue;
     }
 
-    // Closing line heuristic: short italic-ish closing paragraphs near end
     const para: string[] = [line];
     i += 1;
-    while (i < lines.length && lines[i].trim() && !lines[i].trim().startsWith("**") && !/^THE QUESTION HE MUST ANSWER/i.test(lines[i].trim())) {
+    while (
+      i < lines.length &&
+      lines[i].trim() &&
+      !lines[i].trim().startsWith("**") &&
+      !/^THE QUESTION HE MUST ANSWER/i.test(lines[i].trim())
+    ) {
       para.push(lines[i].trim());
       i += 1;
     }
@@ -165,18 +242,19 @@ function renderProseBlocks(markdown: string): ReactNode {
       text.startsWith("This is a pre-read") ||
       text.startsWith("If the outline is what you'll preach from");
 
-    blocks.push(
-      <p
-        key={key++}
-        className={`mb-4 text-[16px] leading-[1.7] ${isClosing ? "italic mt-8" : ""}`}
-        style={{
-          ...serifFont,
-          color: isClosing ? "var(--sc-ink-soft)" : "var(--sc-ink)",
-        }}
-      >
-        {inlineMarkdown(text)}
-      </p>,
-    );
+    if (isClosing) {
+      blocks.push(
+        <p
+          key={key++}
+          className="mt-8 mb-4 text-[16px] italic leading-[1.7]"
+          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+        >
+          {inlineMarkdown(text)}
+        </p>,
+      );
+    } else {
+      blocks.push(<Body key={key++}>{inlineMarkdown(text)}</Body>);
+    }
   }
 
   return blocks;
@@ -187,12 +265,7 @@ function StatusPill({ status }: { status: SketchStatus }) {
   return (
     <span
       className="inline-flex items-center rounded-sm px-2.5 py-1 text-[12px] font-semibold tracking-wide"
-      style={{
-        ...uiFont,
-        color: style.color,
-        background: style.background,
-        border: `1px solid ${style.border}`,
-      }}
+      style={{ ...uiFont, color: style.color, background: style.background }}
     >
       {SKETCH_STATUS_LABELS[status]}
     </span>
@@ -206,6 +279,7 @@ export function SketchReportView({
   onStartAnother,
 }: SketchReportViewProps) {
   const hasStatus = SKETCH_FIELDS.some((f) => status[f]);
+  const solidCount = SKETCH_FIELDS.filter((f) => status[f] === "solid").length;
   const workingIdea =
     intake.big_idea.trim().length > 90
       ? `${intake.big_idea.trim().slice(0, 87)}…`
@@ -213,10 +287,10 @@ export function SketchReportView({
 
   return (
     <article className="mx-auto max-w-[720px]">
-      <header className="mb-8 border-b pb-6" style={{ borderColor: "var(--sc-rule)" }}>
+      <header className="mb-8">
         <div
           className="mb-3 text-[11px] font-semibold tracking-[0.18em] uppercase"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
+          style={{ ...uiFont, color: "var(--sc-gold)" }}
         >
           The Sermon Coach · The Sketch
         </div>
@@ -227,8 +301,8 @@ export function SketchReportView({
           Here&apos;s what your sermon is about, before you build it.
         </h1>
         <p
-          className="mb-1 text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          className="mb-1 text-[13px] font-medium tracking-wide"
+          style={{ ...uiFont, color: "var(--sc-gold)" }}
         >
           a read on your sermon before you build it
         </p>
@@ -241,23 +315,36 @@ export function SketchReportView({
       </header>
 
       <dl
-        className="mb-4 grid gap-3 text-[13px] sm:grid-cols-3"
-        style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+        className="mb-4 grid gap-3 border-y py-4 text-[13px] sm:grid-cols-3"
+        style={{
+          ...uiFont,
+          color: "var(--sc-ink-mid)",
+          borderColor: "var(--sc-rule)",
+        }}
       >
         <div>
-          <dt className="mb-1 font-semibold tracking-wide uppercase text-[11px]" style={{ color: "var(--sc-ink-soft)" }}>
+          <dt
+            className="mb-1 text-[11px] font-semibold tracking-[0.14em] uppercase"
+            style={{ color: "var(--sc-gold)" }}
+          >
             Text
           </dt>
           <dd>{intake.primary_passage.trim() || "Not given"}</dd>
         </div>
         <div>
-          <dt className="mb-1 font-semibold tracking-wide uppercase text-[11px]" style={{ color: "var(--sc-ink-soft)" }}>
+          <dt
+            className="mb-1 text-[11px] font-semibold tracking-[0.14em] uppercase"
+            style={{ color: "var(--sc-gold)" }}
+          >
             Working idea
           </dt>
           <dd>{workingIdea || "Not given"}</dd>
         </div>
         <div>
-          <dt className="mb-1 font-semibold tracking-wide uppercase text-[11px]" style={{ color: "var(--sc-ink-soft)" }}>
+          <dt
+            className="mb-1 text-[11px] font-semibold tracking-[0.14em] uppercase"
+            style={{ color: "var(--sc-gold)" }}
+          >
             Preaching
           </dt>
           <dd>
@@ -272,29 +359,32 @@ export function SketchReportView({
         className="mb-8 text-[13px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        This read works from what you told us in the six answers. It is a mirror
-        of the sermon you are making, not a grade and not a substitute for the
-        full evaluation.
+        This read works from what you told us, not a finished manuscript. Where
+        something looks thin or missing, it means we didn&apos;t see it in your
+        six answers. If it&apos;s already in the sermon, you&apos;ll know where.
       </p>
 
       {hasStatus ? (
         <section className="mb-10">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
             <h2
-              className="text-[18px] font-semibold tracking-tight"
+              className="text-[20px] font-semibold tracking-tight"
               style={{ ...serifFont, color: "var(--sc-ink)" }}
             >
               At a glance
             </h2>
-            <div className="flex flex-wrap gap-3 text-[12px]" style={uiFont}>
-              {(["solid", "thin", "seam"] as const).map((s) => (
+            <div
+              className="flex flex-wrap gap-3 text-[12px]"
+              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            >
+              {LEGEND.map(({ status: s, text }) => (
                 <span key={s} className="inline-flex items-center gap-1.5">
                   <span
                     className="inline-block h-2.5 w-2.5 rounded-sm"
-                    style={{ background: PILL_STYLE[s].color }}
+                    style={{ background: PILL_STYLE[s].swatch }}
                     aria-hidden
                   />
-                  {SKETCH_STATUS_LABELS[s]}
+                  {text}
                 </span>
               ))}
             </div>
@@ -327,19 +417,24 @@ export function SketchReportView({
         </section>
       ) : null}
 
-      <section>{renderProseBlocks(read)}</section>
+      <section>{renderProseBlocks(read, solidCount)}</section>
 
       <footer
         className="mt-12 border-t pt-6 text-[13px] leading-relaxed"
-        style={{ ...uiFont, borderColor: "var(--sc-rule)", color: "var(--sc-ink-soft)" }}
+        style={{
+          ...uiFont,
+          borderColor: "var(--sc-rule)",
+          color: "var(--sc-ink-soft)",
+        }}
       >
         <p className="mb-2">
           The Sermon Coach · The Sketch · a reflection on your sermon in
           progress, not a graded evaluation.
         </p>
         <p className="mb-6">
-          The Sketch reflects the answers you provided. It is not a substitute
-          for the full evaluation.
+          The Sketch reflects the answers you provided. It does not score your
+          sermon and is not a substitute for the full evaluation of a finished
+          manuscript.
         </p>
         <button
           type="button"

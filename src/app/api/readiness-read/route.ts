@@ -98,10 +98,12 @@ function splitRead(raw: string): {
 
   if (!last) {
     console.warn("no telemetry block emitted");
-    return { read: raw, telemetry: {}, status: {} };
+    return { read: stripProseGlance(raw), telemetry: {}, status: {} };
   }
 
-  const read = raw.slice(0, last.index).trim();
+  // Strip a leftover prose AT A GLANCE if the model still emits one —
+  // the report table is driven only by the telemetry `status` object.
+  const read = stripProseGlance(raw.slice(0, last.index).trim());
 
   let parsed: unknown;
   try {
@@ -113,6 +115,15 @@ function splitRead(raw: string): {
 
   const telemetry = normalize(parsed);
   return { read, telemetry, status: statusFromTelemetry(telemetry) };
+}
+
+function stripProseGlance(read: string): string {
+  return read
+    .replace(
+      /\*\*AT A GLANCE\*\*[\s\S]*?(?=\*\*(?:WHAT'S SOLID|THE ONE THING))/i,
+      "",
+    )
+    .trim();
 }
 
 export async function POST(request: Request) {
