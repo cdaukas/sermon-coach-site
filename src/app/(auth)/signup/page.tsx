@@ -14,6 +14,7 @@ import {
   EmailExistsMessage,
   isDuplicateSignupError,
 } from "@/lib/auth/signup-errors";
+import { START_PATH } from "@/lib/auth/start";
 import { createClient } from "@/lib/supabase/client";
 import {
   buildAuthCallbackUrl,
@@ -102,7 +103,7 @@ function SignupForm() {
     const siteOrigin = getSiteOrigin();
     const emailRedirectTo = postCheckoutPath
       ? buildAuthCallbackUrl(siteOrigin, postCheckoutPath)
-      : `${siteOrigin}/login`;
+      : buildAuthCallbackUrl(siteOrigin, START_PATH);
 
     const { data: available, error: checkError } = await supabase.rpc(
       "email_available",
@@ -139,7 +140,7 @@ function SignupForm() {
     }
 
     if (data.session) {
-      router.push(postCheckoutPath ?? "/dashboard");
+      router.push(postCheckoutPath ?? START_PATH);
       router.refresh();
       return;
     }
@@ -151,7 +152,7 @@ function SignupForm() {
         ? "Check your email to confirm your account. After you verify, you'll continue to Coach checkout."
         : packParams
           ? "Check your email to confirm your account. After you verify, you'll continue to pack checkout."
-          : "Check your email to confirm your account, then sign in.",
+          : "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
     });
   }
 
