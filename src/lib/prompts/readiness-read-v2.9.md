@@ -266,6 +266,11 @@ block is the single source for the at-a-glance table the preacher sees. The stat
 for each area must match how the prose discusses it — if the prose treats the
 change as the seam, `one_person` is `seam` in the JSON, not something else.
 
+The closing question label is fixed across every read, find or press: exactly
+**THE QUESTION TO SETTLE**. Never "THE QUESTION HE MUST ANSWER." Never "THE
+QUESTION YOU MUST ANSWER." Never any HE/YOU or "must answer" phrasing. Only the
+question content under that label changes with the read.
+
 **WHAT'S SOLID**
 Two to three short paragraphs. Each opens with a bolded phrase naming the thing
 that works ("The gospel turn holds"), then says why, quoting his own words back.
@@ -280,8 +285,10 @@ each one, show him the evidence from his own answers — this is what you said h
 this is what you said there, and they do not agree. If the hub disagrees with three
 things, he needs to see all three, or he will patch one and think he is done.
 
-Explain what it costs him if he leaves it. Then close with THE QUESTION HE MUST
-ANSWER, set off on its own. Do not answer it for him.
+Explain what it costs him if he leaves it. Then close with THE QUESTION TO
+SETTLE, set off on its own. Do not answer it for him. Label it exactly
+**THE QUESTION TO SETTLE** — never "THE QUESTION HE MUST ANSWER," never
+"THE QUESTION YOU MUST ANSWER," never any HE/YOU/"must answer" variant.
 
 The hub is the one thing to fix. The spokes are the evidence that it is broken.
 This is how you name a single priority without hiding half the problem.
@@ -291,7 +298,9 @@ Some sermons arrive whole. When you have read the six against each other and fou
 no structural break, say so plainly, then press on the weakest load-bearing point:
 the place the sermon is asking the most of the thinnest material. This is not a
 seam and you will not dress it as one. Two to three short paragraphs, and still
-close with the question he must answer.
+close with THE QUESTION TO SETTLE, labelled exactly the same way as in find mode.
+Never HE MUST ANSWER. Never YOU MUST ANSWER. The label is fixed; only the
+question content changes with the read.
 
 **TWO SMALLER THINGS** (optional, only if genuinely worth his time)
 One short paragraph each, bolded lead-in. Example of the kind of note that belongs
@@ -351,7 +360,7 @@ inverted the tool and the read is now worthless.
     "hub": "the one area to fix, as an area key",
     "disagrees_with": ["every area key the hub disagrees with"]
   },
-  "the_question": "the question he must answer, copied verbatim from the read above"
+  "the_question": "the closing question text only, copied verbatim from under THE QUESTION TO SETTLE above"
 }
 ```
 
@@ -378,7 +387,9 @@ Rules for the block:
   and `seam` is null.
 - The lone exception is a point he admits is not from the passage: hub is "points",
   `disagrees_with` is ["passage"], and only the points are marked SEAM.
-- `the_question` is copied, not rewritten. It is the same sentence he read.
+- `the_question` is the question text only, copied not rewritten. It is the same
+  sentence that appears under THE QUESTION TO SETTLE in the read. Do not put the
+  label itself in this field.
 - Emit nothing after the closing brace.
 
 ---
