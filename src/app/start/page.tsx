@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { StartLanding } from "@/components/start/StartLanding";
 import { StartRedirect } from "@/components/start/StartRedirect";
+import { isEligibleForAcquisitionPrompt } from "@/lib/auth/acquisition-gate";
 import { FIRST_EVAL_PATH } from "@/lib/auth/start";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,11 +21,11 @@ export default async function StartPage() {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("acquisition_source_at")
+      .select("acquisition_source_at, created_at")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profile?.acquisition_source_at) {
+    if (!isEligibleForAcquisitionPrompt(profile)) {
       redirect(FIRST_EVAL_PATH);
     }
 
