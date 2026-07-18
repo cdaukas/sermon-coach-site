@@ -122,10 +122,10 @@ export function SketchIntakeForm({
           The Sketch
         </div>
         <h1
-          className="mb-2 text-[30px] font-semibold leading-tight tracking-tight"
+          className="mb-2 text-balance text-[26px] font-semibold leading-tight tracking-tight sm:text-[30px]"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          A read on your sermon before you build it out.
+          Read your sermon outline before you preach it.
         </h1>
         <p
           className="text-[15px] leading-relaxed"
