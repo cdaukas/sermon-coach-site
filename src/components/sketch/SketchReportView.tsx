@@ -152,12 +152,38 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
     if (questionInline !== null) {
       const rest: string[] = questionInline ? [questionInline] : [];
       i += 1;
-      while (i < lines.length && lines[i].trim()) {
-        const next = lines[i].trim();
-        if (matchQuestionLine(next) !== null) break;
-        rest.push(next);
-        i += 1;
+
+      // Split shape: label alone, then blank line(s), then the question.
+      // Skip blanks only when we still need the question text.
+      if (rest.length === 0) {
+        while (i < lines.length && !lines[i].trim()) i += 1;
+        if (i < lines.length) {
+          const next = lines[i].trim();
+          if (matchQuestionLine(next) === null) {
+            rest.push(next);
+            i += 1;
+          }
+        }
+      } else {
+        // Same-line shape: absorb any continued prose until a blank.
+        while (i < lines.length && lines[i].trim()) {
+          const next = lines[i].trim();
+          if (matchQuestionLine(next) !== null) break;
+          rest.push(next);
+          i += 1;
+        }
       }
+
+      // Strip wrapping ** from a whole-line bold question so it renders as
+      // body text inside the box, not gold all-caps CardHeader styling.
+      const questionText = rest
+        .map((chunk) => {
+          const wholeBold = chunk.match(/^\*\*(.+)\*\*$/);
+          return wholeBold ? wholeBold[1].trim() : chunk;
+        })
+        .join(" ")
+        .trim();
+
       blocks.push(
         <aside
           key={key++}
@@ -177,7 +203,7 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
             className="text-[16px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
-            {inlineMarkdown(rest.join(" "))}
+            {inlineMarkdown(questionText)}
           </p>
         </aside>,
       );
