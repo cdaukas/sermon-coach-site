@@ -122,7 +122,7 @@ export function SketchIntakeForm({
           The Sketch
         </div>
         <h1
-          className="mb-2 text-balance text-[26px] font-semibold leading-tight tracking-tight sm:text-[30px]"
+          className="mb-2 whitespace-nowrap text-[clamp(16px,4.8vw,28px)] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
           Read your sermon outline before you preach it.
