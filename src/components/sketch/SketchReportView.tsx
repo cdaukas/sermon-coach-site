@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import {
   SKETCH_AREA_LABELS,
   SKETCH_FIELDS,
@@ -9,6 +10,30 @@ import {
   type SketchStatus,
   type SketchStatusMap,
 } from "@/lib/sketch/types";
+
+/** Matches bare HE/YOU/TO SETTLE, optional ** wrapping, colon in/out of bold, inline or split question. */
+const QUESTION_LINE_RE =
+  /^(?:\*\*)?\s*THE QUESTION (?:(?:HE|YOU) MUST ANSWER|TO SETTLE):?\s*(?:\*\*)?:?\s*(.*)$/i;
+
+function matchQuestionLine(line: string): string | null {
+  const m = line.match(QUESTION_LINE_RE);
+  return m ? (m[1] ?? "").trim() : null;
+}
+
+/** Section / closing markers that end a question block mid-run. */
+function isQuestionBlockBoundary(line: string): boolean {
+  if (
+    line.startsWith("This is a pre-read") ||
+    line.startsWith("If the outline is what you'll preach from")
+  ) {
+    return true;
+  }
+  const heading = line.match(/^\*\*(.+?)\*\*$/);
+  if (!heading) return false;
+  const raw = heading[1].replace(/\s*—\s*.*$/, "").trim().toUpperCase();
+  if (raw.startsWith("CLOSING LINE")) return true;
+  return Object.keys(SECTION_TITLES).some((k) => raw.startsWith(k));
+}
 
 const serifFont = { fontFamily: "var(--font-serif)" };
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -136,6 +161,64 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
       continue;
     }
 
+    // Question callout before heading check — a bold-only label line would
+    // otherwise be swallowed as a card header.
+    const questionInline = matchQuestionLine(line);
+    if (questionInline !== null) {
+      const rest: string[] = questionInline ? [questionInline] : [];
+      i += 1;
+
+      // Skip blanks after a lone label so the question body can start.
+      if (rest.length === 0) {
+        while (i < lines.length && !lines[i].trim()) i += 1;
+      }
+
+      // Pull every following line until blank or next block (section /
+      // closing). Seam mode often spans a bolded first clause + a normal
+      // continuation across two or more lines.
+      while (i < lines.length) {
+        const next = lines[i].trim();
+        if (!next) break;
+        if (matchQuestionLine(next) !== null) break;
+        if (isQuestionBlockBoundary(next)) break;
+        rest.push(next);
+        i += 1;
+      }
+
+      // Strip ** markers so bolded clauses render as body text in the box,
+      // not gold all-caps CardHeader styling.
+      const questionText = rest
+        .map((chunk) => chunk.replace(/\*\*/g, "").trim())
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+      blocks.push(
+        <aside
+          key={key++}
+          className="my-6 rounded-r px-5 py-4"
+          style={{
+            borderLeft: "3px solid var(--sc-rule)",
+            background: "var(--sc-bg)",
+          }}
+        >
+          <div
+            className="mb-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            The question to settle
+          </div>
+          <p
+            className="text-[16px] leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            {inlineMarkdown(questionText)}
+          </p>
+        </aside>,
+      );
+      continue;
+    }
+
     const heading = line.match(/^\*\*(.+?)\*\*$/);
     if (heading) {
       const raw = heading[1].replace(/\s*—\s*.*$/, "").trim();
@@ -191,47 +274,13 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
       continue;
     }
 
-    if (/^THE QUESTION HE MUST ANSWER/i.test(line)) {
-      const first = line.replace(/^THE QUESTION HE MUST ANSWER:?\s*/i, "");
-      const rest: string[] = first ? [first] : [];
-      i += 1;
-      while (i < lines.length && lines[i].trim()) {
-        rest.push(lines[i].trim());
-        i += 1;
-      }
-      blocks.push(
-        <aside
-          key={key++}
-          className="my-6 rounded-r px-5 py-4"
-          style={{
-            borderLeft: "3px solid var(--sc-gold)",
-            background: "rgba(138,102,36,0.055)",
-          }}
-        >
-          <div
-            className="mb-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase"
-            style={{ ...uiFont, color: "var(--sc-gold)" }}
-          >
-            The question to settle
-          </div>
-          <p
-            className="text-[16px] leading-relaxed"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            {inlineMarkdown(rest.join(" "))}
-          </p>
-        </aside>,
-      );
-      continue;
-    }
-
     const para: string[] = [line];
     i += 1;
     while (
       i < lines.length &&
       lines[i].trim() &&
       !lines[i].trim().startsWith("**") &&
-      !/^THE QUESTION HE MUST ANSWER/i.test(lines[i].trim())
+      matchQuestionLine(lines[i].trim()) === null
     ) {
       para.push(lines[i].trim());
       i += 1;
@@ -298,19 +347,13 @@ export function SketchReportView({
           className="mb-2 text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Here&apos;s what your sermon is about, before you build it.
+          Read your sermon before you preach it.
         </h1>
-        <p
-          className="mb-1 text-[13px] font-medium tracking-wide"
-          style={{ ...uiFont, color: "var(--sc-gold)" }}
-        >
-          a read on your sermon before you build it
-        </p>
         <p
           className="text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          A reflected read of your six answers. Not a score, a mirror.
+          No score. A read of your six answers.
         </p>
       </header>
 
@@ -420,21 +463,27 @@ export function SketchReportView({
       <section>{renderProseBlocks(read, solidCount)}</section>
 
       <footer
-        className="mt-12 border-t pt-6 text-[13px] leading-relaxed"
-        style={{
-          ...uiFont,
-          borderColor: "var(--sc-rule)",
-          color: "var(--sc-ink-soft)",
-        }}
+        className="mt-12 border-t pt-6"
+        style={{ ...uiFont, borderColor: "var(--sc-rule)" }}
       >
-        <p className="mb-2">
+        <Link
+          href="/start"
+          className="mb-6 inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline transition-opacity hover:opacity-90"
+          style={{
+            background: "var(--sc-ink)",
+            borderColor: "var(--sc-ink)",
+            color: "var(--sc-bg)",
+          }}
+        >
+          Ready for the full evaluation? Run it on your finished outline,
+          manuscript, or transcript.
+        </Link>
+        <p
+          className="mb-6 text-[13px] leading-relaxed"
+          style={{ color: "var(--sc-ink-soft)" }}
+        >
           The Sermon Coach · The Sketch · a reflection on your sermon in
           progress, not a graded evaluation.
-        </p>
-        <p className="mb-6">
-          The Sketch reflects the answers you provided. It does not score your
-          sermon and is not a substitute for the full evaluation of a finished
-          manuscript.
         </p>
         <button
           type="button"
