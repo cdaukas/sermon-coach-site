@@ -20,6 +20,21 @@ function matchQuestionLine(line: string): string | null {
   return m ? (m[1] ?? "").trim() : null;
 }
 
+/** Section / closing markers that end a question block mid-run. */
+function isQuestionBlockBoundary(line: string): boolean {
+  if (
+    line.startsWith("This is a pre-read") ||
+    line.startsWith("If the outline is what you'll preach from")
+  ) {
+    return true;
+  }
+  const heading = line.match(/^\*\*(.+?)\*\*$/);
+  if (!heading) return false;
+  const raw = heading[1].replace(/\s*—\s*.*$/, "").trim().toUpperCase();
+  if (raw.startsWith("CLOSING LINE")) return true;
+  return Object.keys(SECTION_TITLES).some((k) => raw.startsWith(k));
+}
+
 const serifFont = { fontFamily: "var(--font-serif)" };
 const uiFont = { fontFamily: "var(--font-ui)" };
 
@@ -153,34 +168,28 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
       const rest: string[] = questionInline ? [questionInline] : [];
       i += 1;
 
-      // Split shape: label alone, then blank line(s), then the question.
-      // Skip blanks only when we still need the question text.
+      // Skip blanks after a lone label so the question body can start.
       if (rest.length === 0) {
         while (i < lines.length && !lines[i].trim()) i += 1;
-        if (i < lines.length) {
-          const next = lines[i].trim();
-          if (matchQuestionLine(next) === null) {
-            rest.push(next);
-            i += 1;
-          }
-        }
-      } else {
-        // Same-line shape: absorb any continued prose until a blank.
-        while (i < lines.length && lines[i].trim()) {
-          const next = lines[i].trim();
-          if (matchQuestionLine(next) !== null) break;
-          rest.push(next);
-          i += 1;
-        }
       }
 
-      // Strip wrapping ** from a whole-line bold question so it renders as
-      // body text inside the box, not gold all-caps CardHeader styling.
+      // Pull every following line until blank or next block (section /
+      // closing). Seam mode often spans a bolded first clause + a normal
+      // continuation across two or more lines.
+      while (i < lines.length) {
+        const next = lines[i].trim();
+        if (!next) break;
+        if (matchQuestionLine(next) !== null) break;
+        if (isQuestionBlockBoundary(next)) break;
+        rest.push(next);
+        i += 1;
+      }
+
+      // Strip ** markers so bolded clauses render as body text in the box,
+      // not gold all-caps CardHeader styling.
       const questionText = rest
-        .map((chunk) => {
-          const wholeBold = chunk.match(/^\*\*(.+)\*\*$/);
-          return wholeBold ? wholeBold[1].trim() : chunk;
-        })
+        .map((chunk) => chunk.replace(/\*\*/g, "").trim())
+        .filter(Boolean)
         .join(" ")
         .trim();
 
