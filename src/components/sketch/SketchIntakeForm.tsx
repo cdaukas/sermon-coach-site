@@ -125,13 +125,14 @@ export function SketchIntakeForm({
           className="mb-2 text-[30px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Six answers. One read before you build.
+          A read on your sermon before you build it out.
         </h1>
         <p
           className="text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          a read on your sermon before you build it
+          Insight into the core of your sermon, whether you preach from an
+          outline or build it into a manuscript.
         </p>
       </header>
 
