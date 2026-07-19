@@ -122,17 +122,16 @@ export function SketchIntakeForm({
           The Sketch
         </div>
         <h1
-          className="mb-2 whitespace-nowrap text-[30px] font-semibold leading-tight tracking-tight"
+          className="mb-2 text-balance text-[30px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Early scan of your sermon outline.
+          Alignment check on your sermon outline.
         </h1>
         <p
           className="text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          Insight into the alignment of your sermon, whether you preach from an
-          outline or build it into a manuscript.
+          A read on your sermon before you build it.
         </p>
       </header>
 
