@@ -122,16 +122,16 @@ export function SketchIntakeForm({
           The Sketch
         </div>
         <h1
-          className="mb-2 whitespace-nowrap text-[clamp(16px,4.8vw,28px)] font-semibold leading-tight tracking-tight"
+          className="mb-2 whitespace-nowrap text-[30px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Read your sermon outline before you preach it.
+          Early scan of your sermon outline.
         </h1>
         <p
           className="text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          Insight into the core of your sermon, whether you preach from an
+          Insight into the alignment of your sermon, whether you preach from an
           outline or build it into a manuscript.
         </p>
       </header>
