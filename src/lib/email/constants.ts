@@ -3,7 +3,7 @@ export const RESEND_FROM = "Chris Daukas <chris@sermoncoach.online>";
 
 /** Weekly blog teaser sends via npm run blog:send. */
 export const BLOG_EMAIL_FROM =
-  "Chris Daukas · The Sermon Coach <chris@sermoncoach.online>";
+  "Chris Daukas · The Sermon Coach <chris@sermoncoach.com>";
 export const RESEND_REPLY_TO = "chris@sermoncoach.online";
 export const RESEND_API_URL = "https://api.resend.com/emails";
 
