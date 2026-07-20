@@ -347,13 +347,13 @@ export function SketchReportView({
           className="mb-2 text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Read your sermon before you preach it.
+          Here&apos;s how your sermon is aligned.
         </h1>
         <p
           className="text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          No score. A read of your six answers.
+          No score. A read of how your sermon&apos;s core elements line up.
         </p>
       </header>
 
