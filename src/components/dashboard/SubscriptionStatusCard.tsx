@@ -44,7 +44,7 @@ export function SubscriptionStatusCard({
   };
 
   if (status.kind === "subscription") {
-    const word = status.remaining === 1 ? "evaluation" : "evaluations";
+    const word = status.remaining === 1 ? "credit" : "credits";
     return (
       <div style={cardStyle}>
         <div style={labelStyle}>Subscription · This Month</div>
@@ -58,7 +58,7 @@ export function SubscriptionStatusCard({
   }
 
   // kind === "free"
-  const word = status.freeRemaining === 1 ? "evaluation" : "evaluations";
+  const word = status.freeRemaining === 1 ? "credit" : "credits";
   return (
     <div style={cardStyle}>
       <div style={labelStyle}>Free to try</div>

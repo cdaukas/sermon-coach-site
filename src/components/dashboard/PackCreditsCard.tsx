@@ -55,7 +55,7 @@ export function PackCreditsCard({
           className="mt-1 text-[13px]"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          Your monthly evaluations are used first. Pack credits kick in after those
+          Your monthly credits are used first. Pack credits kick in after those
           run out.
         </p>
       ) : null}

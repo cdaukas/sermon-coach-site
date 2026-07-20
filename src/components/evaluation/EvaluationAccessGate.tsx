@@ -45,13 +45,13 @@ export function EvaluationCreditNotice({
 
   if (entitlement.creditSource === "free" && entitlement.freeRemaining > 0) {
     notices.push(
-      `${entitlement.freeRemaining} free evaluation${entitlement.freeRemaining === 1 ? "" : "s"} remaining`,
+      `${entitlement.freeRemaining} free credit${entitlement.freeRemaining === 1 ? "" : "s"} remaining`,
     );
   }
 
   if (entitlement.packRemaining > 0) {
     notices.push(
-      `${entitlement.packRemaining} pack evaluation${entitlement.packRemaining === 1 ? "" : "s"} remaining`,
+      `${entitlement.packRemaining} pack credit${entitlement.packRemaining === 1 ? "" : "s"} remaining`,
     );
   }
 
@@ -82,7 +82,7 @@ export function EvaluationAccessGate({
     return (
       <CapacityAlert
         className={className}
-        message="You've used all your evaluations this month."
+        message="You've used all your credits this month."
       />
     );
   }
@@ -91,7 +91,7 @@ export function EvaluationAccessGate({
     return (
       <CapacityAlert
         className={className}
-        message="No evaluation credits remaining."
+        message="No credits remaining."
       />
     );
   }

@@ -66,7 +66,7 @@ export default async function BuyPage() {
           className="text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Add evaluations
+          Add credits
         </h1>
         {hasActiveSubscription ? (
           <p
@@ -113,7 +113,7 @@ export default async function BuyPage() {
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           role="status"
         >
-          Out of evaluations until next month? A pack carries you through. Credits stack on top of your subscription, get used only after your monthly ten, and stay good for 18 months. Nothing you buy goes to waste.
+          Out of credits until next month? A pack carries you through. Credits stack on top of your subscription, get used only after your monthly ten, and stay good for 18 months. Nothing you buy goes to waste.
         </p>
       ) : null}
 

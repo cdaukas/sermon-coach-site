@@ -124,21 +124,21 @@ export function EvaluateButton({
 
       {!hideCreditLine && entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-          {entitlement.freeRemaining} free evaluation
+          {entitlement.freeRemaining} free credit
           {entitlement.freeRemaining === 1 ? "" : "s"} remaining
         </p>
       ) : null}
 
       {!hideCreditLine && entitlement?.packRemaining != null && entitlement.packRemaining > 0 ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-          {entitlement.packRemaining} pack evaluation
+          {entitlement.packRemaining} pack credit
           {entitlement.packRemaining === 1 ? "" : "s"} remaining
         </p>
       ) : null}
 
       {!hideCreditLine && usage && entitlement?.creditSource === "subscription" ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-          {usage.used} of {usage.limit} evaluations used this month
+          {usage.used} of {usage.limit} credits used this month
         </p>
       ) : null}
 

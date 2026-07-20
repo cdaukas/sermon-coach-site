@@ -8,7 +8,7 @@ export function formatEvaluationCreditLine(
   }
 
   if (entitlement.creditSource === "subscription" && entitlement.usage) {
-    return `${entitlement.usage.used} of ${entitlement.usage.limit} evaluations used this month`;
+    return `${entitlement.usage.used} of ${entitlement.usage.limit} credits used this month`;
   }
 
   if (entitlement.creditSource === "pack" && entitlement.packRemaining > 0) {
