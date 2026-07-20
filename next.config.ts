@@ -14,6 +14,17 @@ const nextConfig: NextConfig = {
         destination: "/start",
         statusCode: 301,
       },
+      // Extensionless marketing bookmarks → canonical .html URLs (301, not rewrite).
+      { source: "/pricing", destination: "/pricing.html", statusCode: 301 },
+      { source: "/faq", destination: "/faq.html", statusCode: 301 },
+      { source: "/story", destination: "/story.html", statusCode: 301 },
+      { source: "/terms", destination: "/terms.html", statusCode: 301 },
+      { source: "/privacy", destination: "/privacy.html", statusCode: 301 },
+      {
+        source: "/how-its-scored",
+        destination: "/how-its-scored.html",
+        statusCode: 301,
+      },
     ];
   },
   async rewrites() {
