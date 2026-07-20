@@ -131,7 +131,7 @@ export function SketchIntakeForm({
           className="text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          A read on your sermon before you build it.
+          Insight into the core of your sermon before you build it.
         </p>
       </header>
 
