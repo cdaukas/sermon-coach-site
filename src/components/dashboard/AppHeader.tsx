@@ -31,7 +31,6 @@ export function AppHeader() {
   const onDashboard = pathname === "/dashboard";
   const onBuy = pathname === "/dashboard/buy";
   const onNewSermon = pathname === "/dashboard/sermons/new";
-  const onSketch = pathname === "/dashboard/sketch";
 
   return (
     <header className="dashboard-app-header mb-10 flex flex-wrap items-center justify-between gap-4">
@@ -55,16 +54,6 @@ export function AppHeader() {
             style={secondaryButtonStyle}
           >
             Dashboard
-          </Link>
-        ) : null}
-
-        {!onSketch ? (
-          <Link
-            href="/dashboard/sketch"
-            className={secondaryButtonClass}
-            style={secondaryButtonStyle}
-          >
-            The Sketch
           </Link>
         ) : null}
 
