@@ -296,7 +296,7 @@ export async function checkEvaluationEligibility(
 
   return {
     ok: false,
-    error: "No evaluation credits remaining.",
+    error: "No credits remaining.",
     code: NO_EVALUATION_CREDITS_CODE,
   };
 }

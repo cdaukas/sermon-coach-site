@@ -91,7 +91,7 @@ export function DashboardSubscribeCTA({
 
       <ul className="mt-3 mb-4 flex-grow list-none space-y-2">
         {[
-          "10 evaluations every month",
+          "10 credits every month",
           "Full 11-criterion rubric",
           "A private library of every evaluation",
         ].map((line, i) => (
