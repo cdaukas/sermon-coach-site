@@ -14,7 +14,7 @@ import {
   EmailExistsMessage,
   isDuplicateSignupError,
 } from "@/lib/auth/signup-errors";
-import { START_PATH } from "@/lib/auth/start";
+import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
 import { createClient } from "@/lib/supabase/client";
 import {
   buildAuthCallbackUrl,
@@ -55,11 +55,16 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const checkoutParams = parseCoachCheckoutParams(searchParams);
   const packParams = parsePackCheckoutParams(searchParams);
+  const claimToken = searchParams.get("claim")?.trim() || null;
   const postCheckoutPath = checkoutParams
     ? buildCheckoutPath(checkoutParams.cadence)
     : packParams
       ? buildPackCheckoutPath(packParams.pack)
       : null;
+  const defaultNextPath =
+    claimToken && !postCheckoutPath
+      ? startPathWithClaim(claimToken)
+      : START_PATH;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -103,7 +108,7 @@ function SignupForm() {
     const siteOrigin = getSiteOrigin();
     const emailRedirectTo = postCheckoutPath
       ? buildAuthCallbackUrl(siteOrigin, postCheckoutPath)
-      : buildAuthCallbackUrl(siteOrigin, START_PATH);
+      : buildAuthCallbackUrl(siteOrigin, defaultNextPath);
 
     const { data: available, error: checkError } = await supabase.rpc(
       "email_available",
@@ -140,7 +145,7 @@ function SignupForm() {
     }
 
     if (data.session) {
-      router.push(postCheckoutPath ?? START_PATH);
+      router.push(postCheckoutPath ?? defaultNextPath);
       router.refresh();
       return;
     }

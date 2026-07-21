@@ -46,6 +46,17 @@ describe("checkout params", () => {
     );
   });
 
+  it("builds callback URL that preserves claim token in next path", () => {
+    const callbackUrl = buildAuthCallbackUrl(
+      "https://sermoncoach.online",
+      "/start?claim=abc-123",
+    );
+    assert.equal(
+      callbackUrl,
+      "https://sermoncoach.online/auth/callback?next=%2Fstart%3Fclaim%3Dabc-123",
+    );
+  });
+
   it("maps coach cadence to Stripe price IDs", () => {
     assert.equal(
       getCoachPriceId("monthly"),

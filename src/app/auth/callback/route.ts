@@ -2,7 +2,14 @@ import {
   destinationForPostAuth,
   needsAcquisitionAttribution,
 } from "@/lib/auth/acquisition-gate";
+import {
+  claimSketchRead,
+  claimTokenFromNextPath,
+  resolveSketchClaimToken,
+  SKETCH_CLAIM_COOKIE,
+} from "@/lib/sketch/claim";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 function safeRedirectPath(next: string | null): string {
@@ -22,6 +29,21 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const jar = await cookies();
+        const token = resolveSketchClaimToken(
+          jar.get(SKETCH_CLAIM_COOKIE)?.value,
+          searchParams.get("claim") ?? claimTokenFromNextPath(next),
+        );
+        if (token) {
+          await claimSketchRead(user.id, token);
+        }
+      }
+
       const needsAttribution = await needsAcquisitionAttribution(supabase);
       const destination = destinationForPostAuth(next, needsAttribution);
       return NextResponse.redirect(`${origin}${destination}`);
