@@ -63,7 +63,7 @@ export function SermonDetailEvaluationActions({
   }
 
   const showRerunPrompt = rerunPromptMode === reportMode;
-  const runButtonLabel = `Run ${modeDisplayName(reportMode)} evaluation`;
+  const runButtonLabel = `Run ${modeDisplayName(reportMode)}`;
 
   return (
     <div className="mt-8 flex max-w-xl flex-col items-start gap-4">
@@ -73,7 +73,7 @@ export function SermonDetailEvaluationActions({
             className="text-[13px] leading-relaxed"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            You&apos;ve already run a {modeDisplayName(reportMode)} evaluation on
+            You&apos;ve already run {modeDisplayName(reportMode)} on
             this sermon. Run it again?
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-4">

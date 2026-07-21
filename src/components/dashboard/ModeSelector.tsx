@@ -8,12 +8,12 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 const MODE_OPTIONS = [
   {
     value: "diagnostic",
-    header: "Personal",
+    header: "The Evaluation",
     body: "An assessment of your own preaching.",
   },
   {
     value: "coaching",
-    header: "Mentoring",
+    header: "The Mentoring Debrief",
     body: "A coaching report to hand the preacher you're mentoring. Same rubric.",
   },
 ] as const satisfies ReadonlyArray<{
