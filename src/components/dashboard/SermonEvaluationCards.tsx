@@ -15,8 +15,8 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
 const CARD_TABS = [
-  { value: "diagnostic", label: "Personal" },
-  { value: "coaching", label: "Mentoring" },
+  { value: "diagnostic", label: "The Evaluation" },
+  { value: "coaching", label: "The Mentoring Debrief" },
 ] as const satisfies ReadonlyArray<{
   value: StashedReportMode;
   label: string;
@@ -192,7 +192,7 @@ function EvaluationEmptyCard({ mode }: { mode: StashedReportMode }) {
         className="text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        Not yet run in {modeDisplayName(mode)} mode.
+        {modeDisplayName(mode)} hasn&apos;t been run yet.
       </p>
     </div>
   );

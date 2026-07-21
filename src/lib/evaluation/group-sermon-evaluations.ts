@@ -69,5 +69,5 @@ export function getSmartDefaultRunMode(
 }
 
 export function modeDisplayName(mode: StashedReportMode): string {
-  return mode === "coaching" ? "Mentoring" : "Personal";
+  return mode === "coaching" ? "The Mentoring Debrief" : "The Evaluation";
 }
