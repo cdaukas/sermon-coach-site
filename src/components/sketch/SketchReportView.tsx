@@ -79,6 +79,8 @@ type SketchReportViewProps = {
   read: string;
   status: SketchStatusMap;
   onStartAnother: () => void;
+  /** Optional block after the read prose (e.g. public save CTA). */
+  afterRead?: ReactNode;
 };
 
 function inlineMarkdown(text: string): ReactNode[] {
@@ -326,6 +328,7 @@ export function SketchReportView({
   read,
   status,
   onStartAnother,
+  afterRead,
 }: SketchReportViewProps) {
   const hasStatus = SKETCH_FIELDS.some((f) => status[f]);
   const solidCount = SKETCH_FIELDS.filter((f) => status[f] === "solid").length;
@@ -461,6 +464,8 @@ export function SketchReportView({
       ) : null}
 
       <section>{renderProseBlocks(read, solidCount)}</section>
+
+      {afterRead ? <div className="mt-10">{afterRead}</div> : null}
 
       <footer
         className="mt-12 border-t pt-6"

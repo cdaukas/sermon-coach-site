@@ -16,10 +16,20 @@ const fieldStyle = {
   color: "var(--sc-ink)",
 };
 
+export type SketchIntakeHeaderCopy = {
+  eyebrow: string;
+  heading: string;
+  subhead: string;
+  /** Optional line near the form (e.g. "No account needed.") */
+  note?: string;
+};
+
 type SketchIntakeFormProps = {
   submitting: boolean;
   error: string | null;
   onSubmit: (intake: SketchIntake) => void;
+  /** Defaults preserve the authed Sketch header copy. */
+  header?: SketchIntakeHeaderCopy;
 };
 
 const QUESTIONS: Array<{
@@ -66,10 +76,17 @@ const QUESTIONS: Array<{
   },
 ];
 
+const DEFAULT_HEADER: SketchIntakeHeaderCopy = {
+  eyebrow: "The Sketch",
+  heading: "Alignment check on your sermon outline.",
+  subhead: "Insight into the core of your sermon before you build it.",
+};
+
 export function SketchIntakeForm({
   submitting,
   error,
   onSubmit,
+  header = DEFAULT_HEADER,
 }: SketchIntakeFormProps) {
   const [primaryPassage, setPrimaryPassage] = useState("");
   const [outlineForm, setOutlineForm] = useState<OutlineForm>("manuscript");
@@ -119,20 +136,28 @@ export function SketchIntakeForm({
           className="mb-3 text-[11px] font-semibold tracking-[0.18em] uppercase"
           style={{ ...uiFont, color: "var(--sc-accent)" }}
         >
-          The Sketch
+          {header.eyebrow}
         </div>
         <h1
           className="mb-2 text-balance text-[30px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Alignment check on your sermon outline.
+          {header.heading}
         </h1>
         <p
           className="text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          Insight into the core of your sermon before you build it.
+          {header.subhead}
         </p>
+        {header.note ? (
+          <p
+            className="mt-3 text-[14px] font-medium"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            {header.note}
+          </p>
+        ) : null}
       </header>
 
       <div className="mb-6">
