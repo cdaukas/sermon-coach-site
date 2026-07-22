@@ -30,26 +30,26 @@ const QUESTIONS: Array<{
 }> = [
   {
     key: "ache",
-    label: "The ache",
-    hint: "What is broken in the person listening that this text speaks to?",
+    label: "The ache/fallen condition",
+    hint: "What is broken in the person listening or in this fallen world that this text speaks to?",
     rows: 3,
   },
   {
     key: "big_idea",
     label: "The big idea",
-    hint: "The one sentence they should still carry on Tuesday.",
+    hint: "The one sentence they should still carry on Monday morning.",
     rows: 2,
   },
   {
     key: "gospel_turn",
     label: "The gospel turn",
-    hint: "Where the sermon stops being advice and becomes good news.",
+    hint: "How the sermon anchors on Jesus and His good news rather than simply moral advice.",
     rows: 3,
   },
   {
     key: "points",
     label: "The points",
-    hint: "Your points, and whether each comes out of the passage.",
+    hint: "Your points, and where each one comes out of the passage.",
     rows: 4,
   },
   {
@@ -61,7 +61,7 @@ const QUESTIONS: Array<{
   {
     key: "ending",
     label: "The last ninety seconds",
-    hint: "How the sermon actually lands.",
+    hint: "How the sermon actually comes to a close.",
     rows: 3,
   },
 ];
