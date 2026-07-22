@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   SketchIntakeForm,
   type SketchIntakeHeaderCopy,
@@ -18,6 +18,9 @@ import type {
 import { SKETCH_FIELDS } from "@/lib/sketch/types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
+
+const SAVE_FAILURE_COPY =
+  "That didn't go through. Your read is still here. Try again in a moment.";
 
 const PUBLIC_HEADER: SketchIntakeHeaderCopy = {
   eyebrow: "THE SKETCH",
@@ -57,11 +60,7 @@ type Phase =
       save: SketchSavePayload;
     };
 
-type SaveUi =
-  | { kind: "idle" }
-  | { kind: "saving" }
-  | { kind: "saved"; token: string }
-  | { kind: "error"; message: string };
+type SaveUi = { kind: "idle" } | { kind: "saving" } | { kind: "error" };
 
 function statusFieldsFromMap(
   status: SketchStatusMap,
@@ -115,9 +114,10 @@ function SaveReadCta({
   read: string;
   save: SketchSavePayload;
 }) {
+  const router = useRouter();
   const [ui, setUi] = useState<SaveUi>({ kind: "idle" });
 
-  async function handleSave() {
+  async function handleCreateAccount() {
     setUi({ kind: "saving" });
 
     try {
@@ -143,66 +143,16 @@ function SaveReadCta({
         reason?: string;
       };
 
-      if (!res.ok) {
-        if (res.status === 429 && data.reason && RATE_LIMIT_COPY[data.reason]) {
-          setUi({ kind: "error", message: RATE_LIMIT_COPY[data.reason] });
-        } else {
-          setUi({
-            kind: "error",
-            message: data.error ?? "The read could not be saved. Try again.",
-          });
-        }
+      if (!res.ok || !data.token) {
+        setUi({ kind: "error" });
         return;
       }
 
-      if (!data.token) {
-        setUi({
-          kind: "error",
-          message: "The read could not be saved. Try again.",
-        });
-        return;
-      }
-
-      setUi({ kind: "saved", token: data.token });
+      // Cookie is set by /api/sketch/save. Stage is invisible — go straight to signup.
+      router.push(startPathWithClaim(data.token));
     } catch {
-      setUi({
-        kind: "error",
-        message: "The read could not be saved. Try again.",
-      });
+      setUi({ kind: "error" });
     }
-  }
-
-  if (ui.kind === "saved") {
-    const signupHref = startPathWithClaim(ui.token);
-    return (
-      <div
-        className="rounded border px-5 py-5"
-        style={{
-          borderColor: "var(--sc-rule)",
-          background: "var(--sc-bg)",
-        }}
-      >
-        <p
-          className="mb-3 text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink)" }}
-        >
-          Saved. Create a free account to keep this read — we&apos;ll attach it
-          when you confirm your email.
-        </p>
-        <Link
-          href={signupHref}
-          className="inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline"
-          style={{
-            ...uiFont,
-            background: "var(--sc-ink)",
-            color: "var(--sc-bg)",
-            borderColor: "var(--sc-ink)",
-          }}
-        >
-          Create your free account
-        </Link>
-      </div>
-    );
   }
 
   return (
@@ -217,8 +167,7 @@ function SaveReadCta({
         className="mb-3 text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        Want to keep this read? Save it, then create a free account. Nothing is
-        stored until you ask.
+        Want to keep this read? Nothing is stored until you ask.
       </p>
       {ui.kind === "error" ? (
         <p
@@ -231,12 +180,12 @@ function SaveReadCta({
           }}
           role="alert"
         >
-          {ui.message}
+          {SAVE_FAILURE_COPY}
         </p>
       ) : null}
       <button
         type="button"
-        onClick={handleSave}
+        onClick={handleCreateAccount}
         disabled={ui.kind === "saving"}
         className="rounded border px-5 py-3 text-[14px] font-semibold tracking-wide transition-opacity disabled:opacity-60"
         style={{
@@ -247,7 +196,7 @@ function SaveReadCta({
           cursor: ui.kind === "saving" ? "wait" : "pointer",
         }}
       >
-        {ui.kind === "saving" ? "Saving…" : "Save this read"}
+        Create a free account to keep this read
       </button>
     </div>
   );
