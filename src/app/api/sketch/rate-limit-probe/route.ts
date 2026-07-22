@@ -36,6 +36,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ip: getClientIp(request) });
   }
 
+  // Parse a supplied header value with the same helper, without Vercel
+  // rewriting x-forwarded-for on the inbound request.
+  if (mode === "ip-parse") {
+    const headers = new Headers();
+    if (typeof body.forwardedFor === "string") {
+      headers.set("x-forwarded-for", body.forwardedFor);
+    }
+    // body.forwardedFor === null → intentionally omit the header
+    const synthetic = new Request("https://example.com/probe", { headers });
+    return NextResponse.json({ ip: getClientIp(synthetic) });
+  }
+
   if (mode === "check") {
     const ip = String(body.ip ?? "").trim();
     const action = String(body.action ?? "") as SketchRateAction;
