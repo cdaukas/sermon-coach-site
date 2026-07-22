@@ -26,6 +26,17 @@ export type SketchIntake = {
 export type SketchApiResponse = {
   read: string;
   status: SketchStatusMap;
+  /** Present on /api/sketch/run so Save can stage without importing generate.ts. */
+  prompt_version?: string;
+  mode?: "find" | "press";
+  seam_hub?: SketchField;
+  seam_spokes?: string[];
+  status_ache?: SketchStatus;
+  status_big_idea?: SketchStatus;
+  status_gospel_turn?: SketchStatus;
+  status_points?: SketchStatus;
+  status_one_person?: SketchStatus;
+  status_ending?: SketchStatus;
 };
 
 /** Display labels for the AT A GLANCE table — alias only; keys stay internal. */

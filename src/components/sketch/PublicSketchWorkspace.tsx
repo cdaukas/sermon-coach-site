@@ -1,16 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   SketchIntakeForm,
   type SketchIntakeHeaderCopy,
 } from "@/components/sketch/SketchIntakeForm";
 import { SketchReportView } from "@/components/sketch/SketchReportView";
+import { startPathWithClaim } from "@/lib/auth/start";
 import type {
   SketchApiResponse,
+  SketchField,
   SketchIntake,
+  SketchStatus,
   SketchStatusMap,
 } from "@/lib/sketch/types";
+import { SKETCH_FIELDS } from "@/lib/sketch/types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
@@ -28,6 +33,19 @@ const RATE_LIMIT_COPY: Record<string, string> = {
   daily_sitewide: "The Sketch is busy right now. Try again in a little while.",
 };
 
+type SketchSavePayload = {
+  prompt_version: string;
+  mode?: "find" | "press";
+  seam_hub?: SketchField;
+  seam_spokes?: string[];
+  status_ache?: SketchStatus;
+  status_big_idea?: SketchStatus;
+  status_gospel_turn?: SketchStatus;
+  status_points?: SketchStatus;
+  status_one_person?: SketchStatus;
+  status_ending?: SketchStatus;
+};
+
 type Phase =
   | { kind: "intake" }
   | { kind: "loading"; intake: SketchIntake }
@@ -36,9 +54,157 @@ type Phase =
       intake: SketchIntake;
       read: string;
       status: SketchStatusMap;
+      save: SketchSavePayload;
     };
 
-function SaveReadPlaceholder() {
+type SaveUi =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "saved"; token: string }
+  | { kind: "error"; message: string };
+
+function statusFieldsFromMap(
+  status: SketchStatusMap,
+): Pick<
+  SketchSavePayload,
+  | "status_ache"
+  | "status_big_idea"
+  | "status_gospel_turn"
+  | "status_points"
+  | "status_one_person"
+  | "status_ending"
+> {
+  const out: Record<string, SketchStatus> = {};
+  for (const f of SKETCH_FIELDS) {
+    const v = status[f];
+    if (v) out[`status_${f}`] = v;
+  }
+  return out;
+}
+
+function savePayloadFromRun(data: SketchApiResponse): SketchSavePayload | null {
+  const prompt_version = data.prompt_version?.trim();
+  if (!prompt_version) return null;
+
+  const fromTelemetry = statusFieldsFromMap({
+    ache: data.status_ache,
+    big_idea: data.status_big_idea,
+    gospel_turn: data.status_gospel_turn,
+    points: data.status_points,
+    one_person: data.status_one_person,
+    ending: data.status_ending,
+  });
+  const fromStatus = statusFieldsFromMap(data.status ?? {});
+
+  return {
+    prompt_version,
+    mode: data.mode,
+    seam_hub: data.seam_hub,
+    seam_spokes: data.seam_spokes,
+    ...fromStatus,
+    ...fromTelemetry,
+  };
+}
+
+function SaveReadCta({
+  intake,
+  read,
+  save,
+}: {
+  intake: SketchIntake;
+  read: string;
+  save: SketchSavePayload;
+}) {
+  const [ui, setUi] = useState<SaveUi>({ kind: "idle" });
+
+  async function handleSave() {
+    setUi({ kind: "saving" });
+
+    try {
+      const res = await fetch("/api/sketch/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          primary_passage: intake.primary_passage,
+          ache: intake.ache,
+          big_idea: intake.big_idea,
+          gospel_turn: intake.gospel_turn,
+          points: intake.points,
+          one_person: intake.one_person,
+          ending: intake.ending,
+          read_output: read,
+          ...save,
+        }),
+      });
+
+      const data = (await res.json()) as {
+        token?: string;
+        error?: string;
+        reason?: string;
+      };
+
+      if (!res.ok) {
+        if (res.status === 429 && data.reason && RATE_LIMIT_COPY[data.reason]) {
+          setUi({ kind: "error", message: RATE_LIMIT_COPY[data.reason] });
+        } else {
+          setUi({
+            kind: "error",
+            message: data.error ?? "The read could not be saved. Try again.",
+          });
+        }
+        return;
+      }
+
+      if (!data.token) {
+        setUi({
+          kind: "error",
+          message: "The read could not be saved. Try again.",
+        });
+        return;
+      }
+
+      setUi({ kind: "saved", token: data.token });
+    } catch {
+      setUi({
+        kind: "error",
+        message: "The read could not be saved. Try again.",
+      });
+    }
+  }
+
+  if (ui.kind === "saved") {
+    const signupHref = startPathWithClaim(ui.token);
+    return (
+      <div
+        className="rounded border px-5 py-5"
+        style={{
+          borderColor: "var(--sc-rule)",
+          background: "var(--sc-bg)",
+        }}
+      >
+        <p
+          className="mb-3 text-[15px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink)" }}
+        >
+          Saved. Create a free account to keep this read — we&apos;ll attach it
+          when you confirm your email.
+        </p>
+        <Link
+          href={signupHref}
+          className="inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline"
+          style={{
+            ...uiFont,
+            background: "var(--sc-ink)",
+            color: "var(--sc-bg)",
+            borderColor: "var(--sc-ink)",
+          }}
+        >
+          Create your free account
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div
       className="rounded border px-5 py-5"
@@ -51,21 +217,37 @@ function SaveReadPlaceholder() {
         className="mb-3 text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        Want to keep this read? Save is coming next.
+        Want to keep this read? Save it, then create a free account. Nothing is
+        stored until you ask.
       </p>
-      {/* HOLD — save wiring lands in the next branch (/api/sketch/save + claim). */}
+      {ui.kind === "error" ? (
+        <p
+          className="mb-3 rounded border px-4 py-3 text-[14px]"
+          style={{
+            ...uiFont,
+            color: "var(--sc-error)",
+            background: "var(--sc-error-bg)",
+            borderColor: "var(--sc-error)",
+          }}
+          role="alert"
+        >
+          {ui.message}
+        </p>
+      ) : null}
       <button
         type="button"
-        className="rounded border px-5 py-3 text-[14px] font-semibold tracking-wide"
+        onClick={handleSave}
+        disabled={ui.kind === "saving"}
+        className="rounded border px-5 py-3 text-[14px] font-semibold tracking-wide transition-opacity disabled:opacity-60"
         style={{
           ...uiFont,
           background: "var(--sc-ink)",
           color: "var(--sc-bg)",
           borderColor: "var(--sc-ink)",
-          cursor: "default",
+          cursor: ui.kind === "saving" ? "wait" : "pointer",
         }}
       >
-        Save this read
+        {ui.kind === "saving" ? "Saving…" : "Save this read"}
       </button>
     </div>
   );
@@ -101,11 +283,19 @@ export function PublicSketchWorkspace() {
         return;
       }
 
+      const save = savePayloadFromRun(data);
+      if (!save) {
+        setPhase({ kind: "intake" });
+        setError("The read could not be generated. Try again.");
+        return;
+      }
+
       setPhase({
         kind: "report",
         intake,
         read: data.read ?? "",
         status: data.status ?? {},
+        save,
       });
     } catch {
       setPhase({ kind: "intake" });
@@ -142,7 +332,13 @@ export function PublicSketchWorkspace() {
           setError(null);
           setPhase({ kind: "intake" });
         }}
-        afterRead={<SaveReadPlaceholder />}
+        afterRead={
+          <SaveReadCta
+            intake={phase.intake}
+            read={phase.read}
+            save={phase.save}
+          />
+        }
       />
     );
   }
