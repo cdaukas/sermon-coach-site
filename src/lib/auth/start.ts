@@ -9,3 +9,8 @@ export const START_DESTINATION = "/start/continue";
 
 /** First-eval page after attribution is resolved. */
 export const FIRST_EVAL_PATH = "/dashboard/sermons/new";
+
+/** Post-verify next path that carries a Sketch claim token as fallback. */
+export function startPathWithClaim(token: string): string {
+  return `${START_PATH}?claim=${encodeURIComponent(token)}`;
+}

@@ -10,7 +10,7 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
-import { START_PATH } from "@/lib/auth/start";
+import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
 import { buildAuthCallbackUrl } from "@/lib/billing/checkout";
 import { createClient } from "@/lib/supabase/client";
 
@@ -49,9 +49,10 @@ const VALUE_POINTS = [
   "Your first evaluation is free — no card, no commitment.",
 ];
 
-export function StartLanding() {
+export function StartLanding({ claimToken = null }: { claimToken?: string | null }) {
   const router = useRouter();
-  const loginHref = `/login?redirectTo=${encodeURIComponent(START_PATH)}`;
+  const nextPath = claimToken ? startPathWithClaim(claimToken) : START_PATH;
+  const loginHref = `/login?redirectTo=${encodeURIComponent(nextPath)}`;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,7 +88,7 @@ export function StartLanding() {
     setLoading(true);
     const supabase = createClient();
     const siteOrigin = getSiteOrigin();
-    const emailRedirectTo = buildAuthCallbackUrl(siteOrigin, START_PATH);
+    const emailRedirectTo = buildAuthCallbackUrl(siteOrigin, nextPath);
 
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
