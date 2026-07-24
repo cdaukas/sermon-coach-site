@@ -12,7 +12,7 @@ import {
   type SketchStatusMap,
 } from "@/lib/sketch/types";
 
-export const SKETCH_PROMPT_VERSION = "v2.9";
+export const SKETCH_PROMPT_VERSION = "v2.10";
 const MODEL = "claude-opus-4-8";
 
 const SYSTEM_PROMPT = readFileSync(
