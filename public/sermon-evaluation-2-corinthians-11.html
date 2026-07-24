@@ -174,9 +174,8 @@
   <div class="lockup">
     <div class="score-panel">
       <div class="band"><em>Exemplary</em></div>
-      <div class="composite">47 / 55</div>
-      <div class="hair"></div>
-      <div class="mono">Composite · See methodology at end</div>
+      <div class="mono" style="display:none">Summary</div>
+      <div class="mono">See methodology for score</div>
     </div>
     <div class="verdict">
       <p>Malachi caught what most preachers miss — that Paul’s boast is <em>parody</em>, sarcasm wielded as a weapon — and made that irony the interpretive spine of the whole sermon. From the opening Milton frame to the Damascus basket, the reading honors Paul’s actual rhetorical strategy instead of flattening it into straight self-promotion, and the sermon’s strongest instincts all grow out of that one disciplined exegetical choice.</p>
@@ -446,39 +445,46 @@
 
   <!-- METHODOLOGY -->
   <div class="method">
-    <div class="eyebrow">Methodology · Show your work</div>
-    <h2>What the score means &amp; how it was calculated</h2>
+    <h2>Methodology · Show Your Work</h2>
+    <div class="eyebrow" style="margin-top:8px;">Score calculation · grading bands</div>
 
-    <div class="subhead" style="margin-top:22px;">Grading Bands</div>
-    <p>The letter grade derives from the <strong>weighted</strong> score. This sermon’s weighted score of <strong>47</strong> places it at the floor of the <strong>A · Exemplary</strong> band (47–55) — genuinely study-worthy work, with clear room to move up <em>within</em> the band.</p>
-    <table class="bands">
-      <tr><th>Letter</th><th>Range</th><th>Band</th><th>What it means</th></tr>
-      <tr class="here"><td>A</td><td>47–55</td><td>Exemplary</td><td>Multiple criteria scored 5s. Worth studying or sharing with another preacher. ← this sermon (47)</td></tr>
-      <tr><td>B</td><td>39–46</td><td>Strong</td><td>Most criteria 4s; the preacher is doing the work well.</td></tr>
-      <tr><td>C</td><td>30–38</td><td>Faithful</td><td>Most criteria 3s; faithfully present, not yet striking. The healthy expected score for most sermons.</td></tr>
-      <tr><td>D</td><td>22–29</td><td>Needs Improvement</td><td>Multiple 2s; real gaps to address.</td></tr>
-      <tr><td>F</td><td>&lt; 22</td><td>Significant Concerns</td><td>Multiple 1s; issues to fix before preaching again.</td></tr>
+    <div class="subhead" style="margin-top:22px;">How this sermon was scored</div>
+    <div class="scorebox" style="display:block;">
+      <div class="n" style="font-size:40px;">8.5 / 10</div>
+      <div class="l" style="margin-top:6px;">Composite score (display)</div>
+      <div class="note" style="margin:16px 0 0;background:transparent;padding:0;">Internal weighted score: <strong>47/55</strong> · Simple composite: <strong>47/55</strong></div>
+      <div class="calc" style="margin:8px 0 0;">weighted = round(weighted_raw × 55 / 70) = 47/55</div>
+      <div class="note" style="margin:8px 0 0;background:transparent;padding:0;">Base-10 display converts weighted /55 ÷ 5.5 (47 ÷ 5.5 = 8.5).</div>
+    </div>
+
+    <table class="subt">
+      <tr><td>Text &amp; Theology</td><td>13 / 15</td></tr>
+      <tr><td>Structure &amp; Craft</td><td>14 / 15</td></tr>
+      <tr><td>Application &amp; Audience Connection</td><td>12 / 15</td></tr>
+      <tr><td>Ecclesial &amp; Spiritual</td><td>8 / 10</td></tr>
     </table>
 
-    <div class="mathwrap">
-      <div class="subhead">How this sermon was scored</div>
-      <div class="scorebox">
-        <div class="sb"><div class="n">47/55</div><div class="l">Composite — Simple</div></div>
-        <div class="sb"><div class="n">47/55</div><div class="l">Composite — Weighted</div></div>
-      </div>
-      <div class="note">Double-weighted criteria: <strong>Fallen Condition Focus (5)</strong>, <strong>Gospel Clarity (4)</strong>, <strong>Application to Present Audience (4)</strong>. The simple and weighted composites are identical (47 = 47): the sermon performs on its load-bearing criteria almost exactly as it performs overall — no hidden strength inflating it, nothing critical dragging it down. It is <em>evenly</em> strong. A 4/5 on this rubric means “strong, doing the work well”; a 5 means “exemplary, worth studying.”</div>
-      <div class="note">Manuscript-equivalent evaluation: criterion #8 (emotional delivery) is capped at 4/5 because a document shows whether the emotional arc is well <em>designed</em>, not whether it is well <em>delivered</em>. The realistic ceiling here is ~53/55; closing the rest of that gap requires audio or video of the sermon as preached.</div>
-      <table class="subt">
-        <tr><td>Text &amp; Theology</td><td>13 / 15</td></tr>
-        <tr><td>Structure &amp; Craft</td><td>14 / 15</td></tr>
-        <tr><td>Application &amp; Audience Connection</td><td>12 / 15</td></tr>
-        <tr><td>Ecclesial &amp; Spiritual</td><td>8 / 10</td></tr>
-        <tr><td>Raw Total</td><td>47 / 55</td></tr>
-      </table>
-      <div class="calc">simple composite   = <span class="g">13 + 14 + 12 + 8</span> = 47/55
-weighted_raw       = 47 + FCF(5) + gospel(4) + application(4) = <span class="g">60</span>   (max 70)
-weighted composite = round(60 × 55 / 70) = <span class="g">47/55</span></div>
-    </div>
+    <blockquote class="note" style="border-left:2px solid var(--accent);padding-left:18px;">
+      <strong>Why some criteria count twice.</strong>
+      Three of the eleven criteria carry double weight in the composite score: Fallen Condition
+      Focus, Gospel Clarity, and Application. These are the load-bearing tests of whether a
+      sermon actually preaches the gospel to real people — not just whether it handles the text
+      well, but whether it brings that text to bear on human fallenness, makes the good news
+      unmistakable, and lands it in the hearer's actual life. A sermon can score
+      respectably everywhere else and still miss the point if these three are weak, so the math
+      reflects what the pulpit reflects.
+    </blockquote>
+
+    <div class="subhead">Grading Bands</div>
+    <p>Display score of <strong>8.5 / 10</strong> places this sermon in <strong>Exemplary · Tier 5</strong>. Band thresholds use the internal weighted /55 score (47/55).</p>
+    <table class="bands">
+      <tr><th>Tier</th><th>Range (/55)</th><th>Display (/10)</th><th>Band</th><th>What it means</th></tr>
+      <tr class="here"><td>5</td><td>47–55</td><td>8.5–10.0</td><td>Exemplary ← this sermon</td><td>Multiple criteria scored 5s. Worth studying or sharing.</td></tr>
+      <tr><td>4</td><td>39–46</td><td>7.1–8.4</td><td>Strong</td><td>Most criteria scored 4s. Doing the work well.</td></tr>
+      <tr><td>3</td><td>30–38</td><td>5.5–6.9</td><td>Faithful</td><td>Most criteria scored 3s. Faithfully doing the work.</td></tr>
+      <tr><td>2</td><td>22–29</td><td>4.0–5.4</td><td>Needs Improvement</td><td>Multiple criteria scored 2s. Real gaps to address.</td></tr>
+      <tr><td>1</td><td>&lt;22</td><td>&lt;4.0</td><td>Significant Concerns</td><td>Multiple criteria scored 1s. Address before preaching again.</td></tr>
+    </table>
   </div>
 
   <p class="legal-disclaimer">The Sermon Coach is an independent tool. It is not affiliated with, endorsed by, or sponsored by Bryan Chapell, Tim Keller, John Piper, Haddon Robinson, the Simeon Trust, 9Marks, or any author, ministry, or organization whose published work informs its rubric. All names and works are referenced for identification and attribution only. None of these individuals or organizations, nor any author or teacher associated with them, has endorsed or is affiliated with The Sermon Coach.</p>
