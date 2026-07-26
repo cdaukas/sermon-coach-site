@@ -4,6 +4,6 @@ import { SKETCH_PROMPT_VERSION } from "./generate";
 
 describe("sketch generate module", () => {
   it("exports the shared prompt version used by both routes", () => {
-    assert.equal(SKETCH_PROMPT_VERSION, "v2.9");
+    assert.equal(SKETCH_PROMPT_VERSION, "v2.10");
   });
 });
