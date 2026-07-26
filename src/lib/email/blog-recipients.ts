@@ -33,6 +33,91 @@ export function applyInternalAccountFilter(
   return { eligible, internalExcludedCount };
 }
 
+/** Domains that are never real newsletter recipients (fixtures / SMS gateways). */
+export const TEST_FIXTURE_DOMAINS = [
+  "example.com",
+  "example.org",
+  "example.net",
+  "vtext.com",
+  "txt.att.net",
+  "tmomail.net",
+  "msg.fi.google.com",
+] as const;
+
+/** Local-part prefixes used by automated test fixtures (any domain). */
+export const TEST_FIXTURE_LOCAL_PREFIXES = [
+  "sketch-",
+  "acq-",
+  "rr-",
+] as const;
+
+/** Plus-tag local-part prefix used for Chris test addresses (any domain). */
+export const TEST_FIXTURE_PLUS_TAG_PREFIX = "cdaukas+";
+
+/**
+ * Returns the first matching fixture rule key, or null.
+ * Domain rules win over local-prefix rules; plus-tag is last.
+ */
+export function matchTestFixtureRule(email: string): string | null {
+  const normalized = email.trim().toLowerCase();
+  const at = normalized.lastIndexOf("@");
+  if (at <= 0 || at === normalized.length - 1) {
+    return null;
+  }
+
+  const local = normalized.slice(0, at);
+  const domain = normalized.slice(at + 1);
+
+  for (const fixtureDomain of TEST_FIXTURE_DOMAINS) {
+    if (domain === fixtureDomain) {
+      return fixtureDomain;
+    }
+  }
+
+  for (const prefix of TEST_FIXTURE_LOCAL_PREFIXES) {
+    if (local.startsWith(prefix)) {
+      return prefix;
+    }
+  }
+
+  if (local.startsWith(TEST_FIXTURE_PLUS_TAG_PREFIX)) {
+    return TEST_FIXTURE_PLUS_TAG_PREFIX;
+  }
+
+  return null;
+}
+
+/** Test-fixture / SMS-gateway addresses — excluded from real list sends. */
+export function isTestFixtureAccount(email: string): boolean {
+  return matchTestFixtureRule(email) !== null;
+}
+
+export function applyTestFixtureFilter(
+  recipients: BlogRecipientRow[],
+): {
+  eligible: BlogRecipientRow[];
+  fixtureExcludedCount: number;
+  fixtureExcludedByRule: Record<string, string[]>;
+} {
+  const eligible: BlogRecipientRow[] = [];
+  const fixtureExcludedByRule: Record<string, string[]> = {};
+  let fixtureExcludedCount = 0;
+
+  for (const recipient of recipients) {
+    const rule = matchTestFixtureRule(recipient.email);
+    if (rule) {
+      fixtureExcludedCount += 1;
+      const bucket = fixtureExcludedByRule[rule] ?? [];
+      bucket.push(recipient.email);
+      fixtureExcludedByRule[rule] = bucket;
+      continue;
+    }
+    eligible.push(recipient);
+  }
+
+  return { eligible, fixtureExcludedCount, fixtureExcludedByRule };
+}
+
 /**
  * Broadest audience: every auth.users row with an email.
  * profiles.id = auth.users.id (1:1 via on_auth_user_created trigger) — no tier filter.
@@ -183,6 +268,8 @@ export async function resolveEligibleBlogRecipients(
   totalNewsletterSubscribers: number;
   totalUniqueRecipients: number;
   internalExcludedCount: number;
+  fixtureExcludedCount: number;
+  fixtureExcludedByRule: Record<string, string[]>;
   suppressedCount: number;
   eligible: BlogRecipientRow[];
 }> {
@@ -193,9 +280,14 @@ export async function resolveEligibleBlogRecipients(
   const merged = mergeRecipientSources(accounts, newsletter);
   const { eligible: afterInternal, internalExcludedCount } =
     applyInternalAccountFilter(merged);
+  const {
+    eligible: afterFixture,
+    fixtureExcludedCount,
+    fixtureExcludedByRule,
+  } = applyTestFixtureFilter(afterInternal);
   const suppressed = await loadSuppressedEmails(supabase);
   const { eligible, suppressedCount } = applySuppressionFilter(
-    afterInternal,
+    afterFixture,
     suppressed,
   );
 
@@ -204,6 +296,8 @@ export async function resolveEligibleBlogRecipients(
     totalNewsletterSubscribers: newsletter.length,
     totalUniqueRecipients: merged.length,
     internalExcludedCount,
+    fixtureExcludedCount,
+    fixtureExcludedByRule,
     suppressedCount,
     eligible,
   };

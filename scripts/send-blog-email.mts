@@ -168,6 +168,8 @@ async function resolveRecipients(
   totalNewsletterSubscribers?: number;
   totalUniqueRecipients?: number;
   internalExcludedCount?: number;
+  fixtureExcludedCount?: number;
+  fixtureExcludedByRule?: Record<string, string[]>;
   suppressedCount?: number;
 }> {
   if (mode === "test") {
@@ -186,6 +188,8 @@ async function resolveRecipients(
     totalNewsletterSubscribers,
     totalUniqueRecipients,
     internalExcludedCount,
+    fixtureExcludedCount,
+    fixtureExcludedByRule,
     suppressedCount,
     eligible,
   } = await resolveEligibleBlogRecipients(supabase);
@@ -196,8 +200,72 @@ async function resolveRecipients(
     totalNewsletterSubscribers,
     totalUniqueRecipients,
     internalExcludedCount,
+    fixtureExcludedCount,
+    fixtureExcludedByRule,
     suppressedCount,
   };
+}
+
+function printRecipientCountBlock(opts: {
+  totalUniqueRecipients: number;
+  internalExcludedCount: number;
+  fixtureExcludedCount: number;
+  fixtureExcludedByRule: Record<string, string[]>;
+  suppressedCount: number;
+  eligibleCount: number;
+}): void {
+  const {
+    totalUniqueRecipients,
+    internalExcludedCount,
+    fixtureExcludedCount,
+    fixtureExcludedByRule,
+    suppressedCount,
+    eligibleCount,
+  } = opts;
+
+  console.log(`merged unique:        ${totalUniqueRecipients}`);
+  console.log(`internal excluded:    ${internalExcludedCount}`);
+  console.log(`fixture excluded:     ${fixtureExcludedCount}`);
+
+  const preferredRuleOrder = [
+    "example.com",
+    "example.org",
+    "example.net",
+    "vtext.com",
+    "txt.att.net",
+    "tmomail.net",
+    "msg.fi.google.com",
+    "sketch-",
+    "acq-",
+    "rr-",
+    "cdaukas+",
+  ];
+
+  const ruleEntries: Array<[string, string[]]> = [];
+  const seen = new Set<string>();
+  for (const rule of preferredRuleOrder) {
+    const emails = fixtureExcludedByRule[rule];
+    if (emails && emails.length > 0) {
+      ruleEntries.push([rule, emails]);
+      seen.add(rule);
+    }
+  }
+  for (const [rule, emails] of Object.entries(fixtureExcludedByRule)) {
+    if (!seen.has(rule) && emails.length > 0) {
+      ruleEntries.push([rule, emails]);
+    }
+  }
+
+  if (ruleEntries.length > 0) {
+    const [firstKey, firstEmails] = ruleEntries[0]!;
+    console.log(`   by rule:  ${firstKey}: ${firstEmails.length}`);
+    for (const [rule, emails] of ruleEntries.slice(1)) {
+      console.log(`             ${rule}: ${emails.length}`);
+    }
+  }
+
+  console.log(`suppressed:           ${suppressedCount}`);
+  console.log(`ELIGIBLE:             ${eligibleCount}`);
 }
 
 function sleep(ms: number): Promise<void> {
@@ -212,10 +280,10 @@ async function main(): Promise<void> {
   const content = await loadWeekContent(week);
   const {
     emails,
-    totalAccounts,
-    totalNewsletterSubscribers,
     totalUniqueRecipients,
     internalExcludedCount,
+    fixtureExcludedCount,
+    fixtureExcludedByRule,
     suppressedCount,
   } = await resolveRecipients(mode);
 
@@ -239,18 +307,23 @@ async function main(): Promise<void> {
   console.log(`Subject: ${content.subject}`);
 
   if (mode === "dryrun") {
-    console.log(`Total accounts with email: ${totalAccounts ?? emails.length}`);
-    console.log(
-      `Newsletter-only subscribers: ${totalNewsletterSubscribers ?? 0}`,
-    );
-    console.log(
-      `Unique recipients (accounts + newsletter, deduped): ${totalUniqueRecipients ?? emails.length}`,
-    );
-    console.log(
-      `Internal test accounts excluded: ${internalExcludedCount ?? 0}`,
-    );
-    console.log(`Suppressed (skipped): ${suppressedCount ?? 0}`);
-    console.log(`Eligible to receive: ${emails.length}`);
+    printRecipientCountBlock({
+      totalUniqueRecipients: totalUniqueRecipients ?? emails.length,
+      internalExcludedCount: internalExcludedCount ?? 0,
+      fixtureExcludedCount: fixtureExcludedCount ?? 0,
+      fixtureExcludedByRule: fixtureExcludedByRule ?? {},
+      suppressedCount: suppressedCount ?? 0,
+      eligibleCount: emails.length,
+    });
+
+    const fixtureEmails = Object.values(fixtureExcludedByRule ?? {})
+      .flat()
+      .sort((a, b) => a.localeCompare(b));
+    console.log("Fixture-excluded addresses:");
+    for (const email of fixtureEmails) {
+      console.log(`  - ${email}`);
+    }
+
     console.log("Full eligible list:");
     for (const email of emails) {
       console.log(`  - ${email}`);
@@ -267,17 +340,14 @@ async function main(): Promise<void> {
   }
 
   if (mode === "send") {
-    console.log(`Total accounts with email: ${totalAccounts ?? emails.length}`);
-    console.log(
-      `Newsletter-only subscribers: ${totalNewsletterSubscribers ?? 0}`,
-    );
-    console.log(
-      `Unique recipients (accounts + newsletter, deduped): ${totalUniqueRecipients ?? emails.length}`,
-    );
-    console.log(
-      `Internal test accounts excluded: ${internalExcludedCount ?? 0}`,
-    );
-    console.log(`Suppressed (skipped): ${suppressedCount ?? 0}`);
+    printRecipientCountBlock({
+      totalUniqueRecipients: totalUniqueRecipients ?? emails.length,
+      internalExcludedCount: internalExcludedCount ?? 0,
+      fixtureExcludedCount: fixtureExcludedCount ?? 0,
+      fixtureExcludedByRule: fixtureExcludedByRule ?? {},
+      suppressedCount: suppressedCount ?? 0,
+      eligibleCount: emails.length,
+    });
     console.log(`Sending to ${emails.length} eligible recipients…`);
   } else {
     console.log(`To: ${emails.join(", ")}`);
