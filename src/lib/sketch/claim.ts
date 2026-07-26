@@ -4,12 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 
 export const SKETCH_CLAIM_COOKIE = "sketch_claim";
 
+/** Set when a claim inserts a readiness_reads row — lets /start show confirmation
+ *  after /auth/confirm already consumed the staging token. */
+export const SKETCH_CLAIM_OK_COOKIE = "sketch_claim_ok";
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: "lax" as const,
   path: "/",
 };
+
+const CLAIM_OK_MAX_AGE_SECONDS = 60 * 10;
 
 /** Resolve claim token: httpOnly cookie first, then ?claim= query param. */
 export function resolveSketchClaimToken(
@@ -46,20 +52,42 @@ export async function clearSketchClaimCookie(): Promise<void> {
   }
 }
 
+export async function markSketchClaimOkCookie(): Promise<void> {
+  try {
+    const jar = await cookies();
+    jar.set(
+      SKETCH_CLAIM_OK_COOKIE,
+      "1",
+      sketchClaimCookieOptions(CLAIM_OK_MAX_AGE_SECONDS),
+    );
+  } catch (err) {
+    console.error("markSketchClaimOkCookie failed", err);
+  }
+}
+
+export async function clearSketchClaimOkCookie(): Promise<void> {
+  try {
+    const jar = await cookies();
+    jar.set(SKETCH_CLAIM_OK_COOKIE, "", sketchClaimCookieOptions(0));
+  } catch (err) {
+    console.error("clearSketchClaimOkCookie failed", err);
+  }
+}
+
 /**
  * Copy a staged anonymous Sketch read onto the signed-in user.
- * Idempotent and fail-safe: never throws; never deletes staging before
- * readiness_reads insert succeeds.
+ * Fail-safe: never throws; never deletes staging before readiness_reads
+ * insert succeeds. Returns true when a new readiness_reads row was inserted.
  */
 export async function claimSketchRead(
   userId: string,
   token: string,
-): Promise<void> {
+): Promise<boolean> {
   try {
     const trimmed = token.trim();
     if (!userId || !trimmed) {
       await clearSketchClaimCookie();
-      return;
+      return false;
     }
 
     const admin = createAdminClient();
@@ -73,18 +101,18 @@ export async function claimSketchRead(
     if (lookupError) {
       console.error("claimSketchRead lookup failed", lookupError);
       await clearSketchClaimCookie();
-      return;
+      return false;
     }
 
     if (!claim) {
       await clearSketchClaimCookie();
-      return;
+      return false;
     }
 
     const expiresAt = claim.expires_at ? Date.parse(claim.expires_at) : NaN;
     if (!Number.isNaN(expiresAt) && expiresAt < Date.now()) {
       await clearSketchClaimCookie();
-      return;
+      return false;
     }
 
     const { error: insertError } = await admin.from("readiness_reads").insert({
@@ -113,7 +141,7 @@ export async function claimSketchRead(
     if (insertError) {
       console.error("claimSketchRead readiness_reads insert failed", insertError);
       // Leave staging row in place so a later attempt can succeed.
-      return;
+      return false;
     }
 
     const { error: deleteError } = await admin
@@ -147,7 +175,10 @@ export async function claimSketchRead(
     }
 
     await clearSketchClaimCookie();
+    await markSketchClaimOkCookie();
+    return true;
   } catch (err) {
     console.error("claimSketchRead threw", err);
+    return false;
   }
 }
