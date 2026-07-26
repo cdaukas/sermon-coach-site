@@ -46,7 +46,7 @@ export async function listReadinessReadsForUser(
     throw new Error(error.message);
   }
 
-  return (data ?? []) as ReadinessReadListItem[];
+  return (data ?? []) as unknown as ReadinessReadListItem[];
 }
 
 /**
@@ -67,7 +67,7 @@ export async function listReadinessReadsDetailForUser(
     throw new Error(error.message);
   }
 
-  return (data ?? []) as ReadinessReadRow[];
+  return (data ?? []) as unknown as ReadinessReadRow[];
 }
 
 /**
@@ -90,5 +90,5 @@ export async function getReadinessReadForUser(
     throw new Error(error.message);
   }
 
-  return (data as ReadinessReadRow | null) ?? null;
+  return (data as unknown as ReadinessReadRow | null) ?? null;
 }
