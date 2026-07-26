@@ -5,7 +5,10 @@
 // write readiness_reads or sketch_claims.
 
 import { NextResponse } from "next/server";
-import { generateSketchRead } from "@/lib/sketch/generate";
+import {
+  generateSketchRead,
+  SKETCH_PROMPT_VERSION,
+} from "@/lib/sketch/generate";
 import {
   checkSketchRateLimit,
   getClientIp,
@@ -72,8 +75,12 @@ export async function POST(request: Request) {
   }
 
   // Public path: response body only. No readiness_reads, no sketch_claims.
+  // prompt_version + telemetry travel with the read so a later Save can
+  // stage the same row shape claimSketchRead expects — still not persisted here.
   return NextResponse.json({
     read: generated.read,
     status: generated.status,
+    prompt_version: SKETCH_PROMPT_VERSION,
+    ...generated.telemetry,
   });
 }

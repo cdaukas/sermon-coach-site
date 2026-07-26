@@ -1,6 +1,7 @@
 // POST /api/sketch/save
 // Stage an anonymous Sketch read for later claim. No session required.
 // Writes via service role only — sketch_claims has RLS on and zero policies.
+// Rate-limited by IP (action: save) — same limiter as /api/sketch/run.
 
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
@@ -8,6 +9,11 @@ import {
   SKETCH_CLAIM_COOKIE,
   sketchClaimCookieOptions,
 } from "@/lib/sketch/claim";
+import {
+  checkSketchRateLimit,
+  getClientIp,
+  recordSketchEvent,
+} from "@/lib/sketch/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -44,6 +50,15 @@ function optionalStatus(value: unknown): string | null {
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const limit = await checkSketchRateLimit(ip, "save");
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Rate limited", reason: limit.reason },
+      { status: 429 },
+    );
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -107,6 +122,10 @@ export async function POST(request: Request) {
     seam_hub = null;
     seam_spokes = null;
   }
+
+  // Count this attempt before the write so cooldown / daily caps apply
+  // even if the insert fails.
+  await recordSketchEvent(ip, "save");
 
   const token = randomUUID();
   const admin = createAdminClient();
