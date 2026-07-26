@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SketchReportView } from "@/components/sketch/SketchReportView";
-import type { ReadinessReadRow } from "@/lib/sketch/queries";
-import { statusMapFromRow } from "@/lib/sketch/queries";
+import type { ReadinessReadRow } from "@/lib/sketch/readiness-read";
+import { statusMapFromRow } from "@/lib/sketch/readiness-read";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
