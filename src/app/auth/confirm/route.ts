@@ -10,7 +10,6 @@ import {
   SKETCH_CLAIM_COOKIE,
 } from "@/lib/sketch/claim";
 import { createClient } from "@/lib/supabase/server";
-import type { EmailOtpType } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -22,13 +21,18 @@ import { NextResponse } from "next/server";
  * 1. Ship this route (unused until template change).
  * 2. Confirm-signup template (dashboard), type=signup:
  *    {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup&next={{ .RedirectTo | urlquery }}
+ *    Reset-password template (dashboard), type=recovery:
+ *    {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next={{ .RedirectTo | urlquery }}
  * 3. Keep /auth/callback for in-flight ConfirmationURL / PKCE emails.
+ *
+ * Unknown types (email_change, invite, …) fail closed — never enter the
+ * signup claim/attribution path.
  */
 
 function loginFailureRedirect(origin: string, nextPath: string): NextResponse {
   const url = new URL("/login", origin);
   url.searchParams.set("error", "auth_callback_failed");
-  // Preserve claim/checkout destination — do not drop next on verify failure.
+  // Preserve claim/checkout/update-password destination — do not drop next on verify failure.
   url.searchParams.set("redirectTo", nextPath);
   return NextResponse.redirect(url);
 }
@@ -44,31 +48,50 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
-    type: type as EmailOtpType,
-    token_hash,
-  });
 
-  if (error) {
-    return loginFailureRedirect(origin, next);
-  }
+  // Recovery: session for /update-password only. Never reads claim cookie/params.
+  if (type === "recovery") {
+    const { error } = await supabase.auth.verifyOtp({
+      type: "recovery",
+      token_hash,
+    });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    const jar = await cookies();
-    const token = resolveSketchClaimToken(
-      jar.get(SKETCH_CLAIM_COOKIE)?.value,
-      searchParams.get("claim") ?? claimTokenFromNextPath(next),
-    );
-    if (token) {
-      await claimSketchRead(user.id, token);
+    if (error) {
+      return loginFailureRedirect(origin, next);
     }
+
+    return NextResponse.redirect(`${origin}${next}`);
   }
 
-  const needsAttribution = await needsAcquisitionAttribution(supabase);
-  const destination = destinationForPostAuth(next, needsAttribution);
-  return NextResponse.redirect(`${origin}${destination}`);
+  if (type === "signup") {
+    const { error } = await supabase.auth.verifyOtp({
+      type: "signup",
+      token_hash,
+    });
+
+    if (error) {
+      return loginFailureRedirect(origin, next);
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const jar = await cookies();
+      const token = resolveSketchClaimToken(
+        jar.get(SKETCH_CLAIM_COOKIE)?.value,
+        searchParams.get("claim") ?? claimTokenFromNextPath(next),
+      );
+      if (token) {
+        await claimSketchRead(user.id, token);
+      }
+    }
+
+    const needsAttribution = await needsAcquisitionAttribution(supabase);
+    const destination = destinationForPostAuth(next, needsAttribution);
+    return NextResponse.redirect(`${origin}${destination}`);
+  }
+
+  return loginFailureRedirect(origin, next);
 }
