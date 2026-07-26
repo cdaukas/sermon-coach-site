@@ -63,8 +63,15 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    // Already signed in: /login must settle on /dashboard (not /start).
+    // /start is the getting-started surface and bounces settled users onward,
+    // which paired with this redirect produced a login↔start loop.
+    // Attribution-unanswered users still hit /start via the dashboard gate below.
+    // /signup keeps routing through /start so first-time handoff is unchanged.
     const url = request.nextUrl.clone();
-    url.pathname = START_PATH;
+    const onLogin =
+      pathname === "/login" || pathname.startsWith("/login/");
+    url.pathname = onLogin ? "/dashboard" : START_PATH;
     url.search = "";
     return NextResponse.redirect(url);
   }
