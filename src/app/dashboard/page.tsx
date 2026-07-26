@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SermonList } from "@/components/dashboard/SermonList";
+import { SketchHistorySection } from "@/components/dashboard/SketchHistorySection";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
 import { listRecentCompleteEvaluations } from "@/lib/evaluation/queries";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { listSermons } from "@/lib/sermons/queries";
+import { listReadinessReadsDetailForUser } from "@/lib/sketch/queries";
 import { createClient } from "@/lib/supabase/server";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -18,17 +20,32 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermons, subscriptionStatus, packCredits, entitlement, recentComplete] =
-    await Promise.all([
-      listSermons(),
-      getSubscriptionStatus(),
-      getPackCredits(),
-      user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
-      listRecentCompleteEvaluations(2),
-    ]);
+  const [
+    sermons,
+    subscriptionStatus,
+    packCredits,
+    entitlement,
+    recentComplete,
+    sketchReads,
+  ] = await Promise.all([
+    listSermons(),
+    getSubscriptionStatus(),
+    getPackCredits(),
+    user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
+    listRecentCompleteEvaluations(2),
+    user ? listReadinessReadsDetailForUser(user.id) : Promise.resolve([]),
+  ]);
   const hasActiveSubscription = entitlement?.subscriptionActive === true;
   const showStatusRow = subscriptionStatus || packCredits;
   const growthReportHref = recentComplete.length >= 2 ? "/dashboard/growth" : null;
+  const sketchItems = sketchReads.map((row) => ({
+    id: row.id,
+    primary_passage: row.primary_passage,
+    created_at: row.created_at,
+  }));
+  const sketchesById = Object.fromEntries(
+    sketchReads.map((row) => [row.id, row]),
+  );
 
   const pageHeader = (
     <div className="mt-12 mb-6">
@@ -118,6 +135,8 @@ export default async function DashboardPage() {
         growthReportLink={growthReportLink}
         header={pageHeader}
       />
+
+      <SketchHistorySection items={sketchItems} readsById={sketchesById} />
     </main>
   );
 }
