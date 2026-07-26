@@ -13,12 +13,13 @@ import { createClient } from "@/lib/supabase/client";
 
 function destinationFromSearch(
   searchParams: ReturnType<typeof useSearchParams>,
+  fallback: string,
 ): string {
   const checkoutParams = parseCoachCheckoutParams(searchParams);
   const packParams = parsePackCheckoutParams(searchParams);
   if (checkoutParams) return buildCheckoutPath(checkoutParams.cadence);
   if (packParams) return buildPackCheckoutPath(packParams.pack);
-  return START_PATH;
+  return fallback;
 }
 
 function readHashSession(): {
@@ -39,6 +40,10 @@ function readHashSession(): {
  * Confirm-email can land on /login with tokens in the URL hash. Middleware
  * never sees the hash. Materialize the session, then hard-navigate to /start
  * so attribution gating runs on a normal request.
+ *
+ * Already-authenticated visitors who reach /login (cookie session, no hash)
+ * go to /dashboard instead — /start is not a terminal page for them and used
+ * to bounce back into the auth handoff loop.
  */
 export function PostAuthHandoff() {
   const pathname = usePathname();
@@ -56,7 +61,20 @@ export function PostAuthHandoff() {
 
     let cancelled = false;
     const supabase = createClient();
-    const destination = destinationFromSearch(searchParams);
+    const onLogin =
+      pathname === "/login" || pathname.startsWith("/login/");
+    // Hash/confirm handoff still enters via /start (attribution + claim).
+    const postConfirmDestination = destinationFromSearch(
+      searchParams,
+      START_PATH,
+    );
+    // Cookie session already present on /login: settle on dashboard
+    // (middleware may still send unanswered attribution users to /start).
+    // /signup keeps the prior /start handoff.
+    const alreadyAuthedDestination = destinationFromSearch(
+      searchParams,
+      onLogin ? "/dashboard" : START_PATH,
+    );
 
     async function go(dest: string) {
       if (cancelled) return;
@@ -74,7 +92,7 @@ export function PostAuthHandoff() {
             "",
             `${window.location.pathname}${window.location.search}`,
           );
-          await go(destination);
+          await go(postConfirmDestination);
           return;
         }
       }
@@ -83,7 +101,7 @@ export function PostAuthHandoff() {
         data: { session },
       } = await supabase.auth.getSession();
       if (session) {
-        await go(destination);
+        await go(alreadyAuthedDestination);
       }
     }
 
@@ -95,7 +113,7 @@ export function PostAuthHandoff() {
       if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
         // Avoid fighting an in-progress password login submit that pushes its own destination.
         if (readHashSession() || window.location.hash.includes("access_token")) {
-          void go(destination);
+          void go(postConfirmDestination);
         }
       }
     });
