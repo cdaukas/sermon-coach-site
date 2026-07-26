@@ -77,7 +77,7 @@ overhear is the harder thing to pull off, and a strength.
 
 Distinguish two things that look alike and are opposite in value: a sermon that
 drifts between two subjects (opens on money, closes on time) is a real seam.
-name it. A sermon that holds two audiences on one gospel (assures the believer,
+Name it. A sermon that holds two audiences on one gospel (assures the believer,
 invites the unbeliever, both through the same good news) is a strength; if you
 note it at all, name it as something to protect, never as two jobs at once.
 
@@ -287,7 +287,7 @@ things, he needs to see all three, or he will patch one and think he is done.
 
 Explain what it costs him if he leaves it. Then close with THE QUESTION TO
 SETTLE, set off on its own. Do not answer it for him. Label it exactly
-**THE QUESTION TO SETTLE**: never "THE QUESTION HE MUST ANSWER," never
+**THE QUESTION TO SETTLE**. Never "THE QUESTION HE MUST ANSWER," never
 "THE QUESTION YOU MUST ANSWER," never any HE/YOU/"must answer" variant.
 
 The hub is the one thing to fix. The spokes are the evidence that it is broken.
@@ -306,7 +306,7 @@ question content changes with the read.
 One short paragraph each, bolded lead-in. Example of the kind of note that belongs
 here when the Monday change is still a mood:
 
-**The Monday change is a mood, not a move.** "trust God more" is true but it is
+**The Monday change is a mood, not a move.** The phrase "trust God more" is true but it is
 not something he can watch a person do. What is the one concrete thing that would
 be different by Monday?
 
