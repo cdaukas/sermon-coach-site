@@ -7,8 +7,6 @@ import { StartRedirect } from "@/components/start/StartRedirect";
 import { isEligibleForAcquisitionPrompt } from "@/lib/auth/acquisition-gate";
 import { FIRST_EVAL_PATH } from "@/lib/auth/start";
 import {
-  claimSketchRead,
-  clearSketchClaimOkCookie,
   resolveSketchClaimToken,
   SKETCH_CLAIM_COOKIE,
   SKETCH_CLAIM_OK_COOKIE,
@@ -22,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 type StartPageProps = {
-  searchParams: Promise<{ claim?: string | string[] }>;
+  searchParams: Promise<{ claim?: string | string[]; saved?: string | string[] }>;
 };
 
 export default async function StartPage({ searchParams }: StartPageProps) {
@@ -33,20 +31,22 @@ export default async function StartPage({ searchParams }: StartPageProps) {
 
   const params = await searchParams;
   const claimParam = Array.isArray(params.claim) ? params.claim[0] : params.claim;
+  const savedParam = Array.isArray(params.saved) ? params.saved[0] : params.saved;
 
   if (user) {
     const jar = await cookies();
+    // One-shot confirmation after /start/claim (or confirm → claim) succeeded.
+    // Require the ok cookie so ?saved=1 alone cannot forge the landing.
+    if (savedParam === "1" && jar.get(SKETCH_CLAIM_OK_COOKIE)?.value === "1") {
+      return <StartClaimed />;
+    }
+
     const token = resolveSketchClaimToken(
       jar.get(SKETCH_CLAIM_COOKIE)?.value,
       claimParam,
     );
-    const claimedNow = token ? await claimSketchRead(user.id, token) : false;
-    // Confirm may have claimed already and set this cookie before redirecting here.
-    const claimedViaConfirm = jar.get(SKETCH_CLAIM_OK_COOKIE)?.value === "1";
-
-    if (claimedNow || claimedViaConfirm) {
-      await clearSketchClaimOkCookie();
-      return <StartClaimed />;
+    if (token) {
+      redirect(`/start/claim?claim=${encodeURIComponent(token)}`);
     }
 
     const { data: profile } = await supabase
