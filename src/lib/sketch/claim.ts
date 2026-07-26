@@ -103,7 +103,15 @@ export async function claimSketchRead(
       return false;
     }
 
-    if (!inserted) {
+    // PostgREST may return boolean or string depending on client/version.
+    const didInsert = inserted === true || inserted === "true";
+    if (!didInsert) {
+      console.error("claimSketchRead rpc returned no insert", {
+        inserted,
+        insertedType: typeof inserted,
+        tokenPrefix: trimmed.slice(0, 8),
+        userId,
+      });
       await clearSketchClaimCookie();
       return false;
     }
