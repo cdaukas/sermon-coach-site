@@ -76,8 +76,9 @@ export async function clearSketchClaimOkCookie(): Promise<void> {
 
 /**
  * Copy a staged anonymous Sketch read onto the signed-in user.
- * Fail-safe: never throws; never deletes staging before readiness_reads
- * insert succeeds. Returns true when a new readiness_reads row was inserted.
+ * Fail-safe: never throws. Attach is serialized in claim_sketch_read
+ * (SELECT … FOR UPDATE → insert → delete staging). Returns true when a
+ * new readiness_reads row was inserted.
  */
 export async function claimSketchRead(
   userId: string,
@@ -91,66 +92,20 @@ export async function claimSketchRead(
     }
 
     const admin = createAdminClient();
+    const { data: inserted, error: claimError } = await admin.rpc(
+      "claim_sketch_read",
+      { p_user_id: userId, p_token: trimmed },
+    );
 
-    const { data: claim, error: lookupError } = await admin
-      .from("sketch_claims")
-      .select("*")
-      .eq("token", trimmed)
-      .maybeSingle();
-
-    if (lookupError) {
-      console.error("claimSketchRead lookup failed", lookupError);
+    if (claimError) {
+      console.error("claimSketchRead rpc failed", claimError);
       await clearSketchClaimCookie();
       return false;
     }
 
-    if (!claim) {
+    if (!inserted) {
       await clearSketchClaimCookie();
       return false;
-    }
-
-    const expiresAt = claim.expires_at ? Date.parse(claim.expires_at) : NaN;
-    if (!Number.isNaN(expiresAt) && expiresAt < Date.now()) {
-      await clearSketchClaimCookie();
-      return false;
-    }
-
-    const { error: insertError } = await admin.from("readiness_reads").insert({
-      user_id: userId,
-      sermon_id: null,
-      primary_passage: claim.primary_passage,
-      ache: claim.ache,
-      big_idea: claim.big_idea,
-      gospel_turn: claim.gospel_turn,
-      points: claim.points,
-      one_person: claim.one_person,
-      ending: claim.ending,
-      read_output: claim.read_output,
-      prompt_version: claim.prompt_version,
-      mode: claim.mode,
-      status_ache: claim.status_ache,
-      status_big_idea: claim.status_big_idea,
-      status_gospel_turn: claim.status_gospel_turn,
-      status_points: claim.status_points,
-      status_one_person: claim.status_one_person,
-      status_ending: claim.status_ending,
-      seam_hub: claim.seam_hub,
-      seam_spokes: claim.seam_spokes,
-    });
-
-    if (insertError) {
-      console.error("claimSketchRead readiness_reads insert failed", insertError);
-      // Leave staging row in place so a later attempt can succeed.
-      return false;
-    }
-
-    const { error: deleteError } = await admin
-      .from("sketch_claims")
-      .delete()
-      .eq("token", trimmed);
-
-    if (deleteError) {
-      console.error("claimSketchRead staging delete failed", deleteError);
     }
 
     try {
