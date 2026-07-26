@@ -236,7 +236,7 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
           const muted =
             sectionKey === "WHAT'S SOLID"
               ? solidCount > 0
-                ? `${solidCount} of six`
+                ? `${solidCount} of 6`
                 : undefined
               : "before Sunday";
           blocks.push(
