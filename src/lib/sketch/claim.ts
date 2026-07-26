@@ -103,15 +103,9 @@ export async function claimSketchRead(
       return false;
     }
 
-    // PostgREST may return boolean or string depending on client/version.
+    // PostgREST / supabase-js may surface the boolean as a string.
     const didInsert = inserted === true || inserted === "true";
     if (!didInsert) {
-      console.error("claimSketchRead rpc returned no insert", {
-        inserted,
-        insertedType: typeof inserted,
-        tokenPrefix: trimmed.slice(0, 8),
-        userId,
-      });
       await clearSketchClaimCookie();
       return false;
     }

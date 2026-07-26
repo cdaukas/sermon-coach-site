@@ -39,17 +39,9 @@ export async function GET(request: Request) {
   const claimedNow = token ? await claimSketchRead(user.id, token) : false;
   const claimedViaConfirm = jar.get(SKETCH_CLAIM_OK_COOKIE)?.value === "1";
 
-  console.error("start/claim result", {
-    hasToken: Boolean(token),
-    tokenPrefix: token?.slice(0, 8) ?? null,
-    userId: user.id,
-    claimedNow,
-    claimedViaConfirm,
-  });
-
   if (claimedNow || claimedViaConfirm) {
     return NextResponse.redirect(new URL("/start?saved=1", origin));
   }
 
-  return NextResponse.redirect(new URL("/start?claim_miss=1", origin));
+  return NextResponse.redirect(new URL("/start", origin));
 }
