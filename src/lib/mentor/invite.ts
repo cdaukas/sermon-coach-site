@@ -93,12 +93,21 @@ export function mentorAcceptCarryPath(token: string): string {
   return `${MENTOR_ACCEPT_PATH}/carry?token=${encodeURIComponent(token)}`;
 }
 
-/** Extract ?token= from a next path such as `/mentor/accept?token=<token>`. */
+/** Extract ?token= from a next path such as `/mentor/accept?token=<token>`,
+ *  or from a nested `/start?next=/mentor/accept?token=<token>` (post-confirm shape).
+ */
 export function mentorTokenFromNextPath(nextPath: string): string | null {
   try {
     const url = new URL(nextPath, "https://placeholder.local");
-    if (url.pathname !== MENTOR_ACCEPT_PATH) return null;
-    return url.searchParams.get("token")?.trim() || null;
+    if (url.pathname === MENTOR_ACCEPT_PATH) {
+      return url.searchParams.get("token")?.trim() || null;
+    }
+    if (url.pathname === "/start") {
+      const nested = url.searchParams.get("next")?.trim();
+      if (!nested) return null;
+      return mentorTokenFromNextPath(nested);
+    }
+    return null;
   } catch {
     return null;
   }

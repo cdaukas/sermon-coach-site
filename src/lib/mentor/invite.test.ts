@@ -40,6 +40,15 @@ describe("mentorTokenFromNextPath", () => {
     );
   });
 
+  it("extracts token from nested /start?next= accept path", () => {
+    assert.equal(
+      mentorTokenFromNextPath(
+        "/start?next=%2Fmentor%2Faccept%3Ftoken%3Dtok-2",
+      ),
+      "tok-2",
+    );
+  });
+
   it("rejects non-accept paths", () => {
     assert.equal(mentorTokenFromNextPath("/start?claim=tok"), null);
   });
