@@ -14,3 +14,12 @@ export const FIRST_EVAL_PATH = "/dashboard/sermons/new";
 export function startPathWithClaim(token: string): string {
   return `${START_PATH}?claim=${encodeURIComponent(token)}`;
 }
+
+/**
+ * Post-verify next path that carries a relative destination (e.g. mentor accept).
+ * Mirrors startPathWithClaim: confirmation returns to /start with the payload
+ * in the query string so /start can honor it before acquisition.
+ */
+export function startPathWithNext(nextPath: string): string {
+  return `${START_PATH}?next=${encodeURIComponent(nextPath)}`;
+}

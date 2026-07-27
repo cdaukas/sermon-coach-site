@@ -89,5 +89,10 @@ export default async function StartPage({ searchParams }: StartPageProps) {
     return <StartRedirect />;
   }
 
-  return <StartLanding claimToken={claimParam ?? null} />;
+  const inviteNext =
+    preservedNext?.startsWith(MENTOR_ACCEPT_PATH) ? preservedNext : null;
+
+  return (
+    <StartLanding claimToken={claimParam ?? null} inviteNext={inviteNext} />
+  );
 }

@@ -54,7 +54,11 @@ function destinationWithMentorInvite(
   const token =
     cookieToken?.trim() || mentorTokenFromNextPath(nextPath) || null;
   if (!token) return destination;
-  if (destination === START_PATH || isDashboardPath(destination)) {
+  if (
+    destination === START_PATH ||
+    destination.startsWith(`${START_PATH}?`) ||
+    isDashboardPath(destination)
+  ) {
     return mentorAcceptPathWithToken(token);
   }
   return destination;

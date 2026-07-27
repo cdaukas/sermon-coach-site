@@ -11,8 +11,13 @@ import {
   AuthSubmit,
 } from "@/components/auth/AuthForm";
 import { setNewsletterOptedIn } from "@/lib/auth/newsletter-opt-in";
-import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
+import {
+  START_PATH,
+  startPathWithClaim,
+  startPathWithNext,
+} from "@/lib/auth/start";
 import { buildAuthCallbackUrl } from "@/lib/billing/checkout";
+import { MENTOR_ACCEPT_PATH } from "@/lib/mentor/invite";
 import { browserSiteOrigin } from "@/lib/site-origin";
 import { createClient } from "@/lib/supabase/client";
 
@@ -38,9 +43,27 @@ const VALUE_POINTS = [
   "Your first evaluation is free. No card, no commitment.",
 ];
 
-export function StartLanding({ claimToken = null }: { claimToken?: string | null }) {
+type StartLandingProps = {
+  claimToken?: string | null;
+  /** Relative mentor-accept path, e.g. /mentor/accept?token=… */
+  inviteNext?: string | null;
+};
+
+export function StartLanding({
+  claimToken = null,
+  inviteNext = null,
+}: StartLandingProps) {
   const router = useRouter();
-  const nextPath = claimToken ? startPathWithClaim(claimToken) : START_PATH;
+  // Mirror sketch: claim → /start?claim=; mentor → /start?next=/mentor/accept?token=
+  // so emailRedirectTo carries the destination through confirmation.
+  const nextPath = inviteNext
+    ? startPathWithNext(inviteNext)
+    : claimToken
+      ? startPathWithClaim(claimToken)
+      : START_PATH;
+  const isMentorInvite = Boolean(
+    inviteNext?.startsWith(MENTOR_ACCEPT_PATH),
+  );
   const loginHref = `/login?redirectTo=${encodeURIComponent(nextPath)}`;
 
   const [email, setEmail] = useState("");
@@ -100,6 +123,7 @@ export function StartLanding({ claimToken = null }: { claimToken?: string | null
     if (data.session) {
       // Profile row exists via handle_new_user; RPC confirms opt-in when session is live.
       await setNewsletterOptedIn(newsletterOptedIn);
+      router.push(nextPath);
       router.refresh();
       return;
     }
@@ -107,7 +131,9 @@ export function StartLanding({ claimToken = null }: { claimToken?: string | null
     setAwaitingConfirmation(true);
     setBanner({
       variant: "success",
-      text: "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
+      text: isMentorInvite
+        ? "Check your email to confirm your account. After you verify, you'll return to finish accepting the mentoring invitation."
+        : "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
     });
   }
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { startPathWithNext } from "@/lib/auth/start";
 import {
   MENTOR_INVITE_COOKIE,
   mentorAcceptPathWithToken,
@@ -9,11 +10,11 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * Persist the invite token as an httpOnly cookie (same-browser fallback),
- * then send the user to signup or the consent screen. Cookie writes are not
- * allowed in Server Components — this route mirrors sketch claim staging.
+ * then send the user to /start with next= (mirrors sketch /start?claim=).
+ * Cookie writes are not allowed in Server Components.
  *
  * Production: cookie Domain=.sermoncoach.online so apex ↔ www both see it.
- * Signup redirects prefer www so emailRedirectTo matches Supabase Site URL.
+ * /start signup folds next into emailRedirectTo so confirmation keeps it.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -34,9 +35,9 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    const signup = new URL("/signup", redirectOrigin);
-    signup.searchParams.set("next", acceptPath);
-    const unauthed = NextResponse.redirect(signup);
+    // Mirror sketch: unauthed visitors sign up on /start with the payload in the query.
+    const startUrl = `${redirectOrigin}${startPathWithNext(acceptPath)}`;
+    const unauthed = NextResponse.redirect(startUrl);
     unauthed.cookies.set(MENTOR_INVITE_COOKIE, token, cookieOpts);
     return unauthed;
   }
