@@ -3,7 +3,10 @@ import { describe, it } from "node:test";
 import {
   applyInternalAccountFilter,
   applySuppressionFilter,
+  applyTestFixtureFilter,
   isInternalTestAccount,
+  isTestFixtureAccount,
+  matchTestFixtureRule,
   mergeRecipientSources,
 } from "./blog-recipients";
 
@@ -33,6 +36,34 @@ describe("internal test account filter", () => {
     assert.deepEqual(
       eligible.map((row) => row.email),
       ["chrisd@gtn.org", "reader@example.com"],
+    );
+  });
+});
+
+describe("test fixture filter", () => {
+  it("matches local-part prefixes on any domain, not only example.com", () => {
+    assert.equal(matchTestFixtureRule("sketch-prod-xxx@gmail.com"), "sketch-");
+    assert.equal(matchTestFixtureRule("acq-test@live.com"), "acq-");
+    assert.equal(matchTestFixtureRule("rr-foo@sermoncoach.online"), "rr-");
+    assert.equal(matchTestFixtureRule("reader@example.com"), "example.com");
+    assert.equal(matchTestFixtureRule("pastor@realchurch.org"), null);
+    assert.equal(isTestFixtureAccount("sketch-prod-xxx@gmail.com"), true);
+  });
+
+  it("excludes fixture emails from the eligible list", () => {
+    const recipients = [
+      { userId: "1", email: "pastor@realchurch.org" },
+      { userId: "2", email: "sketch-prod-xxx@gmail.com" },
+      { userId: "3", email: "reader@example.com" },
+    ];
+
+    const { eligible, fixtureExcludedCount } =
+      applyTestFixtureFilter(recipients);
+
+    assert.equal(fixtureExcludedCount, 2);
+    assert.deepEqual(
+      eligible.map((row) => row.email),
+      ["pastor@realchurch.org"],
     );
   });
 });

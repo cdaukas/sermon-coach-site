@@ -119,8 +119,8 @@ export function applyTestFixtureFilter(
 }
 
 /**
- * Broadest audience: every auth.users row with an email.
- * profiles.id = auth.users.id (1:1 via on_auth_user_created trigger) — no tier filter.
+ * Every auth.users row with an email (no opt-in filter).
+ * Used as the email source; Model B filters via newsletter_opted_in below.
  */
 export async function listAllAccountEmails(
   supabase: SupabaseClient,
@@ -164,6 +164,29 @@ export async function listAllAccountEmails(
   }
 
   return [...byEmail.values()].sort((a, b) => a.email.localeCompare(b.email));
+}
+
+/**
+ * Account audience for Friday send (Model B): profiles.newsletter_opted_in = true.
+ * Emails still resolved from auth.users via listAllAccountEmails.
+ */
+export async function listOptedInAccountEmails(
+  supabase: SupabaseClient,
+): Promise<BlogRecipientRow[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("newsletter_opted_in", true);
+
+  if (error) {
+    throw new Error(`profiles newsletter_opted_in query failed: ${error.message}`);
+  }
+
+  const optedInIds = new Set((data ?? []).map((row) => String(row.id)));
+  const accounts = await listAllAccountEmails(supabase);
+  return accounts.filter(
+    (row) => row.userId != null && optedInIds.has(row.userId),
+  );
 }
 
 export async function listNewsletterSubscriberEmails(
@@ -274,7 +297,7 @@ export async function resolveEligibleBlogRecipients(
   eligible: BlogRecipientRow[];
 }> {
   const [accounts, newsletter] = await Promise.all([
-    listAllAccountEmails(supabase),
+    listOptedInAccountEmails(supabase),
     listNewsletterSubscriberEmails(supabase),
   ]);
   const merged = mergeRecipientSources(accounts, newsletter);
