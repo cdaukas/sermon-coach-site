@@ -4,7 +4,7 @@ export const RUN_COOLDOWN_MS = 20_000;
 export const RUN_DAILY_PER_IP = 5;
 export const SAVE_COOLDOWN_MS = 5_000;
 export const SAVE_DAILY_PER_IP = 10;
-export const RUN_DAILY_SITEWIDE = 300;
+export const RUN_DAILY_SITEWIDE = 15;
 export const SAVE_DAILY_SITEWIDE = 500;
 
 export type SketchRateAction = "run" | "save";
