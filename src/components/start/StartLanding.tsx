@@ -13,6 +13,7 @@ import {
 import { setNewsletterOptedIn } from "@/lib/auth/newsletter-opt-in";
 import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
 import { buildAuthCallbackUrl } from "@/lib/billing/checkout";
+import { browserSiteOrigin } from "@/lib/site-origin";
 import { createClient } from "@/lib/supabase/client";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -29,22 +30,6 @@ function friendlySignupError(message: string): string {
     return message;
   }
   return "Something went wrong. Please try again.";
-}
-
-function getSiteOrigin(): string {
-  const isLocalDev =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1");
-
-  if (isLocalDev && typeof window !== "undefined") {
-    return window.location.origin;
-  }
-
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    "https://sermoncoach.online"
-  );
 }
 
 const VALUE_POINTS = [
@@ -92,7 +77,7 @@ export function StartLanding({ claimToken = null }: { claimToken?: string | null
 
     setLoading(true);
     const supabase = createClient();
-    const siteOrigin = getSiteOrigin();
+    const siteOrigin = browserSiteOrigin();
     const emailRedirectTo = buildAuthCallbackUrl(siteOrigin, nextPath);
 
     const { data, error } = await supabase.auth.signUp({

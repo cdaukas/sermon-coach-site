@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   mentorAcceptPathWithToken,
+  mentorInviteCookieOptions,
   mentorTokenFromNextPath,
   messageForAcceptError,
   parseAcceptMentorInviteResult,
@@ -78,5 +79,19 @@ describe("parseAcceptMentorInviteResult", () => {
       }),
       { ok: false, error_code: "invalid_or_used", relationship_id: null },
     );
+  });
+});
+
+describe("mentorInviteCookieOptions", () => {
+  it("sets parent domain on production hosts", () => {
+    const opts = mentorInviteCookieOptions(3600, "sermoncoach.online");
+    assert.equal(opts.domain, ".sermoncoach.online");
+    const www = mentorInviteCookieOptions(3600, "www.sermoncoach.online");
+    assert.equal(www.domain, ".sermoncoach.online");
+  });
+
+  it("omits domain on localhost", () => {
+    const opts = mentorInviteCookieOptions(3600, "localhost");
+    assert.equal(opts.domain, undefined);
   });
 });

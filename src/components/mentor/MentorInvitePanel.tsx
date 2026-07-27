@@ -5,6 +5,7 @@ import { AuthMessage } from "@/components/auth/AuthMessage";
 import { AuthSubmit } from "@/components/auth/AuthForm";
 import { createClient } from "@/lib/supabase/client";
 import { mentorAcceptPathWithToken } from "@/lib/mentor/invite";
+import { browserSiteOrigin } from "@/lib/site-origin";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
@@ -39,8 +40,8 @@ export function MentorInvitePanel() {
       return;
     }
 
-    const origin = window.location.origin;
-    setLink(`${origin}${mentorAcceptPathWithToken(token)}`);
+    // Always www in production so invite host matches Supabase Site URL.
+    setLink(`${browserSiteOrigin()}${mentorAcceptPathWithToken(token)}`);
   }
 
   async function handleCopy() {
