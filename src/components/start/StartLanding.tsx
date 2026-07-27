@@ -46,7 +46,7 @@ function getSiteOrigin(): string {
 const VALUE_POINTS = [
   "Paste your manuscript and get a structured evaluation in minutes.",
   "Scored and narrated against eleven questions drawn from Chapell, Keller, Piper, and the expository tradition.",
-  "Your first evaluation is free — no card, no commitment.",
+  "Your first evaluation is free. No card, no commitment.",
 ];
 
 export function StartLanding({ claimToken = null }: { claimToken?: string | null }) {

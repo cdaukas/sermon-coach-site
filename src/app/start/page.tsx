@@ -16,7 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "Get Started",
   description:
-    "Create a free account and get your first sermon evaluation — no card, no commitment.",
+    "Create a free account and get your first sermon evaluation. No card, no commitment.",
 };
 
 type StartPageProps = {
