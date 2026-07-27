@@ -1,7 +1,14 @@
 import {
   destinationForPostAuth,
+  isDashboardPath,
   needsAcquisitionAttribution,
 } from "@/lib/auth/acquisition-gate";
+import {
+  MENTOR_INVITE_COOKIE,
+  mentorAcceptPathWithToken,
+  mentorTokenFromNextPath,
+} from "@/lib/mentor/invite";
+import { START_PATH } from "@/lib/auth/start";
 import {
   claimSketchRead,
   claimTokenFromNextPath,
@@ -19,6 +26,22 @@ function safeRedirectPath(next: string | null): string {
   return next;
 }
 
+/** When confirm drops the accept URL but the cookie remains, prefer consent. */
+function destinationWithMentorInvite(
+  destination: string,
+  cookieToken: string | undefined | null,
+  nextPath: string,
+): string {
+  if (destination.startsWith("/mentor/accept")) return destination;
+  const token =
+    cookieToken?.trim() || mentorTokenFromNextPath(nextPath) || null;
+  if (!token) return destination;
+  if (destination === START_PATH || isDashboardPath(destination)) {
+    return mentorAcceptPathWithToken(token);
+  }
+  return destination;
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -33,8 +56,8 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
 
+      const jar = await cookies();
       if (user) {
-        const jar = await cookies();
         const token = resolveSketchClaimToken(
           jar.get(SKETCH_CLAIM_COOKIE)?.value,
           searchParams.get("claim") ?? claimTokenFromNextPath(next),
@@ -45,7 +68,11 @@ export async function GET(request: Request) {
       }
 
       const needsAttribution = await needsAcquisitionAttribution(supabase);
-      const destination = destinationForPostAuth(next, needsAttribution);
+      const destination = destinationWithMentorInvite(
+        destinationForPostAuth(next, needsAttribution),
+        jar.get(MENTOR_INVITE_COOKIE)?.value,
+        next,
+      );
       return NextResponse.redirect(`${origin}${destination}`);
     }
   }

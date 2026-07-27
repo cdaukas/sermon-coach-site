@@ -1,6 +1,7 @@
 /** Mentor invite token survival + accept result helpers.
  *  Mirrors the sketch claim pattern: token in the post-auth `next` path,
- *  with an httpOnly cookie as same-browser fallback.
+ *  with an httpOnly cookie as same-browser fallback. /start reads the cookie
+ *  when the URL destination is lost (same safety net as sketch_claim).
  */
 
 export const MENTOR_INVITE_COOKIE = "mentor_invite";
@@ -32,6 +33,17 @@ export type AcceptMentorInviteResult = {
 
 export function mentorInviteCookieOptions(maxAge = INVITE_COOKIE_MAX_AGE_SECONDS) {
   return { ...COOKIE_OPTIONS, maxAge };
+}
+
+/** Clear after accept succeeds or a definitive RPC rejection (mirrors sketch claim). */
+export async function clearMentorInviteCookie(): Promise<void> {
+  try {
+    const { cookies } = await import("next/headers");
+    const jar = await cookies();
+    jar.set(MENTOR_INVITE_COOKIE, "", mentorInviteCookieOptions(0));
+  } catch (err) {
+    console.error("clearMentorInviteCookie failed", err);
+  }
 }
 
 /** Resolve invite token: ?token= query param first, then httpOnly cookie fallback.
