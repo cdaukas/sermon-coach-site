@@ -14,6 +14,7 @@ import {
   EmailExistsMessage,
   isDuplicateSignupError,
 } from "@/lib/auth/signup-errors";
+import { setNewsletterOptedIn } from "@/lib/auth/newsletter-opt-in";
 import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -25,6 +26,9 @@ import {
   parseCoachCheckoutParams,
   parsePackCheckoutParams,
 } from "@/lib/billing/checkout";
+
+const NEWSLETTER_OPT_IN_LABEL =
+  "Get the Friday post. One email a week on preaching that lands.";
 
 function friendlySignupError(message: string): string {
   const lower = message.toLowerCase();
@@ -68,6 +72,7 @@ function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [newsletterOptedIn, setNewsletterOptedInState] = useState(false);
   const [banner, setBanner] = useState<{
     variant: "error" | "success";
     text: ReactNode;
@@ -128,6 +133,9 @@ function SignupForm() {
       password,
       options: {
         emailRedirectTo,
+        data: {
+          newsletter_opted_in: newsletterOptedIn,
+        },
       },
     });
     setLoading(false);
@@ -145,6 +153,7 @@ function SignupForm() {
     }
 
     if (data.session) {
+      await setNewsletterOptedIn(newsletterOptedIn);
       router.push(postCheckoutPath ?? defaultNextPath);
       router.refresh();
       return;
@@ -246,6 +255,19 @@ function SignupForm() {
               onChange: (e) => setConfirmPassword(e.target.value),
             }}
           />
+          <label
+            className="flex cursor-pointer items-start gap-3 text-[14px] leading-relaxed"
+            style={{ fontFamily: "var(--font-ui)", color: "var(--sc-ink-mid)" }}
+          >
+            <input
+              type="checkbox"
+              name="newsletterOptedIn"
+              checked={newsletterOptedIn}
+              onChange={(e) => setNewsletterOptedInState(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0"
+            />
+            <span>{NEWSLETTER_OPT_IN_LABEL}</span>
+          </label>
           <AuthSubmit disabled={loading}>
             {loading ? "Creating account…" : "Create account"}
           </AuthSubmit>

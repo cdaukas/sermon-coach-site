@@ -10,11 +10,15 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import { setNewsletterOptedIn } from "@/lib/auth/newsletter-opt-in";
 import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
 import { buildAuthCallbackUrl } from "@/lib/billing/checkout";
 import { createClient } from "@/lib/supabase/client";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
+
+const NEWSLETTER_OPT_IN_LABEL =
+  "Get the Friday post. One email a week on preaching that lands.";
 
 function friendlySignupError(message: string): string {
   const lower = message.toLowerCase();
@@ -57,6 +61,7 @@ export function StartLanding({ claimToken = null }: { claimToken?: string | null
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [newsletterOptedIn, setNewsletterOptedInState] = useState(false);
   const [banner, setBanner] = useState<{
     variant: "error" | "success";
     text: string;
@@ -95,6 +100,9 @@ export function StartLanding({ claimToken = null }: { claimToken?: string | null
       password,
       options: {
         emailRedirectTo,
+        data: {
+          newsletter_opted_in: newsletterOptedIn,
+        },
       },
     });
     setLoading(false);
@@ -105,6 +113,8 @@ export function StartLanding({ claimToken = null }: { claimToken?: string | null
     }
 
     if (data.session) {
+      // Profile row exists via handle_new_user; RPC confirms opt-in when session is live.
+      await setNewsletterOptedIn(newsletterOptedIn);
       router.refresh();
       return;
     }
@@ -245,6 +255,19 @@ export function StartLanding({ claimToken = null }: { claimToken?: string | null
                   onChange: (e) => setConfirmPassword(e.target.value),
                 }}
               />
+              <label
+                className="flex cursor-pointer items-start gap-3 text-[14px] leading-relaxed"
+                style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+              >
+                <input
+                  type="checkbox"
+                  name="newsletterOptedIn"
+                  checked={newsletterOptedIn}
+                  onChange={(e) => setNewsletterOptedInState(e.target.checked)}
+                  className="mt-1 h-4 w-4 shrink-0"
+                />
+                <span>{NEWSLETTER_OPT_IN_LABEL}</span>
+              </label>
               <AuthSubmit disabled={loading}>
                 {loading ? "Creating account…" : "Create free account"}
               </AuthSubmit>
