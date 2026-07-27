@@ -16,6 +16,14 @@ type MentorAcceptFormProps = {
   token: string;
 };
 
+async function clearInviteCookie(): Promise<void> {
+  try {
+    await fetch("/mentor/accept/clear", { method: "POST" });
+  } catch (err) {
+    console.error("clear mentor_invite cookie failed", err);
+  }
+}
+
 export function MentorAcceptForm({ token }: MentorAcceptFormProps) {
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
@@ -37,8 +45,14 @@ export function MentorAcceptForm({ token }: MentorAcceptFormProps) {
 
     const result = parseAcceptMentorInviteResult(data);
     if (result.ok) {
+      await clearInviteCookie();
       setAccepted(true);
       return;
+    }
+
+    // Definitive rejections: drop the cookie so /start does not re-loop here.
+    if (result.error_code) {
+      await clearInviteCookie();
     }
 
     setError(

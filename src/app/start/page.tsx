@@ -7,6 +7,10 @@ import { StartRedirect } from "@/components/start/StartRedirect";
 import { isEligibleForAcquisitionPrompt } from "@/lib/auth/acquisition-gate";
 import { FIRST_EVAL_PATH } from "@/lib/auth/start";
 import {
+  MENTOR_INVITE_COOKIE,
+  mentorAcceptPathWithToken,
+} from "@/lib/mentor/invite";
+import {
   resolveSketchClaimToken,
   SKETCH_CLAIM_COOKIE,
   SKETCH_CLAIM_OK_COOKIE,
@@ -47,6 +51,14 @@ export default async function StartPage({ searchParams }: StartPageProps) {
     );
     if (token) {
       redirect(`/start/claim?claim=${encodeURIComponent(token)}`);
+    }
+
+    // Mentor invite safety net (mirrors sketch_claim above): when email
+    // confirmation drops next=/mentor/accept?token=…, the cookie still lands
+    // the mentee on the consent screen instead of dying at attribution.
+    const mentorInviteToken = jar.get(MENTOR_INVITE_COOKIE)?.value?.trim();
+    if (mentorInviteToken) {
+      redirect(mentorAcceptPathWithToken(mentorInviteToken));
     }
 
     const { data: profile } = await supabase
