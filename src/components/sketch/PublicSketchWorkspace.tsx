@@ -24,7 +24,7 @@ const SAVE_FAILURE_COPY =
 
 const PUBLIC_HEADER: SketchIntakeHeaderCopy = {
   eyebrow: "THE SKETCH",
-  heading: "A read on your sermon before you build it.",
+  heading: "Alignment check on your sermon outline.",
   subhead:
     "Answer six questions about the passage and the people you're preaching to. You'll get back an honest read on where the sermon is solid and where it's still thin, before you write a word.",
   note: "No account needed.",
