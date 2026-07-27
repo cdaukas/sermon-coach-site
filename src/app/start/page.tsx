@@ -7,6 +7,7 @@ import { StartRedirect } from "@/components/start/StartRedirect";
 import { isEligibleForAcquisitionPrompt } from "@/lib/auth/acquisition-gate";
 import { FIRST_EVAL_PATH } from "@/lib/auth/start";
 import {
+  MENTOR_ACCEPT_PATH,
   MENTOR_INVITE_COOKIE,
   mentorAcceptPathWithToken,
 } from "@/lib/mentor/invite";
@@ -24,8 +25,17 @@ export const metadata: Metadata = {
 };
 
 type StartPageProps = {
-  searchParams: Promise<{ claim?: string | string[]; saved?: string | string[] }>;
+  searchParams: Promise<{
+    claim?: string | string[];
+    saved?: string | string[];
+    next?: string | string[];
+  }>;
 };
+
+function safeRelativeNext(raw: string | null | undefined): string | null {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return null;
+  return raw;
+}
 
 export default async function StartPage({ searchParams }: StartPageProps) {
   const supabase = await createClient();
@@ -36,6 +46,8 @@ export default async function StartPage({ searchParams }: StartPageProps) {
   const params = await searchParams;
   const claimParam = Array.isArray(params.claim) ? params.claim[0] : params.claim;
   const savedParam = Array.isArray(params.saved) ? params.saved[0] : params.saved;
+  const nextParam = Array.isArray(params.next) ? params.next[0] : params.next;
+  const preservedNext = safeRelativeNext(nextParam);
 
   if (user) {
     const jar = await cookies();
@@ -45,6 +57,7 @@ export default async function StartPage({ searchParams }: StartPageProps) {
       return <StartClaimed />;
     }
 
+    // Sketch claim BEFORE acquisition (proven ordering).
     const token = resolveSketchClaimToken(
       jar.get(SKETCH_CLAIM_COOKIE)?.value,
       claimParam,
@@ -53,9 +66,11 @@ export default async function StartPage({ searchParams }: StartPageProps) {
       redirect(`/start/claim?claim=${encodeURIComponent(token)}`);
     }
 
-    // Mentor invite safety net (mirrors sketch_claim above): when email
-    // confirmation drops next=/mentor/accept?token=…, the cookie still lands
-    // the mentee on the consent screen instead of dying at attribution.
+    // Mentor invite BEFORE acquisition — same precedence as sketch claim.
+    // Prefer surviving ?next=/mentor/accept?token=…, then cookie fallback.
+    if (preservedNext?.startsWith(MENTOR_ACCEPT_PATH)) {
+      redirect(preservedNext);
+    }
     const mentorInviteToken = jar.get(MENTOR_INVITE_COOKIE)?.value?.trim();
     if (mentorInviteToken) {
       redirect(mentorAcceptPathWithToken(mentorInviteToken));
