@@ -4,6 +4,11 @@
  *  when the URL destination is lost (same safety net as sketch_claim).
  */
 
+import {
+  isSermonCoachProductionHost,
+  SITE_COOKIE_PARENT_DOMAIN,
+} from "@/lib/site-origin";
+
 export const MENTOR_INVITE_COOKIE = "mentor_invite";
 
 export const MENTOR_ACCEPT_PATH = "/mentor/accept";
@@ -31,16 +36,36 @@ export type AcceptMentorInviteResult = {
   relationship_id: string | null;
 };
 
-export function mentorInviteCookieOptions(maxAge = INVITE_COOKIE_MAX_AGE_SECONDS) {
-  return { ...COOKIE_OPTIONS, maxAge };
+export function mentorInviteCookieOptions(
+  maxAge = INVITE_COOKIE_MAX_AGE_SECONDS,
+  hostname?: string | null,
+) {
+  const options: {
+    httpOnly: boolean;
+    secure: boolean;
+    sameSite: "lax";
+    path: string;
+    maxAge: number;
+    domain?: string;
+  } = { ...COOKIE_OPTIONS, maxAge };
+
+  // Scope to parent domain so apex-set cookies are visible on www (Site URL)
+  // and vice versa. Omit on localhost — Domain must match the request host.
+  if (hostname && isSermonCoachProductionHost(hostname)) {
+    options.domain = SITE_COOKIE_PARENT_DOMAIN;
+  }
+
+  return options;
 }
 
 /** Clear after accept succeeds or a definitive RPC rejection (mirrors sketch claim). */
-export async function clearMentorInviteCookie(): Promise<void> {
+export async function clearMentorInviteCookie(
+  hostname?: string | null,
+): Promise<void> {
   try {
     const { cookies } = await import("next/headers");
     const jar = await cookies();
-    jar.set(MENTOR_INVITE_COOKIE, "", mentorInviteCookieOptions(0));
+    jar.set(MENTOR_INVITE_COOKIE, "", mentorInviteCookieOptions(0, hostname));
   } catch (err) {
     console.error("clearMentorInviteCookie failed", err);
   }

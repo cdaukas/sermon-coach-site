@@ -16,6 +16,7 @@ import {
 } from "@/lib/auth/signup-errors";
 import { setNewsletterOptedIn } from "@/lib/auth/newsletter-opt-in";
 import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
+import { browserSiteOrigin } from "@/lib/site-origin";
 import { createClient } from "@/lib/supabase/client";
 import {
   buildAuthCallbackUrl,
@@ -36,22 +37,6 @@ function friendlySignupError(message: string): string {
     return message;
   }
   return "Something went wrong. Please try again.";
-}
-
-function getSiteOrigin(): string {
-  const isLocalDev =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1");
-
-  if (isLocalDev && typeof window !== "undefined") {
-    return window.location.origin;
-  }
-
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    "https://sermoncoach.online"
-  );
 }
 
 /** Relative post-auth path only (mirrors confirm-redirect safeRedirectPath). */
@@ -122,7 +107,7 @@ function SignupForm() {
     setLoading(true);
     const supabase = createClient();
     const trimmedEmail = email.trim();
-    const siteOrigin = getSiteOrigin();
+    const siteOrigin = browserSiteOrigin();
     const emailRedirectTo = postCheckoutPath
       ? buildAuthCallbackUrl(siteOrigin, postCheckoutPath)
       : buildAuthCallbackUrl(siteOrigin, defaultNextPath);
