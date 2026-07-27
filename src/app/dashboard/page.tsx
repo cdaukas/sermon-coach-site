@@ -113,7 +113,7 @@ export default async function DashboardPage() {
               style={{ ...uiFont, color: "var(--sc-accent)" }}
             >
               {hasActiveSubscription
-                ? "Need more evaluations? Visit Buy →"
+                ? "Need more credits? Visit Buy →"
                 : "Subscribe or buy a pack →"}
             </Link>
           </div>
