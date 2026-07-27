@@ -54,21 +54,31 @@ function getSiteOrigin(): string {
   );
 }
 
+/** Relative post-auth path only (mirrors confirm-redirect safeRedirectPath). */
+function safeNextPath(raw: string | null): string | null {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return null;
+  return raw;
+}
+
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const checkoutParams = parseCoachCheckoutParams(searchParams);
   const packParams = parsePackCheckoutParams(searchParams);
   const claimToken = searchParams.get("claim")?.trim() || null;
+  const preservedNext = safeNextPath(searchParams.get("next"));
   const postCheckoutPath = checkoutParams
     ? buildCheckoutPath(checkoutParams.cadence)
     : packParams
       ? buildPackCheckoutPath(packParams.pack)
       : null;
-  const defaultNextPath =
-    claimToken && !postCheckoutPath
-      ? startPathWithClaim(claimToken)
-      : START_PATH;
+  const defaultNextPath = postCheckoutPath
+    ? postCheckoutPath
+    : preservedNext
+      ? preservedNext
+      : claimToken
+        ? startPathWithClaim(claimToken)
+        : START_PATH;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -84,7 +94,9 @@ function SignupForm() {
     ? buildLoginPath(checkoutParams.cadence)
     : packParams
       ? buildPackLoginPath(packParams.pack)
-      : "/login";
+      : preservedNext || claimToken
+        ? `/login?redirectTo=${encodeURIComponent(defaultNextPath)}`
+        : "/login";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -166,7 +178,9 @@ function SignupForm() {
         ? "Check your email to confirm your account. After you verify, you'll continue to Coach checkout."
         : packParams
           ? "Check your email to confirm your account. After you verify, you'll continue to pack checkout."
-          : "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
+          : preservedNext
+            ? "Check your email to confirm your account. After you verify, you'll return to finish accepting the invitation."
+            : "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
     });
   }
 

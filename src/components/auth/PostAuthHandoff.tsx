@@ -19,6 +19,10 @@ function destinationFromSearch(
   const packParams = parsePackCheckoutParams(searchParams);
   if (checkoutParams) return buildCheckoutPath(checkoutParams.cadence);
   if (packParams) return buildPackCheckoutPath(packParams.pack);
+  const next = searchParams.get("next");
+  if (next && next.startsWith("/") && !next.startsWith("//")) {
+    return next;
+  }
   return fallback;
 }
 
