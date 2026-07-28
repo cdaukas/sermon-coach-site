@@ -28,7 +28,9 @@ export function normalizeReportMode(value: unknown): ReportMode {
   if (value === "debrief") {
     return "debrief";
   }
-  // TODO: remove legacy coaching tolerance after backfill to debrief.
+  // Database backfill complete as of 2026-07-28. This branch remains solely
+  // for stale sermonReportMode browser-storage values (still 'coaching').
+  // Do not remove before 2027.
   if (value === "coaching") {
     return "debrief";
   }
