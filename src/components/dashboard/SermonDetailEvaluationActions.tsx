@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EvaluateButton } from "@/components/evaluation/EvaluateButton";
 import { EvaluationCreditLine } from "@/components/evaluation/EvaluationCreditLine";
-import type { StashedReportMode } from "@/lib/evaluation/context";
+import type { ReportMode } from "@/lib/evaluation/context";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import {
   groupCompleteEvaluationsByMode,
@@ -16,7 +16,7 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 type SermonDetailEvaluationActionsProps = {
   sermonId: string;
   completeEvaluations: SermonEvaluationListItem[];
-  reportMode: StashedReportMode;
+  reportMode: ReportMode;
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
 };
@@ -33,7 +33,7 @@ export function SermonDetailEvaluationActions({
     [completeEvaluations],
   );
   const [rerunPromptMode, setRerunPromptMode] =
-    useState<StashedReportMode | null>(null);
+    useState<ReportMode | null>(null);
   const pendingRunRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {

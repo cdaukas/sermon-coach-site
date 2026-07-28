@@ -1,6 +1,6 @@
 "use client";
 
-import type { StashedReportMode } from "@/lib/evaluation/context";
+import type { ReportMode } from "@/lib/evaluation/context";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -12,19 +12,19 @@ const MODE_OPTIONS = [
     body: "An assessment of your own preaching.",
   },
   {
-    value: "coaching",
+    value: "debrief",
     header: "The Mentoring Debrief",
     body: "A coaching report to hand the preacher you're mentoring. Same rubric.",
   },
 ] as const satisfies ReadonlyArray<{
-  value: StashedReportMode;
+  value: ReportMode;
   header: string;
   body: string;
 }>;
 
 type ModeSelectorProps = {
-  value: StashedReportMode;
-  onChange: (value: StashedReportMode) => void;
+  value: ReportMode;
+  onChange: (value: ReportMode) => void;
   disabled?: boolean;
 };
 

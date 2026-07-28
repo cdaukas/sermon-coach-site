@@ -1,3 +1,7 @@
+import type { ReportMode } from "./types";
+
+export type { ReportMode } from "./types";
+
 export type SermonContext = {
   occasion?: string;
   audience?: string;
@@ -12,8 +16,6 @@ export type SermonContextInput = {
   other?: string;
 };
 
-export type StashedReportMode = "diagnostic" | "coaching";
-
 export function sermonContextStorageKey(sermonId: string): string {
   return `sermonContext:${sermonId}`;
 }
@@ -22,8 +24,15 @@ export function sermonReportModeStorageKey(sermonId: string): string {
   return `sermonReportMode:${sermonId}`;
 }
 
-export function normalizeReportMode(value: unknown): StashedReportMode {
-  return value === "coaching" ? "coaching" : "diagnostic";
+export function normalizeReportMode(value: unknown): ReportMode {
+  if (value === "debrief") {
+    return "debrief";
+  }
+  // TODO: remove legacy coaching tolerance after backfill to debrief.
+  if (value === "coaching") {
+    return "debrief";
+  }
+  return "diagnostic";
 }
 
 function trimField(value: string | undefined): string | undefined {

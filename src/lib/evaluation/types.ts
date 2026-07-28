@@ -4,7 +4,7 @@ import type { HowItPreaches } from "./hip-schema";
 
 export type EvaluationStatus = "pending" | "running" | "complete" | "failed";
 
-export type ReportMode = "diagnostic" | "coaching";
+export type ReportMode = "diagnostic" | "debrief";
 
 export type SermonEvaluationRow = {
   id: string;

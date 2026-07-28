@@ -3,6 +3,7 @@ import type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./gro
 import type { CoachingNarrative } from "./coaching-schema";
 import { howItPreachesSchema } from "./hip-schema";
 import { parseEvaluationResult } from "./schema";
+import { normalizeReportMode } from "./context";
 
 export type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./growth-report-types";
 import type {
@@ -39,7 +40,7 @@ function mapEvaluationRow(
     id: row.id as string,
     sermon_version_id: row.sermon_version_id as string,
     status: row.status as SermonEvaluationRow["status"],
-    report_mode: (row.report_mode as ReportMode | undefined) ?? "diagnostic",
+    report_mode: normalizeReportMode(row.report_mode),
     coaching_narrative: (row.coaching_narrative as CoachingNarrative | null) ?? null,
     how_it_preaches: parseHowItPreaches(row.how_it_preaches),
     error_message: (row.error_message as string | null) ?? null,
@@ -367,7 +368,7 @@ export async function listEvaluationsForSermon(
   return (data ?? []).map((row) => ({
     id: row.id,
     status: row.status as EvaluationStatus,
-    report_mode: (row.report_mode as ReportMode | undefined) ?? "diagnostic",
+    report_mode: normalizeReportMode(row.report_mode),
     overall_score: row.overall_score,
     score_band: row.score_band,
     prompt_version: row.prompt_version,
@@ -425,7 +426,7 @@ export async function getMostRecentReportModeForUser(
     return "diagnostic";
   }
 
-  return (evaluation.report_mode as ReportMode | undefined) ?? "diagnostic";
+  return normalizeReportMode(evaluation.report_mode);
 }
 
 export async function sermonHasActiveEvaluation(
