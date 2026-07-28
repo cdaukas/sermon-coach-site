@@ -17,7 +17,7 @@ import { requestEvaluation } from "@/lib/evaluation/actions";
 import {
   normalizeSermonContext,
   sermonContextStorageKey,
-  type StashedReportMode,
+  type ReportMode,
 } from "@/lib/evaluation/context";
 import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-errors";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
@@ -61,7 +61,7 @@ type InputMethod = "paste" | "youtube";
 
 type SermonFormProps = {
   entitlement: EvaluationEntitlement | null;
-  defaultReportMode: StashedReportMode;
+  defaultReportMode: ReportMode;
 };
 
 function countWords(text: string): number {
@@ -97,7 +97,7 @@ export function SermonForm({
   const [audience, setAudience] = useState("");
   const [series, setSeries] = useState("");
   const [other, setOther] = useState("");
-  const [reportMode, setReportMode] = useState<StashedReportMode>(defaultReportMode);
+  const [reportMode, setReportMode] = useState<ReportMode>(defaultReportMode);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");

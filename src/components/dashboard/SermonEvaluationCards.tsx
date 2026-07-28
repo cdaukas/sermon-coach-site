@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import type { StashedReportMode } from "@/lib/evaluation/context";
+import type { ReportMode } from "@/lib/evaluation/context";
 import { formatDisplayScoreBare, parseEvaluationCardLabels } from "@/lib/evaluation/display-score";
 import {
   groupCompleteEvaluationsByMode,
@@ -16,17 +16,17 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 const CARD_TABS = [
   { value: "diagnostic", label: "The Evaluation" },
-  { value: "coaching", label: "The Mentoring Debrief" },
+  { value: "debrief", label: "The Mentoring Debrief" },
 ] as const satisfies ReadonlyArray<{
-  value: StashedReportMode;
+  value: ReportMode;
   label: string;
 }>;
 
 type SermonEvaluationCardsProps = {
   sermonId: string;
   completeEvaluations: SermonEvaluationListItem[];
-  selectedMode: StashedReportMode;
-  onModeChange: (mode: StashedReportMode) => void;
+  selectedMode: ReportMode;
+  onModeChange: (mode: ReportMode) => void;
 };
 
 function formatEvaluationDate(iso: string): string {
@@ -179,7 +179,7 @@ function EvaluationLightCard({
   );
 }
 
-function EvaluationEmptyCard({ mode }: { mode: StashedReportMode }) {
+function EvaluationEmptyCard({ mode }: { mode: ReportMode }) {
   return (
     <div
       className="rounded border px-8 py-8"
@@ -204,8 +204,8 @@ function ModeEvaluationPanel({
   group,
 }: {
   sermonId: string;
-  mode: StashedReportMode;
-  group: EvaluationsByMode[StashedReportMode];
+  mode: ReportMode;
+  group: EvaluationsByMode[ReportMode];
 }) {
   return (
     <div className="flex flex-col gap-4">

@@ -1,5 +1,5 @@
-import type { StashedReportMode } from "./context";
-import type { ReportMode, SermonEvaluationListItem } from "./types";
+import type { ReportMode } from "./types";
+import type { SermonEvaluationListItem } from "./types";
 
 export type ModeEvaluationGroup = {
   latest: SermonEvaluationListItem | null;
@@ -18,8 +18,8 @@ export function groupCompleteEvaluationsByMode(
   const diagnostic = completeEvaluations.filter(
     (evaluation) => evaluation.report_mode === "diagnostic",
   );
-  const coaching = completeEvaluations.filter(
-    (evaluation) => evaluation.report_mode === "coaching",
+  const debrief = completeEvaluations.filter(
+    (evaluation) => evaluation.report_mode === "debrief",
   );
 
   return {
@@ -27,16 +27,16 @@ export function groupCompleteEvaluationsByMode(
       latest: diagnostic[0] ?? null,
       older: diagnostic.slice(1),
     },
-    coaching: {
-      latest: coaching[0] ?? null,
-      older: coaching.slice(1),
+    debrief: {
+      latest: debrief[0] ?? null,
+      older: debrief.slice(1),
     },
   };
 }
 
 export function getDefaultEvaluationCardTab(
   completeEvaluations: SermonEvaluationListItem[],
-): StashedReportMode {
+): ReportMode {
   if (completeEvaluations.length === 0) {
     return "diagnostic";
   }
@@ -46,28 +46,28 @@ export function getDefaultEvaluationCardTab(
 
 export function getSmartDefaultRunMode(
   grouped: EvaluationsByMode,
-): StashedReportMode {
+): ReportMode {
   const hasDiagnostic = grouped.diagnostic.latest !== null;
-  const hasCoaching = grouped.coaching.latest !== null;
+  const hasDebrief = grouped.debrief.latest !== null;
 
-  if (!hasDiagnostic && !hasCoaching) {
+  if (!hasDiagnostic && !hasDebrief) {
     return "diagnostic";
   }
 
-  if (hasDiagnostic && !hasCoaching) {
-    return "coaching";
+  if (hasDiagnostic && !hasDebrief) {
+    return "debrief";
   }
 
-  if (!hasDiagnostic && hasCoaching) {
+  if (!hasDiagnostic && hasDebrief) {
     return "diagnostic";
   }
 
   const diagnosticTime = evaluationTimestamp(grouped.diagnostic.latest!);
-  const coachingTime = evaluationTimestamp(grouped.coaching.latest!);
+  const debriefTime = evaluationTimestamp(grouped.debrief.latest!);
 
-  return diagnosticTime <= coachingTime ? "diagnostic" : "coaching";
+  return diagnosticTime <= debriefTime ? "diagnostic" : "debrief";
 }
 
-export function modeDisplayName(mode: StashedReportMode): string {
-  return mode === "coaching" ? "The Mentoring Debrief" : "The Evaluation";
+export function modeDisplayName(mode: ReportMode): string {
+  return mode === "debrief" ? "The Mentoring Debrief" : "The Evaluation";
 }

@@ -9,7 +9,7 @@ import {
   normalizeSermonContext,
   sermonContextStorageKey,
   type SermonContext,
-  type StashedReportMode,
+  type ReportMode,
 } from "@/lib/evaluation/context";
 import { requestEvaluation } from "@/lib/evaluation/actions";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
@@ -23,7 +23,7 @@ type EvaluateButtonProps = {
   sermonId: string;
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
-  reportMode: StashedReportMode;
+  reportMode: ReportMode;
   embedded?: boolean;
   hideCreditLine?: boolean;
   buttonLabel?: string;

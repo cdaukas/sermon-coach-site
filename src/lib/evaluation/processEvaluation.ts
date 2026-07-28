@@ -8,7 +8,7 @@ import { runHowItPreachesBestEffort } from "./runHowItPreaches";
 import { formatScoreBandStrict } from "./schema";
 import { recordEvaluationComplete } from "./quota";
 import { runEvaluation, EvaluationRunError } from "./runEvaluation";
-import type { ReportMode } from "./types";
+import { normalizeReportMode } from "./context";
 
 export type ProcessEvaluationInput = {
   evaluationId: string;
@@ -69,7 +69,7 @@ export async function processEvaluationJob(
       throw new Error(fetchError?.message ?? "Evaluation not found.");
     }
 
-    const reportMode = evaluationRow.report_mode as ReportMode;
+    const reportMode = normalizeReportMode(evaluationRow.report_mode);
 
     const { result, model, inputTokens, outputTokens } = await runEvaluation({
       sermonTitle,
@@ -82,7 +82,7 @@ export async function processEvaluationJob(
     let billedInputTokens = inputTokens;
     let billedOutputTokens = outputTokens;
 
-    if (reportMode === "coaching") {
+    if (reportMode === "debrief") {
       const coaching = await runCoachingNarrative({
         result,
         manuscript,

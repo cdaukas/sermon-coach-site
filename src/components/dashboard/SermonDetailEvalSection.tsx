@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { SermonDetailEvaluationActions } from "@/components/dashboard/SermonDetailEvaluationActions";
 import { SermonEvaluationCards } from "@/components/dashboard/SermonEvaluationCards";
-import type { StashedReportMode } from "@/lib/evaluation/context";
+import type { ReportMode } from "@/lib/evaluation/context";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { getDefaultEvaluationCardTab } from "@/lib/evaluation/group-sermon-evaluations";
 import type { SermonEvaluationListItem } from "@/lib/evaluation/types";
@@ -25,7 +25,7 @@ export function SermonDetailEvalSection({
     () => getDefaultEvaluationCardTab(completeEvaluations),
     [completeEvaluations],
   );
-  const [selectedMode, setSelectedMode] = useState<StashedReportMode>(defaultMode);
+  const [selectedMode, setSelectedMode] = useState<ReportMode>(defaultMode);
 
   return (
     <>

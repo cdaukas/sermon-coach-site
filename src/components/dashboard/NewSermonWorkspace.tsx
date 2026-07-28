@@ -1,7 +1,7 @@
 "use client";
 
 import { EvaluationAccessGate } from "@/components/evaluation/EvaluationAccessGate";
-import type { StashedReportMode } from "@/lib/evaluation/context";
+import type { ReportMode } from "@/lib/evaluation/context";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { SermonForm } from "./SermonForm";
 
@@ -10,7 +10,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
-  defaultReportMode: StashedReportMode;
+  defaultReportMode: ReportMode;
 };
 
 export function NewSermonWorkspace({
