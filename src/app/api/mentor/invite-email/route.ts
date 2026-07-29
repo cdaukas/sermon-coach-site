@@ -4,12 +4,18 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const INVITE_EMAIL_DAILY_CAP = 10;
-const INVITE_EMAIL_WINDOW_MS = 24 * 60 * 60 * 1000;
+const RATE_LIMIT_MESSAGE =
+  "You have sent several invitations today. Try again tomorrow, or copy the link and send it yourself.";
 
 type InviteEmailBody = {
   token?: unknown;
   to?: unknown;
+};
+
+type StampMentorInviteEmailResult = {
+  ok?: boolean;
+  error_code?: string;
+  sent_to?: string | null;
 };
 
 function isValidRecipientEmail(raw: string): boolean {
@@ -21,6 +27,64 @@ function isValidRecipientEmail(raw: string): boolean {
 function readResendApiKey(): string | null {
   const key = process.env.RESEND_API_KEY?.trim();
   return key && key.length > 0 ? key : null;
+}
+
+function parseStampResult(data: unknown): StampMentorInviteEmailResult {
+  if (!data || typeof data !== "object") {
+    return {};
+  }
+  return data as StampMentorInviteEmailResult;
+}
+
+function jsonForStampError(
+  result: StampMentorInviteEmailResult,
+): NextResponse | null {
+  const code = result.error_code;
+  if (!code) return null;
+
+  switch (code) {
+    case "not_authenticated":
+      return NextResponse.json(
+        { ok: false, error: "not_authenticated" },
+        { status: 401 },
+      );
+    case "missing_email":
+      return NextResponse.json(
+        { ok: false, error: "invalid_email" },
+        { status: 400 },
+      );
+    case "invalid_token":
+    case "not_your_invite":
+      return NextResponse.json(
+        { ok: false, error: "invite_not_found" },
+        { status: 404 },
+      );
+    case "not_pending":
+      return NextResponse.json(
+        { ok: false, error: "invite_not_pending" },
+        { status: 409 },
+      );
+    case "already_sent":
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "already_sent",
+          sent_to: result.sent_to ?? null,
+        },
+        { status: 409 },
+      );
+    case "rate_limited":
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "rate_limited",
+          message: RATE_LIMIT_MESSAGE,
+        },
+        { status: 429 },
+      );
+    default:
+      return null;
+  }
 }
 
 export async function POST(request: Request) {
@@ -106,7 +170,7 @@ export async function POST(request: Request) {
   if (relationship.status !== "pending") {
     return NextResponse.json(
       { ok: false, error: "invite_not_pending" },
-      { status: 400 },
+      { status: 409 },
     );
   }
 
@@ -147,33 +211,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const windowStart = new Date(Date.now() - INVITE_EMAIL_WINDOW_MS).toISOString();
-  const { count: recentSendCount, error: countError } = await supabase
-    .from("mentor_relationships")
-    .select("id", { count: "exact", head: true })
-    .gte("invite_email_sent_at", windowStart)
-    .not("invite_email_sent_at", "is", null);
-
-  if (countError) {
-    console.error("[mentor/invite-email] rate limit count failed", countError);
-    return NextResponse.json(
-      { ok: false, error: "server_error" },
-      { status: 500 },
-    );
-  }
-
-  if ((recentSendCount ?? 0) >= INVITE_EMAIL_DAILY_CAP) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "rate_limited",
-        message:
-          "You have sent several invitations today. Try again tomorrow, or copy the link and send it yourself.",
-      },
-      { status: 429 },
-    );
-  }
-
   const sendResult = await sendMentorInviteEmail({
     apiKey: resendApiKey,
     to,
@@ -190,34 +227,67 @@ export async function POST(request: Request) {
     );
   }
 
-  const sentAt = new Date().toISOString();
-  const { data: stamped, error: stampError } = await supabase
-    .from("mentor_relationships")
-    .update({
-      invite_email_to: to,
-      invite_email_sent_at: sentAt,
-    })
-    .eq("id", relationship.id)
-    .is("invite_email_sent_at", null)
-    .select("id")
-    .maybeSingle();
+  const { data: stampData, error: stampRpcError } = await supabase.rpc(
+    "stamp_mentor_invite_email",
+    {
+      p_token: token,
+      p_email: to,
+    },
+  );
 
-  if (stampError) {
-    console.error("[mentor/invite-email] stamp failed after send", stampError);
+  if (stampRpcError) {
+    console.error(
+      "[mentor/invite-email] stamp RPC failed after successful Resend send",
+      {
+        resend_id: sendResult.id,
+        error: stampRpcError.message,
+      },
+    );
     return NextResponse.json(
-      { ok: false, error: "stamp_failed", resend_id: sendResult.id },
+      {
+        ok: false,
+        error: "stamp_failed_after_send",
+        resend_id: sendResult.id,
+      },
       { status: 500 },
     );
   }
 
-  if (!stamped) {
+  const stampResult = parseStampResult(stampData);
+
+  if (stampResult.ok !== true) {
+    const mapped = jsonForStampError(stampResult);
+    if (mapped) {
+      console.error(
+        "[mentor/invite-email] stamp RPC rejected after successful Resend send",
+        {
+          resend_id: sendResult.id,
+          error_code: stampResult.error_code,
+          sent_to: stampResult.sent_to,
+        },
+      );
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "stamp_failed_after_send",
+          resend_id: sendResult.id,
+          detail: stampResult.error_code,
+        },
+        { status: 500 },
+      );
+    }
+
+    console.error(
+      "[mentor/invite-email] stamp RPC returned unexpected payload after send",
+      { resend_id: sendResult.id, stampData },
+    );
     return NextResponse.json(
       {
         ok: false,
-        error: "already_sent",
-        sent_to: relationship.invite_email_to ?? to,
+        error: "stamp_failed_after_send",
+        resend_id: sendResult.id,
       },
-      { status: 409 },
+      { status: 500 },
     );
   }
 
