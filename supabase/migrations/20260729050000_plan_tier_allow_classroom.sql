@@ -5,10 +5,6 @@
 --   {table}_{column}_check → profiles_plan_tier_check
 -- (see 20260525120000_profiles_and_sermon_evaluations.sql)
 
-update public.profiles
-set plan_tier = 'classroom'
-where plan_tier = 'cohort';
-
 alter table public.profiles
   drop constraint profiles_plan_tier_check;
 
