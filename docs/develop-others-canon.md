@@ -130,13 +130,23 @@ Tables: `mentor_relationships`, `profiles.display_name`,
    `preview_mentor_invite` server-side. Seat-branched disclosure. PR #173.
    `/mentor/accept` redirects here with the token preserved, currently a 307
    that should be a 308.
-3. Verify the existing carry pattern and reconcile it with the sketch claim.
-   **Rescoped 2026-07-29.** This was written as "build invite context surviving
-   signup," but that work already existed: `/mentor/accept/carry` sets an
-   httpOnly cookie and sends to `/start` with `next=`, and the cookie clears on
-   accept success or definitive rejection. Step 2 reused it. What remains is
-   verification end to end and deciding whether the mentor-invite cookie and the
-   sketch claim should share one mechanism.
+3. **Shipped.** Invite context surviving signup. Never built this session; the
+   work already existed and was verified end to end on production 2026-07-29,
+   twelve checks, token `e4f36c55` consumed. Two independent recovery routes,
+   both live: the `mentor_invite` cookie (httpOnly, `.sermoncoach.online`, 30
+   days, so apex and www both see it) and the token nested inside `next`, which
+   `mentorTokenFromNextPath` recurses to find. Same browser uses the cookie,
+   different device uses the nested `next`.
+   Verified chain: `/auth/confirm?token_hash=...` 307, `/mentor/accept?token=`
+   307, `/invite/[token]` 200. It does not pass through `/auth/callback` or
+   `/start`.
+   Signup confirmation mail uses the token_hash template against
+   `/auth/confirm`, not PKCE against `/auth/callback`. That is deliberate and
+   documented in the route file: it works cross-device because there is no code
+   verifier. `/auth/confirm` carries its own copy of
+   `destinationWithMentorInvite` and reads the invite cookie itself.
+   Invited mentees arrive with `acquisition_source` null, since the attribution
+   gate never fires on this path. Deliberate, tracked in Asana.
 4. Invite email via Resend.
 5. Mentee dashboard, where the hold becomes visible.
 
@@ -180,6 +190,9 @@ your own invites without burning them.
 
 Do not reintroduce any of these.
 
+- **"The confirmation email returns to `/auth/callback?code=`."** Wrong for
+  signup. Template-based signup mail goes to `/auth/confirm?token_hash=`.
+  `/auth/callback` handles PKCE only, and nothing in `src/` sends a magic link.
 - **Mentee walking away does not release.** Replaced 2026-07-28 by the 30-day
   grace above.
 - **Coach-conversion unlock / dormancy model.** Evaluations dormant until the
