@@ -1,3 +1,6 @@
+> Historical. Written during Step 6, before Cohort was replaced by Classroom.
+> Not maintained. For current product shape see docs/develop-others-canon.md.
+
 # Step 6 Plan: Sermon Evaluation Pipeline
 
 **Status when this was written:** Steps 1–5 are complete on `build/product-layer`. Auth works end-to-end. Logged-in users can save sermons (`sermons` + `sermon_versions`) and view them on the dashboard. **No evaluation logic, no `profiles` table, no Anthropic dependency yet.**

@@ -1,3 +1,6 @@
+> Historical. Written during Step 6, before Cohort was replaced by Classroom.
+> Not maintained. For current product shape see docs/develop-others-canon.md.
+
 # Session handoff — Step 6 (evaluation pipeline)
 
 **Branch:** `build/product-layer` (pushed to `origin`)  
