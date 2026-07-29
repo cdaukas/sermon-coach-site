@@ -30,6 +30,7 @@ export function AppHeader() {
   const pathname = usePathname();
   const onDashboard = pathname === "/dashboard";
   const onBuy = pathname === "/dashboard/buy";
+  const onMentoring = pathname === "/dashboard/mentoring";
   const onNewSermon = pathname === "/dashboard/sermons/new";
 
   return (
@@ -64,6 +65,16 @@ export function AppHeader() {
             style={secondaryButtonStyle}
           >
             Buy
+          </Link>
+        ) : null}
+
+        {!onMentoring ? (
+          <Link
+            href="/dashboard/mentoring"
+            className={secondaryButtonClass}
+            style={secondaryButtonStyle}
+          >
+            Mentoring
           </Link>
         ) : null}
 
