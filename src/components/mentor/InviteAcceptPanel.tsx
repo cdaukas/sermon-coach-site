@@ -66,8 +66,9 @@ function DebriefDisclosure({ mentorName }: { mentorName: string }) {
         <li>
           Every sermon you submit is also evaluated in full against the rubric.
           Those stay closed to you while the mentoring is active. Once every 90
-          days, {mentorName} can open one early, when he&apos;s ready to talk it
-          through.
+          days, {mentorName}
+          {" "}
+          can open one early, when he&apos;s ready to talk it through.
         </li>
         <li>
           You&apos;ll see that it happened. The date shows up in your history,
