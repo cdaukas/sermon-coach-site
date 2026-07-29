@@ -1,3 +1,7 @@
+> Historical. Written May 2026 against branch build/product-layer, before
+> Classroom replaced Cohort and before Stripe shipped. Not maintained. For
+> current product shape see docs/develop-others-canon.md.
+
 # The Sermon Coach — Build Plan
 
 Living plan for the product layer on `build/product-layer`: Next.js app + Supabase + Claude evaluations + Stripe, with marketing HTML unchanged in `public/`. Last updated May 2026.
