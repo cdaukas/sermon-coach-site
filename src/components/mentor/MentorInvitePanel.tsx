@@ -60,8 +60,14 @@ export function MentorInvitePanel({
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [capBlocked, setCapBlocked] = useState(false);
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSentTo, setEmailSentTo] = useState<string | null>(null);
 
   const needsName = displayName == null;
 
@@ -103,6 +109,9 @@ export function MentorInvitePanel({
     setCreateError(null);
     setCapBlocked(false);
     setCopied(false);
+    setEmailError(null);
+    setEmailSentTo(null);
+    setRecipientEmail("");
     setCreating(true);
 
     const supabase = createClient();
@@ -113,6 +122,7 @@ export function MentorInvitePanel({
 
     if (rpcError) {
       setInviteLink(null);
+      setInviteToken(null);
       if (isSeatCapError(rpcError)) {
         setCapBlocked(true);
         return;
@@ -128,11 +138,86 @@ export function MentorInvitePanel({
     const token = typeof data === "string" ? data.trim() : "";
     if (!token) {
       setInviteLink(null);
+      setInviteToken(null);
       setCreateError("Could not create an invitation. Please try again.");
       return;
     }
 
+    setInviteToken(token);
     setInviteLink(`${browserSiteOrigin()}/invite/${token}`);
+  }
+
+  async function handleSendInviteEmail() {
+    if (!inviteToken || emailSentTo) return;
+
+    setEmailError(null);
+    setEmailSending(true);
+
+    try {
+      const response = await fetch("/api/mentor/invite-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: inviteToken,
+          to: recipientEmail.trim(),
+        }),
+      });
+
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        message?: string;
+        sent_to?: string;
+      };
+
+      if (response.status === 503 && payload.error === "email_not_configured") {
+        setEmailError(
+          "Email is not configured on the server. Try again later or copy the link.",
+        );
+        return;
+      }
+
+      if (payload.error === "rate_limited" && payload.message) {
+        setEmailError(payload.message);
+        return;
+      }
+
+      if (payload.error === "already_sent") {
+        const prior =
+          typeof payload.sent_to === "string" ? payload.sent_to : null;
+        if (prior) setEmailSentTo(prior);
+        setEmailError("This invitation was already emailed.");
+        return;
+      }
+
+      if (payload.error === "display_name_required") {
+        setEmailError(
+          "Add your name before sending an invitation by email.",
+        );
+        return;
+      }
+
+      if (!response.ok || !payload.ok) {
+        if (payload.error === "invalid_email") {
+          setEmailError("Enter a valid email address.");
+          return;
+        }
+        if (payload.error === "send_failed" && payload.message) {
+          setEmailError(payload.message);
+          return;
+        }
+        setEmailError("Could not send the invitation. Please try again.");
+        return;
+      }
+
+      if (typeof payload.sent_to === "string") {
+        setEmailSentTo(payload.sent_to);
+      }
+    } catch {
+      setEmailError("Could not send the invitation. Please try again.");
+    } finally {
+      setEmailSending(false);
+    }
   }
 
   async function handleCopy() {
@@ -187,6 +272,86 @@ export function MentorInvitePanel({
         <AuthSubmit type="button" onClick={() => void handleCopy()}>
           {copied ? "Copied" : "Copy link"}
         </AuthSubmit>
+
+        <div
+          className="space-y-3 border-t pt-6"
+          style={{ borderColor: "var(--sc-rule)" }}
+        >
+          <p
+            className="text-[13px] font-medium"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            Email it for me
+          </p>
+
+          {needsName ? (
+            <p
+              className="text-[13px] leading-relaxed"
+              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            >
+              Add your name before sending an invitation by email. Without it the
+              message arrives from someone your friend has never heard of, and it
+              will land in spam.{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setPromptOpen(true);
+                  setNameError(null);
+                }}
+                className="border-0 bg-transparent p-0 font-medium underline-offset-2 hover:underline"
+                style={{ ...uiFont, color: "var(--sc-accent)", cursor: "pointer" }}
+              >
+                Add your name
+              </button>
+            </p>
+          ) : null}
+
+          {emailError ? (
+            <AuthMessage variant="error">{emailError}</AuthMessage>
+          ) : null}
+
+          {emailSentTo ? (
+            <AuthMessage variant="success">
+              Sent to {emailSentTo}. Nothing happens until he accepts.
+            </AuthMessage>
+          ) : null}
+
+          {!needsName && !emailSentTo ? (
+            <>
+              <AuthField
+                id="invite-recipient-email"
+                label="Their email address"
+                inputProps={{
+                  name: "invite-recipient-email",
+                  type: "email",
+                  autoComplete: "email",
+                  value: recipientEmail,
+                  disabled: emailSending,
+                  onChange: (e) => setRecipientEmail(e.target.value),
+                }}
+              />
+              <AuthSubmit
+                type="button"
+                variant="secondary"
+                disabled={emailSending || recipientEmail.trim().length === 0}
+                onClick={() => void handleSendInviteEmail()}
+              >
+                {emailSending ? "Sending…" : "Send invitation"}
+              </AuthSubmit>
+            </>
+          ) : null}
+
+          {emailSentTo ? (
+            <p
+              className="text-[13px] leading-relaxed"
+              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            >
+              Email is not always instant on church filters. If they do not see
+              it within a few minutes, ask them to check spam or promotions, or
+              copy the link above.
+            </p>
+          ) : null}
+        </div>
 
         <p
           className="text-[13px] leading-relaxed"
