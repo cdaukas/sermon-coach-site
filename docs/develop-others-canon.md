@@ -140,13 +140,17 @@ Tables: `mentor_relationships`, `profiles.display_name`,
 4. Invite email via Resend.
 5. Mentee dashboard, where the hold becomes visible.
 
-Gates on step 3, both unresolved as of 2026-07-29:
-- The magic-link failure on the live callback. Step 3 verification runs through
-  `/auth/callback`, so it cannot be trusted until that is diagnosed.
-- Testing step 3 requires a real accept, which consumes a token, creates an
-  active relationship, and holds a seat. The mentor account is at 4 of 4 with no
-  revoke path. Confirm an end-relationship path exists before testing, or the
-  only exit is hand-written SQL.
+Gates on step 3, both cleared 2026-07-29:
+- The magic-link failure was not a bug. The 2026-07-28 walkthrough generated
+  its link with `auth.admin.generateLink`, which does not use PKCE and returns
+  tokens in a URL hash fragment rather than as `?code=`. `/auth/callback` reads
+  only `code`, so it fell through correctly. The app has no `signInWithOtp`
+  calls at all; every real send site builds a PKCE link that does return
+  `?code=`.
+- The seat-cap concern is gone. Three exposed tokens were revoked, leaving
+  `adf905dd` with one pending invite and two free seats. Revoke is real:
+  `preview_mentor_invite` filters on status and returns `invalid_or_used` for a
+  revoked token. There is still no mentor-facing revoke UI or RPC.
 
 Useful property found 2026-07-29: `accept_mentor_invite` rejects `self_invite`
 without consuming the token, so the accept path can be tested repeatedly against
