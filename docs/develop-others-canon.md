@@ -147,8 +147,32 @@ Tables: `mentor_relationships`, `profiles.display_name`,
    `destinationWithMentorInvite` and reads the invite cookie itself.
    Invited mentees arrive with `acquisition_source` null, since the attribution
    gate never fires on this path. Deliberate, tracked in Asana.
-4. Invite email via Resend.
-5. Mentee dashboard, where the hold becomes visible.
+4. **Shipped.** Invite email via Resend. PR #179. First Resend send inside the
+   Next runtime; every other send in the repo is a Supabase Edge Function or a
+   CLI script, so `RESEND_API_KEY` had to be added to Vercel separately.
+   Subject: "{display_name} has a seat for you on The Sermon Coach". From:
+   "{display_name} via The Sermon Coach <chris@sermoncoach.online>", reply-to
+   the mentor's own address. Resend accepts the varying display name; confirmed
+   delivered on production.
+   Dedup and the 10-per-24-hours rate limit are enforced by
+   `stamp_mentor_invite_email`, a SECURITY DEFINER RPC, not by an UPDATE grant.
+   An earlier column-scoped grant was rejected during review: its WITH CHECK
+   pinned only `mentor_id` and `status`, so a mentor could PATCH
+   `invite_email_sent_at` back to null and defeat both guards. All writes to
+   `mentor_relationships` go through SECURITY DEFINER. No exceptions.
+
+5. **Blocked.** Mentee dashboard. Cannot start: mentored evaluations cannot be
+   created at all. `requestEvaluation` never sets `mentor_relationship_id`, and
+   `sermon_evaluations_insert_own` requires it null, so a mentee's submission
+   produces an ordinary unheld evaluation his mentor cannot see. Both live
+   pairings have zero sermons and zero evaluations, so there is nothing to
+   build against. Tracked in Asana as the mentored submission pipeline, which
+   also carries the open entitlement question.
+
+Verified 2026-07-29: the hold IS enforced in the database, not only in the UI.
+`sermon_evaluations_select_own` gates on `released_to_mentee_at` and
+`relationship_holds_evaluations`, so a held diagnostic row is invisible to the
+mentee through PostgREST. The disclosure on `/invite/[token]` is accurate.
 
 Gates on step 3, both cleared 2026-07-29:
 - The magic-link failure was not a bug. The 2026-07-28 walkthrough generated
