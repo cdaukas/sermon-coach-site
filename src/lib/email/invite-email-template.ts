@@ -18,7 +18,7 @@ export function renderInviteEmailHtml(params: RenderInviteEmailParams): string {
   const inviteUrl = escapeHtml(
     `${CANONICAL_SITE_ORIGIN}/invite/${encodeURIComponent(params.token.trim())}`,
   );
-  const preheader = escapeHtml("A seat on The Sermon Coach, on him.");
+  const preheader = escapeHtml("He reads what comes back. Nothing for you to pay.");
 
   return `<!DOCTYPE html>
 <html lang="en">

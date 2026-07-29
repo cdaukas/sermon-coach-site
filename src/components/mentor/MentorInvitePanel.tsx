@@ -346,9 +346,8 @@ export function MentorInvitePanel({
               className="text-[13px] leading-relaxed"
               style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
             >
-              Email is not always instant on church filters. If they do not see
-              it within a few minutes, ask them to check spam or promotions, or
-              copy the link above.
+              Email is unreliable, especially to church-hosted domains. If he does not see
+              it within a few minutes, send him this link directly.
             </p>
           ) : null}
         </div>

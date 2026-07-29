@@ -29,7 +29,7 @@ export function mentorInviteEmailFromHeader(displayName: string): string {
 export async function sendMentorInviteEmail(
   params: SendMentorInviteEmailParams,
 ): Promise<SendMentorInviteEmailResult> {
-  const subject = `${params.displayName.trim()} wants to read your preaching`;
+  const subject = `${params.displayName.trim()} has a seat for you on The Sermon Coach`;
   const html = renderInviteEmailHtml({
     displayName: params.displayName,
     token: params.token,
