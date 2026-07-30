@@ -23,10 +23,10 @@ export type CoachingNarrativePresentation = {
 
 export type CoachingReportPresentation = {
   sermonTitle: string;
-  scriptureReference: string;
+  scriptureReference: string | null;
   evaluatedAt: string;
   preacherName: string | null;
-  submissionMode: string;
-  overallBand: string;
+  submissionMode: string | null;
+  overallBand: string | null;
   coachingNarrative: CoachingNarrativePresentation | null;
 };

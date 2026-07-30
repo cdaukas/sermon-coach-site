@@ -78,7 +78,10 @@ export function EvaluateButton({
         setError(result.error);
         return;
       }
-      startPolling(result.evaluationId, result.sermonId);
+      startPolling(
+        result.debriefEvaluationId ?? result.evaluationId,
+        result.sermonId,
+      );
     });
   }
 

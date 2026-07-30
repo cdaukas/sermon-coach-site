@@ -39,20 +39,20 @@ export function toCoachingReportPresentation(
   data: EvaluationWithSermon,
 ): CoachingReportPresentation {
   const { evaluation, sermon } = data;
-  const result = evaluation.result!;
+  const result = evaluation.result;
   const evaluatedAt = evaluation.completed_at ?? evaluation.created_at;
   const scriptureReference =
     sermon.primary_passage?.trim() ||
-    result.meta.scripture_reference.trim() ||
-    "";
+    result?.meta.scripture_reference.trim() ||
+    null;
 
   return {
     sermonTitle: sermon.title,
     scriptureReference,
     evaluatedAt,
-    preacherName: result.meta.preacher_name,
-    submissionMode: result.meta.submission_mode,
-    overallBand: result.scoring.band,
+    preacherName: result?.meta.preacher_name ?? null,
+    submissionMode: result?.meta.submission_mode ?? null,
+    overallBand: result?.scoring.band ?? null,
     coachingNarrative: toNarrativePresentation(evaluation.coaching_narrative),
   };
 }

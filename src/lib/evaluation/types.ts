@@ -44,5 +44,11 @@ export type EvaluationWithSermon = {
 };
 
 export type RequestEvaluationResult =
-  | { ok: true; evaluationId: string; sermonId: string }
+  | {
+      ok: true;
+      evaluationId: string;
+      sermonId: string;
+      /** Mentored path only: poll and navigate to this debrief row. */
+      debriefEvaluationId?: string;
+    }
   | { ok: false; error: string; code?: string };
