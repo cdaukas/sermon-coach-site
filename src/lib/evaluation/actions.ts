@@ -31,6 +31,7 @@ type CreateMentoredEvaluationRpcResult = {
   ok?: boolean;
   error_code?: string | null;
   diagnostic_id?: string;
+  debrief_id?: string;
 };
 
 async function runFixtureEvaluation(
@@ -157,10 +158,33 @@ export async function requestEvaluation(
 
     const result = rpcData as CreateMentoredEvaluationRpcResult | null;
 
-    if (result?.ok === true && typeof result.diagnostic_id === "string") {
+    if (
+      result?.ok === true &&
+      typeof result.diagnostic_id === "string" &&
+      typeof result.debrief_id === "string"
+    ) {
+      const evaluationId = result.diagnostic_id;
+      const debriefEvaluationId = result.debrief_id;
+
+      after(async () => {
+        try {
+          await processEvaluationJob({
+            evaluationId,
+            debriefEvaluationId,
+            userId: user.id,
+            sermonTitle: sermon.title,
+            manuscript: version.content,
+            context,
+            primaryPassage: sermon.primary_passage,
+          });
+        } catch {
+          // Pair updated to failed inside processEvaluationJob
+        }
+      });
+
       return {
         ok: true,
-        evaluationId: result.diagnostic_id,
+        evaluationId,
         sermonId,
       };
     }

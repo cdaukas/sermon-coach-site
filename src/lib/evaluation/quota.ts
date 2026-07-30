@@ -341,11 +341,15 @@ export async function countActiveEvaluationsForUser(
     return 0;
   }
 
+  // Mentored pairs are two rows for one submission; exclude the held debrief
+  // half so a pair counts as one. Unmentored rows (mentor_relationship_id null)
+  // are unchanged, including Coach debriefs.
   const { count, error } = await supabase
     .from("sermon_evaluations")
     .select("id", { count: "exact", head: true })
     .in("sermon_version_id", versionIds)
-    .in("status", ["pending", "running"]);
+    .in("status", ["pending", "running"])
+    .or("mentor_relationship_id.is.null,report_mode.neq.debrief");
 
   if (error) {
     throw new Error(error.message);
