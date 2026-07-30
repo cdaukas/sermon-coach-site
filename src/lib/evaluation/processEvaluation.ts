@@ -17,6 +17,13 @@ export type ProcessEvaluationInput = {
   manuscript: string;
   context?: SermonContext;
   primaryPassage?: string | null;
+  /** Present for a mentored pair: the debrief row id. Never enqueued alone. */
+  debriefEvaluationId?: string;
+};
+
+type MentoredRpcResult = {
+  ok?: boolean;
+  error_code?: string | null;
 };
 
 function userSafeError(error: unknown): string {
@@ -41,12 +48,124 @@ function userSafeError(error: unknown): string {
   return "Something went wrong running the evaluation.";
 }
 
+async function processMentoredEvaluationJob(
+  input: ProcessEvaluationInput & { debriefEvaluationId: string },
+): Promise<void> {
+  const supabase = createAdminClient();
+  const {
+    evaluationId,
+    debriefEvaluationId,
+    userId,
+    sermonTitle,
+    manuscript,
+    context,
+    primaryPassage,
+  } = input;
+
+  const { data: claimData, error: claimError } = await supabase.rpc(
+    "claim_mentored_evaluation",
+    {
+      p_diagnostic_id: evaluationId,
+      p_debrief_id: debriefEvaluationId,
+    },
+  );
+
+  if (claimError) {
+    throw new Error(claimError.message);
+  }
+
+  const claim = claimData as MentoredRpcResult | null;
+  if (claim?.ok !== true) {
+    if (claim?.error_code === "diagnostic_not_claimable") {
+      return;
+    }
+    throw new Error(
+      claim?.error_code ?? "claim_mentored_evaluation failed.",
+    );
+  }
+
+  try {
+    const { result, model, inputTokens, outputTokens } = await runEvaluation({
+      sermonTitle,
+      manuscript,
+      context,
+      primaryPassage: primaryPassage?.trim() || undefined,
+    });
+
+    const coaching = await runCoachingNarrative({
+      result,
+      manuscript,
+      sermonTitle,
+      primaryPassage,
+      context,
+    });
+
+    let billedInputTokens = inputTokens + coaching.inputTokens;
+    let billedOutputTokens = outputTokens + coaching.outputTokens;
+
+    const hip = await runHowItPreachesBestEffort(
+      {
+        manuscript,
+        sermonTitle,
+        primaryPassage,
+        context,
+      },
+      { evaluationId, userId },
+    );
+    billedInputTokens += hip.inputTokens;
+    billedOutputTokens += hip.outputTokens;
+
+    const { data: completeData, error: completeError } = await supabase.rpc(
+      "complete_mentored_evaluation",
+      {
+        p_diagnostic_id: evaluationId,
+        p_debrief_id: debriefEvaluationId,
+        p_model: model,
+        p_result: result,
+        p_overall_score: result.scoring.composite_weighted,
+        p_score_band: formatScoreBandStrict(result.scoring),
+        p_coaching_narrative: coaching.narrative,
+        p_how_it_preaches: hip.howItPreaches,
+        p_input_tokens: billedInputTokens,
+        p_output_tokens: billedOutputTokens,
+      },
+    );
+
+    if (completeError) {
+      throw new Error(completeError.message);
+    }
+
+    const complete = completeData as MentoredRpcResult | null;
+    if (complete?.ok !== true) {
+      throw new Error(
+        complete?.error_code ?? "complete_mentored_evaluation failed.",
+      );
+    }
+  } catch (error) {
+    await supabase.rpc("fail_mentored_evaluation", {
+      p_diagnostic_id: evaluationId,
+      p_debrief_id: debriefEvaluationId,
+      p_error_message: userSafeError(error),
+    });
+
+    throw error;
+  }
+}
+
 export async function processEvaluationJob(
   input: ProcessEvaluationInput,
 ): Promise<void> {
   // Runs inside after(), detached from the request — must not depend on the
   // user's session surviving the job. All three UPDATEs scope by primary key,
   // which is what makes losing RLS safe here.
+  if (typeof input.debriefEvaluationId === "string") {
+    await processMentoredEvaluationJob({
+      ...input,
+      debriefEvaluationId: input.debriefEvaluationId,
+    });
+    return;
+  }
+
   const supabase = createAdminClient();
   const { evaluationId, userId, sermonTitle, manuscript, context, primaryPassage } =
     input;
