@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
+import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -15,18 +17,20 @@ export default async function MentoringPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let initialDisplayName: string | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    const raw = profile?.display_name;
-    initialDisplayName =
-      typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
+  if (!user || !isMentoringUiAllowed(user.id)) {
+    notFound();
   }
+
+  let initialDisplayName: string | null = null;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const raw = profile?.display_name;
+  initialDisplayName =
+    typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
 
   return (
     <main
