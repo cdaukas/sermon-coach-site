@@ -255,7 +255,8 @@ export async function processEvaluationJob(
         output_tokens: billedOutputTokens,
         completed_at: completedAt,
       })
-      .eq("id", evaluationId);
+      .eq("id", evaluationId)
+      .eq("status", "running");
 
     if (updateError) {
       throw new Error(updateError.message);
@@ -270,7 +271,8 @@ export async function processEvaluationJob(
         error_message: userSafeError(error),
         completed_at: new Date().toISOString(),
       })
-      .eq("id", evaluationId);
+      .eq("id", evaluationId)
+      .eq("status", "running");
 
     throw error;
   }
