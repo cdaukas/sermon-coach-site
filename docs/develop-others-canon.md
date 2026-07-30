@@ -1,6 +1,6 @@
 # Develop-others lane, canon
 
-**Last updated: 2026-07-29**
+**Last updated: 2026-07-30**
 
 This file is the current shape of the develop-others lane. It supersedes every
 earlier document, chat, brief, and Asana note by definition. If something
@@ -97,6 +97,17 @@ differ at the same price.
 - Entry is by invite only, consensual, single-use token.
 - Invite context must be read at account creation, not at a later accept step,
   or you lose people who sign up first.
+
+## Routing
+
+Routing is automatic. A mentee with an active relationship submits
+into that relationship, always. There is no per-submission choice and
+no mode picker. When the seat's monthly allotment is spent, submission
+is blocked; it does not fall back to the mentee's own credits. A mentee
+who also holds a Coach subscription cannot reach those credits while
+the relationship is active. This is a known consequence, accepted
+because the debrief seat is built for the preacher who is not already
+paying for Coach.
 
 ## Database surface
 

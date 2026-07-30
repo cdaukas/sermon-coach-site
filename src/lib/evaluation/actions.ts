@@ -17,8 +17,21 @@ import {
 } from "./quota";
 import { isEvaluationStubEnabled } from "./stub";
 import type { SermonContext } from "./context";
-import { ACTIVE_EVAL_IN_PROGRESS_ERROR } from "./eval-start-errors";
+import {
+  ACTIVE_EVAL_IN_PROGRESS_ERROR,
+  MENTORED_ALLOTMENT_EXHAUSTED_ERROR,
+  MENTORED_ALREADY_IN_FLIGHT_ERROR,
+} from "./eval-start-errors";
 import type { ReportMode, RequestEvaluationResult } from "./types";
+
+const MENTORED_GENERIC_FAILURE =
+  "Something went wrong. Please try again.";
+
+type CreateMentoredEvaluationRpcResult = {
+  ok?: boolean;
+  error_code?: string | null;
+  diagnostic_id?: string;
+};
 
 async function runFixtureEvaluation(
   sermonId: string,
@@ -116,6 +129,57 @@ export async function requestEvaluation(
       error:
         "Evaluation is not configured. Add ANTHROPIC_API_KEY to .env.local.",
     };
+  }
+
+  const { data: relationship, error: relationshipError } = await supabase
+    .from("mentor_relationships")
+    .select("id")
+    .eq("mentee_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (relationshipError) {
+    return { ok: false, error: MENTORED_GENERIC_FAILURE };
+  }
+
+  if (relationship) {
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      "create_mentored_evaluation",
+      {
+        p_sermon_version_id: version.id,
+        p_prompt_version: EVALUATION_PROMPT_VERSION,
+      },
+    );
+
+    if (rpcError) {
+      return { ok: false, error: MENTORED_GENERIC_FAILURE };
+    }
+
+    const result = rpcData as CreateMentoredEvaluationRpcResult | null;
+
+    if (result?.ok === true && typeof result.diagnostic_id === "string") {
+      return {
+        ok: true,
+        evaluationId: result.diagnostic_id,
+        sermonId,
+      };
+    }
+
+    const code = result?.error_code;
+    if (code === "allotment_exhausted") {
+      return { ok: false, error: MENTORED_ALLOTMENT_EXHAUSTED_ERROR };
+    }
+    if (code === "already_in_flight") {
+      return { ok: false, error: MENTORED_ALREADY_IN_FLIGHT_ERROR };
+    }
+    if (code === "not_authenticated") {
+      return {
+        ok: false,
+        error: "You must be signed in to run an evaluation.",
+      };
+    }
+
+    return { ok: false, error: MENTORED_GENERIC_FAILURE };
   }
 
   const eligibility = await checkEvaluationEligibility(user.id);
