@@ -51,14 +51,21 @@ export async function processEvaluationJob(
   const { evaluationId, userId, sermonTitle, manuscript, context, primaryPassage } =
     input;
 
-  const { error: runningError } = await supabase
+  // Compare-and-swap: only one worker may move pending → running.
+  // Zero rows means another worker already owns it — normal, not a failure.
+  const { data: claimed, error: runningError } = await supabase
     .from("sermon_evaluations")
     .update({ status: "running", started_at: new Date().toISOString() })
     .eq("id", evaluationId)
-    .in("status", ["pending", "running"]);
+    .eq("status", "pending")
+    .select("id");
 
   if (runningError) {
     throw new Error(runningError.message);
+  }
+
+  if (!claimed || claimed.length === 0) {
+    return;
   }
 
   try {
