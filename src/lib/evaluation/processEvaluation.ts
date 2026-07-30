@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { SermonContext } from "./context";
 import {
   CoachingNarrativeError,
@@ -44,7 +44,10 @@ function userSafeError(error: unknown): string {
 export async function processEvaluationJob(
   input: ProcessEvaluationInput,
 ): Promise<void> {
-  const supabase = await createClient();
+  // Runs inside after(), detached from the request — must not depend on the
+  // user's session surviving the job. All three UPDATEs scope by primary key,
+  // which is what makes losing RLS safe here.
+  const supabase = createAdminClient();
   const { evaluationId, userId, sermonTitle, manuscript, context, primaryPassage } =
     input;
 

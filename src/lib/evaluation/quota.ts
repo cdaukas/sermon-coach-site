@@ -436,8 +436,8 @@ export async function recordEvaluationComplete(
     return;
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("consume_evaluation_credit", {
+  const admin = createAdminClient();
+  const { error } = await admin.rpc("consume_evaluation_credit", {
     p_user_id: userId,
   });
 
