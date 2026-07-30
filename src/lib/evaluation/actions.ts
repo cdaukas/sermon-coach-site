@@ -185,6 +185,7 @@ export async function requestEvaluation(
       return {
         ok: true,
         evaluationId,
+        debriefEvaluationId,
         sermonId,
       };
     }

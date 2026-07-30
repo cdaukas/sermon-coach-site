@@ -54,7 +54,13 @@ export default async function EvaluationPage({
 
   const { evaluation, sermon } = data;
 
-  if (evaluation.status !== "complete" || !evaluation.result) {
+  const debriefReady =
+    evaluation.report_mode === "debrief" &&
+    evaluation.coaching_narrative != null;
+  const diagnosticReady =
+    evaluation.report_mode !== "debrief" && evaluation.result != null;
+
+  if (evaluation.status !== "complete" || (!debriefReady && !diagnosticReady)) {
     return (
       <main
         className="rounded px-8 py-10"
@@ -89,12 +95,12 @@ export default async function EvaluationPage({
   }
 
   const evaluatedAt = evaluation.completed_at ?? evaluation.created_at;
-  const pastorName = evaluation.result.meta.preacher_name;
+  const pastorName = evaluation.result?.meta.preacher_name ?? null;
   const coverPreacher =
     pastorName?.trim() || preacherParam?.trim() || null;
   const scriptureReference =
     sermon.primary_passage?.trim() ||
-    evaluation.result.meta.scripture_reference.trim() ||
+    evaluation.result?.meta.scripture_reference.trim() ||
     null;
   const footerDate = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
@@ -111,7 +117,7 @@ export default async function EvaluationPage({
     >
       {pdfCapture ? <EvaluationPdfCapture /> : null}
 
-      {showCover ? (
+      {showCover && evaluation.result ? (
         <EvaluationPdfCover
           preparedFor={preparedFor}
           variant={coverVariant}
@@ -151,7 +157,7 @@ export default async function EvaluationPage({
         />
       ) : (
         <EvaluationDashboard
-          result={evaluation.result}
+          result={evaluation.result!}
           sermonTitle={sermon.title}
           scriptureReference={scriptureReference}
           showPrintActions={!pdfCapture}

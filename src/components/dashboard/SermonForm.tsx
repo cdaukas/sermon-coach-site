@@ -270,7 +270,10 @@ export function SermonForm({
         return;
       }
 
-      startPolling(evalResult.evaluationId, evalResult.sermonId);
+      startPolling(
+        evalResult.debriefEvaluationId ?? evalResult.evaluationId,
+        evalResult.sermonId,
+      );
     } catch {
       setError("Something went wrong. Try again in a minute.");
     } finally {

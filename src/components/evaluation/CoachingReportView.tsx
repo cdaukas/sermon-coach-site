@@ -217,9 +217,11 @@ export function CoachingReportView({
           <strong style={{ color: "var(--sc-ink)" }}>Evaluated:</strong>{" "}
           {formatEvaluatedDate(data.evaluatedAt)}
         </span>
-        <span>
-          <strong style={{ color: "var(--sc-ink)" }}>Mode:</strong> {data.submissionMode}
-        </span>
+        {data.submissionMode ? (
+          <span>
+            <strong style={{ color: "var(--sc-ink)" }}>Mode:</strong> {data.submissionMode}
+          </span>
+        ) : null}
       </div>
 
       {showPrintActions ? (
