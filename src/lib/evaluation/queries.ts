@@ -160,6 +160,7 @@ export async function getEvaluationById(
   }
 
   let sermon: EvaluationWithSermon["sermon"] | null = null;
+  let resolvedVia: EvaluationWithSermon["resolvedVia"] = "owner";
 
   if (version) {
     const { data, error: sermonError } = await supabase
@@ -195,9 +196,10 @@ export async function getEvaluationById(
       title: context.sermon_title as string,
       primary_passage: (context.primary_passage as string | null) ?? null,
     };
+    resolvedVia = "mentored_context";
   }
 
-  return { evaluation, sermon };
+  return { evaluation, sermon, resolvedVia };
 }
 
 export async function listRecentCompleteEvaluations(

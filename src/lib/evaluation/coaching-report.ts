@@ -36,7 +36,7 @@ function toNarrativePresentation(
 
 /** Strips server-only evaluation payloads for presentational components. */
 export function toCoachingReportPresentation(
-  data: EvaluationWithSermon,
+  data: Pick<EvaluationWithSermon, "evaluation" | "sermon">,
 ): CoachingReportPresentation {
   const { evaluation, sermon } = data;
   const result = evaluation.result;

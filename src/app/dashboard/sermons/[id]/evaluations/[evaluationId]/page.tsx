@@ -16,6 +16,8 @@ import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
+const BACK_LABEL_MENTOR = "Back to mentoring";
+
 type EvaluationPageProps = {
   params: Promise<{ id: string; evaluationId: string }>;
   searchParams: Promise<{ pdf?: string; for?: string; variant?: string; preacher?: string }>;
@@ -52,7 +54,11 @@ export default async function EvaluationPage({
     notFound();
   }
 
-  const { evaluation, sermon } = data;
+  const { evaluation, sermon, resolvedVia } = data;
+  const backHref =
+    resolvedVia === "owner"
+      ? `/dashboard/sermons/${sermonId}`
+      : "/dashboard/mentoring";
 
   const debriefReady =
     evaluation.report_mode === "debrief" &&
@@ -84,11 +90,13 @@ export default async function EvaluationPage({
             : `This evaluation is not ready yet (status: ${evaluation.status}).`}
         </p>
         <Link
-          href={`/dashboard/sermons/${sermonId}`}
+          href={backHref}
           className="mt-6 inline-block text-[13px] font-medium no-underline hover:underline"
           style={{ ...uiFont, color: "var(--sc-accent)" }}
         >
-          ← Back to sermon
+          {resolvedVia === "owner"
+            ? "← Back to sermon"
+            : `← ${BACK_LABEL_MENTOR}`}
         </Link>
       </main>
     );
@@ -132,11 +140,13 @@ export default async function EvaluationPage({
       {!pdfCapture ? (
         <div className="screen-only mb-8 flex flex-wrap items-center justify-between gap-4">
           <Link
-            href={`/dashboard/sermons/${sermonId}`}
+            href={backHref}
             className="inline-block text-[13px] font-medium no-underline hover:underline"
             style={{ ...uiFont, color: "var(--sc-accent)" }}
           >
-            ← Back to {sermon.title}
+            {resolvedVia === "owner"
+              ? `← Back to ${sermon.title}`
+              : `← ${BACK_LABEL_MENTOR}`}
           </Link>
         </div>
       ) : null}
