@@ -162,7 +162,7 @@ export default async function EvaluationPage({
 
       {evaluation.report_mode === "debrief" ? (
         <CoachingReportView
-          data={toCoachingReportPresentation({ evaluation, sermon, resolvedVia })}
+          data={toCoachingReportPresentation({ evaluation, sermon })}
           showPrintActions={!pdfCapture}
         />
       ) : (
