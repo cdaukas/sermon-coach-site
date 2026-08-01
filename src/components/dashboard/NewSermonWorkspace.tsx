@@ -11,13 +11,16 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
   defaultReportMode: ReportMode;
+  isMentoredMentee?: boolean;
 };
 
 export function NewSermonWorkspace({
   entitlement,
   defaultReportMode,
+  isMentoredMentee = false,
 }: NewSermonWorkspaceProps) {
   const canEvaluate = entitlement?.canEvaluate ?? true;
+  const showForm = isMentoredMentee || canEvaluate;
 
   return (
     <>
@@ -47,12 +50,15 @@ export function NewSermonWorkspace({
         </p>
       </div>
 
-      <EvaluationAccessGate entitlement={entitlement} className="mb-8" />
+      {!isMentoredMentee ? (
+        <EvaluationAccessGate entitlement={entitlement} className="mb-8" />
+      ) : null}
 
-      {canEvaluate ? (
+      {showForm ? (
         <SermonForm
           entitlement={entitlement}
           defaultReportMode={defaultReportMode}
+          isMentoredMentee={isMentoredMentee}
         />
       ) : null}
     </>

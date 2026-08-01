@@ -62,6 +62,7 @@ type InputMethod = "paste" | "youtube";
 type SermonFormProps = {
   entitlement: EvaluationEntitlement | null;
   defaultReportMode: ReportMode;
+  isMentoredMentee?: boolean;
 };
 
 function countWords(text: string): number {
@@ -86,6 +87,7 @@ function estimateSermonMinutes(wordCount: number): number {
 export function SermonForm({
   entitlement,
   defaultReportMode,
+  isMentoredMentee = false,
 }: SermonFormProps) {
   const router = useRouter();
   const savedSermonIdRef = useRef<string | null>(null);
@@ -106,6 +108,7 @@ export function SermonForm({
   const [contentFromYoutube, setContentFromYoutube] = useState(false);
 
   const canEvaluate = entitlement?.canEvaluate ?? false;
+  const mayRunEvaluation = isMentoredMentee || canEvaluate;
 
   const handleEvalComplete = useCallback(
     (evaluationId: string, sermonId: string) => {
@@ -287,7 +290,7 @@ export function SermonForm({
   }
 
   const formDisabled = saving || polling || youtubeFetching;
-  const primaryDisabled = formDisabled || !canEvaluate;
+  const primaryDisabled = formDisabled || !mayRunEvaluation;
   const primaryLabel = polling
     ? "Evaluating…"
     : saving
@@ -544,11 +547,13 @@ export function SermonForm({
         </div>
       </details>
 
-      <ModeSelector
-        value={reportMode}
-        onChange={setReportMode}
-        disabled={formDisabled}
-      />
+      {!isMentoredMentee ? (
+        <ModeSelector
+          value={reportMode}
+          onChange={setReportMode}
+          disabled={formDisabled}
+        />
+      ) : null}
 
       <div>
         {polling ? <EvaluationPollingStatus elapsed={elapsed} /> : null}
@@ -569,7 +574,9 @@ export function SermonForm({
           </button>
         </p>
 
-        <EvaluationCreditLine entitlement={entitlement} />
+        {!isMentoredMentee ? (
+          <EvaluationCreditLine entitlement={entitlement} />
+        ) : null}
       </div>
     </AuthForm>
   );

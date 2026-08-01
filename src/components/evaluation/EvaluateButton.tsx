@@ -29,6 +29,7 @@ type EvaluateButtonProps = {
   buttonLabel?: string;
   onRunClick?: (run: () => void) => void;
   disabled?: boolean;
+  isMentoredMentee?: boolean;
 };
 
 export function EvaluateButton({
@@ -41,6 +42,7 @@ export function EvaluateButton({
   buttonLabel = "Run Evaluation",
   onRunClick,
   disabled = false,
+  isMentoredMentee = false,
 }: EvaluateButtonProps) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -96,10 +98,12 @@ export function EvaluateButton({
 
   const busy = pending || polling;
   const canEvaluate = entitlement?.canEvaluate ?? false;
+  const mayRunEvaluation = isMentoredMentee || canEvaluate;
   const usage = entitlement?.usage;
   const rootClassName = embedded ? "" : "mt-8";
+  const showCoachCreditLines = !hideCreditLine && !isMentoredMentee;
 
-  if (!canEvaluate) {
+  if (!mayRunEvaluation) {
     return (
       <div className={rootClassName}>
         <EvaluationAccessGate entitlement={entitlement} />
@@ -125,21 +129,27 @@ export function EvaluateButton({
         {pending ? "Starting…" : polling ? "Evaluating…" : buttonLabel}
       </button>
 
-      {!hideCreditLine && entitlement?.creditSource === "free" && entitlement.freeRemaining > 0 ? (
+      {showCoachCreditLines &&
+      entitlement?.creditSource === "free" &&
+      entitlement.freeRemaining > 0 ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {entitlement.freeRemaining} free credit
           {entitlement.freeRemaining === 1 ? "" : "s"} remaining
         </p>
       ) : null}
 
-      {!hideCreditLine && entitlement?.packRemaining != null && entitlement.packRemaining > 0 ? (
+      {showCoachCreditLines &&
+      entitlement?.packRemaining != null &&
+      entitlement.packRemaining > 0 ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {entitlement.packRemaining} pack credit
           {entitlement.packRemaining === 1 ? "" : "s"} remaining
         </p>
       ) : null}
 
-      {!hideCreditLine && usage && entitlement?.creditSource === "subscription" ? (
+      {showCoachCreditLines &&
+      usage &&
+      entitlement?.creditSource === "subscription" ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
           {usage.used} of {usage.limit} credits used this month
         </p>

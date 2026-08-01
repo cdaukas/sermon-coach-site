@@ -19,6 +19,7 @@ type SermonDetailEvaluationActionsProps = {
   reportMode: ReportMode;
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
+  isMentoredMentee?: boolean;
 };
 
 export function SermonDetailEvaluationActions({
@@ -27,6 +28,7 @@ export function SermonDetailEvaluationActions({
   reportMode,
   entitlement,
   hasActiveEvaluation,
+  isMentoredMentee = false,
 }: SermonDetailEvaluationActionsProps) {
   const grouped = useMemo(
     () => groupCompleteEvaluationsByMode(completeEvaluations),
@@ -112,8 +114,11 @@ export function SermonDetailEvaluationActions({
           buttonLabel={runButtonLabel}
           onRunClick={handleRunClick}
           disabled={showRerunPrompt}
+          isMentoredMentee={isMentoredMentee}
         />
-        <EvaluationCreditLine entitlement={entitlement} />
+        {!isMentoredMentee ? (
+          <EvaluationCreditLine entitlement={entitlement} />
+        ) : null}
       </div>
     </div>
   );
