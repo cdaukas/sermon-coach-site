@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
+import { MentoredSubmissionsList } from "@/components/mentor/MentoredSubmissionsList";
+import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
 import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,6 +34,8 @@ export default async function MentoringPage() {
   initialDisplayName =
     typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
 
+  const submissions = await listMentoredEvaluationsForMentor();
+
   return (
     <main
       className="rounded px-8 py-10"
@@ -58,6 +62,8 @@ export default async function MentoringPage() {
       </div>
 
       <MentorInvitePanel initialDisplayName={initialDisplayName} />
+
+      <MentoredSubmissionsList submissions={submissions} />
     </main>
   );
 }
