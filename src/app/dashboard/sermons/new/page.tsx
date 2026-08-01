@@ -4,6 +4,7 @@ import { NewSermonWorkspace } from "@/components/dashboard/NewSermonWorkspace";
 import { createClient } from "@/lib/supabase/server";
 import { getMostRecentReportModeForUser } from "@/lib/evaluation/queries";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
+import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
 
 export const metadata: Metadata = {
   title: "New Sermon",
@@ -22,6 +23,9 @@ export default async function NewSermonPage() {
   const defaultReportMode = user
     ? await getMostRecentReportModeForUser(user.id)
     : "diagnostic";
+  const isMentoredMentee = user
+    ? await viewerHasActiveMentorRelationship(user.id)
+    : false;
 
   return (
     <main
@@ -43,6 +47,7 @@ export default async function NewSermonPage() {
       <NewSermonWorkspace
         entitlement={entitlement}
         defaultReportMode={defaultReportMode}
+        isMentoredMentee={isMentoredMentee}
       />
     </main>
   );

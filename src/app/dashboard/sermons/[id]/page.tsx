@@ -10,6 +10,7 @@ import {
   listEvaluationsForSermon,
   sermonHasActiveEvaluation,
 } from "@/lib/evaluation/queries";
+import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
 import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
 /** Long-running Claude evaluation (see STEP_6_PLAN §B). */
@@ -54,12 +55,15 @@ export default async function SermonDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermon, evaluations, entitlement, hasActiveEvaluation] =
+  const [sermon, evaluations, entitlement, hasActiveEvaluation, isMentoredMentee] =
     await Promise.all([
       getSermonWithLatestVersion(id),
       listEvaluationsForSermon(id),
       user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
       sermonHasActiveEvaluation(id),
+      user
+        ? viewerHasActiveMentorRelationship(user.id)
+        : Promise.resolve(false),
     ]);
 
   if (!sermon?.latest_version) {
@@ -113,6 +117,7 @@ export default async function SermonDetailPage({
         completeEvaluations={completeEvaluations}
         entitlement={entitlement}
         hasActiveEvaluation={hasActiveEvaluation}
+        isMentoredMentee={isMentoredMentee}
       />
 
       <SermonDetailManuscript content={version.content} />

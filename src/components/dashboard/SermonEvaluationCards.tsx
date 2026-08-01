@@ -27,6 +27,7 @@ type SermonEvaluationCardsProps = {
   completeEvaluations: SermonEvaluationListItem[];
   selectedMode: ReportMode;
   onModeChange: (mode: ReportMode) => void;
+  isMentoredMentee?: boolean;
 };
 
 function formatEvaluationDate(iso: string): string {
@@ -192,7 +193,7 @@ function EvaluationEmptyCard({ mode }: { mode: ReportMode }) {
         className="text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        {modeDisplayName(mode)} hasn&apos;t been run yet.
+        {`${modeDisplayName(mode)} hasn't been run yet.`}
       </p>
     </div>
   );
@@ -241,11 +242,54 @@ export function SermonEvaluationCards({
   completeEvaluations,
   selectedMode,
   onModeChange,
+  isMentoredMentee = false,
 }: SermonEvaluationCardsProps) {
   const grouped = useMemo(
     () => groupCompleteEvaluationsByMode(completeEvaluations),
     [completeEvaluations],
   );
+
+  if (isMentoredMentee) {
+    const modesWithResults = CARD_TABS.filter((tab) => {
+      const group = grouped[tab.value];
+      return group.latest != null || group.older.length > 0;
+    }).sort((a, b) => {
+      // Debrief first: the reading he is meant to open; diagnostic second.
+      if (a.value === b.value) return 0;
+      if (a.value === "debrief") return -1;
+      if (b.value === "debrief") return 1;
+      return 0;
+    });
+    const showModeLabels = modesWithResults.length > 1;
+
+    return (
+      <div className="mb-6">
+        {modesWithResults.length === 0 ? (
+          <EvaluationEmptyCard mode={selectedMode} />
+        ) : (
+          <div className="flex flex-col gap-6">
+            {modesWithResults.map((tab) => (
+              <div key={tab.value} className="flex flex-col gap-4">
+                {showModeLabels ? (
+                  <p
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                    style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                  >
+                    {modeDisplayName(tab.value)}
+                  </p>
+                ) : null}
+                <ModeEvaluationPanel
+                  sermonId={sermonId}
+                  mode={tab.value}
+                  group={grouped[tab.value]}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6">
