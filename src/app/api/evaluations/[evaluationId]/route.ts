@@ -30,5 +30,6 @@ export async function GET(_request: Request, context: RouteContext) {
     sermonId: status.sermonId,
     overallScore: status.overallScore,
     scoreBand: status.scoreBand,
+    ready: status.ready,
   });
 }

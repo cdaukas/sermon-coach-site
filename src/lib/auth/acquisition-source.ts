@@ -37,6 +37,13 @@ export async function setAcquisitionSource(
   });
 
   if (error) {
-    console.error("set_acquisition_source failed:", error.message);
+    console.error("[setAcquisitionSource] set_acquisition_source failed", {
+      callSite: "src/lib/auth/acquisition-source.ts#setAcquisitionSource",
+      source,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
   }
 }

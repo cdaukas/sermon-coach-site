@@ -51,9 +51,11 @@ export function useEvaluationPolling(options: UseEvaluationPollingOptions = {}) 
         status: string;
         errorMessage: string | null;
         sermonId: string;
+        ready?: boolean;
       };
 
-      if (data.status === "complete") {
+      // Wait for mode-correct payload (ready), not status alone.
+      if (data.status === "complete" && data.ready !== false) {
         stopPolling();
         if (onComplete) {
           onComplete(evaluationId, expectedSermonId);
@@ -62,6 +64,10 @@ export function useEvaluationPolling(options: UseEvaluationPollingOptions = {}) 
             `/dashboard/sermons/${expectedSermonId}/evaluations/${evaluationId}`,
           );
         }
+        return;
+      }
+
+      if (data.status === "complete" && data.ready === false) {
         return;
       }
 
