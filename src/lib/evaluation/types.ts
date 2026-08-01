@@ -38,9 +38,14 @@ export type SermonEvaluationListItem = Pick<
   | "completed_at"
 >;
 
+/** How getEvaluationById resolved sermon metadata for this viewer. */
+export type EvaluationSermonResolvedVia = "owner" | "mentored_context";
+
 export type EvaluationWithSermon = {
   evaluation: SermonEvaluationRow;
   sermon: { id: string; title: string; primary_passage: string | null };
+  /** Navigation hint only. Not a permission check. */
+  resolvedVia: EvaluationSermonResolvedVia;
 };
 
 export type RequestEvaluationResult =
