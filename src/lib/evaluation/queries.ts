@@ -159,22 +159,42 @@ export async function getEvaluationById(
     throw new Error(versionError.message);
   }
 
-  if (!version) {
-    return null;
-  }
+  let sermon: EvaluationWithSermon["sermon"] | null = null;
 
-  const { data: sermon, error: sermonError } = await supabase
-    .from("sermons")
-    .select("id, title, primary_passage")
-    .eq("id", version.sermon_id)
-    .maybeSingle();
+  if (version) {
+    const { data, error: sermonError } = await supabase
+      .from("sermons")
+      .select("id, title, primary_passage")
+      .eq("id", version.sermon_id)
+      .maybeSingle();
 
-  if (sermonError) {
-    throw new Error(sermonError.message);
+    if (sermonError) {
+      throw new Error(sermonError.message);
+    }
+
+    sermon = data;
   }
 
   if (!sermon) {
-    return null;
+    const { data: contextRows, error: contextError } = await supabase.rpc(
+      "get_mentored_evaluation_context",
+      { p_evaluation_id: evaluationId },
+    );
+
+    if (contextError) {
+      throw new Error(contextError.message);
+    }
+
+    const context = Array.isArray(contextRows) ? contextRows[0] : contextRows;
+    if (!context) {
+      return null;
+    }
+
+    sermon = {
+      id: context.sermon_id as string,
+      title: context.sermon_title as string,
+      primary_passage: (context.primary_passage as string | null) ?? null,
+    };
   }
 
   return { evaluation, sermon };
