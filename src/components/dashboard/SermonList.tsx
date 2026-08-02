@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { parseEvaluationCardLabels } from "@/lib/evaluation/display-score";
 import type { DashboardSermonRow } from "@/lib/sermons/types";
 
@@ -24,14 +24,7 @@ type SermonListProps = {
   header?: ReactNode;
 };
 
-function MetaSep() {
-  return (
-    <span aria-hidden="true" style={{ color: "#4a5568" }}>
-      {" "}
-      ·{" "}
-    </span>
-  );
-}
+const META_SEP = " · ";
 
 function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
   const href = sermon.latestEvaluation
@@ -40,7 +33,69 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
 
   const passage = sermon.primary_passage?.trim() || null;
   const evaluated = sermon.latestEvaluation != null;
-  const showRuns = sermon.completeEvaluationCount > 1;
+
+  const segments: ReactNode[] = [];
+
+  if (passage) {
+    segments.push(
+      <span key="passage" className="truncate" style={{ minWidth: 0 }}>
+        {passage}
+      </span>,
+    );
+  }
+
+  segments.push(
+    <span key="saved" style={{ whiteSpace: "nowrap" }}>
+      Saved {formatSavedDate(sermon.created_at)}
+    </span>,
+  );
+
+  if (evaluated) {
+    segments.push(
+      <span
+        key="band"
+        style={{
+          ...uiFont,
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          lineHeight: 1,
+          borderRadius: 4,
+          padding: "4px 9px",
+          background: "#faf6ed",
+          color: "#a67c2e",
+          border: "1px solid #e8dcc2",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {bandLabel(sermon.latestEvaluation!.score_band)}
+      </span>,
+    );
+  } else {
+    segments.push(
+      <span key="band" style={{ whiteSpace: "nowrap" }}>
+        Not run
+      </span>,
+    );
+  }
+
+  if (sermon.completeEvaluationCount > 1) {
+    segments.push(
+      <span
+        key="runs"
+        style={{
+          ...uiFont,
+          fontSize: 12,
+          lineHeight: 1,
+          color: "#9aa1ac",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {sermon.completeEvaluationCount} runs
+      </span>,
+    );
+  }
 
   return (
     <li style={{ margin: "0 0 9px", listStyle: "none" }}>
@@ -68,9 +123,10 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
           style={{
             ...serifFont,
             margin: 0,
+            padding: 0,
             fontSize: 19,
             fontWeight: 600,
-            lineHeight: 1.2,
+            lineHeight: 1.15,
             letterSpacing: "-0.01em",
             color: "#1a2332",
           }}
@@ -81,63 +137,28 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
           style={{
             ...uiFont,
             display: "flex",
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
             alignItems: "center",
             margin: "3px 0 0",
+            padding: 0,
             fontSize: 13,
             fontWeight: 400,
-            lineHeight: 1.3,
+            lineHeight: 1,
             color: "#4a5568",
+            minWidth: 0,
+            overflow: "hidden",
           }}
         >
-          {passage ? (
-            <>
-              <span className="truncate">{passage}</span>
-              <MetaSep />
-            </>
-          ) : null}
-          <span style={{ whiteSpace: "nowrap" }}>
-            Saved {formatSavedDate(sermon.created_at)}
-          </span>
-          <MetaSep />
-          {evaluated ? (
-            <span
-              style={{
-                ...uiFont,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                lineHeight: 1.2,
-                borderRadius: 4,
-                padding: "4px 9px",
-                background: "#faf6ed",
-                color: "#a67c2e",
-                border: "1px solid #e8dcc2",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {bandLabel(sermon.latestEvaluation!.score_band)}
-            </span>
-          ) : (
-            <span>Not run</span>
-          )}
-          {showRuns ? (
-            <>
-              <MetaSep />
-              <span
-                style={{
-                  ...uiFont,
-                  fontSize: 12,
-                  lineHeight: 1.2,
-                  color: "#9aa1ac",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {sermon.completeEvaluationCount} runs
-              </span>
-            </>
-          ) : null}
+          {segments.map((segment, index) => (
+            <Fragment key={index}>
+              {index > 0 ? (
+                <span aria-hidden="true" style={{ flexShrink: 0 }}>
+                  {META_SEP}
+                </span>
+              ) : null}
+              {segment}
+            </Fragment>
+          ))}
         </p>
       </Link>
     </li>
