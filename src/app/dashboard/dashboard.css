@@ -98,7 +98,9 @@
 }
 
 .dashboard-rail-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 9px 22px;
   border-left: 3px solid transparent;
   border-bottom: none;
@@ -109,6 +111,17 @@
   white-space: nowrap;
   background: transparent;
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.dashboard-rail-free-tag {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9aa1ac;
+  background: none;
+  border: none;
 }
 
 .dashboard-rail-link:hover {

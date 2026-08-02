@@ -15,6 +15,8 @@ type NavItem = {
   href: string;
   label: string;
   shortLabel?: string;
+  /** Cost-clarity tag; Sketches and Growth only. */
+  freeTag?: boolean;
   isActive: (pathname: string) => boolean;
 };
 
@@ -28,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     href: "/dashboard/sketches",
     label: "Sketches",
+    freeTag: true,
     isActive: (pathname) =>
       pathname === "/dashboard/sketches" ||
       pathname.startsWith("/dashboard/sketches/") ||
@@ -37,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     href: "/dashboard/growth",
     label: "Growth",
+    freeTag: true,
     isActive: (pathname) => pathname.startsWith("/dashboard/growth"),
   },
   {
@@ -66,6 +70,11 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
       <span className="dashboard-rail-label-short">
         {item.shortLabel ?? item.label}
       </span>
+      {item.freeTag ? (
+        <span className="dashboard-rail-free-tag" aria-hidden="true">
+          Free
+        </span>
+      ) : null}
     </Link>
   );
 }

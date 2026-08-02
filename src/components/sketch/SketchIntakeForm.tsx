@@ -79,7 +79,7 @@ const QUESTIONS: Array<{
 const DEFAULT_HEADER: SketchIntakeHeaderCopy = {
   eyebrow: "The Sketch",
   heading: "Alignment check on your sermon outline.",
-  subhead: "Insight into the core of your sermon before you build it.",
+  subhead: "No score, no credit. A read on your sermon before you build it.",
 };
 
 export function SketchIntakeForm({
@@ -145,8 +145,8 @@ export function SketchIntakeForm({
           {header.heading}
         </h1>
         <p
-          className="text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          className="text-[14px] leading-relaxed"
+          style={{ ...uiFont, color: "#4a5568" }}
         >
           {header.subhead}
         </p>
