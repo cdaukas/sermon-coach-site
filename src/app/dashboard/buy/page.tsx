@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { CreditStrip } from "@/components/dashboard/CreditStrip";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
-import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
 import { buildCreditStripModel } from "@/lib/billing/credit-display";
@@ -59,33 +58,27 @@ export default async function BuyPage() {
         boxShadow: "var(--sc-shadow-lift)",
       }}
     >
-      <div
-        className="mb-8 flex flex-wrap items-end justify-between gap-4"
-        style={{ borderBottom: "1px solid #d4cfc1", paddingBottom: 18 }}
-      >
-        <div className="min-w-0">
+      <div className="mb-8">
+        <p
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+          style={{ ...uiFont, color: "var(--sc-accent)" }}
+        >
+          Buy
+        </p>
+        <h1
+          className="text-[32px] font-semibold leading-tight tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          Add credits
+        </h1>
+        {hasActiveSubscription ? (
           <p
-            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-            style={{ ...uiFont, color: "var(--sc-accent)" }}
+            className="mt-3 text-[14px]"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            Buy
+            {planLabel(entitlement?.usage?.planTier)}
           </p>
-          <h1
-            className="text-[32px] font-semibold leading-tight tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            Add credits
-          </h1>
-          {hasActiveSubscription ? (
-            <p
-              className="mt-3 text-[14px]"
-              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-            >
-              {planLabel(entitlement?.usage?.planTier)}
-            </p>
-          ) : null}
-        </div>
-        <NewEvaluationButton />
+        ) : null}
       </div>
 
       {stripModel ? (

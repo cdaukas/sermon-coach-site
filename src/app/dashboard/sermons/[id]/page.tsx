@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { SermonDetailEvalErrorBanner } from "@/components/dashboard/SermonDetailEvalErrorBanner";
 import { SermonDetailEvalSection } from "@/components/dashboard/SermonDetailEvalSection";
 import { SermonDetailManuscript } from "@/components/dashboard/SermonDetailManuscript";
@@ -93,28 +92,22 @@ export default async function SermonDetailPage({
         ← Back to library
       </Link>
 
-      <div
-        className="mb-8 flex flex-wrap items-end justify-between gap-4"
-        style={{ borderBottom: "1px solid #d4cfc1", paddingBottom: 18 }}
-      >
-        <div className="min-w-0">
-          <p
-            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-            style={{ ...uiFont, color: "var(--sc-accent)" }}
-          >
-            Sermon
-          </p>
-          <h1
-            className="text-[32px] font-semibold leading-tight tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            {sermon.title}
-          </h1>
-          <p className="mt-3 text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-            Saved {formatDate(version.created_at)}
-          </p>
-        </div>
-        <NewEvaluationButton />
+      <div className="mb-8">
+        <p
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+          style={{ ...uiFont, color: "var(--sc-accent)" }}
+        >
+          Sermon
+        </p>
+        <h1
+          className="text-[32px] font-semibold leading-tight tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          {sermon.title}
+        </h1>
+        <p className="mt-3 text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+          Saved {formatDate(version.created_at)}
+        </p>
       </div>
 
       <SermonDetailEvalErrorBanner evalError={evalError} />

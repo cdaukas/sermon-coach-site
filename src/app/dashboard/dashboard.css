@@ -228,8 +228,7 @@
 }
 
 .dashboard-sermon-row-passage,
-.dashboard-sermon-row-date,
-.dashboard-sermon-row-mode {
+.dashboard-sermon-row-date {
   min-width: 0;
   font-family: var(--font-ui);
   font-size: 13px;
@@ -277,7 +276,7 @@
 }
 
 .dashboard-sketch-row-link {
-  grid-template-columns: minmax(0, 1fr) 160px 90px 90px;
+  grid-template-columns: minmax(0, 1fr) 160px 90px;
 }
 
 @media (max-width: 700px) {
@@ -289,8 +288,7 @@
   .dashboard-sermon-row-passage,
   .dashboard-sermon-row-date,
   .dashboard-sermon-row-runs,
-  .dashboard-sermon-row-band,
-  .dashboard-sermon-row-mode {
+  .dashboard-sermon-row-band {
     display: none;
   }
 

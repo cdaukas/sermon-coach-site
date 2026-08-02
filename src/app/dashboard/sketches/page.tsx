@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { SketchList } from "@/components/dashboard/SketchList";
 import { listReadinessReadsDetailForUser } from "@/lib/sketch/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -42,21 +41,18 @@ export default async function SketchesLibraryPage() {
             Your sketches
           </h1>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <NewEvaluationButton />
-          <Link
-            href="/dashboard/sketch"
-            className="inline-block rounded border px-5 py-2.5 text-[13px] font-semibold tracking-wide no-underline"
-            style={{
-              ...uiFont,
-              background: "var(--sc-ink)",
-              color: "var(--sc-bg)",
-              borderColor: "var(--sc-ink)",
-            }}
-          >
-            Run The Sketch
-          </Link>
-        </div>
+        <Link
+          href="/dashboard/sketch"
+          className="inline-block rounded border px-5 py-2.5 text-[13px] font-semibold tracking-wide no-underline"
+          style={{
+            ...uiFont,
+            background: "var(--sc-ink)",
+            color: "var(--sc-bg)",
+            borderColor: "var(--sc-ink)",
+          }}
+        >
+          Run The Sketch
+        </Link>
       </div>
 
       {sketches.length === 0 ? (

@@ -14,18 +14,10 @@ function formatDate(iso: string): string {
   }).format(new Date(iso));
 }
 
-function modeLabel(mode: ReadinessReadRow["mode"]): string | null {
-  if (mode === "find") return "Find";
-  if (mode === "press") return "Press";
-  return null;
-}
-
 function buildMobileMeta(sketch: ReadinessReadRow): string {
   const segments: string[] = [];
   const passage = sketch.primary_passage?.trim() || null;
-  const mode = modeLabel(sketch.mode);
   if (passage) segments.push(passage);
-  if (mode) segments.push(mode);
   segments.push(formatDate(sketch.created_at));
   return segments.join(" · ");
 }
@@ -34,7 +26,6 @@ function SketchRow({ sketch }: { sketch: ReadinessReadRow }) {
   const passage = sketch.primary_passage?.trim() || null;
   const workingIdea = sketch.big_idea?.trim() || null;
   const title = workingIdea || passage || "";
-  const mode = modeLabel(sketch.mode);
 
   return (
     <li className="dashboard-sermon-row">
@@ -44,7 +35,6 @@ function SketchRow({ sketch }: { sketch: ReadinessReadRow }) {
       >
         <span className="dashboard-sermon-row-title">{title}</span>
         <span className="dashboard-sermon-row-passage">{passage ?? ""}</span>
-        <span className="dashboard-sermon-row-mode">{mode ?? ""}</span>
         <span className="dashboard-sermon-row-date">
           {formatDate(sketch.created_at)}
         </span>
