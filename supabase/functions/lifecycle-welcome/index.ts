@@ -52,18 +52,18 @@ function isEmailConfirmationTransition(payload: DbWebhookUpdatePayload): boolean
   return wasConfirmed === null && isConfirmed !== null;
 }
 
-function buildWelcomeHtml(dashboardUrl: string): string {
+function buildWelcomeHtml(firstEvalUrl: string): string {
   return [
-    "<p>You're set. Here's your next step: paste your sermon manuscript (or a transcript, if it's a message you've already preached) into your dashboard and save.</p>",
-    "<p>You can sharpen an upcoming message or test the rubric on an old one on purpose. Before you run it, choose The Evaluation for your own study, or The Mentoring Debrief if you're walking alongside another preacher. Your evaluation comes back in a few minutes.</p>",
-    `<p><a href="${dashboardUrl}">Submit your first sermon →</a></p>`,
+    "<p>You're set. Here's your next step: paste your sermon manuscript, or a transcript if it's a message you've already preached, into your dashboard and save.</p>",
+    "<p>You can sharpen an upcoming message or run an old one to see how the rubric reads it. Your evaluation comes back in a few minutes.</p>",
+    `<p><a href="${firstEvalUrl}">Submit your first sermon →</a></p>`,
     "<p>— Chris</p>",
   ].join("\n");
 }
 
 async function sendWelcomeEmail(params: {
   to: string;
-  dashboardUrl: string;
+  firstEvalUrl: string;
   resendApiKey: string;
 }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const response = await fetch("https://api.resend.com/emails", {
@@ -77,7 +77,7 @@ async function sendWelcomeEmail(params: {
       to: [params.to],
       reply_to: RESEND_REPLY_TO,
       subject: "You're in. Here's where to start.",
-      html: buildWelcomeHtml(params.dashboardUrl),
+      html: buildWelcomeHtml(params.firstEvalUrl),
     }),
   });
 
@@ -186,11 +186,11 @@ Deno.serve(async (req) => {
     /\/$/,
     "",
   );
-  const dashboardUrl = `${siteUrl}/dashboard`;
+  const firstEvalUrl = `${siteUrl}/dashboard/sermons/new`;
 
   const sendResult = await sendWelcomeEmail({
     to: userData.user.email,
-    dashboardUrl,
+    firstEvalUrl,
     resendApiKey,
   });
 
