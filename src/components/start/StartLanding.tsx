@@ -133,7 +133,7 @@ export function StartLanding({
       variant: "success",
       text: isMentorInvite
         ? "Check your email to confirm your account. After you verify, you'll return to finish accepting the mentoring invitation."
-        : "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
+        : "Check your email and click the link to confirm your account. That will sign you in and take you straight to sermon submission.",
     });
   }
 
@@ -218,12 +218,6 @@ export function StartLanding({
                   chris@sermoncoach.online
                 </AuthLink>{" "}
                 and he&apos;ll sort it out.
-              </p>
-              <p
-                className="text-center text-sm"
-                style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-              >
-                <AuthLink href={loginHref}>Go to sign in</AuthLink>
               </p>
             </div>
           ) : (
