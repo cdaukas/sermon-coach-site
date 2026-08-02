@@ -1,11 +1,7 @@
-import { CreditStrip } from "@/components/dashboard/CreditStrip";
 import { EmptyLibraryCard } from "@/components/dashboard/EmptyLibraryCard";
 import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { PurchaseArrivalBand } from "@/components/dashboard/PurchaseArrivalBand";
 import { SermonList } from "@/components/dashboard/SermonList";
-import {
-  buildCreditStripModel,
-} from "@/lib/billing/credit-display";
 import {
   getMostRecentPackGrant,
   isWithinMinutes,
@@ -32,7 +28,6 @@ export default async function DashboardPage() {
     getMostRecentPackGrant(),
   ]);
 
-  const stripModel = buildCreditStripModel(entitlement);
   const libraryEmpty = sermons.length === 0;
 
   const recentPackArrival =
@@ -84,8 +79,6 @@ export default async function DashboardPage() {
   return (
     <div>
       {pageHeader}
-
-      {stripModel ? <CreditStrip model={stripModel} /> : null}
 
       {showPurchaseBand && recentPackArrival ? (
         <PurchaseArrivalBand

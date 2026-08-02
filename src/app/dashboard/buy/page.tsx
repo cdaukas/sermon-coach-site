@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
+import { CreditStrip } from "@/components/dashboard/CreditStrip";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
 import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
 import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
+import { buildCreditStripModel } from "@/lib/billing/credit-display";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
@@ -43,6 +45,7 @@ export default async function BuyPage() {
 
   const hasActiveSubscription = entitlement?.subscriptionActive === true;
   const showStatusRow = subscriptionStatus || packCredits;
+  const stripModel = buildCreditStripModel(entitlement);
   const usage = entitlement?.usage ?? null;
   const subscriberDepleted =
     hasActiveSubscription && usage !== null && usage.used >= usage.limit;
@@ -84,6 +87,10 @@ export default async function BuyPage() {
         </div>
         <NewEvaluationButton />
       </div>
+
+      {stripModel ? (
+        <CreditStrip model={stripModel} showAddCreditsLink={false} />
+      ) : null}
 
       {showStatusRow ? (
         <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">

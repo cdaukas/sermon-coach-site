@@ -24,20 +24,23 @@ type SermonListProps = {
   header?: ReactNode;
 };
 
+function MetaSep() {
+  return (
+    <span aria-hidden="true" style={{ color: "#4a5568" }}>
+      {" "}
+      ·{" "}
+    </span>
+  );
+}
+
 function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
   const href = sermon.latestEvaluation
     ? `/dashboard/sermons/${sermon.id}/evaluations/${sermon.latestEvaluation.id}`
     : `/dashboard/sermons/${sermon.id}`;
 
   const passage = sermon.primary_passage?.trim() || null;
-  const meta = passage
-    ? `${passage} · Saved ${formatSavedDate(sermon.created_at)}`
-    : `Saved ${formatSavedDate(sermon.created_at)}`;
-
   const evaluated = sermon.latestEvaluation != null;
-  const chipLabel = evaluated
-    ? bandLabel(sermon.latestEvaluation!.score_band)
-    : "Not run";
+  const showRuns = sermon.completeEvaluationCount > 1;
 
   return (
     <li style={{ margin: "0 0 9px", listStyle: "none" }}>
@@ -45,10 +48,7 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
         href={href}
         className="no-underline transition-colors"
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
+          display: "block",
           background: "#ffffff",
           border: "1px solid #d4cfc1",
           borderRadius: 4,
@@ -63,77 +63,82 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
           event.currentTarget.style.borderColor = "#d4cfc1";
         }}
       >
-        <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-          <p
-            className="truncate"
-            style={{
-              ...serifFont,
-              margin: 0,
-              fontSize: 19,
-              fontWeight: 600,
-              lineHeight: 1.2,
-              letterSpacing: "-0.01em",
-              color: "#1a2332",
-            }}
-          >
-            {sermon.title}
-          </p>
-          <p
-            className="truncate"
-            style={{
-              ...uiFont,
-              margin: "3px 0 0",
-              fontSize: 13,
-              fontWeight: 400,
-              lineHeight: 1.3,
-              color: "#4a5568",
-            }}
-          >
-            {meta}
-          </p>
-        </div>
-
-        <div
+        <p
+          className="truncate"
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            gap: 10,
-            flexShrink: 0,
-            marginLeft: "auto",
+            ...serifFont,
+            margin: 0,
+            fontSize: 19,
+            fontWeight: 600,
+            lineHeight: 1.2,
+            letterSpacing: "-0.01em",
+            color: "#1a2332",
           }}
         >
-          <span
-            style={{
-              ...uiFont,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              lineHeight: 1.2,
-              borderRadius: 4,
-              padding: "4px 9px",
-              background: evaluated ? "#faf6ed" : "transparent",
-              color: evaluated ? "#a67c2e" : "#4a5568",
-              border: evaluated ? "1px solid #e8dcc2" : "1px solid #d4cfc1",
-            }}
-          >
-            {chipLabel}
+          {sermon.title}
+        </p>
+        <p
+          style={{
+            ...uiFont,
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            margin: "3px 0 0",
+            fontSize: 13,
+            fontWeight: 400,
+            lineHeight: 1.3,
+            color: "#4a5568",
+          }}
+        >
+          {passage ? (
+            <>
+              <span className="truncate">{passage}</span>
+              <MetaSep />
+            </>
+          ) : null}
+          <span style={{ whiteSpace: "nowrap" }}>
+            Saved {formatSavedDate(sermon.created_at)}
           </span>
-          {sermon.completeEvaluationCount > 1 ? (
+          <MetaSep />
+          {evaluated ? (
             <span
               style={{
                 ...uiFont,
-                fontSize: 12,
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
                 lineHeight: 1.2,
-                color: "#9aa1ac",
+                borderRadius: 4,
+                padding: "4px 9px",
+                background: "#faf6ed",
+                color: "#a67c2e",
+                border: "1px solid #e8dcc2",
                 whiteSpace: "nowrap",
               }}
             >
-              {sermon.completeEvaluationCount} runs
+              {bandLabel(sermon.latestEvaluation!.score_band)}
             </span>
+          ) : (
+            <span>Not run</span>
+          )}
+          {showRuns ? (
+            <>
+              <MetaSep />
+              <span
+                style={{
+                  ...uiFont,
+                  fontSize: 12,
+                  lineHeight: 1.2,
+                  color: "#9aa1ac",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {sermon.completeEvaluationCount} runs
+              </span>
+            </>
           ) : null}
-        </div>
+        </p>
       </Link>
     </li>
   );

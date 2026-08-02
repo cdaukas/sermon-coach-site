@@ -7,9 +7,14 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 type CreditStripProps = {
   model: CreditStripModel;
+  /** Hide when already on /dashboard/buy. Default true. */
+  showAddCreditsLink?: boolean;
 };
 
-export function CreditStrip({ model }: CreditStripProps) {
+export function CreditStrip({
+  model,
+  showAddCreditsLink = true,
+}: CreditStripProps) {
   const parts: ReactNode[] = [];
 
   if (model.subscription) {
@@ -120,13 +125,15 @@ export function CreditStrip({ model }: CreditStripProps) {
           </span>
         ))}
       </p>
-      <Link
-        href="/dashboard/buy"
-        className="shrink-0 no-underline hover:underline"
-        style={{ ...uiFont, fontSize: 13, fontWeight: 600, color: "#a67c2e" }}
-      >
-        Add credits →
-      </Link>
+      {showAddCreditsLink ? (
+        <Link
+          href="/dashboard/buy"
+          className="shrink-0 no-underline hover:underline"
+          style={{ ...uiFont, fontSize: 13, fontWeight: 600, color: "#a67c2e" }}
+        >
+          Add credits →
+        </Link>
+      ) : null}
     </div>
   );
 }

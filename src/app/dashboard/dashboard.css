@@ -170,7 +170,8 @@
 .dashboard-content {
   flex: 1;
   min-width: 0;
-  max-width: 100%;
+  width: 100%;
+  max-width: 720px;
   padding: 34px 40px 64px;
   overflow-x: clip;
   box-sizing: border-box;

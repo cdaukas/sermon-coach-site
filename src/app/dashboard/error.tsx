@@ -86,7 +86,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
               borderColor: "var(--sc-rule)",
             }}
           >
-            New sermon
+            New evaluation
           </Link>
         </div>
       </div>
