@@ -8,7 +8,11 @@ export function formatEvaluationCreditLine(
   }
 
   if (entitlement.creditSource === "subscription" && entitlement.usage) {
-    return `${entitlement.usage.used} of ${entitlement.usage.limit} credits used this month`;
+    const remaining = Math.max(
+      0,
+      entitlement.usage.limit - entitlement.usage.used,
+    );
+    return `This uses one credit. You have ${remaining} left this month.`;
   }
 
   if (entitlement.creditSource === "pack" && entitlement.packRemaining > 0) {

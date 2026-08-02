@@ -7,18 +7,12 @@ import {
   AuthField,
   AuthForm,
   AuthLabel,
-  AuthSubmit,
 } from "@/components/auth/AuthForm";
-import { ModeSelector } from "@/components/dashboard/ModeSelector";
 import { EvaluationCreditLine } from "@/components/evaluation/EvaluationCreditLine";
 import { EvaluationPollingStatus } from "@/components/evaluation/EvaluationPollingStatus";
 import { useEvaluationPolling } from "@/components/evaluation/useEvaluationPolling";
 import { requestEvaluation } from "@/lib/evaluation/actions";
-import {
-  normalizeSermonContext,
-  sermonContextStorageKey,
-  type ReportMode,
-} from "@/lib/evaluation/context";
+import { normalizeSermonContext, sermonContextStorageKey } from "@/lib/evaluation/context";
 import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-errors";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { createSermon } from "@/lib/sermons/actions";
@@ -61,7 +55,6 @@ type InputMethod = "paste" | "youtube";
 
 type SermonFormProps = {
   entitlement: EvaluationEntitlement | null;
-  defaultReportMode: ReportMode;
   isMentoredMentee?: boolean;
 };
 
@@ -86,7 +79,6 @@ function estimateSermonMinutes(wordCount: number): number {
 
 export function SermonForm({
   entitlement,
-  defaultReportMode,
   isMentoredMentee = false,
 }: SermonFormProps) {
   const router = useRouter();
@@ -99,7 +91,6 @@ export function SermonForm({
   const [audience, setAudience] = useState("");
   const [series, setSeries] = useState("");
   const [other, setOther] = useState("");
-  const [reportMode, setReportMode] = useState<ReportMode>(defaultReportMode);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -258,12 +249,12 @@ export function SermonForm({
       savedSermonIdRef.current = result.sermonId;
       const context = buildContext();
 
-      // requestEvaluation may redirect to /pricing.html if credits were
-      // exhausted between page load and this call.
+      // Always The Evaluation from this form. Mentored mentees still go through
+      // create_mentored_evaluation inside requestEvaluation (reportMode unused).
       const evalResult = await requestEvaluation(
         result.sermonId,
         context,
-        reportMode,
+        "diagnostic",
       );
 
       if (!evalResult.ok) {
@@ -303,15 +294,15 @@ export function SermonForm({
 
       <div className="flex flex-col items-start gap-2">
         <div
-          className="inline-flex rounded border p-1"
-          style={{ borderColor: "var(--sc-rule)", background: "var(--sc-bg)" }}
+          className="flex w-full gap-[26px]"
+          style={{ borderBottom: "1px solid #d4cfc1" }}
           role="tablist"
           aria-label="Input method"
         >
           {(
             [
               { value: "paste", label: "Paste manuscript" },
-              { value: "youtube", label: "YouTube link" },
+              { value: "youtube", label: "Paste a YouTube link" },
             ] as const
           ).map((tab) => {
             const selected = inputMethod === tab.value;
@@ -324,12 +315,15 @@ export function SermonForm({
                 aria-selected={selected}
                 disabled={formDisabled}
                 onClick={() => setInputMethod(tab.value)}
-                className="rounded px-4 py-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                className="border-0 bg-transparent px-0 pb-[11px] text-[14px] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 style={{
                   ...uiFont,
-                  background: selected ? "var(--sc-panel)" : "transparent",
-                  color: selected ? "var(--sc-ink)" : "var(--sc-ink-soft)",
-                  boxShadow: selected ? "var(--sc-shadow-lift)" : "none",
+                  fontWeight: selected ? 600 : 500,
+                  color: selected ? "#1a2332" : "#4a5568",
+                  borderBottom: selected
+                    ? "2px solid #a67c2e"
+                    : "2px solid transparent",
+                  marginBottom: "-1px",
                 }}
               >
                 {tab.label}
@@ -458,23 +452,33 @@ export function SermonForm({
 
       <details className="group">
         <summary
-          className="cursor-pointer list-none rounded border px-5 py-4 transition-colors hover:border-[var(--sc-ink)] [&::-webkit-details-marker]:hidden"
+          className="flex cursor-pointer items-start gap-3 rounded border px-5 py-4 transition-colors hover:border-[var(--sc-ink)] [&::-webkit-details-marker]:hidden"
           style={{
             ...uiFont,
+            listStyle: "none",
             background: "var(--sc-bg)",
             borderColor: "var(--sc-rule)",
             color: "var(--sc-ink)",
           }}
         >
-          <span className="block text-[15px] font-semibold" style={serifFont}>
-            Add context (optional)
-          </span>
           <span
-            className="mt-1 block text-[13px] font-normal leading-relaxed"
-            style={{ color: "var(--sc-ink-soft)" }}
-          >
-            A minute of context sharpens the read. Skip it and the evaluation
-            still runs.
+            aria-hidden="true"
+            className="mt-[7px] inline-block h-0 w-0 shrink-0 border-y-[5px] border-l-[7px] border-y-transparent border-l-[#a67c2e] transition-transform group-open:rotate-90"
+          />
+          <span className="min-w-0 flex-1">
+            <span
+              className="block text-[17px] font-semibold"
+              style={serifFont}
+            >
+              Add context
+            </span>
+            <span
+              className="mt-1 block text-[13px] font-normal leading-relaxed"
+              style={{ color: "#4a5568" }}
+            >
+              A minute of context sharpens the read. Skip it and the evaluation
+              still runs.
+            </span>
           </span>
         </summary>
 
@@ -547,36 +551,53 @@ export function SermonForm({
         </div>
       </details>
 
-      {!isMentoredMentee ? (
-        <ModeSelector
-          value={reportMode}
-          onChange={setReportMode}
-          disabled={formDisabled}
-        />
-      ) : null}
-
-      <div>
+      <div
+        style={{
+          borderTop: "1px solid #d4cfc1",
+          paddingTop: 20,
+        }}
+      >
         {polling ? <EvaluationPollingStatus elapsed={elapsed} /> : null}
 
-        <AuthSubmit type="submit" disabled={primaryDisabled}>
-          {primaryLabel}
-        </AuthSubmit>
+        {!isMentoredMentee ? (
+          <EvaluationCreditLine
+            entitlement={entitlement}
+            className="mb-4 text-[13px] leading-relaxed"
+          />
+        ) : null}
 
-        <p className="mt-3 text-center">
+        <div className="flex flex-wrap items-center gap-5">
+          <button
+            type="submit"
+            disabled={primaryDisabled}
+            className="rounded border-0 text-[14px] font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+            style={{
+              ...uiFont,
+              padding: "13px 26px",
+              background: "#1a2332",
+              color: "#faf8f3",
+              borderRadius: 4,
+            }}
+          >
+            {primaryLabel}
+          </button>
+
           <button
             type="button"
             disabled={formDisabled}
             onClick={() => void handleSaveWithoutRunning()}
-            className="border-0 bg-transparent p-0 text-[13px] underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            className="border-0 bg-transparent p-0 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            style={{ ...uiFont, color: "#4a5568" }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.color = "#1a2332";
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.color = "#4a5568";
+            }}
           >
             Save without running
           </button>
-        </p>
-
-        {!isMentoredMentee ? (
-          <EvaluationCreditLine entitlement={entitlement} />
-        ) : null}
+        </div>
       </div>
     </AuthForm>
   );

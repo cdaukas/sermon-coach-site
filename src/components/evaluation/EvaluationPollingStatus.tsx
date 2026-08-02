@@ -35,7 +35,8 @@ export function EvaluationPollingStatus({
         className="mt-1 text-[13px]"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        This usually takes 2–4 minutes. Keep this tab open.
+        This usually takes 2 to 4 minutes. You can close this tab and come back
+        to it from your dashboard.
       </p>
       <p
         className="mt-2 text-[12px]"

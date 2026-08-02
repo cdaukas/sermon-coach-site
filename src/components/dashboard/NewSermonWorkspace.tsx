@@ -1,7 +1,6 @@
 "use client";
 
 import { EvaluationAccessGate } from "@/components/evaluation/EvaluationAccessGate";
-import type { ReportMode } from "@/lib/evaluation/context";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { SermonForm } from "./SermonForm";
 
@@ -10,13 +9,11 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
-  defaultReportMode: ReportMode;
   isMentoredMentee?: boolean;
 };
 
 export function NewSermonWorkspace({
   entitlement,
-  defaultReportMode,
   isMentoredMentee = false,
 }: NewSermonWorkspaceProps) {
   const canEvaluate = entitlement?.canEvaluate ?? true;
@@ -57,7 +54,6 @@ export function NewSermonWorkspace({
       {showForm ? (
         <SermonForm
           entitlement={entitlement}
-          defaultReportMode={defaultReportMode}
           isMentoredMentee={isMentoredMentee}
         />
       ) : null}
