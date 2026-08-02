@@ -124,11 +124,23 @@ export async function claimSketchRead(
           { p_source: "sketch", p_detail: null },
         );
         if (attrError) {
-          console.error("claimSketchRead set_acquisition_source failed", attrError);
+          console.error(
+            "[claimSketchRead] set_acquisition_source failed",
+            {
+              callSite: "src/lib/sketch/claim.ts#claimSketchRead",
+              message: attrError.message,
+              code: attrError.code,
+              details: attrError.details,
+              hint: attrError.hint,
+            },
+          );
         }
       }
     } catch (attrErr) {
-      console.error("claimSketchRead attribution threw", attrErr);
+      console.error("[claimSketchRead] attribution threw", {
+        callSite: "src/lib/sketch/claim.ts#claimSketchRead",
+        error: attrErr,
+      });
     }
 
     await clearSketchClaimCookie();

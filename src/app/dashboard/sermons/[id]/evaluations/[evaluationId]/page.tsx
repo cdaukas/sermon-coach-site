@@ -9,6 +9,7 @@ import {
 } from "@/components/evaluation/EvaluationPdfCover";
 import { EvaluationPdfCapture } from "@/components/evaluation/EvaluationPdfCapture";
 import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
+import { IncompleteEvaluationPoller } from "@/components/evaluation/IncompleteEvaluationPoller";
 import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
 import { getEvaluation } from "@/lib/evaluation/queries";
 import "@/app/evaluation-pdf-capture.css";
@@ -67,6 +68,9 @@ export default async function EvaluationPage({
     evaluation.report_mode !== "debrief" && evaluation.result != null;
 
   if (evaluation.status !== "complete" || (!debriefReady && !diagnosticReady)) {
+    const backLabel =
+      resolvedVia === "owner" ? "Back to sermon" : BACK_LABEL_MENTOR;
+
     return (
       <main
         className="rounded px-8 py-10"
@@ -76,28 +80,15 @@ export default async function EvaluationPage({
           boxShadow: "var(--sc-shadow-lift)",
         }}
       >
-        {evaluation.status === "failed" && evaluation.error_message ? (
-          <p
-            className="mb-4 text-[15px]"
-            style={{ ...uiFont, color: "var(--sc-error)" }}
-          >
-            {evaluation.error_message}
-          </p>
-        ) : null}
-        <p style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-          {evaluation.status === "running" || evaluation.status === "pending"
-            ? "Evaluation in progress…"
-            : `This evaluation is not ready yet (status: ${evaluation.status}).`}
-        </p>
-        <Link
-          href={backHref}
-          className="mt-6 inline-block text-[13px] font-medium no-underline hover:underline"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
-        >
-          {resolvedVia === "owner"
-            ? "← Back to sermon"
-            : `← ${BACK_LABEL_MENTOR}`}
-        </Link>
+        <IncompleteEvaluationPoller
+          evaluationId={evaluationId}
+          sermonId={sermonId}
+          sermonTitle={sermon.title}
+          backHref={backHref}
+          backLabel={backLabel}
+          initialStatus={evaluation.status}
+          initialErrorMessage={evaluation.error_message}
+        />
       </main>
     );
   }

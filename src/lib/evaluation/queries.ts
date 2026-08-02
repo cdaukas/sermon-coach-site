@@ -64,6 +64,8 @@ export type EvaluationStatusResponse = {
   sermonId: string;
   overallScore: number | null;
   scoreBand: string | null;
+  /** True only when status is complete and the mode-correct payload is present. */
+  ready: boolean;
 };
 
 export async function getEvaluationStatus(
@@ -74,7 +76,7 @@ export async function getEvaluationStatus(
   const { data: row, error } = await supabase
     .from("sermon_evaluations")
     .select(
-      "id, status, error_message, overall_score, score_band, sermon_version_id",
+      "id, status, error_message, overall_score, score_band, sermon_version_id, report_mode, result, coaching_narrative",
     )
     .eq("id", evaluationId)
     .maybeSingle();
@@ -101,13 +103,21 @@ export async function getEvaluationStatus(
     return null;
   }
 
+  const status = row.status as EvaluationStatus;
+  const debriefReady =
+    row.report_mode === "debrief" && row.coaching_narrative != null;
+  const diagnosticReady =
+    row.report_mode !== "debrief" && row.result != null;
+  const ready = status === "complete" && (debriefReady || diagnosticReady);
+
   return {
     id: row.id,
-    status: row.status as EvaluationStatus,
+    status,
     errorMessage: row.error_message,
     sermonId: version.sermon_id,
     overallScore: row.overall_score,
     scoreBand: row.score_band,
+    ready,
   };
 }
 
