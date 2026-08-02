@@ -5,10 +5,20 @@
  * Rail layout uses CSS grid areas (not display:contents) so the <860px
  * wordmark/actions row cannot collapse back into the nav row.
  */
+.dashboard-root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
 .dashboard-shell {
   display: flex;
   min-height: 100%;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
   background: transparent;
 }
 
@@ -34,6 +44,7 @@
     "actions";
   flex-shrink: 0;
   width: 232px;
+  min-width: 0;
   min-height: 100%;
   padding: 34px 0 28px;
   background: transparent;
@@ -115,6 +126,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
+  min-width: 0;
 }
 
 .dashboard-rail-credit-chip {
@@ -153,17 +165,24 @@
 .dashboard-content {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   padding: 34px 40px 64px;
+  overflow-x: clip;
+  box-sizing: border-box;
 }
 
 @media (max-width: 859px) {
   .dashboard-shell {
     flex-direction: column;
+    overflow-x: clip;
   }
 
   .dashboard-rail {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     min-height: 0;
+    flex-shrink: 1;
     padding: 12px 16px 10px;
     border-right: none;
     border-bottom: 1px solid #d4cfc1;
@@ -175,6 +194,7 @@
     column-gap: 12px;
     row-gap: 8px;
     align-items: center;
+    overflow-x: clip;
   }
 
   .dashboard-rail-wordmark {
@@ -190,9 +210,12 @@
   .dashboard-rail-actions {
     flex-direction: row;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
     padding: 0;
     border-top: none;
+    flex-shrink: 0;
+    max-width: 100%;
   }
 
   .dashboard-rail-credit-chip {
@@ -209,6 +232,9 @@
     flex-wrap: nowrap;
     align-items: center;
     gap: 20px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -251,7 +277,11 @@
   }
 
   .dashboard-content {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     padding: 26px 22px 50px;
+    overflow-x: clip;
   }
 
   .dashboard-shell h1 {

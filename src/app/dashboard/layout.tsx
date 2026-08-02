@@ -37,7 +37,7 @@ export default async function DashboardLayout({
 
   return (
     <div
-      className="flex min-h-full flex-col"
+      className="dashboard-root flex min-h-full flex-col"
       style={{ background: "var(--sc-bg)" }}
     >
       <LastActiveTracker />
