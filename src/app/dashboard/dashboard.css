@@ -196,9 +196,9 @@
 
 .dashboard-sermon-row-link {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 160px 90px 70px 110px;
+  grid-template-columns: minmax(0, 1fr) 160px 90px 56px 110px;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin-inline: -12px;
   padding: 14px 12px;
   border-bottom: 1px solid #d4cfc1;
@@ -261,7 +261,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #a67c2e;
-  text-align: right;
+  text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
