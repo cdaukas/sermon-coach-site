@@ -1,5 +1,7 @@
 # Authenticated conversion-path design audit
 
+**Note:** The heat-map register hexes and score-bar colors on the evaluation report are intentional design, not token debt. They should not be mapped back to the brand palette in any future cleanup pass.
+
 Read-only inventory of the seven free-evaluation conversion surfaces. No code was changed.
 
 **Out of scope (noted, ignored):** account settings, admin routes, mentor surfaces (`/dashboard/mentoring`, invite/accept), Sketch surfaces (`/dashboard/sketch`, `SketchHistorySection` on dashboard home, public sketch), growth report (`/dashboard/growth`).
