@@ -9,7 +9,6 @@ export type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./gro
 import type {
   EvaluationStatus,
   EvaluationWithSermon,
-  ReportMode,
   SermonEvaluationListItem,
   SermonEvaluationRow,
 } from "./types";
