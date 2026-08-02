@@ -215,6 +215,8 @@
 
 .dashboard-sermon-row-title {
   min-width: 0;
+  width: 100%;
+  max-width: none;
   margin: 0;
   font-family: var(--font-serif);
   font-size: 17px;
@@ -275,7 +277,7 @@
   display: none;
 }
 
-.dashboard-sketch-row-link {
+.dashboard-sermon-row-link.dashboard-sketch-row-link {
   grid-template-columns: minmax(0, 1fr) 160px 90px;
 }
 
@@ -283,6 +285,10 @@
   .dashboard-sermon-row-link {
     grid-template-columns: minmax(0, 1fr);
     gap: 4px;
+  }
+
+  .dashboard-sermon-row-link.dashboard-sketch-row-link {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .dashboard-sermon-row-passage,

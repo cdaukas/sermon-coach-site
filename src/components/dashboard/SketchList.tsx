@@ -33,7 +33,12 @@ function SketchRow({ sketch }: { sketch: ReadinessReadRow }) {
         href={`/dashboard/sketches/${sketch.id}`}
         className="dashboard-sermon-row-link dashboard-sketch-row-link"
       >
-        <span className="dashboard-sermon-row-title">{title}</span>
+        <span
+          className="dashboard-sermon-row-title"
+          title={title || undefined}
+        >
+          {title}
+        </span>
         <span className="dashboard-sermon-row-passage">{passage ?? ""}</span>
         <span className="dashboard-sermon-row-date">
           {formatDate(sketch.created_at)}
