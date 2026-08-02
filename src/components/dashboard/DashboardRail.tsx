@@ -25,13 +25,6 @@ const PRIMARY_NAV: NavItem[] = [
       pathname === "/dashboard" || pathname.startsWith("/dashboard/sermons"),
   },
   {
-    href: "/dashboard/sketch",
-    label: "Sketches",
-    isActive: (pathname) =>
-      pathname === "/dashboard/sketch" ||
-      pathname.startsWith("/dashboard/sketch/"),
-  },
-  {
     href: "/dashboard/growth",
     label: "Growth",
     isActive: (pathname) => pathname.startsWith("/dashboard/growth"),
@@ -76,40 +69,42 @@ export function DashboardRail({ creditChipLabel }: DashboardRailProps) {
         <sup className="dashboard-rail-tm">™</sup>
       </Link>
 
-      <nav className="dashboard-rail-nav" aria-label="Main">
-        <div className="dashboard-rail-nav-group">
-          {PRIMARY_NAV.map((item) => (
-            <NavLink key={item.href} item={item} pathname={pathname} />
-          ))}
-        </div>
+      <div className="dashboard-rail-toolbar">
+        <nav className="dashboard-rail-nav" aria-label="Main">
+          <div className="dashboard-rail-nav-group">
+            {PRIMARY_NAV.map((item) => (
+              <NavLink key={item.href} item={item} pathname={pathname} />
+            ))}
+          </div>
 
-        <div className="dashboard-rail-nav-group">
-          <p className="dashboard-rail-group-label" style={uiFont}>
-            Account
-          </p>
-          {ACCOUNT_NAV.map((item) => (
-            <NavLink key={item.href} item={item} pathname={pathname} />
-          ))}
-        </div>
-      </nav>
+          <div className="dashboard-rail-nav-group">
+            <p className="dashboard-rail-group-label" style={uiFont}>
+              Account
+            </p>
+            {ACCOUNT_NAV.map((item) => (
+              <NavLink key={item.href} item={item} pathname={pathname} />
+            ))}
+          </div>
+        </nav>
 
-      <div className="dashboard-rail-footer">
-        <Link
-          href="/dashboard/buy"
-          className="dashboard-rail-credit-chip"
-          style={uiFont}
-        >
-          {creditChipLabel}
-        </Link>
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="dashboard-rail-sign-out"
+        <div className="dashboard-rail-footer">
+          <Link
+            href="/dashboard/buy"
+            className="dashboard-rail-credit-chip"
             style={uiFont}
           >
-            Sign out
-          </button>
-        </form>
+            {creditChipLabel}
+          </Link>
+          <form action={signOut} className="dashboard-rail-sign-out-form">
+            <button
+              type="submit"
+              className="dashboard-rail-sign-out"
+              style={uiFont}
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
     </aside>
   );
