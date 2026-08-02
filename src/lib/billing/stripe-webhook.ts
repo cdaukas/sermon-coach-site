@@ -60,12 +60,157 @@ async function activateProfile(
   }
 }
 
+async function deactivateProfile(
+  supabase: SupabaseClient,
+  profileId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      subscription_status: "inactive",
+    })
+    .eq("id", profileId);
+
+  if (error) {
+    throw new Error(
+      `Failed to deactivate profile ${profileId}: ${error.message}`,
+    );
+  }
+}
+
+type ProfileMatch =
+  | { matched: true; profileId: string }
+  | { matched: false; reason: string };
+
+/**
+ * Shared profile match order for subscription lifecycle writes:
+ * metadata.supabase_user_id → stripe_customer_id → legacy email.
+ */
+async function resolveProfileForSubscriptionCustomer(
+  deps: StripeWebhookDeps,
+  params: {
+    customerId: string;
+    metadataUserId?: string | null;
+    subscriptionId?: string | null;
+    /** Prefer expanded customer email when the event already carries it. */
+    resolveEmail?: () => Promise<string | null>;
+  },
+): Promise<ProfileMatch> {
+  const { customerId, metadataUserId, subscriptionId } = params;
+
+  if (metadataUserId) {
+    const { data: profileByMetadata, error: metadataLookupError } =
+      await deps.supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", metadataUserId)
+        .maybeSingle();
+
+    if (metadataLookupError) {
+      throw new Error(
+        `Profile lookup by subscription metadata failed: ${metadataLookupError.message}`,
+      );
+    }
+
+    if (profileByMetadata) {
+      return { matched: true, profileId: profileByMetadata.id };
+    }
+
+    deps.logError(
+      "Stripe subscription: supabase_user_id metadata did not match a profile",
+      {
+        metadataUserId,
+        customerId,
+        subscriptionId: subscriptionId ?? undefined,
+      },
+    );
+  }
+
+  const { data: byCustomerId, error: customerLookupError } = await deps.supabase
+    .from("profiles")
+    .select("id")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+
+  if (customerLookupError) {
+    throw new Error(
+      `Profile lookup by stripe_customer_id failed: ${customerLookupError.message}`,
+    );
+  }
+
+  if (byCustomerId) {
+    return { matched: true, profileId: byCustomerId.id };
+  }
+
+  const email = params.resolveEmail
+    ? await params.resolveEmail()
+    : await (async () => {
+        const retrieved = await deps.stripe.customers.retrieve(customerId);
+        if (retrieved.deleted) return null;
+        return retrieved.email ?? null;
+      })();
+
+  if (!email) {
+    return {
+      matched: false,
+      reason: "could not resolve customer email for profile match",
+    };
+  }
+
+  deps.logError(
+    "Subscription: using legacy email match fallback (retire when unused)",
+    {
+      email,
+      customerId,
+      subscriptionId: subscriptionId ?? undefined,
+    },
+  );
+
+  const { data: profileId, error: emailLookupError } = await deps.supabase.rpc(
+    "find_profile_id_by_email",
+    { p_email: email },
+  );
+
+  if (emailLookupError) {
+    throw new Error(`Profile lookup by email failed: ${emailLookupError.message}`);
+  }
+
+  if (!profileId) {
+    return {
+      matched: false,
+      reason: "no Supabase profile matched metadata, customer id, or email",
+    };
+  }
+
+  return { matched: true, profileId };
+}
+
 function getSessionCustomerId(session: Stripe.Checkout.Session): string | null {
   const customer = session.customer;
   if (typeof customer === "string") {
     return customer;
   }
   return customer?.id ?? null;
+}
+
+function getInvoiceCustomerId(invoice: Stripe.Invoice): string | null {
+  const customer = invoice.customer;
+  if (typeof customer === "string") {
+    return customer;
+  }
+  return customer?.id ?? null;
+}
+
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  // Stripe API 2025+ nests subscription under parent.subscription_details.
+  const subscription = invoice.parent?.subscription_details?.subscription;
+  if (!subscription) {
+    return null;
+  }
+  if (typeof subscription === "string") {
+    return subscription;
+  }
+  return subscription.id ?? null;
 }
 
 /** Activates subscription from Checkout Session via client_reference_id (Supabase user id). */
@@ -118,14 +263,15 @@ export async function handleSubscriptionCheckoutCompleted(
   await activateProfile(deps.supabase, profile.id, customerId);
 }
 
+/**
+ * Maps Stripe subscription status at the boundary:
+ * active/trialing → activateProfile ("active");
+ * every other status → deactivateProfile ("inactive").
+ */
 export async function handleSubscriptionActivationEvent(
   subscription: Stripe.Subscription,
   deps: StripeWebhookDeps,
 ): Promise<{ matched: boolean }> {
-  if (!isActivatingSubscriptionStatus(subscription.status)) {
-    return { matched: true };
-  }
-
   const customerId = getCustomerId(subscription);
   if (!customerId) {
     deps.logError("Stripe subscription missing customer ID", {
@@ -134,90 +280,126 @@ export async function handleSubscriptionActivationEvent(
     return { matched: false };
   }
 
-  const metadataUserId = subscription.metadata?.supabase_user_id;
-  if (metadataUserId) {
-    const { data: profileByMetadata, error: metadataLookupError } =
-      await deps.supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", metadataUserId)
-        .maybeSingle();
+  const match = await resolveProfileForSubscriptionCustomer(deps, {
+    customerId,
+    metadataUserId: subscription.metadata?.supabase_user_id,
+    subscriptionId: subscription.id,
+    resolveEmail: () => resolveCustomerEmail(deps.stripe, subscription),
+  });
 
-    if (metadataLookupError) {
-      throw new Error(
-        `Profile lookup by subscription metadata failed: ${metadataLookupError.message}`,
-      );
-    }
+  if (!match.matched) {
+    deps.logError("No Supabase profile match for Stripe subscription", {
+      customerId,
+      subscriptionId: subscription.id,
+      reason: match.reason,
+      stripeStatus: subscription.status,
+    });
+    return { matched: false };
+  }
 
-    if (profileByMetadata) {
-      await activateProfile(deps.supabase, profileByMetadata.id, customerId);
-      return { matched: true };
-    }
+  if (isActivatingSubscriptionStatus(subscription.status)) {
+    await activateProfile(deps.supabase, match.profileId, customerId);
+  } else {
+    await deactivateProfile(deps.supabase, match.profileId);
+  }
 
+  return { matched: true };
+}
+
+/** customer.subscription.deleted → inactive. */
+export async function handleSubscriptionDeletedEvent(
+  subscription: Stripe.Subscription,
+  deps: StripeWebhookDeps,
+): Promise<{ matched: boolean }> {
+  const customerId = getCustomerId(subscription);
+  if (!customerId) {
+    deps.logError("Stripe subscription.deleted missing customer ID", {
+      subscriptionId: subscription.id,
+    });
+    return { matched: false };
+  }
+
+  const match = await resolveProfileForSubscriptionCustomer(deps, {
+    customerId,
+    metadataUserId: subscription.metadata?.supabase_user_id,
+    subscriptionId: subscription.id,
+    resolveEmail: () => resolveCustomerEmail(deps.stripe, subscription),
+  });
+
+  if (!match.matched) {
+    deps.logError("subscription.deleted: no profile match", {
+      customerId,
+      subscriptionId: subscription.id,
+      reason: match.reason,
+    });
+    return { matched: false };
+  }
+
+  await deactivateProfile(deps.supabase, match.profileId);
+  return { matched: true };
+}
+
+/**
+ * invoice.payment_failed → inactive when a profile can be resolved with the
+ * same match order. Skips (and logs why) when it cannot — subscription.updated
+ * will still catch the state change.
+ */
+export async function handleInvoicePaymentFailed(
+  invoice: Stripe.Invoice,
+  deps: StripeWebhookDeps,
+): Promise<{ matched: boolean; skipped?: string }> {
+  const subscriptionId = getInvoiceSubscriptionId(invoice);
+  if (!subscriptionId) {
+    const skipped =
+      "invoice.payment_failed has no subscription id (not a subscription invoice); skipping — subscription.updated will catch state changes";
+    deps.logError(skipped, { invoiceId: invoice.id });
+    return { matched: false, skipped };
+  }
+
+  const customerId = getInvoiceCustomerId(invoice);
+  if (!customerId) {
+    const skipped =
+      "invoice.payment_failed missing customer id; skipping — subscription.updated will catch state changes";
+    deps.logError(skipped, {
+      invoiceId: invoice.id,
+      subscriptionId,
+    });
+    return { matched: false, skipped };
+  }
+
+  let metadataUserId: string | null = null;
+  try {
+    const subscription =
+      await deps.stripe.subscriptions.retrieve(subscriptionId);
+    metadataUserId = subscription.metadata?.supabase_user_id ?? null;
+  } catch (err) {
     deps.logError(
-      "Stripe subscription: supabase_user_id metadata did not match a profile",
+      "invoice.payment_failed: could not retrieve subscription for metadata match; continuing with customer id / email",
       {
-        metadataUserId,
-        customerId,
-        subscriptionId: subscription.id,
+        invoiceId: invoice.id,
+        subscriptionId,
+        error: err instanceof Error ? err.message : String(err),
       },
     );
   }
 
-  const { data: byCustomerId, error: customerLookupError } = await deps.supabase
-    .from("profiles")
-    .select("id")
-    .eq("stripe_customer_id", customerId)
-    .maybeSingle();
+  const match = await resolveProfileForSubscriptionCustomer(deps, {
+    customerId,
+    metadataUserId,
+    subscriptionId,
+  });
 
-  if (customerLookupError) {
-    throw new Error(
-      `Profile lookup by stripe_customer_id failed: ${customerLookupError.message}`,
-    );
-  }
-
-  if (byCustomerId) {
-    await activateProfile(deps.supabase, byCustomerId.id, customerId);
-    return { matched: true };
-  }
-
-  const email = await resolveCustomerEmail(deps.stripe, subscription);
-  if (!email) {
-    deps.logError("Stripe subscription: could not resolve customer email", {
+  if (!match.matched) {
+    const skipped = `invoice.payment_failed: ${match.reason}; skipping — subscription.updated will catch state changes`;
+    deps.logError(skipped, {
+      invoiceId: invoice.id,
       customerId,
-      subscriptionId: subscription.id,
+      subscriptionId,
     });
-    return { matched: false };
+    return { matched: false, skipped };
   }
 
-  deps.logError(
-    "Subscription: using legacy email match fallback (retire when unused)",
-    {
-      email,
-      customerId,
-      subscriptionId: subscription.id,
-    },
-  );
-
-  const { data: profileId, error: emailLookupError } = await deps.supabase.rpc(
-    "find_profile_id_by_email",
-    { p_email: email },
-  );
-
-  if (emailLookupError) {
-    throw new Error(`Profile lookup by email failed: ${emailLookupError.message}`);
-  }
-
-  if (!profileId) {
-    deps.logError("No Supabase profile match for Stripe subscription", {
-      email,
-      customerId,
-      subscriptionId: subscription.id,
-    });
-    return { matched: false };
-  }
-
-  await activateProfile(deps.supabase, profileId, customerId);
+  await deactivateProfile(deps.supabase, match.profileId);
   return { matched: true };
 }
 

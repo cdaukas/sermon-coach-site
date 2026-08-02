@@ -4,13 +4,15 @@ import {
   handlePackCheckoutCompleted,
   handleSubscriptionCheckoutCompleted,
   handleSubscriptionActivationEvent,
+  handleSubscriptionDeletedEvent,
+  handleInvoicePaymentFailed,
 } from "@/lib/billing/stripe-webhook";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Redeploy trigger — pick up corrected STRIPE_SECRET_KEY.
 export const runtime = "nodejs";
 
-const SUBSCRIPTION_EVENTS = new Set([
+const SUBSCRIPTION_LIFECYCLE_EVENTS = new Set([
   "customer.subscription.created",
   "customer.subscription.updated",
 ]);
@@ -69,20 +71,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   }
 
-  if (!SUBSCRIPTION_EVENTS.has(event.type)) {
+  const isSubscriptionLifecycle =
+    SUBSCRIPTION_LIFECYCLE_EVENTS.has(event.type);
+  const isSubscriptionDeleted = event.type === "customer.subscription.deleted";
+  const isInvoicePaymentFailed = event.type === "invoice.payment_failed";
+
+  if (
+    !isSubscriptionLifecycle &&
+    !isSubscriptionDeleted &&
+    !isInvoicePaymentFailed
+  ) {
     return NextResponse.json({ received: true });
   }
 
   try {
-    const supabase = createAdminClient();
-    await handleSubscriptionActivationEvent(
-      event.data.object as Stripe.Subscription,
-      {
-        supabase,
-        stripe,
-        logError: (message, meta) => console.error(message, meta ?? {}),
-      },
-    );
+    const deps = {
+      supabase: createAdminClient(),
+      stripe,
+      logError: (message: string, meta?: Record<string, unknown>) =>
+        console.error(message, meta ?? {}),
+    };
+
+    if (isSubscriptionLifecycle) {
+      await handleSubscriptionActivationEvent(
+        event.data.object as Stripe.Subscription,
+        deps,
+      );
+    } else if (isSubscriptionDeleted) {
+      await handleSubscriptionDeletedEvent(
+        event.data.object as Stripe.Subscription,
+        deps,
+      );
+    } else if (isInvoicePaymentFailed) {
+      await handleInvoicePaymentFailed(
+        event.data.object as Stripe.Invoice,
+        deps,
+      );
+    }
   } catch (err) {
     console.error("Stripe webhook handler error:", err);
     return NextResponse.json({ error: "Handler failed" }, { status: 500 });

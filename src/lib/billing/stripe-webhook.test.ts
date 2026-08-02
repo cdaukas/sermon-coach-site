@@ -3,8 +3,10 @@ import { describe, it } from "node:test";
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  handleInvoicePaymentFailed,
   handleSubscriptionActivationEvent,
   handleSubscriptionCheckoutCompleted,
+  handleSubscriptionDeletedEvent,
   isActivatingSubscriptionStatus,
   resolveCustomerEmail,
 } from "./stripe-webhook";
@@ -77,7 +79,7 @@ function makeSupabaseMock(handlers: {
         },
       };
     },
-    rpc(fn: string, args: { p_email: string }) {
+    rpc(fn: string, _args: { p_email: string }) {
       assert.equal(fn, "find_profile_id_by_email");
       return Promise.resolve({
         data: handlers.profileIdByEmail ?? null,
@@ -149,8 +151,10 @@ describe("resolveCustomerEmail", () => {
 });
 
 describe("handleSubscriptionActivationEvent", () => {
-  it("ignores non-activating subscription statuses", async () => {
-    const { supabase, updates } = makeSupabaseMock({});
+  it("deactivates profile when Stripe status is not active or trialing", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
     const errors: string[] = [];
 
     const result = await handleSubscriptionActivationEvent(
@@ -163,7 +167,12 @@ describe("handleSubscriptionActivationEvent", () => {
     );
 
     assert.equal(result.matched, true);
-    assert.equal(updates.length, 0);
+    assert.deepEqual(updates, [
+      {
+        id: "user-1",
+        values: { subscription_status: "inactive" },
+      },
+    ]);
     assert.equal(errors.length, 0);
   });
 
@@ -288,8 +297,101 @@ describe("handleSubscriptionActivationEvent", () => {
     assert.equal(errors.length, 2);
     assert.match(errors[0].message, /legacy email match fallback/);
     assert.match(errors[1].message, /No Supabase profile match/);
-    assert.equal(errors[1].meta?.email, "unknown@church.org");
     assert.equal(errors[1].meta?.customerId, "cus_abc");
+  });
+});
+
+describe("handleSubscriptionDeletedEvent", () => {
+  it("writes inactive for a matched profile", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
+
+    const result = await handleSubscriptionDeletedEvent(
+      makeSubscription({ status: "canceled" }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.deepEqual(updates, [
+      {
+        id: "user-1",
+        values: { subscription_status: "inactive" },
+      },
+    ]);
+  });
+});
+
+describe("handleInvoicePaymentFailed", () => {
+  it("skips when invoice has no subscription parent", async () => {
+    const { supabase, updates } = makeSupabaseMock({});
+    const errors: Array<{ message: string }> = [];
+
+    const result = await handleInvoicePaymentFailed(
+      {
+        id: "in_1",
+        object: "invoice",
+        customer: "cus_abc",
+        parent: null,
+      } as Stripe.Invoice,
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: (message) => errors.push({ message }),
+      },
+    );
+
+    assert.equal(result.matched, false);
+    assert.match(result.skipped ?? "", /no subscription id/);
+    assert.equal(updates.length, 0);
+    assert.equal(errors.length, 1);
+  });
+
+  it("deactivates profile matched by stripe_customer_id", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
+
+    const stripe = {
+      subscriptions: {
+        retrieve: async (id: string) => {
+          assert.equal(id, "sub_123");
+          return makeSubscription({ metadata: {} });
+        },
+      },
+    } as unknown as Stripe;
+
+    const result = await handleInvoicePaymentFailed(
+      {
+        id: "in_1",
+        object: "invoice",
+        customer: "cus_abc",
+        parent: {
+          type: "subscription_details",
+          subscription_details: {
+            subscription: "sub_123",
+          },
+          quote_details: null,
+        },
+      } as Stripe.Invoice,
+      {
+        supabase,
+        stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.deepEqual(updates, [
+      {
+        id: "user-1",
+        values: { subscription_status: "inactive" },
+      },
+    ]);
   });
 });
 
