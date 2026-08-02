@@ -25,6 +25,7 @@ const DETAIL_SELECT = [
   "status_points",
   "status_one_person",
   "status_ending",
+  "mode",
   "created_at",
 ].join(", ");
 

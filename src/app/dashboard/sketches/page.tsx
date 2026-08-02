@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
+import { SketchList } from "@/components/dashboard/SketchList";
 import { listReadinessReadsDetailForUser } from "@/lib/sketch/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,14 +11,6 @@ export const metadata: Metadata = {
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
-
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(iso));
-}
 
 export default async function SketchesLibraryPage() {
   const supabase = await createClient();
@@ -108,60 +101,7 @@ export default async function SketchesLibraryPage() {
           </Link>
         </div>
       ) : (
-        <ul className="m-0 list-none p-0">
-          {sketches.map((sketch) => {
-            const passage =
-              sketch.primary_passage?.trim() || "Untitled passage";
-            const workingIdea = sketch.big_idea?.trim() || null;
-
-            return (
-              <li key={sketch.id} className="mb-[9px] last:mb-0">
-                <Link
-                  href={`/dashboard/sketches/${sketch.id}`}
-                  className="block no-underline transition-colors"
-                  style={{
-                    background: "#ffffff",
-                    border: "1px solid #d4cfc1",
-                    borderRadius: 4,
-                    boxShadow: "var(--sc-shadow)",
-                    padding: "15px 18px",
-                  }}
-                >
-                  <p
-                    className="m-0 font-semibold leading-tight"
-                    style={{
-                      ...serifFont,
-                      fontSize: 19,
-                      letterSpacing: "-0.01em",
-                      color: "#1a2332",
-                    }}
-                  >
-                    {passage}
-                  </p>
-                  {workingIdea ? (
-                    <p
-                      className="mt-1 mb-0 line-clamp-2"
-                      style={{
-                        ...serifFont,
-                        fontSize: 14,
-                        fontStyle: "italic",
-                        color: "#4a5568",
-                      }}
-                    >
-                      {workingIdea}
-                    </p>
-                  ) : null}
-                  <p
-                    className="mt-2 mb-0"
-                    style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
-                  >
-                    {formatDate(sketch.created_at)}
-                  </p>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <SketchList sketches={sketches} />
       )}
     </div>
   );

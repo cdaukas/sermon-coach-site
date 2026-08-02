@@ -23,6 +23,7 @@ export type ReadinessReadRow = {
   status_points: SketchStatus | null;
   status_one_person: SketchStatus | null;
   status_ending: SketchStatus | null;
+  mode: "find" | "press" | null;
   created_at: string;
 };
 
