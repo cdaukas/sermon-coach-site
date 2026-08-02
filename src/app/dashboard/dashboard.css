@@ -1,10 +1,199 @@
 /*
- * Dashboard route-group heading convention.
+ * Dashboard route-group chrome.
  * Scoped to .dashboard-shell so marketing pages and evaluation display stay untouched.
- * Page chrome (nav, labels, CTAs) keeps --font-ui via inline styles.
+ * Page chrome (nav, labels, CTAs) keeps system / --font-ui via component styles.
  */
+.dashboard-shell {
+  display: flex;
+  min-height: 100%;
+  width: 100%;
+  background: transparent;
+}
+
 .dashboard-shell h1,
 .dashboard-shell h2,
 .dashboard-shell .sc-heading {
   font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.dashboard-shell h1 {
+  font-size: 36px;
+}
+
+.dashboard-rail {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 232px;
+  min-height: 100%;
+  padding: 34px 0 28px;
+  background: transparent;
+  border-right: 1px solid #d4cfc1;
+  box-sizing: border-box;
+}
+
+.dashboard-rail-wordmark {
+  display: block;
+  padding: 0 22px 26px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1a2332;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.dashboard-rail-tm {
+  font-size: 9px;
+  line-height: 0;
+  vertical-align: super;
+}
+
+.dashboard-rail-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.dashboard-rail-nav-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-rail-group-label {
+  margin: 0;
+  padding: 20px 22px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9aa1ac;
+}
+
+.dashboard-rail-link {
+  display: block;
+  padding: 9px 22px;
+  border-left: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.dashboard-rail-link:hover {
+  color: #1a2332;
+  background: rgba(166, 124, 46, 0.045);
+}
+
+.dashboard-rail-link.is-active {
+  color: #1a2332;
+  font-weight: 600;
+  border-left-color: #a67c2e;
+  background: rgba(166, 124, 46, 0.06);
+}
+
+.dashboard-rail-footer {
+  margin-top: auto;
+  padding: 20px 22px 0;
+  border-top: 1px solid #d4cfc1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dashboard-rail-credit-chip {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid #e8dcc2;
+  border-radius: 4px;
+  background: #faf6ed;
+  color: #a67c2e;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dashboard-rail-sign-out {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #4a5568;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dashboard-rail-sign-out:hover {
+  color: #1a2332;
+  text-decoration: underline;
+}
+
+.dashboard-content {
+  flex: 1;
+  min-width: 0;
+  padding: 34px 40px 64px;
+}
+
+@media (max-width: 859px) {
+  .dashboard-shell {
+    flex-direction: column;
+  }
+
+  .dashboard-rail {
+    width: 100%;
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid #d4cfc1;
+    padding-bottom: 16px;
+  }
+
+  .dashboard-rail-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0 8px;
+  }
+
+  .dashboard-rail-nav-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .dashboard-rail-group-label {
+    padding: 12px 12px 7px 22px;
+  }
+
+  .dashboard-rail-link {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    padding: 9px 14px;
+  }
+
+  .dashboard-rail-link.is-active {
+    border-left-color: transparent;
+    border-bottom-color: #a67c2e;
+  }
+
+  .dashboard-rail-footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    margin-top: 12px;
+    padding-top: 16px;
+  }
+
+  .dashboard-content {
+    padding: 26px 22px 50px;
+  }
+
+  .dashboard-shell h1 {
+    font-size: 30px;
+  }
 }

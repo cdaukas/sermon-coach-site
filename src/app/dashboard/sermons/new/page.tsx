@@ -7,7 +7,7 @@ import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
 
 export const metadata: Metadata = {
-  title: "New Sermon",
+  title: "New sermon",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
