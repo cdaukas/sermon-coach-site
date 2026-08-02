@@ -70,6 +70,27 @@ export function CreditStrip({ model }: CreditStripProps) {
     );
   }
 
+  if (model.freeRemaining > 0) {
+    parts.push(
+      <span key="free">
+        <span
+          style={{
+            ...serifFont,
+            fontSize: 17,
+            fontWeight: 600,
+            color: "#1a2332",
+          }}
+        >
+          {model.freeRemaining}
+        </span>
+        <span style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}>
+          {" "}
+          free {model.freeRemaining === 1 ? "credit" : "credits"}
+        </span>
+      </span>,
+    );
+  }
+
   if (parts.length === 0) {
     return null;
   }

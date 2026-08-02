@@ -34,6 +34,7 @@ export function formatCreditChipLabel(
 export type CreditStripModel = {
   subscription: { used: number; limit: number; resetLabel: string } | null;
   packRemaining: number;
+  freeRemaining: number;
 };
 
 function nextResetLabel(periodStart: string): string {
@@ -66,10 +67,19 @@ export function buildCreditStripModel(
       : null;
 
   const packRemaining = entitlement.packRemaining;
+  const freeRemaining = entitlement.freeRemaining;
 
-  if (!subscription && packRemaining <= 0) {
+  if (!subscription && packRemaining <= 0 && freeRemaining <= 0) {
     return null;
   }
 
-  return { subscription, packRemaining };
+  return { subscription, packRemaining, freeRemaining };
+}
+
+/** Visible strip total — must match the rail chip. */
+export function creditStripTotal(model: CreditStripModel): number {
+  const subscriptionLeft = model.subscription
+    ? Math.max(0, model.subscription.limit - model.subscription.used)
+    : 0;
+  return subscriptionLeft + model.packRemaining + model.freeRemaining;
 }

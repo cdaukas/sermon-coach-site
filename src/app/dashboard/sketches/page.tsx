@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { listReadinessReadsDetailForUser } from "@/lib/sketch/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,8 +31,11 @@ export default async function SketchesLibraryPage() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <div
+        className="mb-6 flex flex-wrap items-end justify-between gap-4"
+        style={{ borderBottom: "1px solid #d4cfc1", paddingBottom: 18 }}
+      >
+        <div className="min-w-0">
           <p
             className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
             style={{ ...uiFont, color: "var(--sc-accent)" }}
@@ -45,18 +49,21 @@ export default async function SketchesLibraryPage() {
             Your sketches
           </h1>
         </div>
-        <Link
-          href="/dashboard/sketch"
-          className="inline-block rounded border px-5 py-2.5 text-[13px] font-semibold tracking-wide no-underline"
-          style={{
-            ...uiFont,
-            background: "var(--sc-ink)",
-            color: "var(--sc-bg)",
-            borderColor: "var(--sc-ink)",
-          }}
-        >
-          Run The Sketch
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <NewEvaluationButton />
+          <Link
+            href="/dashboard/sketch"
+            className="inline-block rounded border px-5 py-2.5 text-[13px] font-semibold tracking-wide no-underline"
+            style={{
+              ...uiFont,
+              background: "var(--sc-ink)",
+              color: "var(--sc-bg)",
+              borderColor: "var(--sc-ink)",
+            }}
+          >
+            Run The Sketch
+          </Link>
+        </div>
       </div>
 
       {sketches.length === 0 ? (

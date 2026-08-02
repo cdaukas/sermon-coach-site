@@ -295,7 +295,7 @@ export function SermonForm({
     ? "Evaluating…"
     : saving
       ? "Saving…"
-      : "Save and run evaluation";
+      : "Run The Evaluation";
 
   return (
     <AuthForm onSubmit={handleSubmit}>

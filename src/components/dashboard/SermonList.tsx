@@ -40,17 +40,20 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
     : "Not run";
 
   return (
-    <li className="mb-[9px] last:mb-0">
+    <li style={{ margin: "0 0 9px", listStyle: "none" }}>
       <Link
         href={href}
-        className="flex items-center justify-between gap-4 no-underline transition-colors"
+        className="no-underline transition-colors"
         style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
           background: "#ffffff",
           border: "1px solid #d4cfc1",
           borderRadius: 4,
           boxShadow: "var(--sc-shadow)",
           padding: "15px 18px",
-          minHeight: 72,
           boxSizing: "border-box",
         }}
         onMouseEnter={(event) => {
@@ -60,12 +63,15 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
           event.currentTarget.style.borderColor = "#d4cfc1";
         }}
       >
-        <div className="min-w-0">
+        <div style={{ minWidth: 0, flex: "1 1 auto" }}>
           <p
-            className="truncate font-semibold leading-tight"
+            className="truncate"
             style={{
               ...serifFont,
+              margin: 0,
               fontSize: 19,
+              fontWeight: 600,
+              lineHeight: 1.2,
               letterSpacing: "-0.01em",
               color: "#1a2332",
             }}
@@ -73,14 +79,30 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
             {sermon.title}
           </p>
           <p
-            className="mt-1 truncate"
-            style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
+            className="truncate"
+            style={{
+              ...uiFont,
+              margin: "3px 0 0",
+              fontSize: 13,
+              fontWeight: 400,
+              lineHeight: 1.3,
+              color: "#4a5568",
+            }}
           >
             {meta}
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: 10,
+            flexShrink: 0,
+            marginLeft: "auto",
+          }}
+        >
           <span
             style={{
               ...uiFont,
@@ -88,6 +110,7 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
               fontWeight: 700,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
+              lineHeight: 1.2,
               borderRadius: 4,
               padding: "4px 9px",
               background: evaluated ? "#faf6ed" : "transparent",
@@ -98,7 +121,15 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
             {chipLabel}
           </span>
           {sermon.completeEvaluationCount > 1 ? (
-            <span style={{ ...uiFont, fontSize: 12, color: "#9aa1ac" }}>
+            <span
+              style={{
+                ...uiFont,
+                fontSize: 12,
+                lineHeight: 1.2,
+                color: "#9aa1ac",
+                whiteSpace: "nowrap",
+              }}
+            >
               {sermon.completeEvaluationCount} runs
             </span>
           ) : null}
@@ -116,7 +147,7 @@ export function SermonList({ sermons, header }: SermonListProps) {
   return (
     <>
       {header}
-      <ul className="m-0 list-none p-0">
+      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
         {sermons.map((sermon) => (
           <SermonRow key={sermon.id} sermon={sermon} />
         ))}

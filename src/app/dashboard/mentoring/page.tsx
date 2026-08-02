@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
 import { MentoredSubmissionsList } from "@/components/mentor/MentoredSubmissionsList";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
@@ -45,20 +46,26 @@ export default async function MentoringPage() {
         boxShadow: "var(--sc-shadow-lift)",
       }}
     >
-      <div className="mb-8">
-        <h1
-          className="text-[32px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          Invite someone you are developing
-        </h1>
-        <p
-          className="mt-3 max-w-2xl text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          They preach. You read. The seat is yours, not theirs, and you can end
-          it whenever the season is over.
-        </p>
+      <div
+        className="mb-8 flex flex-wrap items-end justify-between gap-4"
+        style={{ borderBottom: "1px solid #d4cfc1", paddingBottom: 18 }}
+      >
+        <div className="min-w-0">
+          <h1
+            className="text-[32px] font-semibold leading-tight tracking-tight"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            Invite someone you are developing
+          </h1>
+          <p
+            className="mt-3 max-w-2xl text-[15px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            They preach. You read. The seat is yours, not theirs, and you can end
+            it whenever the season is over.
+          </p>
+        </div>
+        <NewEvaluationButton />
       </div>
 
       <MentorInvitePanel initialDisplayName={initialDisplayName} />

@@ -35,7 +35,7 @@ export function NewSermonWorkspace({
           className="text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          New Sermon
+          New evaluation
         </h1>
         <p
           className="mt-3 text-base leading-relaxed"

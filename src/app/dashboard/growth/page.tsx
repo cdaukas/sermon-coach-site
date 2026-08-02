@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { GrowthReportPicker } from "@/components/dashboard/GrowthReportPicker";
 import { GrowthReportView } from "@/components/dashboard/GrowthReportView";
 import { GrowthTrendArc } from "@/components/dashboard/GrowthTrendArc";
+import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import {
   loadGrowthReportData,
   toGrowthReportPresentation,
@@ -43,18 +44,26 @@ function GrowthReportUnavailable() {
         ← Back to library
       </Link>
 
-      <p
-        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-        style={{ ...uiFont, color: "var(--sc-accent)" }}
+      <div
+        className="mb-4 flex flex-wrap items-end justify-between gap-4"
+        style={{ borderBottom: "1px solid #d4cfc1", paddingBottom: 18 }}
       >
-        Growth report
-      </p>
-      <h1
-        className="mb-4 text-[32px] font-semibold leading-tight tracking-tight"
-        style={{ ...serifFont, color: "var(--sc-ink)" }}
-      >
-        How your preaching is moving
-      </h1>
+        <div className="min-w-0">
+          <p
+            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            Growth report
+          </p>
+          <h1
+            className="mb-4 text-[32px] font-semibold leading-tight tracking-tight"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            How your preaching is moving
+          </h1>
+        </div>
+        <NewEvaluationButton />
+      </div>
       <p className="text-[15px] leading-relaxed" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
         Complete at least two sermon evaluations to compare growth across sermons.
       </p>
@@ -73,18 +82,26 @@ function GrowthReportHeadline() {
         ← Back to library
       </Link>
 
-      <p
-        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-        style={{ ...uiFont, color: "var(--sc-accent)" }}
+      <div
+        className="mb-8 flex flex-wrap items-end justify-between gap-4"
+        style={{ borderBottom: "1px solid #d4cfc1", paddingBottom: 18 }}
       >
-        Growth report
-      </p>
-      <h1
-        className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
-        style={{ ...serifFont, color: "var(--sc-ink)" }}
-      >
-        How your preaching is moving
-      </h1>
+        <div className="min-w-0">
+          <p
+            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            Growth report
+          </p>
+          <h1
+            className="text-[32px] font-semibold leading-tight tracking-tight"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            How your preaching is moving
+          </h1>
+        </div>
+        <NewEvaluationButton />
+      </div>
     </>
   );
 }

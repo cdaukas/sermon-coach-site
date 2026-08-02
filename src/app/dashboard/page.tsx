@@ -1,5 +1,6 @@
 import { CreditStrip } from "@/components/dashboard/CreditStrip";
 import { EmptyLibraryCard } from "@/components/dashboard/EmptyLibraryCard";
+import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { PurchaseArrivalBand } from "@/components/dashboard/PurchaseArrivalBand";
 import { SermonList } from "@/components/dashboard/SermonList";
 import {
@@ -55,19 +56,28 @@ export default async function DashboardPage() {
   const showPurchaseBand = !libraryEmpty && recentPackArrival != null;
 
   const pageHeader = (
-    <div className="mb-6">
-      <p
-        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-        style={{ ...uiFont, color: "var(--sc-accent)" }}
-      >
-        Dashboard
-      </p>
-      <h1
-        className="text-[32px] font-semibold leading-tight tracking-tight"
-        style={{ ...serifFont, color: "var(--sc-ink)" }}
-      >
-        Your sermons
-      </h1>
+    <div
+      className="mb-6 flex flex-wrap items-end justify-between gap-4"
+      style={{
+        borderBottom: "1px solid #d4cfc1",
+        paddingBottom: 18,
+      }}
+    >
+      <div className="min-w-0">
+        <p
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+          style={{ ...uiFont, color: "var(--sc-accent)" }}
+        >
+          Dashboard
+        </p>
+        <h1
+          className="text-[32px] font-semibold leading-tight tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          Your sermons
+        </h1>
+      </div>
+      <NewEvaluationButton />
     </div>
   );
 

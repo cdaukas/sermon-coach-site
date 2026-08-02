@@ -9,7 +9,6 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-x: clip;
 }
 
 .dashboard-shell {
@@ -18,7 +17,6 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-x: clip;
   background: transparent;
 }
 
@@ -43,13 +41,20 @@
     "nav"
     "actions";
   flex-shrink: 0;
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
   width: 232px;
   min-width: 0;
-  min-height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
   padding: 34px 0 28px;
   background: transparent;
   border-right: 1px solid #d4cfc1;
   box-sizing: border-box;
+  overflow-x: clip;
+  overflow-y: auto;
 }
 
 .dashboard-rail-wordmark {
@@ -172,15 +177,23 @@
 }
 
 @media (max-width: 859px) {
+  .dashboard-root {
+    overflow-x: clip;
+  }
+
   .dashboard-shell {
     flex-direction: column;
     overflow-x: clip;
   }
 
   .dashboard-rail {
+    position: static;
+    align-self: stretch;
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    height: auto;
+    max-height: none;
     min-height: 0;
     flex-shrink: 1;
     padding: 12px 16px 10px;
@@ -195,6 +208,7 @@
     row-gap: 8px;
     align-items: center;
     overflow-x: clip;
+    overflow-y: visible;
   }
 
   .dashboard-rail-wordmark {
