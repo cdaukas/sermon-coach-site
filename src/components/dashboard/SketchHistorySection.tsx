@@ -79,7 +79,7 @@ export function SketchHistorySection({
           read={selected.read_output}
           status={statusMapFromRow(selected)}
           onStartAnother={() => {
-            router.push("/sketch");
+            router.push("/dashboard/sketch");
           }}
         />
       </section>
@@ -102,7 +102,7 @@ export function SketchHistorySection({
         >
           No saved sketches yet.{" "}
           <Link
-            href="/sketch"
+            href="/dashboard/sketch"
             className="font-medium no-underline hover:underline"
             style={{ color: "var(--sc-accent)" }}
           >

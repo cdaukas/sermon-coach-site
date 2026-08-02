@@ -26,6 +26,15 @@ const NAV_ITEMS: NavItem[] = [
       pathname === "/dashboard" || pathname.startsWith("/dashboard/sermons"),
   },
   {
+    href: "/dashboard/sketches",
+    label: "Sketches",
+    isActive: (pathname) =>
+      pathname === "/dashboard/sketches" ||
+      pathname.startsWith("/dashboard/sketches/") ||
+      pathname === "/dashboard/sketch" ||
+      pathname.startsWith("/dashboard/sketch/"),
+  },
+  {
     href: "/dashboard/growth",
     label: "Growth",
     isActive: (pathname) => pathname.startsWith("/dashboard/growth"),

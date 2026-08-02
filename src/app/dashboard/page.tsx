@@ -1,18 +1,23 @@
-import Link from "next/link";
-import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
+import { CreditStrip } from "@/components/dashboard/CreditStrip";
+import { EmptyLibraryCard } from "@/components/dashboard/EmptyLibraryCard";
+import { PurchaseArrivalBand } from "@/components/dashboard/PurchaseArrivalBand";
 import { SermonList } from "@/components/dashboard/SermonList";
-import { SketchHistorySection } from "@/components/dashboard/SketchHistorySection";
-import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
-import { getPackCredits } from "@/lib/billing/pack-credits";
-import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
-import { listRecentCompleteEvaluations } from "@/lib/evaluation/queries";
+import {
+  buildCreditStripModel,
+} from "@/lib/billing/credit-display";
+import {
+  getMostRecentPackGrant,
+  isWithinMinutes,
+  packSourceDisplayName,
+} from "@/lib/billing/pack-credits";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
-import { listSermons } from "@/lib/sermons/queries";
-import { listReadinessReadsDetailForUser } from "@/lib/sketch/queries";
+import { listDashboardSermons } from "@/lib/sermons/queries";
 import { createClient } from "@/lib/supabase/server";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
+
+const ARRIVAL_WINDOW_MINUTES = 10;
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -20,35 +25,37 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [
-    sermons,
-    subscriptionStatus,
-    packCredits,
-    entitlement,
-    recentComplete,
-    sketchReads,
-  ] = await Promise.all([
-    listSermons(),
-    getSubscriptionStatus(),
-    getPackCredits(),
+  const [sermons, entitlement, recentGrant] = await Promise.all([
+    listDashboardSermons(),
     user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
-    listRecentCompleteEvaluations(2),
-    user ? listReadinessReadsDetailForUser(user.id) : Promise.resolve([]),
+    getMostRecentPackGrant(),
   ]);
-  const hasActiveSubscription = entitlement?.subscriptionActive === true;
-  const showStatusRow = subscriptionStatus || packCredits;
-  const growthReportHref = recentComplete.length >= 2 ? "/dashboard/growth" : null;
-  const sketchItems = sketchReads.map((row) => ({
-    id: row.id,
-    primary_passage: row.primary_passage,
-    created_at: row.created_at,
-  }));
-  const sketchesById = Object.fromEntries(
-    sketchReads.map((row) => [row.id, row]),
-  );
+
+  const stripModel = buildCreditStripModel(entitlement);
+  const libraryEmpty = sermons.length === 0;
+
+  const recentPackArrival =
+    recentGrant && isWithinMinutes(recentGrant.grantedAt, ARRIVAL_WINDOW_MINUTES)
+      ? recentGrant
+      : null;
+
+  const subscriptionArrival =
+    libraryEmpty &&
+    entitlement?.subscriptionActive === true &&
+    (entitlement.usage?.used ?? 0) === 0;
+
+  const packArrival = libraryEmpty && recentPackArrival != null;
+
+  const emptyKind = packArrival
+    ? ("pack" as const)
+    : subscriptionArrival
+      ? ("subscription" as const)
+      : ("free" as const);
+
+  const showPurchaseBand = !libraryEmpty && recentPackArrival != null;
 
   const pageHeader = (
-    <div className="mt-12 mb-6">
+    <div className="mb-6">
       <p
         className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
@@ -64,79 +71,37 @@ export default async function DashboardPage() {
     </div>
   );
 
-  const growthReportLink = growthReportHref ? (
-    <Link
-      href={growthReportHref}
-      className="inline-block shrink-0 rounded border px-5 py-3 text-[13px] font-semibold tracking-wide no-underline transition-colors hover:border-[var(--sc-accent)]"
-      style={{
-        ...uiFont,
-        background: "var(--sc-bg)",
-        borderColor: "var(--sc-rule)",
-        color: "var(--sc-ink)",
-      }}
-    >
-      View growth report →
-    </Link>
-  ) : null;
-
   return (
-    <main
-      className="rounded px-8 py-10"
-      style={{
-        background: "var(--sc-panel)",
-        border: "1px solid var(--sc-rule)",
-        boxShadow: "var(--sc-shadow-lift)",
-      }}
-    >
-      {showStatusRow ? (
-        <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">
-          {subscriptionStatus ? (
-            <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
-              <SubscriptionStatusCard status={subscriptionStatus} />
-            </div>
-          ) : null}
+    <div>
+      {pageHeader}
 
-          {packCredits ? (
-            <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
-              <PackCreditsCard
-                totalRemaining={packCredits.totalRemaining}
-                soonestExpiry={packCredits.soonestExpiry}
-                hasActiveSubscription={hasActiveSubscription}
-              />
-            </div>
-          ) : null}
+      {stripModel ? <CreditStrip model={stripModel} /> : null}
 
-          <div className="flex min-w-0 flex-1 flex-col justify-center">
-            <Link
-              href="/dashboard/buy"
-              className="inline-block text-[13px] font-medium no-underline hover:underline"
-              style={{ ...uiFont, color: "var(--sc-accent)" }}
-            >
-              {hasActiveSubscription
-                ? "Need more credits? Visit Buy →"
-                : "Subscribe or buy a pack →"}
-            </Link>
-          </div>
-        </div>
+      {showPurchaseBand && recentPackArrival ? (
+        <PurchaseArrivalBand
+          packName={packSourceDisplayName(recentPackArrival.source)}
+          creditCount={recentPackArrival.quantityTotal}
+          grantKey={`${recentPackArrival.source}:${recentPackArrival.grantedAt}`}
+        />
+      ) : null}
+
+      {libraryEmpty ? (
+        <EmptyLibraryCard
+          kind={emptyKind}
+          packName={
+            packArrival && recentPackArrival
+              ? packSourceDisplayName(recentPackArrival.source)
+              : undefined
+          }
+          packCredits={
+            packArrival && recentPackArrival
+              ? recentPackArrival.quantityTotal
+              : undefined
+          }
+        />
       ) : (
-        <p className="mb-8">
-          <Link
-            href="/dashboard/buy"
-            className="text-[13px] font-medium no-underline hover:underline"
-            style={{ ...uiFont, color: "var(--sc-accent)" }}
-          >
-            Subscribe or buy a pack →
-          </Link>
-        </p>
+        <SermonList sermons={sermons} />
       )}
-
-      <SermonList
-        sermons={sermons}
-        growthReportLink={growthReportLink}
-        header={pageHeader}
-      />
-
-      <SketchHistorySection items={sketchItems} readsById={sketchesById} />
-    </main>
+    </div>
   );
 }

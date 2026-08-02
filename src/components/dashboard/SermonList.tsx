@@ -1,214 +1,126 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
-import type { SermonListItem } from "@/lib/sermons/types";
+import type { ReactNode } from "react";
+import { parseEvaluationCardLabels } from "@/lib/evaluation/display-score";
+import type { DashboardSermonRow } from "@/lib/sermons/types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-    new Date(iso),
-  );
-}
-
-function getMonthKey(iso: string): string {
-  const date = new Date(iso);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
-}
-
-function formatMonthHeader(monthKey: string): string {
-  const [year, month] = monthKey.split("-").map(Number);
-  const date = new Date(year, month - 1, 1);
+function formatSavedDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    year: "numeric",
-  }).format(date);
+    month: "short",
+    day: "numeric",
+  }).format(new Date(iso));
 }
 
-function groupSermonsByMonth(
-  sermons: SermonListItem[],
-): { monthKey: string; sermons: SermonListItem[] }[] {
-  const groups = new Map<string, SermonListItem[]>();
-
-  for (const sermon of sermons) {
-    const monthKey = getMonthKey(sermon.created_at);
-    const bucket = groups.get(monthKey) ?? [];
-    bucket.push(sermon);
-    groups.set(monthKey, bucket);
-  }
-
-  return [...groups.entries()]
-    .sort(([a], [b]) => b.localeCompare(a))
-    .map(([monthKey, groupSermons]) => ({
-      monthKey,
-      sermons: groupSermons.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      ),
-    }));
+function bandLabel(scoreBand: string | null): string {
+  return parseEvaluationCardLabels(scoreBand, null).bandLabel;
 }
 
 type SermonListProps = {
-  sermons: SermonListItem[];
-  growthReportLink?: ReactNode;
+  sermons: DashboardSermonRow[];
   header?: ReactNode;
 };
 
-function SermonCard({ sermon }: { sermon: SermonListItem }) {
+function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
+  const href = sermon.latestEvaluation
+    ? `/dashboard/sermons/${sermon.id}/evaluations/${sermon.latestEvaluation.id}`
+    : `/dashboard/sermons/${sermon.id}`;
+
+  const passage = sermon.primary_passage?.trim() || null;
+  const meta = passage
+    ? `${passage} · Saved ${formatSavedDate(sermon.created_at)}`
+    : `Saved ${formatSavedDate(sermon.created_at)}`;
+
+  const evaluated = sermon.latestEvaluation != null;
+  const chipLabel = evaluated
+    ? bandLabel(sermon.latestEvaluation!.score_band)
+    : "Not run";
+
   return (
-    <li>
+    <li className="mb-[9px] last:mb-0">
       <Link
-        href={`/dashboard/sermons/${sermon.id}`}
-        className="block rounded border px-7 py-6 no-underline shadow-[var(--sc-shadow)] transition-all duration-[0.18s] ease-in-out hover:shadow-[var(--sc-shadow-lift)]"
+        href={href}
+        className="flex items-center justify-between gap-4 no-underline transition-colors"
         style={{
-          background: "var(--sc-panel)",
-          borderColor: "var(--sc-rule)",
+          background: "#ffffff",
+          border: "1px solid #d4cfc1",
+          borderRadius: 4,
+          boxShadow: "var(--sc-shadow)",
+          padding: "15px 18px",
+          minHeight: 72,
+          boxSizing: "border-box",
+        }}
+        onMouseEnter={(event) => {
+          event.currentTarget.style.borderColor = "#c9a55c";
+        }}
+        onMouseLeave={(event) => {
+          event.currentTarget.style.borderColor = "#d4cfc1";
         }}
       >
-        <p
-          className="mb-3 text-[22px] font-semibold leading-[1.2] tracking-[-0.01em]"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          {sermon.title}
-        </p>
-        <p
-          className="text-[13px] leading-normal"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-        >
-          Saved {formatDate(sermon.created_at)}
-        </p>
+        <div className="min-w-0">
+          <p
+            className="truncate font-semibold leading-tight"
+            style={{
+              ...serifFont,
+              fontSize: 19,
+              letterSpacing: "-0.01em",
+              color: "#1a2332",
+            }}
+          >
+            {sermon.title}
+          </p>
+          <p
+            className="mt-1 truncate"
+            style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
+          >
+            {meta}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            style={{
+              ...uiFont,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              borderRadius: 4,
+              padding: "4px 9px",
+              background: evaluated ? "#faf6ed" : "transparent",
+              color: evaluated ? "#a67c2e" : "#4a5568",
+              border: evaluated ? "1px solid #e8dcc2" : "1px solid #d4cfc1",
+            }}
+          >
+            {chipLabel}
+          </span>
+          {sermon.completeEvaluationCount > 1 ? (
+            <span style={{ ...uiFont, fontSize: 12, color: "#9aa1ac" }}>
+              {sermon.completeEvaluationCount} runs
+            </span>
+          ) : null}
+        </div>
       </Link>
     </li>
   );
 }
 
-function SermonSearchInput({
-  query,
-  onQueryChange,
-}: {
-  query: string;
-  onQueryChange: (value: string) => void;
-}) {
-  return (
-    <input
-      type="search"
-      value={query}
-      onChange={(event) => onQueryChange(event.target.value)}
-      placeholder="Search your sermons"
-      aria-label="Search your sermons"
-      className="w-full min-w-0 rounded border px-4 py-2.5 text-[15px] outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
-      style={{
-        ...uiFont,
-        background: "var(--sc-bg)",
-        borderColor: "var(--sc-rule)",
-        color: "var(--sc-ink)",
-      }}
-    />
-  );
-}
-
-function DashboardToolbar({
-  growthReportLink,
-  searchInput,
-}: {
-  growthReportLink?: ReactNode;
-  searchInput?: ReactNode;
-}) {
-  if (!growthReportLink && !searchInput) {
-    return null;
-  }
-
-  return (
-    <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-      {growthReportLink}
-      {searchInput ? <div className="min-w-0 flex-1">{searchInput}</div> : null}
-    </div>
-  );
-}
-
-export function SermonList({ sermons, growthReportLink, header }: SermonListProps) {
-  const [query, setQuery] = useState("");
-
+export function SermonList({ sermons, header }: SermonListProps) {
   if (sermons.length === 0) {
-    return (
-      <>
-        {header}
-        <div>
-          <DashboardToolbar growthReportLink={growthReportLink} />
-          <div className="text-center">
-            <p
-              className="mb-6 text-lg leading-relaxed"
-              style={{ ...serifFont, color: "var(--sc-ink-soft)", fontStyle: "italic" }}
-            >
-              No sermons yet. Paste a manuscript to get started.
-            </p>
-            <Link
-              href="/dashboard/sermons/new"
-              className="inline-block rounded border px-7 py-3.5 text-sm font-semibold tracking-wide no-underline transition-all"
-              style={{
-                ...uiFont,
-                background: "var(--sc-ink)",
-                color: "var(--sc-bg)",
-                borderColor: "var(--sc-ink)",
-              }}
-            >
-              Submit your first sermon
-            </Link>
-          </div>
-        </div>
-      </>
-    );
+    return header ? <>{header}</> : null;
   }
-
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredSermons =
-    normalizedQuery === ""
-      ? sermons
-      : sermons.filter((sermon) =>
-          sermon.title.toLowerCase().includes(normalizedQuery),
-        );
-  const groupedSermons = groupSermonsByMonth(filteredSermons);
 
   return (
     <>
       {header}
-      <div>
-        <DashboardToolbar
-          growthReportLink={growthReportLink}
-          searchInput={
-            <SermonSearchInput query={query} onQueryChange={setQuery} />
-          }
-        />
-        <div>
-          {filteredSermons.length === 0 ? (
-            <p className="text-[13px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-              No sermons match that search.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-8">
-              {groupedSermons.map(({ monthKey, sermons: monthSermons }) => (
-                <section key={monthKey}>
-                  <p
-                    className="mb-2 text-[11px] font-semibold tracking-[0.16em]"
-                    style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-                  >
-                    {formatMonthHeader(monthKey)}
-                  </p>
-                  <ul className="flex flex-col gap-4">
-                    {monthSermons.map((sermon) => (
-                      <SermonCard key={sermon.id} sermon={sermon} />
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <ul className="m-0 list-none p-0">
+        {sermons.map((sermon) => (
+          <SermonRow key={sermon.id} sermon={sermon} />
+        ))}
+      </ul>
     </>
   );
 }

@@ -10,8 +10,9 @@ import {
 import { EvaluationPdfCapture } from "@/components/evaluation/EvaluationPdfCapture";
 import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
 import { IncompleteEvaluationPoller } from "@/components/evaluation/IncompleteEvaluationPoller";
+import { EarlierEvaluations } from "@/components/evaluation/EarlierEvaluations";
 import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
-import { getEvaluation } from "@/lib/evaluation/queries";
+import { getEvaluation, listEvaluationsForSermon } from "@/lib/evaluation/queries";
 import "@/app/evaluation-pdf-capture.css";
 import "@/app/evaluation-print.css";
 
@@ -60,6 +61,11 @@ export default async function EvaluationPage({
     resolvedVia === "owner"
       ? `/dashboard/sermons/${sermonId}`
       : "/dashboard/mentoring";
+
+  const siblingEvaluations =
+    resolvedVia === "owner" && !pdfCapture
+      ? await listEvaluationsForSermon(sermonId)
+      : [];
 
   const debriefReady =
     evaluation.report_mode === "debrief" &&
@@ -165,6 +171,16 @@ export default async function EvaluationPage({
           howItPreaches={evaluation.how_it_preaches}
         />
       )}
+
+      {!pdfCapture &&
+      resolvedVia === "owner" &&
+      evaluation.report_mode !== "debrief" ? (
+        <EarlierEvaluations
+          sermonId={sermonId}
+          currentEvaluationId={evaluationId}
+          evaluations={siblingEvaluations}
+        />
+      ) : null}
 
       {!pdfCapture ? (
         <footer
