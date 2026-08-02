@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LastActiveTracker } from "@/components/auth/LastActiveTracker";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { createClient } from "@/lib/supabase/server";
 import "./dashboard.css";
 
@@ -41,7 +40,7 @@ export default async function DashboardLayout({
       style={{ background: "var(--sc-bg)" }}
     >
       <LastActiveTracker />
-      <DashboardShell>{children}</DashboardShell>
+      {children}
     </div>
   );
 }

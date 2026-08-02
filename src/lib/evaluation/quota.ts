@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -450,37 +451,44 @@ export async function recordEvaluationComplete(
   }
 }
 
-export async function getEvaluationEntitlement(
-  userId: string,
-): Promise<EvaluationEntitlement | null> {
-  const loaded = await loadEvaluationBillingContext(userId);
-  if (!loaded.ok) {
-    return null;
-  }
+/**
+ * Per-request memo. DashboardShell (template) and page components both call
+ * this; cache() keeps them on one entitlement fetch so the rail chip and page
+ * strip cannot diverge within the same render.
+ */
+export const getEvaluationEntitlement = cache(
+  async function getEvaluationEntitlement(
+    userId: string,
+  ): Promise<EvaluationEntitlement | null> {
+    const loaded = await loadEvaluationBillingContext(userId);
+    if (!loaded.ok) {
+      return null;
+    }
 
-  const { context } = loaded;
-  const { profile, subscriptionActive, freeRemaining, packRemaining, usage } =
-    context;
+    const { context } = loaded;
+    const { profile, subscriptionActive, freeRemaining, packRemaining, usage } =
+      context;
 
-  const cooldownBlock = checkCooldown(profile.last_evaluation_at);
-  const resolved = resolveEvaluationCredit(profile, packRemaining);
-  const blockedReason = deriveBlockedReason(
-    cooldownBlock,
-    resolved,
-    subscriptionActive,
-    usage,
-  );
+    const cooldownBlock = checkCooldown(profile.last_evaluation_at);
+    const resolved = resolveEvaluationCredit(profile, packRemaining);
+    const blockedReason = deriveBlockedReason(
+      cooldownBlock,
+      resolved,
+      subscriptionActive,
+      usage,
+    );
 
-  return {
-    freeRemaining,
-    packRemaining,
-    subscriptionActive,
-    usage,
-    canEvaluate: blockedReason === "none",
-    creditSource: resolved.canEvaluate ? resolved.creditSource : null,
-    blockedReason,
-  };
-}
+    return {
+      freeRemaining,
+      packRemaining,
+      subscriptionActive,
+      usage,
+      canEvaluate: blockedReason === "none",
+      creditSource: resolved.canEvaluate ? resolved.creditSource : null,
+      blockedReason,
+    };
+  },
+);
 
 /** @deprecated Use getEvaluationEntitlement */
 export async function getEvaluationUsage(
