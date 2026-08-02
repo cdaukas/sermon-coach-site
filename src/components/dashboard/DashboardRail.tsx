@@ -51,72 +51,63 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
       className={`dashboard-rail-link${active ? " is-active" : ""}`}
       style={uiFont}
       aria-current={active ? "page" : undefined}
-      aria-label={item.shortLabel ? item.label : undefined}
+      aria-label={item.label}
     >
       <span className="dashboard-rail-label-full">{item.label}</span>
-      {item.shortLabel ? (
-        <span className="dashboard-rail-label-short">{item.shortLabel}</span>
-      ) : null}
+      <span className="dashboard-rail-label-short">
+        {item.shortLabel ?? item.label}
+      </span>
     </Link>
   );
 }
 
 export function DashboardRail({ creditChipLabel }: DashboardRailProps) {
   const pathname = usePathname();
+  const primaryItems = NAV_ITEMS.filter((item) => item.href !== "/dashboard/buy");
+  const accountItems = NAV_ITEMS.filter((item) => item.href === "/dashboard/buy");
 
   return (
     <aside className="dashboard-rail" aria-label="Dashboard">
-      <div className="dashboard-rail-brand-row">
-        <Link
-          href="/dashboard"
-          className="dashboard-rail-wordmark"
-          style={serifFont}
-        >
-          The Sermon{" "}
-          <span style={{ color: "#a67c2e" }}>Coach</span>
-          <sup className="dashboard-rail-tm">™</sup>
-        </Link>
-
-        <div className="dashboard-rail-actions">
-          <Link
-            href="/dashboard/buy"
-            className="dashboard-rail-credit-chip"
-            style={uiFont}
-          >
-            {creditChipLabel}
-          </Link>
-          <form action={signOut} className="dashboard-rail-sign-out-form">
-            <button
-              type="submit"
-              className="dashboard-rail-sign-out"
-              style={uiFont}
-            >
-              Sign out
-            </button>
-          </form>
-        </div>
-      </div>
+      <Link
+        href="/dashboard"
+        className="dashboard-rail-wordmark"
+        style={serifFont}
+      >
+        The Sermon{" "}
+        <span style={{ color: "#a67c2e" }}>Coach</span>
+        <sup className="dashboard-rail-tm">™</sup>
+      </Link>
 
       <nav className="dashboard-rail-nav" aria-label="Main">
-        <div className="dashboard-rail-nav-group">
-          {NAV_ITEMS.filter((item) => item.href !== "/dashboard/buy").map(
-            (item) => (
-              <NavLink key={item.href} item={item} pathname={pathname} />
-            ),
-          )}
-        </div>
-
-        <div className="dashboard-rail-nav-group">
-          <p className="dashboard-rail-group-label" style={uiFont}>
-            Account
-          </p>
-          {NAV_ITEMS.filter((item) => item.href === "/dashboard/buy").map(
-            (item) => (
-              <NavLink key={item.href} item={item} pathname={pathname} />
-            ),
-          )}
-        </div>
+        {primaryItems.map((item) => (
+          <NavLink key={item.href} item={item} pathname={pathname} />
+        ))}
+        <p className="dashboard-rail-group-label" style={uiFont}>
+          Account
+        </p>
+        {accountItems.map((item) => (
+          <NavLink key={item.href} item={item} pathname={pathname} />
+        ))}
       </nav>
+
+      <div className="dashboard-rail-actions">
+        <Link
+          href="/dashboard/buy"
+          className="dashboard-rail-credit-chip"
+          style={uiFont}
+        >
+          {creditChipLabel}
+        </Link>
+        <form action={signOut} className="dashboard-rail-sign-out-form">
+          <button
+            type="submit"
+            className="dashboard-rail-sign-out"
+            style={uiFont}
+          >
+            Sign out
+          </button>
+        </form>
+      </div>
     </aside>
   );
 }

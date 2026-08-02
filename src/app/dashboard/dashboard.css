@@ -1,7 +1,9 @@
 /*
  * Dashboard route-group chrome.
  * Scoped to .dashboard-shell so marketing pages and evaluation display stay untouched.
- * Page chrome (nav, labels, CTAs) keeps system / --font-ui via component styles.
+ *
+ * Rail layout uses CSS grid areas (not display:contents) so the <860px
+ * wordmark/actions row cannot collapse back into the nav row.
  */
 .dashboard-shell {
   display: flex;
@@ -23,8 +25,13 @@
 }
 
 .dashboard-rail {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brand"
+    "nav"
+    "actions";
   flex-shrink: 0;
   width: 232px;
   min-height: 100%;
@@ -34,13 +41,8 @@
   box-sizing: border-box;
 }
 
-/* Desktop: brand-row children participate in the rail column so actions stay at the bottom. */
-.dashboard-rail-brand-row {
-  display: contents;
-}
-
 .dashboard-rail-wordmark {
-  order: 0;
+  grid-area: brand;
   display: block;
   padding: 0 22px 26px;
   font-size: 19px;
@@ -62,17 +64,11 @@
 }
 
 .dashboard-rail-nav {
-  order: 1;
+  grid-area: nav;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
   min-width: 0;
-}
-
-.dashboard-rail-nav-group {
-  display: flex;
-  flex-direction: column;
+  min-height: 0;
 }
 
 .dashboard-rail-group-label {
@@ -112,15 +108,13 @@
 }
 
 .dashboard-rail-actions {
-  order: 2;
-  margin-top: auto;
+  grid-area: actions;
   padding: 20px 22px 0;
   border-top: 1px solid #d4cfc1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  flex-shrink: 0;
 }
 
 .dashboard-rail-credit-chip {
@@ -173,23 +167,20 @@
     padding: 12px 16px 10px;
     border-right: none;
     border-bottom: 1px solid #d4cfc1;
-  }
-
-  .dashboard-rail-brand-row {
-    display: flex;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    column-gap: 12px;
+    row-gap: 8px;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-width: 0;
-    order: 0;
   }
 
   .dashboard-rail-wordmark {
-    order: unset;
-    flex: 0 1 auto;
-    min-width: 0;
     padding: 0;
     font-size: 16px;
+    min-width: 0;
   }
 
   .dashboard-rail-tm {
@@ -197,14 +188,11 @@
   }
 
   .dashboard-rail-actions {
-    order: unset;
     flex-direction: row;
     align-items: center;
     gap: 10px;
-    margin-top: 0;
     padding: 0;
     border-top: none;
-    flex-shrink: 0;
   }
 
   .dashboard-rail-credit-chip {
@@ -217,14 +205,10 @@
   }
 
   .dashboard-rail-nav {
-    order: 1;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
     gap: 20px;
-    flex: 0 0 auto;
-    margin-top: 8px;
-    min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -233,14 +217,6 @@
 
   .dashboard-rail-nav::-webkit-scrollbar {
     display: none;
-  }
-
-  .dashboard-rail-nav-group {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 20px;
-    flex-shrink: 0;
   }
 
   .dashboard-rail-group-label {
@@ -255,17 +231,13 @@
     display: inline;
   }
 
-  /* Items without a short label keep the full text visible on mobile. */
-  .dashboard-rail-link:not(:has(.dashboard-rail-label-short)) .dashboard-rail-label-full {
-    display: inline;
-  }
-
   .dashboard-rail-link {
     padding: 6px 0;
     border-left: none;
     border-bottom: 2px solid transparent;
     background: transparent;
     font-size: 15px;
+    flex-shrink: 0;
   }
 
   .dashboard-rail-link:hover {
