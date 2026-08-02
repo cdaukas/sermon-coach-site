@@ -2,33 +2,16 @@ import type { Metadata } from "next";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { CreditStrip } from "@/components/dashboard/CreditStrip";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
-import { PackCreditsCard } from "@/components/dashboard/PackCreditsCard";
-import { SubscriptionStatusCard } from "@/components/dashboard/SubscriptionStatusCard";
 import { buildCreditStripModel } from "@/lib/billing/credit-display";
-import { getPackCredits } from "@/lib/billing/pack-credits";
-import { getSubscriptionStatus } from "@/lib/billing/subscription-status";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
-import type { PlanTier } from "@/lib/evaluation/entitlement-types";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Buy",
+  title: "Plan and credits",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
-
-function planLabel(planTier: PlanTier | undefined): string {
-  if (planTier === "cohort") {
-    return "You're on Cohort";
-  }
-
-  if (planTier === "coach") {
-    return "You're on Coach";
-  }
-
-  return "You're subscribed";
-}
 
 export default async function BuyPage() {
   const supabase = await createClient();
@@ -36,14 +19,11 @@ export default async function BuyPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [entitlement, subscriptionStatus, packCredits] = await Promise.all([
-    user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
-    getSubscriptionStatus(),
-    getPackCredits(),
-  ]);
+  const entitlement = user
+    ? await getEvaluationEntitlement(user.id)
+    : null;
 
   const hasActiveSubscription = entitlement?.subscriptionActive === true;
-  const showStatusRow = subscriptionStatus || packCredits;
   const stripModel = buildCreditStripModel(entitlement);
   const usage = entitlement?.usage ?? null;
   const subscriberDepleted =
@@ -63,46 +43,18 @@ export default async function BuyPage() {
           className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
           style={{ ...uiFont, color: "var(--sc-accent)" }}
         >
-          Buy
+          Account
         </p>
         <h1
           className="text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Add credits
+          Plan and credits
         </h1>
-        {hasActiveSubscription ? (
-          <p
-            className="mt-3 text-[14px]"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          >
-            {planLabel(entitlement?.usage?.planTier)}
-          </p>
-        ) : null}
       </div>
 
       {stripModel ? (
         <CreditStrip model={stripModel} showAddCreditsLink={false} />
-      ) : null}
-
-      {showStatusRow ? (
-        <div className="mb-8 flex flex-col gap-6 sm:flex-row sm:items-stretch">
-          {subscriptionStatus ? (
-            <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
-              <SubscriptionStatusCard status={subscriptionStatus} />
-            </div>
-          ) : null}
-
-          {packCredits ? (
-            <div className="flex min-w-0 flex-1 flex-col [&>*]:h-full">
-              <PackCreditsCard
-                totalRemaining={packCredits.totalRemaining}
-                soonestExpiry={packCredits.soonestExpiry}
-                hasActiveSubscription={hasActiveSubscription}
-              />
-            </div>
-          ) : null}
-        </div>
       ) : null}
 
       {!hasActiveSubscription ? (

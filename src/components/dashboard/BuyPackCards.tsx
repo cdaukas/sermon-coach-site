@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { buildPackCheckoutPath } from "@/lib/billing/checkout";
 
-const uiFont = { fontFamily: "var(--font-ui)" };
+const uiFont = {
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+};
+const serifFont = { fontFamily: "var(--font-serif)" };
 
 type BuyPackCard = {
   packKey: "pack_2" | "pack_6" | "pack_12";
@@ -21,12 +24,9 @@ const BUY_PACK_CARDS: BuyPackCard[] = [
     name: "Guest Preacher",
     price: "$29",
     perEval: "$14.50 per credit",
-    tagline: "For the occasional guest spot.",
-    features: [
-      "Two full credits",
-      "Valid 18 months",
+    tagline:
       "Candidating messages, conference keynotes, or the elder filling in a few times a year",
-    ],
+    features: ["Two full credits", "Valid 18 months"],
     ctaLabel: "Add 2 credits",
   },
   {
@@ -34,12 +34,9 @@ const BUY_PACK_CARDS: BuyPackCard[] = [
     name: "Pulpit Supply",
     price: "$69",
     perEval: "$11.50 per credit",
-    tagline: "For steady pulpit rotation.",
-    features: [
-      "Six full credits",
-      "Valid 18 months",
+    tagline:
       "Built for supply preachers, interim pastors, and anyone in the pulpit most months",
-    ],
+    features: ["Six full credits", "Valid 18 months"],
     ctaLabel: "Add 6 credits",
   },
   {
@@ -47,12 +44,9 @@ const BUY_PACK_CARDS: BuyPackCard[] = [
     name: "Series Prep",
     price: "$109",
     perEval: "$9.08 per credit",
-    tagline: "Launch your next series with confidence.",
-    features: [
-      "Twelve full credits",
-      "Valid 18 months",
-      "Run every manuscript through the rubric the week before you preach it. A full quarter of sermons, twelve honest reads, one series done right.",
-    ],
+    tagline:
+      "For running a full quarter of sermons through the rubric the week before you preach each one.",
+    features: ["Twelve full credits", "Valid 18 months"],
     ctaLabel: "Add 12 credits",
     featured: true,
   },
@@ -60,7 +54,7 @@ const BUY_PACK_CARDS: BuyPackCard[] = [
 
 export function BuyPackCards() {
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
+    <div className="grid items-stretch gap-3 sm:grid-cols-3">
       {BUY_PACK_CARDS.map((card) => (
         <div
           key={card.packKey}
@@ -69,7 +63,9 @@ export function BuyPackCards() {
             background: "var(--sc-panel)",
             borderColor: "var(--sc-rule)",
             borderTopWidth: card.featured ? "3px" : "1px",
-            borderTopColor: card.featured ? "var(--sc-accent-soft)" : "var(--sc-rule)",
+            borderTopColor: card.featured
+              ? "var(--sc-accent-soft)"
+              : "var(--sc-rule)",
             paddingTop: card.featured ? "30px" : "20px",
             boxShadow: card.featured
               ? "0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06)"
@@ -78,10 +74,24 @@ export function BuyPackCards() {
         >
           {card.featured ? (
             <div
-              className="absolute left-1/2 -translate-x-1/2 -top-[11px] rounded px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
-              style={{ ...uiFont, background: "var(--sc-accent-soft)", color: "var(--sc-ink)" }}
+              style={{
+                ...uiFont,
+                position: "absolute",
+                top: -11,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "var(--sc-accent-soft)",
+                color: "var(--sc-ink)",
+                padding: "4px 12px",
+                borderRadius: 3,
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                whiteSpace: "nowrap",
+              }}
             >
-              Best Pack Value
+              Best value
             </div>
           ) : null}
 
@@ -93,22 +103,46 @@ export function BuyPackCards() {
           </div>
 
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-[26px] font-semibold" style={{ ...uiFont, color: "var(--sc-ink)" }}>
+            <span
+              className="text-[26px] font-semibold"
+              style={{ ...uiFont, color: "var(--sc-ink)" }}
+            >
               {card.price}
             </span>
           </div>
-          <div className="text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
+          <div
+            className="text-[12px]"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
             {card.perEval}
           </div>
 
-          <p className="mt-2 text-[13px] italic" style={{ color: "var(--sc-ink-soft)" }}>
+          <p
+            className="pack-tagline mt-2 mb-0"
+            style={{
+              ...serifFont,
+              fontSize: 14,
+              fontStyle: "italic",
+              color: "#4a5568",
+            }}
+          >
             {card.tagline}
           </p>
 
-          <ul className="mt-3 mb-4 flex-grow list-none space-y-2">
+          <ul
+            className="mt-3 mb-4 list-none space-y-2"
+            style={{ flexGrow: 1 }}
+          >
             {card.features.map((f, i) => (
-              <li key={i} className="relative pl-5 text-[13px]" style={{ color: "var(--sc-ink-mid)" }}>
-                <span className="absolute left-0 font-bold" style={{ ...uiFont, color: "var(--sc-accent)" }}>
+              <li
+                key={i}
+                className="relative pl-5 text-[13px]"
+                style={{ color: "var(--sc-ink-mid)" }}
+              >
+                <span
+                  className="absolute left-0 font-bold"
+                  style={{ ...uiFont, color: "var(--sc-accent)" }}
+                >
                   {"\u2713"}
                 </span>
                 {f}
@@ -118,8 +152,13 @@ export function BuyPackCards() {
 
           <Link
             href={buildPackCheckoutPath(card.packKey)}
-            className="block w-full rounded border px-4 py-2.5 text-center text-[13px] font-semibold tracking-wide no-underline transition-colors"
-            style={{ ...uiFont, background: "var(--sc-ink)", color: "var(--sc-bg)", borderColor: "var(--sc-ink)" }}
+            className="mt-auto block w-full rounded border px-4 py-2.5 text-center text-[13px] font-semibold tracking-wide no-underline transition-colors"
+            style={{
+              ...uiFont,
+              background: "var(--sc-ink)",
+              color: "var(--sc-bg)",
+              borderColor: "var(--sc-ink)",
+            }}
           >
             {card.ctaLabel}
           </Link>
