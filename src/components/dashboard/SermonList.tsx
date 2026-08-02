@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { parseEvaluationCardLabels } from "@/lib/evaluation/display-score";
 import type { DashboardSermonRow } from "@/lib/sermons/types";
-
-const uiFont = { fontFamily: "var(--font-ui)" };
-const serifFont = { fontFamily: "var(--font-serif)" };
 
 function formatSavedDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -24,7 +21,23 @@ type SermonListProps = {
   header?: ReactNode;
 };
 
-const META_SEP = " · ";
+function buildMobileMeta(sermon: DashboardSermonRow): string {
+  const segments: string[] = [];
+  const passage = sermon.primary_passage?.trim() || null;
+  if (passage) {
+    segments.push(passage);
+  }
+  segments.push(formatSavedDate(sermon.created_at));
+  if (sermon.latestEvaluation) {
+    segments.push(bandLabel(sermon.latestEvaluation.score_band));
+  } else {
+    segments.push("Not run");
+  }
+  if (sermon.completeEvaluationCount > 1) {
+    segments.push(`${sermon.completeEvaluationCount} runs`);
+  }
+  return segments.join(" · ");
+}
 
 function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
   const href = sermon.latestEvaluation
@@ -33,133 +46,30 @@ function SermonRow({ sermon }: { sermon: DashboardSermonRow }) {
 
   const passage = sermon.primary_passage?.trim() || null;
   const evaluated = sermon.latestEvaluation != null;
-
-  const segments: ReactNode[] = [];
-
-  if (passage) {
-    segments.push(
-      <span key="passage" className="truncate" style={{ minWidth: 0 }}>
-        {passage}
-      </span>,
-    );
-  }
-
-  segments.push(
-    <span key="saved" style={{ whiteSpace: "nowrap" }}>
-      Saved {formatSavedDate(sermon.created_at)}
-    </span>,
-  );
-
-  if (evaluated) {
-    segments.push(
-      <span
-        key="band"
-        style={{
-          ...uiFont,
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          lineHeight: 1,
-          borderRadius: 4,
-          padding: "4px 9px",
-          background: "#faf6ed",
-          color: "#a67c2e",
-          border: "1px solid #e8dcc2",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {bandLabel(sermon.latestEvaluation!.score_band)}
-      </span>,
-    );
-  } else {
-    segments.push(
-      <span key="band" style={{ whiteSpace: "nowrap" }}>
-        Not run
-      </span>,
-    );
-  }
-
-  if (sermon.completeEvaluationCount > 1) {
-    segments.push(
-      <span
-        key="runs"
-        style={{
-          ...uiFont,
-          fontSize: 12,
-          lineHeight: 1,
-          color: "#9aa1ac",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {sermon.completeEvaluationCount} runs
-      </span>,
-    );
-  }
+  const dateLabel = formatSavedDate(sermon.created_at);
+  const runsLabel =
+    sermon.completeEvaluationCount > 1
+      ? `${sermon.completeEvaluationCount} runs`
+      : null;
+  const bandText = evaluated
+    ? bandLabel(sermon.latestEvaluation!.score_band)
+    : "Not run";
 
   return (
-    <li style={{ margin: "0 0 9px", listStyle: "none" }}>
-      <Link
-        href={href}
-        className="no-underline transition-colors"
-        style={{
-          display: "block",
-          background: "#ffffff",
-          border: "1px solid #d4cfc1",
-          borderRadius: 4,
-          boxShadow: "var(--sc-shadow)",
-          padding: "15px 18px",
-          boxSizing: "border-box",
-        }}
-        onMouseEnter={(event) => {
-          event.currentTarget.style.borderColor = "#c9a55c";
-        }}
-        onMouseLeave={(event) => {
-          event.currentTarget.style.borderColor = "#d4cfc1";
-        }}
-      >
-        <p
-          className="truncate"
-          style={{
-            ...serifFont,
-            margin: 0,
-            padding: 0,
-            fontSize: 19,
-            fontWeight: 600,
-            lineHeight: 1.15,
-            letterSpacing: "-0.01em",
-            color: "#1a2332",
-          }}
+    <li className="dashboard-sermon-row">
+      <Link href={href} className="dashboard-sermon-row-link">
+        <span className="dashboard-sermon-row-title">{sermon.title}</span>
+        <span className="dashboard-sermon-row-passage">{passage ?? ""}</span>
+        <span className="dashboard-sermon-row-date">{dateLabel}</span>
+        <span className="dashboard-sermon-row-runs">{runsLabel ?? ""}</span>
+        <span
+          className={`dashboard-sermon-row-band${evaluated ? "" : " is-empty"}`}
         >
-          {sermon.title}
-        </p>
-        <p
-          style={{
-            ...uiFont,
-            display: "flex",
-            flexWrap: "nowrap",
-            alignItems: "center",
-            margin: "3px 0 0",
-            padding: 0,
-            fontSize: 13,
-            fontWeight: 400,
-            lineHeight: 1,
-            color: "#4a5568",
-            minWidth: 0,
-            overflow: "hidden",
-          }}
-        >
-          {segments.map((segment, index) => (
-            <Fragment key={index}>
-              {index > 0 ? (
-                <span aria-hidden="true" style={{ flexShrink: 0 }}>
-                  {META_SEP}
-                </span>
-              ) : null}
-              {segment}
-            </Fragment>
-          ))}
-        </p>
+          {bandText}
+        </span>
+        <span className="dashboard-sermon-row-mobile-meta">
+          {buildMobileMeta(sermon)}
+        </span>
       </Link>
     </li>
   );
@@ -173,7 +83,7 @@ export function SermonList({ sermons, header }: SermonListProps) {
   return (
     <>
       {header}
-      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+      <ul className="dashboard-sermon-list">
         {sermons.map((sermon) => (
           <SermonRow key={sermon.id} sermon={sermon} />
         ))}

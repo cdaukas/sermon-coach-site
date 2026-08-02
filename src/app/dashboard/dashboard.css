@@ -177,6 +177,131 @@
   box-sizing: border-box;
 }
 
+/* Compact sermon table rows (dashboard home) */
+.dashboard-sermon-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-sermon-row {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-sermon-row:last-child .dashboard-sermon-row-link {
+  border-bottom: none;
+}
+
+.dashboard-sermon-row-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px 90px 70px 110px;
+  align-items: center;
+  gap: 16px;
+  margin-inline: -12px;
+  padding: 14px 12px;
+  border-bottom: 1px solid #d4cfc1;
+  box-sizing: border-box;
+  text-decoration: none;
+  color: inherit;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.dashboard-sermon-row-link:hover {
+  background: rgba(166, 124, 46, 0.045);
+}
+
+.dashboard-sermon-row-title {
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #1a2332;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-sermon-row-passage,
+.dashboard-sermon-row-date {
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #4a5568;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-sermon-row-runs {
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #9aa1ac;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-sermon-row-band {
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a67c2e;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-sermon-row-band.is-empty {
+  color: #9aa1ac;
+}
+
+.dashboard-sermon-row-mobile-meta {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .dashboard-sermon-row-link {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .dashboard-sermon-row-passage,
+  .dashboard-sermon-row-date,
+  .dashboard-sermon-row-runs,
+  .dashboard-sermon-row-band {
+    display: none;
+  }
+
+  .dashboard-sermon-row-mobile-meta {
+    display: block;
+    min-width: 0;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: #4a5568;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 @media (max-width: 859px) {
   .dashboard-root {
     overflow-x: clip;
