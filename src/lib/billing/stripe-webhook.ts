@@ -9,6 +9,11 @@ export type StripeWebhookDeps = {
   logError: (message: string, meta?: Record<string, unknown>) => void;
 };
 
+export type SubscriptionBillingFields = {
+  subscriptionInterval: string | null;
+  currentPeriodEnd: string | null;
+};
+
 export function isActivatingSubscriptionStatus(status: string): boolean {
   return ACTIVATION_STATUSES.has(status);
 }
@@ -19,6 +24,48 @@ function getCustomerId(subscription: Stripe.Subscription): string | null {
     return customer;
   }
   return customer?.id ?? null;
+}
+
+/**
+ * Read interval + period end from a Stripe Subscription.
+ * Prefer item-level current_period_end (Stripe API recent shape); fall back to
+ * top-level when present. Missing values become null — never throws.
+ */
+export function extractSubscriptionBillingFields(
+  subscription: Stripe.Subscription,
+): SubscriptionBillingFields {
+  const firstItem = subscription.items?.data?.[0];
+
+  let subscriptionInterval: string | null = null;
+  const price = firstItem?.price;
+  if (
+    price &&
+    typeof price === "object" &&
+    price.recurring &&
+    typeof price.recurring.interval === "string" &&
+    price.recurring.interval.length > 0
+  ) {
+    subscriptionInterval = price.recurring.interval;
+  }
+
+  let periodEndUnix: number | null = null;
+  if (firstItem && typeof firstItem.current_period_end === "number") {
+    periodEndUnix = firstItem.current_period_end;
+  } else {
+    const topLevel = (subscription as { current_period_end?: unknown })
+      .current_period_end;
+    if (typeof topLevel === "number") {
+      periodEndUnix = topLevel;
+    }
+  }
+
+  return {
+    subscriptionInterval,
+    currentPeriodEnd:
+      periodEndUnix != null
+        ? new Date(periodEndUnix * 1000).toISOString()
+        : null,
+  };
 }
 
 export async function resolveCustomerEmail(
@@ -46,12 +93,15 @@ async function activateProfile(
   supabase: SupabaseClient,
   profileId: string,
   customerId: string,
+  billing: SubscriptionBillingFields,
 ): Promise<void> {
   const { error } = await supabase
     .from("profiles")
     .update({
       stripe_customer_id: customerId,
       subscription_status: "active",
+      subscription_interval: billing.subscriptionInterval,
+      current_period_end: billing.currentPeriodEnd,
     })
     .eq("id", profileId);
 
@@ -64,6 +114,7 @@ async function deactivateProfile(
   supabase: SupabaseClient,
   profileId: string,
 ): Promise<void> {
+  // Intentionally does not null subscription_interval or current_period_end.
   const { error } = await supabase
     .from("profiles")
     .update({
@@ -260,7 +311,53 @@ export async function handleSubscriptionCheckoutCompleted(
     return;
   }
 
-  await activateProfile(deps.supabase, profile.id, customerId);
+  // Session carries subscription id (string), not item interval / period end.
+  // One retrieve per new subscriber — preferred over expand (keeps webhook payload shape stable).
+  const billing = await loadBillingFieldsForCheckoutSession(session, deps);
+
+  await activateProfile(deps.supabase, profile.id, customerId, billing);
+}
+
+async function loadBillingFieldsForCheckoutSession(
+  session: Stripe.Checkout.Session,
+  deps: StripeWebhookDeps,
+): Promise<SubscriptionBillingFields> {
+  const empty: SubscriptionBillingFields = {
+    subscriptionInterval: null,
+    currentPeriodEnd: null,
+  };
+
+  const subscriptionRef = session.subscription;
+  const subscriptionId =
+    typeof subscriptionRef === "string"
+      ? subscriptionRef
+      : subscriptionRef && typeof subscriptionRef === "object"
+        ? subscriptionRef.id
+        : null;
+
+  if (!subscriptionId) {
+    deps.logError(
+      "Subscription checkout: missing subscription id; activating without interval/period end",
+      { sessionId: session.id },
+    );
+    return empty;
+  }
+
+  try {
+    const subscription =
+      await deps.stripe.subscriptions.retrieve(subscriptionId);
+    return extractSubscriptionBillingFields(subscription);
+  } catch (err) {
+    deps.logError(
+      "Subscription checkout: failed to retrieve subscription for billing fields; activating with nulls",
+      {
+        sessionId: session.id,
+        subscriptionId,
+        error: err instanceof Error ? err.message : String(err),
+      },
+    );
+    return empty;
+  }
 }
 
 /**
@@ -298,7 +395,12 @@ export async function handleSubscriptionActivationEvent(
   }
 
   if (isActivatingSubscriptionStatus(subscription.status)) {
-    await activateProfile(deps.supabase, match.profileId, customerId);
+    await activateProfile(
+      deps.supabase,
+      match.profileId,
+      customerId,
+      extractSubscriptionBillingFields(subscription),
+    );
   } else {
     await deactivateProfile(deps.supabase, match.profileId);
   }

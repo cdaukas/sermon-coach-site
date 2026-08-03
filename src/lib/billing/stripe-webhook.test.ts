@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  extractSubscriptionBillingFields,
   handleInvoicePaymentFailed,
   handleSubscriptionActivationEvent,
   handleSubscriptionCheckoutCompleted,
@@ -10,6 +11,9 @@ import {
   isActivatingSubscriptionStatus,
   resolveCustomerEmail,
 } from "./stripe-webhook";
+
+const PERIOD_END_UNIX = 1_893_456_000;
+const PERIOD_END_ISO = new Date(PERIOD_END_UNIX * 1000).toISOString();
 
 function makeSubscription(
   overrides: Partial<Stripe.Subscription> = {},
@@ -19,6 +23,27 @@ function makeSubscription(
     object: "subscription",
     status: "active",
     customer: "cus_abc",
+    items: {
+      object: "list",
+      data: [
+        {
+          id: "si_1",
+          object: "subscription_item",
+          current_period_end: PERIOD_END_UNIX,
+          current_period_start: PERIOD_END_UNIX - 30 * 24 * 3600,
+          price: {
+            id: "price_month",
+            object: "price",
+            recurring: {
+              interval: "month",
+              interval_count: 1,
+            },
+          },
+        },
+      ],
+      has_more: false,
+      url: "",
+    },
     ...overrides,
   } as Stripe.Subscription;
 }
@@ -31,7 +56,7 @@ function makeSupabaseMock(handlers: {
   profileIdByEmail?: string | null;
   updateError?: string;
 }) {
-  const updates: Array<{ id: string; values: Record<string, string> }> = [];
+  const updates: Array<{ id: string; values: Record<string, unknown> }> = [];
 
   const supabase = {
     from(table: string) {
@@ -64,7 +89,7 @@ function makeSupabaseMock(handlers: {
             },
           };
         },
-        update(values: Record<string, string>) {
+        update(values: Record<string, unknown>) {
           return {
             eq(_col: string, id: string) {
               updates.push({ id, values });
@@ -90,6 +115,66 @@ function makeSupabaseMock(handlers: {
 
   return { supabase, updates };
 }
+
+const activeProfileValues = {
+  stripe_customer_id: "cus_abc",
+  subscription_status: "active",
+  subscription_interval: "month",
+  current_period_end: PERIOD_END_ISO,
+};
+
+describe("extractSubscriptionBillingFields", () => {
+  it("reads interval and period end from the first subscription item", () => {
+    assert.deepEqual(extractSubscriptionBillingFields(makeSubscription()), {
+      subscriptionInterval: "month",
+      currentPeriodEnd: PERIOD_END_ISO,
+    });
+  });
+
+  it("falls back to top-level current_period_end when item lacks it", () => {
+    const subscription = makeSubscription({
+      items: {
+        object: "list",
+        data: [
+          {
+            id: "si_1",
+            object: "subscription_item",
+            price: {
+              id: "price_year",
+              object: "price",
+              recurring: { interval: "year", interval_count: 1 },
+            },
+          },
+        ],
+        has_more: false,
+        url: "",
+      },
+    } as Partial<Stripe.Subscription>);
+    (subscription as { current_period_end?: number }).current_period_end =
+      PERIOD_END_UNIX;
+
+    assert.deepEqual(extractSubscriptionBillingFields(subscription), {
+      subscriptionInterval: "year",
+      currentPeriodEnd: PERIOD_END_ISO,
+    });
+  });
+
+  it("returns nulls when neither period end source is present", () => {
+    const subscription = makeSubscription({
+      items: {
+        object: "list",
+        data: [],
+        has_more: false,
+        url: "",
+      },
+    } as Partial<Stripe.Subscription>);
+
+    assert.deepEqual(extractSubscriptionBillingFields(subscription), {
+      subscriptionInterval: null,
+      currentPeriodEnd: null,
+    });
+  });
+});
 
 describe("isActivatingSubscriptionStatus", () => {
   it("accepts active and trialing", () => {
@@ -196,10 +281,7 @@ describe("handleSubscriptionActivationEvent", () => {
     assert.deepEqual(updates, [
       {
         id: "user-meta",
-        values: {
-          stripe_customer_id: "cus_abc",
-          subscription_status: "active",
-        },
+        values: activeProfileValues,
       },
     ]);
   });
@@ -219,10 +301,7 @@ describe("handleSubscriptionActivationEvent", () => {
     assert.deepEqual(updates, [
       {
         id: "user-1",
-        values: {
-          stripe_customer_id: "cus_abc",
-          subscription_status: "active",
-        },
+        values: activeProfileValues,
       },
     ]);
   });
@@ -258,10 +337,7 @@ describe("handleSubscriptionActivationEvent", () => {
     assert.deepEqual(updates, [
       {
         id: "user-2",
-        values: {
-          stripe_customer_id: "cus_abc",
-          subscription_status: "active",
-        },
+        values: activeProfileValues,
       },
     ]);
   });
@@ -401,6 +477,15 @@ describe("handleSubscriptionCheckoutCompleted", () => {
       profileById: "user-checkout",
     });
 
+    const stripe = {
+      subscriptions: {
+        retrieve: async (id: string) => {
+          assert.equal(id, "sub_123");
+          return makeSubscription();
+        },
+      },
+    } as unknown as Stripe;
+
     await handleSubscriptionCheckoutCompleted(
       {
         id: "cs_123",
@@ -408,10 +493,11 @@ describe("handleSubscriptionCheckoutCompleted", () => {
         mode: "subscription",
         client_reference_id: "user-checkout",
         customer: "cus_abc",
+        subscription: "sub_123",
       } as Stripe.Checkout.Session,
       {
         supabase,
-        stripe: {} as Stripe,
+        stripe,
         logError: () => {},
       },
     );
@@ -419,9 +505,50 @@ describe("handleSubscriptionCheckoutCompleted", () => {
     assert.deepEqual(updates, [
       {
         id: "user-checkout",
+        values: activeProfileValues,
+      },
+    ]);
+  });
+
+  it("activates with null billing fields when subscription retrieve fails", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileById: "user-checkout",
+    });
+    const errors: string[] = [];
+
+    const stripe = {
+      subscriptions: {
+        retrieve: async () => {
+          throw new Error("stripe down");
+        },
+      },
+    } as unknown as Stripe;
+
+    await handleSubscriptionCheckoutCompleted(
+      {
+        id: "cs_123",
+        object: "checkout.session",
+        mode: "subscription",
+        client_reference_id: "user-checkout",
+        customer: "cus_abc",
+        subscription: "sub_123",
+      } as Stripe.Checkout.Session,
+      {
+        supabase,
+        stripe,
+        logError: (message) => errors.push(message),
+      },
+    );
+
+    assert.match(errors[0] ?? "", /failed to retrieve subscription/i);
+    assert.deepEqual(updates, [
+      {
+        id: "user-checkout",
         values: {
           stripe_customer_id: "cus_abc",
           subscription_status: "active",
+          subscription_interval: null,
+          current_period_end: null,
         },
       },
     ]);
