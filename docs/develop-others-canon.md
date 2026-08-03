@@ -1,6 +1,6 @@
 # Develop-others lane, canon
 
-**Last updated: 2026-07-30**
+**Last updated: 2026-08-03**
 
 This file is the current shape of the develop-others lane. It supersedes every
 earlier document, chat, brief, and Asana note by definition. If something
@@ -13,40 +13,64 @@ date under it inherits the file date.
 Do not delete superseded entries silently. Move them to the Retired section so
 the next person can see what changed and stop resurrecting it.
 
+The **user-facing product name is Mentoring** (rail, dashboard seats page
+heading, and pricing section). "Develop others" is an internal / doc lane name
+only. Do not rename this file, routes such as `/dashboard/develop`, or database
+identifiers to match the display string.
+
 ---
 
 ## Seats
 
 Mentors self-serve. Mentees are invited, never self-serve.
 
-| Seat | Price | What the holder gets | Hold |
-|---|---|---|---|
-| Debrief | $12/mo | 4 debriefs/month. Every submission also generates a full evaluation. | Yes |
-| Evaluation | $25/mo | 4 submissions/month yielding 8 results: 4 debriefs + 4 evaluations. | No |
-| Mentor | Included with Coach while holding seats | Reads all mentee work. No grant of its own. | n/a |
+Display names and database values are not the same. `seat_type` in the database
+stays `debrief` or `evaluation`. UI copy uses **Apprentice** and **Colleague**
+only. The single mapping lives in `src/lib/mentor/seat-labels.ts`
+(`mentorSeatDisplayName`). Do not invent a second map or rename the database
+values.
 
-The debrief seat is the same machine as the evaluation seat with the evaluation
-half held back. It does not produce fewer artifacts. It shows fewer. This is why
-the hold is a `released_to_mentee_at` timestamp on the evaluation row rather
-than a flag controlling whether an evaluation runs.
+| Display name | `seat_type` | Price | What the holder gets | Hold |
+|---|---|---|---|---|
+| Apprentice | `debrief` | $12/mo | 2 submissions/month. Every submission generates a debrief (and How It Preaches) the mentee reads, plus a full evaluation that is held until release. | Yes |
+| Colleague | `evaluation` | $25/mo | 4 submissions/month yielding 8 results: 4 debriefs + 4 evaluations. Nothing held. | No |
+| Mentor | n/a | Included with Coach while holding seats | Reads all mentee work. No grant of its own. | n/a |
+
+The Apprentice (`debrief`) seat is the same machine as the Colleague
+(`evaluation`) seat with the evaluation half held back. It does not produce
+fewer artifacts. It shows fewer. This is why the hold is a
+`released_to_mentee_at` timestamp on the evaluation row rather than a flag
+controlling whether an evaluation runs.
 
 - Mentor holds 1 to 4 seats. The cap is enforced, not advisory. Five or more is
   Classroom. Classroom's floor is 5, so there is no gap between the two paths.
   **Changed 2026-07-28. Live.**
-- Monthly reset anchors to the mentor's Coach billing date. The first cycle does
-  not reset.
-- Grandfathering for existing Mentor Mode users goes to the evaluation seat.
+- Monthly period reset and billing-anchored allotment are deferred until Develop
+  Others has Stripe billing. There is no billing cycle to anchor to yet.
+  **Changed 2026-08-03.**
+- Grandfathering for existing Mentor Mode users goes to the evaluation /
+  Colleague seat.
+
+### Open gap: Apprentice allotment in code vs promise
+
+**Recorded 2026-08-03.** Seats marketing and invite copy promise two submissions
+a month for Apprentice. `create_mentored_evaluation` currently enforces four
+submissions per relationship per month regardless of seat type. That is
+over-delivery toward the mentee. Enforce the two-per-month Apprentice limit when
+billing lands; do not change the RPC until then unless product re-opens the
+decision.
 
 ## The hold
 
-Applies to the debrief seat only.
+Applies to the Apprentice (`debrief`) seat only.
 
-- Every submission on a debrief seat generates a debrief and a full evaluation.
-  The mentee reads the debrief. The evaluation is held.
+- Every submission on an Apprentice seat generates a debrief and a full
+  evaluation. The mentee reads the debrief (and How It Preaches). The evaluation
+  is held.
 - The mentee sees that an evaluation ran. He sees the date, marked closed. He
   does not see contents.
-- Once every 90 days the mentor can open one held evaluation early. The mentor
-  picks which one, not the mentee.
+- Release of a held evaluation is currently at the mentor's discretion with no
+  period. There is no 90-day (or any other) cadence. **Changed 2026-08-03.**
 - The hold exists so the mentor can deliver hard findings himself before the
   mentee reads them cold on a screen. It is for conversation, not punishment.
 
@@ -55,11 +79,14 @@ Applies to the debrief seat only.
 All held evaluations open when any of these fire:
 
 1. Mentor ends the relationship. Immediate.
-2. Seat lapses on payment. 30-day grace, then release.
-3. Mentee ends the relationship. 30-day grace, then release.
+2. Mentor releases an individual held evaluation. Immediate, at discretion,
+   no period.
+3. Seat lapses on payment. 30-day grace, then release.
+   **Not yet built; sits behind Stripe billing for seats.**
+4. Mentee ends the relationship. 30-day grace, then release.
    **Decided 2026-07-28. Not yet built.**
 
-Trigger 3 replaces the earlier rule that a mentee walking away did not release.
+Trigger 4 replaces the earlier rule that a mentee walking away did not release.
 That rule left a departing mentee holding up to 48 permanently sealed
 evaluations of his own preaching after a year, which is not defensible.
 
@@ -78,7 +105,7 @@ month to month. Classroom is an invoice for a term. Seminaries, denominations,
 and networks that cannot put recurring charges on a personal card are Classroom
 buyers regardless of size.
 
-Classroom seats carry 4 debriefs so that a mentor seat and a classroom seat never
+Classroom seats carry 4 credits so that a mentor seat and a classroom seat never
 differ at the same price.
 
 ## Terminology
@@ -87,6 +114,9 @@ differ at the same price.
 - `report_mode` values are `diagnostic` and `debrief`. `coaching` is dead in the
   database. A legacy tolerance branch remains in `normalizeReportMode` for stale
   browser storage only. Do not remove before 2027.
+- `seat_type` values are `debrief` and `evaluation` only. Display names are
+  Apprentice and Colleague; see Seats above and
+  `src/lib/mentor/seat-labels.ts`.
 - Preacher-facing report names: The Sketch, The Evaluation, The Debrief.
 - Billing currency is "credits," not "evaluations."
 
@@ -106,8 +136,11 @@ no mode picker. When the seat's monthly allotment is spent, submission
 is blocked; it does not fall back to the mentee's own credits. A mentee
 who also holds a Coach subscription cannot reach those credits while
 the relationship is active. This is a known consequence, accepted
-because the debrief seat is built for the preacher who is not already
-paying for Coach.
+because the Apprentice (`debrief`) seat is built for the preacher who is not
+already paying for Coach.
+
+Until billing lands, "monthly allotment" in product copy is the intended shape;
+see the open gap under Seats for what the RPC actually enforces today.
 
 ## Database surface
 
@@ -203,10 +236,15 @@ your own invites without burning them.
 
 ## Open
 
-- Two 30-day clocks now exist on the same relationship, seat lapse and mentee
-  exit. Confirm they are one timer and cannot both run.
-- Accept-invite disclosure copy still describes the superseded "mentor runs an
-  evaluation every 90 days" model. Corrected wording is in Asana.
+- **Apprentice count vs code.** Seats pages and invite copy promise two
+  submissions a month; `create_mentored_evaluation` still enforces four per
+  relationship per month for every seat type. Over-delivery until billing;
+  enforce then. **2026-08-03.**
+- Billing-anchored monthly period for seat allotments. Deferred until Develop
+  Others has Stripe billing. **2026-08-03.**
+- Two 30-day clocks will exist on the same relationship once seat lapse and
+  mentee exit are built (payment lapse vs mentee exit). Confirm they are one
+  timer and cannot both run.
 - Seat pricing and cancellation terms do not exist in `terms.html`. Terms and
   privacy have been attorney-reviewed, but seats were not in that scope. The new
   section needs a follow-up read.
@@ -216,8 +254,8 @@ your own invites without burning them.
 - No verification that a mentor pays for the seats he creates.
 - Nothing records seats purchased versus seats assigned.
 - Invites never expire.
-- Release on seat upgrade. Debrief to evaluation should open everything held.
-- Quarterly counter anchor: relationship start or billing quarter.
+- Release on seat upgrade. Apprentice (`debrief`) to Colleague (`evaluation`)
+  should open everything held.
 - Refund posture for seats. Subscriptions carry 30-day money-back. Seats
   undecided.
 
@@ -233,9 +271,22 @@ Do not reintroduce any of these.
 - **Coach-conversion unlock / dormancy model.** Evaluations dormant until the
   mentee buys Coach. Considered and rejected 2026-07-28.
 - **"Mentor can run a full evaluation every 90 days."** From the 2026-07-24 lanes
-  doc. Replaced by the hold model, where evaluations always run and the mentor
-  opens one early per 90 days. This one has resurfaced twice. It is the single
-  most likely thing to walk back in.
+  doc. Wrong model entirely: evaluations always run; the mentee does not wait on
+  a mentor-initiated full run.
+- **90-day early-release cadence on the hold.** Evaluations always run and the
+  mentor could open one early every 90 days. Superseded 2026-08-03: release is
+  at the mentor's discretion with no period. Any UI or doc that states a release
+  cadence that does not exist in code is wrong. This one resurfaced as invite
+  copy; keep it out.
+- **Apprentice / debrief seat at 4 submissions a month.** Canon was
+  four debriefs/month. Superseded 2026-08-03: Apprentice is two submissions a
+  month. Code still enforces four for every seat until billing lands (open gap).
+- **Monthly reset anchors to the mentor's Coach billing date, live now.** Stated
+  while seats had no Stripe product. Deferred 2026-08-03 until Develop Others has
+  its own billing cycle to anchor to.
+- **"Debrief seat" / "Evaluation seat" as the user-facing names.** Replaced
+  2026-08-03 by Apprentice and Colleague for display. Database `seat_type`
+  values did not change.
 - **3-seat cap.** Replaced by 4 on 2026-07-28. The 3-cap left a mentor who
   wanted a fourth seat with nowhere to go, since Classroom's floor is 5. Four
   closes the gap.
@@ -257,3 +308,7 @@ Do not reintroduce any of these.
   of monthly seats.
 - **"Term end" language.** Replaced by "relationship end."
 - **Cohort tier.** Fully retired. Replaced by Classroom.
+- **"Develop others" as the user-facing product name.** Used briefly on the
+  rail, seats page, and pricing section on `develop-others-discovery`.
+  Replaced by **Mentoring** for display. Internal lane name and
+  `docs/develop-others-canon.md` filename stay.

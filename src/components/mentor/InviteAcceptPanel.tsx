@@ -64,13 +64,17 @@ function DebriefDisclosure({ mentorName }: { mentorName: string }) {
     >
       <p>Plainly, so there are no surprises.</p>
       <ul className="list-disc space-y-2 pl-5">
-        <li>Every sermon you submit generates a debrief. You both read it.</li>
         <li>
-          Every sermon you submit is also evaluated in full against the rubric.
-          Those stay closed to you while the mentoring is active. Once every 90
-          days, {mentorName}
-          {" "}
-          can open one early, when he&apos;s ready to talk it through.
+          Two submissions a month, drawn from {mentorName}&apos;s seat rather
+          than your credits.
+        </li>
+        <li>
+          Every submission generates a coaching debrief and How It Preaches. You
+          both read those.
+        </li>
+        <li>
+          Every submission is also evaluated in full against the rubric. The
+          scored evaluation stays closed to you until {mentorName} releases it.
         </li>
         <li>
           You&apos;ll see that it happened. The date shows up in your history,
@@ -103,13 +107,13 @@ function EvaluationDisclosure({ mentorName }: { mentorName: string }) {
       <p>Plainly, so there are no surprises.</p>
       <ul className="list-disc space-y-2 pl-5">
         <li>
-          Every sermon you submit generates a debrief and a full evaluation.{" "}
-          {mentorName} reads both.
+          Four submissions a month, drawn from {mentorName}&apos;s seat.
         </li>
         <li>
-          You read both too, at the same time he does. Nothing is held back.
+          Every sermon you submit generates a debrief and a full evaluation.
+          You both read everything the moment it is ready, including the score.
+          Nothing is held back.
         </li>
-        <li>Four submissions a month, on him.</li>
       </ul>
     </div>
   );

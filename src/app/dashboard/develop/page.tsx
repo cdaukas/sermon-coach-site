@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Develop others",
+  title: "Mentoring",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -11,7 +11,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 const CTA_LABEL = "Tell us who you're developing";
 const CTA_HREF =
-  "mailto:chris@sermoncoach.online?subject=Develop%20Others%20seat";
+  "mailto:chris@sermoncoach.online?subject=Mentoring%20seat";
 const CLASSROOM_CTA_LABEL = "Tell us about your class";
 const CLASSROOM_CTA_HREF =
   "mailto:chris@sermoncoach.online?subject=Classroom%20interest";
@@ -26,6 +26,7 @@ type SeatCard = {
   features: ReactNode[];
   ctaLabel: string;
   ctaHref: string;
+  startHere?: boolean;
 };
 
 const CARDS: SeatCard[] = [
@@ -33,8 +34,8 @@ const CARDS: SeatCard[] = [
     name: "Apprentice",
     priceLead: "$",
     priceAmount: "12",
-    priceSuffix: "per seat / mo",
-    priceNote: null,
+    priceSuffix: "/mo",
+    priceNote: "Per seat, billed monthly.",
     tagline:
       "For the associate, the lay preacher, the church planter you are bringing along.",
     features: [
@@ -45,13 +46,14 @@ const CARDS: SeatCard[] = [
     ],
     ctaLabel: CTA_LABEL,
     ctaHref: CTA_HREF,
+    startHere: true,
   },
   {
     name: "Colleague",
     priceLead: "$",
     priceAmount: "25",
-    priceSuffix: "per seat / mo",
-    priceNote: null,
+    priceSuffix: "/mo",
+    priceNote: "Per seat, billed monthly.",
     tagline: "For the peer you are reading, and who is ready to see everything.",
     features: [
       "Four submissions a month, drawn from the seat",
@@ -65,22 +67,22 @@ const CARDS: SeatCard[] = [
     name: "Classroom",
     priceLead: "from $",
     priceAmount: "125",
-    priceSuffix: "/ mo",
+    priceSuffix: "/mo",
     priceNote: "$25 per seat, five-seat minimum. Billed by the term.",
     tagline:
       "For institutions training preachers — a seminary course, a church planting cohort, a denominational track.",
     features: [
       <>
         <strong>$25 per seat, per month</strong>
-        {" — billed by the term, with a five-seat floor"}
+        {
+          " — billed by the term, with a five-seat floor; the instructor seat is free"
+        }
       </>,
       <>
         <strong>4 credits per seat</strong>
         {" each month, pooled across the class"}
       </>,
-      "The instructor seat is free",
-      "Everything in Coach for every preacher in the class",
-      "Each preacher keeps a private library — visible to the instructor, never to classmates",
+      "Everything in Coach for every preacher in the class, with a private library visible to the instructor, never to classmates",
       "One invoice for the institution. We set up the class by hand before your term starts",
     ],
     ctaLabel: CLASSROOM_CTA_LABEL,
@@ -103,12 +105,9 @@ export default function DevelopPage() {
           className="text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Develop others
+          Mentoring
         </h1>
-        <p
-          className="mt-3 max-w-2xl text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
+        <p className="develop-seats-lede">
           A Coach subscription evaluates your own preaching; a seat gives
           another preacher his own account, his own submissions, and a library
           you can read.
@@ -117,7 +116,15 @@ export default function DevelopPage() {
 
       <div className="develop-seats-grid">
         {CARDS.map((card) => (
-          <article key={card.name} className="develop-seat-card">
+          <article
+            key={card.name}
+            className={`develop-seat-card${card.startHere ? " is-start-here" : ""}`}
+          >
+            {card.startHere ? (
+              <div className="develop-seat-ribbon" style={uiFont}>
+                Start Here
+              </div>
+            ) : null}
             <h2 className="develop-seat-name" style={serifFont}>
               {card.name}
             </h2>

@@ -100,8 +100,8 @@ export function DashboardRail({
     href: mentoringUiAllowed
       ? "/dashboard/mentoring"
       : "/dashboard/develop",
-    label: "Develop others",
-    shortLabel: "Develop",
+    label: "Mentoring",
+    shortLabel: "Mentoring",
     locked: !mentoringUiAllowed,
     isActive: (path) =>
       path.startsWith("/dashboard/mentoring") ||

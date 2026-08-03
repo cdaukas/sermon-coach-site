@@ -26,13 +26,13 @@ const SEAT_OPTIONS = [
   {
     value: "debrief" as const,
     title: `${mentorSeatDisplayName("debrief")} · $12/mo`,
-    body: "Four debriefs a month. No score. His evaluations run but stay held until you release one, which you can do once every 90 days.",
+    body: "Two submissions a month, drawn from the seat rather than your credits. He reads the coaching debrief and How It Preaches. The scored evaluation is generated and held until you release it.",
     caption: "Start here for anyone in their first few years of preaching.",
   },
   {
     value: "evaluation" as const,
     title: `${mentorSeatDisplayName("evaluation")} · $25/mo`,
-    body: "Four evaluations and four debriefs a month. Nothing held. He sees every score when you do.",
+    body: "Four submissions a month, drawn from the seat. He reads everything the moment it is ready, including the score.",
     caption: "For a preacher who is ready to be measured against the rubric.",
   },
 ] as const;

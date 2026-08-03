@@ -135,14 +135,32 @@
   border: none;
 }
 
-/* Develop-others seats discovery (/dashboard/develop) */
+/* Mentoring seats discovery (/dashboard/develop) */
+.develop-seats-page {
+  overflow: visible;
+}
+
+.develop-seats-lede {
+  margin: 12px 0 0;
+  max-width: 560px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.55;
+  color: #4a5568;
+  text-align: left;
+}
+
 .develop-seats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+  padding-top: 14px;
+  overflow: visible;
 }
 
 .develop-seat-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--sc-panel);
@@ -150,6 +168,28 @@
   border-radius: 4px;
   padding: 28px 24px;
   min-width: 0;
+  overflow: visible;
+}
+
+.develop-seat-card.is-start-here {
+  border-top: 3px solid var(--sc-accent-soft);
+  padding-top: 30px;
+}
+
+.develop-seat-ribbon {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sc-accent-soft);
+  color: var(--sc-ink);
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .develop-seat-name {
@@ -191,16 +231,17 @@
 }
 
 .develop-seat-period {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--sc-ink-soft);
+  font-family: var(--font-ui);
 }
 
 .develop-seat-note {
   margin: 0 0 8px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--sc-accent);
+  color: #a67c2e;
 }
 
 .develop-seat-features {
