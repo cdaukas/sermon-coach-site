@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { CreditStrip } from "@/components/dashboard/CreditStrip";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
+import { ManageSubscriptionButton } from "@/components/dashboard/ManageSubscriptionButton";
 import { buildCreditStripModel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { createClient } from "@/lib/supabase/server";
@@ -29,6 +30,21 @@ export default async function BuyPage() {
   const subscriberDepleted =
     hasActiveSubscription && usage !== null && usage.used >= usage.limit;
 
+  let stripeCustomerId: string | null = null;
+  if (user && hasActiveSubscription) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("stripe_customer_id")
+      .eq("id", user.id)
+      .maybeSingle();
+    const raw = profile?.stripe_customer_id;
+    stripeCustomerId =
+      typeof raw === "string" && raw.trim() ? raw.trim() : null;
+  }
+
+  const showManageSubscription =
+    hasActiveSubscription && Boolean(stripeCustomerId);
+
   return (
     <main
       className="rounded px-8 py-10"
@@ -54,7 +70,13 @@ export default async function BuyPage() {
       </div>
 
       {stripModel ? (
-        <CreditStrip model={stripModel} showAddCreditsLink={false} />
+        <CreditStrip
+          model={stripModel}
+          showAddCreditsLink={false}
+          action={
+            showManageSubscription ? <ManageSubscriptionButton /> : undefined
+          }
+        />
       ) : null}
 
       {!hasActiveSubscription ? (

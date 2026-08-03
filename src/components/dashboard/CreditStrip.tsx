@@ -9,11 +9,14 @@ type CreditStripProps = {
   model: CreditStripModel;
   /** Hide when already on /dashboard/buy. Default true. */
   showAddCreditsLink?: boolean;
+  /** Optional right-side action (e.g. Manage subscription). Wins over Add credits. */
+  action?: ReactNode;
 };
 
 export function CreditStrip({
   model,
   showAddCreditsLink = true,
+  action,
 }: CreditStripProps) {
   const parts: ReactNode[] = [];
 
@@ -125,7 +128,9 @@ export function CreditStrip({
           </span>
         ))}
       </p>
-      {showAddCreditsLink ? (
+      {action ? (
+        action
+      ) : showAddCreditsLink ? (
         <Link
           href="/dashboard/buy"
           className="shrink-0 no-underline hover:underline"
