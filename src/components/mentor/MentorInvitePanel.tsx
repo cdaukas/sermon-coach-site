@@ -7,6 +7,8 @@ import {
 } from "@/components/auth/AuthForm";
 import { AuthMessage } from "@/components/auth/AuthMessage";
 import { createClient } from "@/lib/supabase/client";
+import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
+import type { MentorSeatType } from "@/lib/mentor/relationships";
 import { browserSiteOrigin } from "@/lib/site-origin";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -16,8 +18,6 @@ const SEAT_CAP_SQLSTATE = "P0001";
 const SEAT_CAP_MESSAGE =
   "seat limit reached: a mentor may hold at most 4 seats";
 
-type SeatType = "debrief" | "evaluation";
-
 type MentorInvitePanelProps = {
   initialDisplayName: string | null;
 };
@@ -25,13 +25,13 @@ type MentorInvitePanelProps = {
 const SEAT_OPTIONS = [
   {
     value: "debrief" as const,
-    title: "Debrief seat · $12/mo",
+    title: `${mentorSeatDisplayName("debrief")} · $12/mo`,
     body: "Four debriefs a month. No score. His evaluations run but stay held until you release one, which you can do once every 90 days.",
     caption: "Start here for anyone in their first few years of preaching.",
   },
   {
     value: "evaluation" as const,
-    title: "Evaluation seat · $25/mo",
+    title: `${mentorSeatDisplayName("evaluation")} · $25/mo`,
     body: "Four evaluations and four debriefs a month. Nothing held. He sees every score when you do.",
     caption: "For a preacher who is ready to be measured against the rubric.",
   },
@@ -56,7 +56,7 @@ export function MentorInvitePanel({
   const [promptOpen, setPromptOpen] = useState(initialDisplayName == null);
   const [skippedName, setSkippedName] = useState(false);
 
-  const [seatType, setSeatType] = useState<SeatType | null>(null);
+  const [seatType, setSeatType] = useState<MentorSeatType | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [capBlocked, setCapBlocked] = useState(false);
@@ -511,8 +511,9 @@ export function MentorInvitePanel({
         className="text-[14px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
       >
-        You can move someone from debrief to evaluation later. Moving up
-        releases everything being held.
+        You can move someone from {mentorSeatDisplayName("debrief")} to{" "}
+        {mentorSeatDisplayName("evaluation")} later. Moving up releases
+        everything being held.
       </p>
 
       {capBlocked ? (

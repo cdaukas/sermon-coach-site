@@ -10,6 +10,8 @@ import {
   parseAcceptMentorInviteResult,
   type AcceptMentorInviteErrorCode,
 } from "@/lib/mentor/invite";
+import type { MentorSeatType } from "@/lib/mentor/relationships";
+import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import { CANONICAL_SITE_ORIGIN } from "@/lib/site-origin";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -35,7 +37,7 @@ const secondaryLinkStyle = {
   borderColor: "var(--sc-rule)",
 } as const;
 
-export type InviteSeatType = "debrief" | "evaluation";
+export type InviteSeatType = MentorSeatType;
 
 type InviteAcceptPanelProps = {
   token: string;
@@ -244,6 +246,13 @@ export function InviteAcceptPanel({
       >
         {mentorName} wants to read your preaching
       </h1>
+
+      <p
+        className="text-[14px] font-medium"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
+        {mentorSeatDisplayName(seatType)} seat
+      </p>
 
       {seatType === "debrief" ? (
         <DebriefDisclosure mentorName={mentorName} />

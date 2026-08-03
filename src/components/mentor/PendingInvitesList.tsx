@@ -7,6 +7,7 @@ import {
   type PendingMentorInvite,
   type RevokeMentorInviteResult,
 } from "@/lib/mentor/relationships";
+import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import { browserSiteOrigin } from "@/lib/site-origin";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,10 +19,6 @@ const QUIET_ACTION = {
   color: "#4a5568",
   cursor: "pointer",
 } as const;
-
-function seatLabel(seatType: PendingMentorInvite["seatType"]): string {
-  return seatType === "debrief" ? "Debrief seat" : "Evaluation seat";
-}
 
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
@@ -141,7 +138,7 @@ function PendingInviteRow({
           className="text-[17px] font-semibold leading-snug tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          {seatLabel(item.seatType)}
+          {mentorSeatDisplayName(item.seatType)}
         </p>
         <p
           className="mt-1.5 text-[13px] leading-relaxed"

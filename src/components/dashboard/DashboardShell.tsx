@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { DashboardRail } from "./DashboardRail";
 import { formatCreditChipLabel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
+import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 type DashboardShellProps = {
@@ -19,10 +20,14 @@ export async function DashboardShell({ children }: DashboardShellProps) {
     : null;
 
   const chip = formatCreditChipLabel(entitlement);
+  const mentoringUiAllowed = user ? isMentoringUiAllowed(user.id) : false;
 
   return (
     <div className="dashboard-shell">
-      <DashboardRail creditChipLabel={chip} />
+      <DashboardRail
+        creditChipLabel={chip}
+        mentoringUiAllowed={mentoringUiAllowed}
+      />
       <div className="dashboard-content">{children}</div>
     </div>
   );

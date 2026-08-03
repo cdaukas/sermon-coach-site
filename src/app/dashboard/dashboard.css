@@ -124,6 +124,145 @@
   border: none;
 }
 
+.dashboard-rail-lock-marker {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9aa1ac;
+  background: none;
+  border: none;
+}
+
+/* Develop-others seats discovery (/dashboard/develop) */
+.develop-seats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.develop-seat-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--sc-panel);
+  box-shadow: var(--sc-shadow);
+  border-radius: 4px;
+  padding: 28px 24px;
+  min-width: 0;
+}
+
+.develop-seat-name {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--sc-ink);
+  letter-spacing: -0.01em;
+}
+
+.develop-seat-tagline {
+  margin: 0 0 20px;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--sc-ink-soft);
+  min-height: 42px;
+}
+
+.develop-seat-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.develop-seat-price {
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--sc-ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.develop-seat-currency {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--sc-ink-soft);
+}
+
+.develop-seat-period {
+  font-size: 13px;
+  color: var(--sc-ink-soft);
+}
+
+.develop-seat-note {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--sc-accent);
+}
+
+.develop-seat-features {
+  list-style: none;
+  margin: 12px 0 24px;
+  padding: 0;
+  flex-grow: 1;
+}
+
+.develop-seat-features li {
+  position: relative;
+  padding: 10px 0 10px 24px;
+  border-bottom: 1px solid var(--sc-rule);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--sc-ink-mid);
+}
+
+.develop-seat-features li:last-child {
+  border-bottom: none;
+}
+
+.develop-seat-features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--sc-accent);
+  font-weight: 700;
+  font-family: var(--font-ui);
+}
+
+.develop-seat-cta {
+  display: block;
+  margin-top: auto;
+  padding: 13px 16px;
+  border: 1px solid var(--sc-ink);
+  border-radius: 4px;
+  background: var(--sc-ink);
+  color: var(--sc-bg);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.develop-seat-cta:hover {
+  background: var(--sc-ink-mid);
+}
+
+@media (max-width: 860px) {
+  .develop-seats-grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+  }
+
+  .develop-seat-tagline {
+    min-height: 0;
+  }
+}
+
 .dashboard-rail-link:hover {
   color: #1a2332;
   background: rgba(166, 124, 46, 0.045);
@@ -188,6 +327,10 @@
   padding: 34px 40px 64px;
   overflow-x: clip;
   box-sizing: border-box;
+}
+
+.dashboard-content:has(.develop-seats-page) {
+  max-width: 1100px;
 }
 
 /* Compact sermon table rows (dashboard home) */

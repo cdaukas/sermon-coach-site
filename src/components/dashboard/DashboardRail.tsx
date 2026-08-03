@@ -17,10 +17,12 @@ type NavItem = {
   shortLabel?: string;
   /** Cost-clarity tag; Sketches and Growth only. */
   freeTag?: boolean;
+  /** Discovery lock for non-allowlisted mentoring access. */
+  locked?: boolean;
   isActive: (pathname: string) => boolean;
 };
 
-const NAV_ITEMS: NavItem[] = [
+const PRIMARY_ITEMS: NavItem[] = [
   {
     href: "/dashboard",
     label: "Sermons",
@@ -43,6 +45,9 @@ const NAV_ITEMS: NavItem[] = [
     freeTag: true,
     isActive: (pathname) => pathname.startsWith("/dashboard/growth"),
   },
+];
+
+const ACCOUNT_ITEMS: NavItem[] = [
   {
     href: "/dashboard/buy",
     label: "Plan and credits",
@@ -53,6 +58,7 @@ const NAV_ITEMS: NavItem[] = [
 
 type DashboardRailProps = {
   creditChipLabel: string;
+  mentoringUiAllowed: boolean;
 };
 
 function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
@@ -64,7 +70,7 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
       className={`dashboard-rail-link${active ? " is-active" : ""}`}
       style={uiFont}
       aria-current={active ? "page" : undefined}
-      aria-label={item.label}
+      aria-label={item.locked ? `${item.label} (locked)` : item.label}
     >
       <span className="dashboard-rail-label-full">{item.label}</span>
       <span className="dashboard-rail-label-short">
@@ -75,14 +81,32 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
           Free
         </span>
       ) : null}
+      {item.locked ? (
+        <span className="dashboard-rail-lock-marker" aria-hidden="true">
+          Lock
+        </span>
+      ) : null}
     </Link>
   );
 }
 
-export function DashboardRail({ creditChipLabel }: DashboardRailProps) {
+export function DashboardRail({
+  creditChipLabel,
+  mentoringUiAllowed,
+}: DashboardRailProps) {
   const pathname = usePathname();
-  const primaryItems = NAV_ITEMS.filter((item) => item.href !== "/dashboard/buy");
-  const accountItems = NAV_ITEMS.filter((item) => item.href === "/dashboard/buy");
+
+  const coachingItem: NavItem = {
+    href: mentoringUiAllowed
+      ? "/dashboard/mentoring"
+      : "/dashboard/develop",
+    label: "Develop others",
+    shortLabel: "Develop",
+    locked: !mentoringUiAllowed,
+    isActive: (path) =>
+      path.startsWith("/dashboard/mentoring") ||
+      path.startsWith("/dashboard/develop"),
+  };
 
   return (
     <aside className="dashboard-rail" aria-label="Dashboard">
@@ -97,13 +121,17 @@ export function DashboardRail({ creditChipLabel }: DashboardRailProps) {
       </Link>
 
       <nav className="dashboard-rail-nav" aria-label="Main">
-        {primaryItems.map((item) => (
+        {PRIMARY_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
         <p className="dashboard-rail-group-label" style={uiFont}>
+          Coaching
+        </p>
+        <NavLink item={coachingItem} pathname={pathname} />
+        <p className="dashboard-rail-group-label" style={uiFont}>
           Account
         </p>
-        {accountItems.map((item) => (
+        {ACCOUNT_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
       </nav>

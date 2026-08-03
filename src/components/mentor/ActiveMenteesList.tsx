@@ -7,6 +7,7 @@ import {
   type ActiveMentorMentee,
   type EndMentorRelationshipResult,
 } from "@/lib/mentor/relationships";
+import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import { createClient } from "@/lib/supabase/client";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -17,10 +18,6 @@ const QUIET_ACTION = {
   color: "#4a5568",
   cursor: "pointer",
 } as const;
-
-function seatLabel(seatType: ActiveMentorMentee["seatType"]): string {
-  return seatType === "debrief" ? "Debrief seat" : "Evaluation seat";
-}
 
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
@@ -125,7 +122,7 @@ function ActiveMenteeRow({
           className="mt-1.5 text-[13px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          {seatLabel(item.seatType)}
+          {mentorSeatDisplayName(item.seatType)}
           {item.acceptedAt ? (
             <>
               <span aria-hidden="true"> · </span>
