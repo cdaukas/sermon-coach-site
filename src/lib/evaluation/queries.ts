@@ -160,7 +160,7 @@ export async function getEvaluationById(
 
   const { data: version, error: versionError } = await supabase
     .from("sermon_versions")
-    .select("sermon_id")
+    .select("sermon_id, content")
     .eq("id", evaluation.sermon_version_id)
     .maybeSingle();
 
@@ -169,6 +169,7 @@ export async function getEvaluationById(
   }
 
   let sermon: EvaluationWithSermon["sermon"] | null = null;
+  let manuscriptContent: string | null = null;
   let resolvedVia: EvaluationWithSermon["resolvedVia"] = "owner";
 
   if (version) {
@@ -183,6 +184,10 @@ export async function getEvaluationById(
     }
 
     sermon = data;
+    if (sermon) {
+      manuscriptContent =
+        typeof version.content === "string" ? version.content : null;
+    }
   }
 
   if (!sermon) {
@@ -205,10 +210,11 @@ export async function getEvaluationById(
       title: context.sermon_title as string,
       primary_passage: (context.primary_passage as string | null) ?? null,
     };
+    manuscriptContent = null;
     resolvedVia = "mentored_context";
   }
 
-  return { evaluation, sermon, resolvedVia };
+  return { evaluation, sermon, manuscriptContent, resolvedVia };
 }
 
 export async function listRecentCompleteEvaluations(

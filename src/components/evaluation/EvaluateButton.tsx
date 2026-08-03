@@ -119,11 +119,13 @@ export function EvaluateButton({
         type="button"
         onClick={handleClick}
         disabled={busy || hasActiveEvaluation || disabled}
-        className="w-full rounded px-5 py-2.5 text-[13px] font-semibold transition-opacity disabled:opacity-60 lg:w-auto"
+        className="w-auto rounded border-0 text-[13px] font-semibold transition-opacity disabled:opacity-60"
         style={{
           ...uiFont,
-          background: "var(--sc-ink)",
+          padding: "13px 26px",
+          background: "#1a2332",
           color: "#faf8f3",
+          borderRadius: 4,
         }}
       >
         {pending ? "Starting…" : polling ? "Evaluating…" : buttonLabel}

@@ -44,6 +44,11 @@ export type EvaluationSermonResolvedVia = "owner" | "mentored_context";
 export type EvaluationWithSermon = {
   evaluation: SermonEvaluationRow;
   sermon: { id: string; title: string; primary_passage: string | null };
+  /**
+   * Manuscript text from the evaluation's sermon_versions row, when the
+   * viewer can read that row (owner path). Null for mentored_context.
+   */
+  manuscriptContent: string | null;
   /** Navigation hint only. Not a permission check. */
   resolvedVia: EvaluationSermonResolvedVia;
 };

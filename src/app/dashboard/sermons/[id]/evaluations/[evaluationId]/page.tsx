@@ -11,14 +11,25 @@ import { EvaluationPdfCapture } from "@/components/evaluation/EvaluationPdfCaptu
 import { EvaluationPrintHeader } from "@/components/evaluation/EvaluationPrintHeader";
 import { IncompleteEvaluationPoller } from "@/components/evaluation/IncompleteEvaluationPoller";
 import { EarlierEvaluations } from "@/components/evaluation/EarlierEvaluations";
+import { ReportEvaluationRerun } from "@/components/evaluation/ReportEvaluationRerun";
+import { ReportManuscriptDisclosure } from "@/components/evaluation/ReportManuscriptDisclosure";
 import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
-import { getEvaluation, listEvaluationsForSermon } from "@/lib/evaluation/queries";
+import {
+  getEvaluation,
+  listEvaluationsForSermon,
+  sermonHasActiveEvaluation,
+} from "@/lib/evaluation/queries";
+import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
+import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
+import { createClient } from "@/lib/supabase/server";
 import "@/app/evaluation-pdf-capture.css";
 import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
 const BACK_LABEL_MENTOR = "Back to mentoring";
+const BACK_HREF_LIBRARY = "/dashboard";
+const BACK_LABEL_LIBRARY = "Back to library";
 
 type EvaluationPageProps = {
   params: Promise<{ id: string; evaluationId: string }>;
@@ -56,16 +67,44 @@ export default async function EvaluationPage({
     notFound();
   }
 
-  const { evaluation, sermon, resolvedVia } = data;
+  const { evaluation, sermon, manuscriptContent, resolvedVia } = data;
   const backHref =
-    resolvedVia === "owner"
-      ? `/dashboard/sermons/${sermonId}`
-      : "/dashboard/mentoring";
+    resolvedVia === "owner" ? BACK_HREF_LIBRARY : "/dashboard/mentoring";
+  const backLabel =
+    resolvedVia === "owner" ? BACK_LABEL_LIBRARY : BACK_LABEL_MENTOR;
 
   const siblingEvaluations =
     resolvedVia === "owner" && !pdfCapture
       ? await listEvaluationsForSermon(sermonId)
       : [];
+
+  const showOwnerReportActions =
+    resolvedVia === "owner" &&
+    !pdfCapture &&
+    evaluation.report_mode !== "debrief";
+
+  let entitlement = null;
+  let hasActiveEvaluation = false;
+  let isMentoredMentee = false;
+
+  if (showOwnerReportActions) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const [nextEntitlement, nextHasActive, nextIsMentored] =
+        await Promise.all([
+          getEvaluationEntitlement(user.id),
+          sermonHasActiveEvaluation(sermonId),
+          viewerHasActiveMentorRelationship(user.id),
+        ]);
+      entitlement = nextEntitlement;
+      hasActiveEvaluation = nextHasActive;
+      isMentoredMentee = nextIsMentored;
+    }
+  }
 
   const debriefReady =
     evaluation.report_mode === "debrief" &&
@@ -74,9 +113,6 @@ export default async function EvaluationPage({
     evaluation.report_mode !== "debrief" && evaluation.result != null;
 
   if (evaluation.status !== "complete" || (!debriefReady && !diagnosticReady)) {
-    const backLabel =
-      resolvedVia === "owner" ? "Back to sermon" : BACK_LABEL_MENTOR;
-
     return (
       <main
         className="rounded px-8 py-10"
@@ -111,6 +147,11 @@ export default async function EvaluationPage({
     dateStyle: "medium",
   }).format(new Date(evaluatedAt));
 
+  const showManuscript =
+    !pdfCapture &&
+    typeof manuscriptContent === "string" &&
+    manuscriptContent.length > 0;
+
   return (
     <main
       className="evaluation-page-main rounded px-6 py-10 md:px-8"
@@ -141,9 +182,7 @@ export default async function EvaluationPage({
             className="inline-block text-[13px] font-medium no-underline hover:underline"
             style={{ ...uiFont, color: "var(--sc-accent)" }}
           >
-            {resolvedVia === "owner"
-              ? `← Back to ${sermon.title}`
-              : `← ${BACK_LABEL_MENTOR}`}
+            {`← ${backLabel}`}
           </Link>
         </div>
       ) : null}
@@ -180,6 +219,19 @@ export default async function EvaluationPage({
           currentEvaluationId={evaluationId}
           evaluations={siblingEvaluations}
         />
+      ) : null}
+
+      {showOwnerReportActions ? (
+        <ReportEvaluationRerun
+          sermonId={sermonId}
+          entitlement={entitlement}
+          hasActiveEvaluation={hasActiveEvaluation}
+          isMentoredMentee={isMentoredMentee}
+        />
+      ) : null}
+
+      {showManuscript ? (
+        <ReportManuscriptDisclosure content={manuscriptContent} />
       ) : null}
 
       {!pdfCapture ? (
