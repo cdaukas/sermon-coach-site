@@ -249,6 +249,16 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
   }
+  .subs.subs-solo {
+    grid-template-columns: 1fr;
+    max-width: 900px;
+  }
+  .subs.subs-solo .tier {
+    width: 100%;
+  }
+  .subs.subs-solo .tier-tagline {
+    min-height: 0;
+  }
   .subs.develop-others {
     grid-template-columns: repeat(3, 1fr);
     max-width: 1100px;
@@ -328,8 +338,8 @@
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   }
   .price-note {
-    font-size: 12.5px;
-    color: var(--accent);
+    font-size: 13px;
+    color: #a67c2e;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -536,7 +546,7 @@
   /* ---------- PACKS ---------- */
   .packs {
     max-width: 1100px;
-    margin: 0 auto;
+    margin: 16px auto 0;
     padding: 0 24px 24px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -760,6 +770,7 @@
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 880px) {
     .subs { grid-template-columns: 1fr; max-width: 480px; }
+    .subs.subs-solo { max-width: 480px; }
     .subs.develop-others { grid-template-columns: 1fr; max-width: 480px; }
     .packs { grid-template-columns: 1fr; max-width: 420px; }
     .tier.featured, .pack.featured, .tier.start-here { margin-top: 16px; }
@@ -873,10 +884,10 @@
   <p>Subscriptions are for preachers in the pulpit most weeks who want a standing rhythm of preparation. Packs are for milestone preaching — a new series, a high-stakes guest slot, the occasional pulpit supply. Same rubric. Same evaluation. Different rhythm.</p>
 </div>
 
-<!-- SUBSCRIPTIONS SECTION -->
+<!-- SECTION 1: YOUR OWN PREACHING -->
 <div id="choose" class="section-header">
-  <h2>Preach regularly? Subscribe.</h2>
-  <p>One tier for individual preachers. One for classrooms.</p>
+  <h2>Your own preaching</h2>
+  <p>Subscribe if you are in the pulpit most weeks. Buy credits if you step in a few times a year.</p>
 </div>
 
 <!-- BILLING TOGGLE -->
@@ -889,10 +900,9 @@
   </div>
 </div>
 
-<!-- SUBSCRIPTION TIERS -->
-<section class="subs">
+<!-- COACH (solo full-width) -->
+<section class="subs subs-solo">
 
-  <!-- COACH -->
   <div class="tier featured">
     <div class="tier-best-for">Most Preachers</div>
     <div class="tier-name">Coach</div>
@@ -915,99 +925,7 @@
     <a href="/checkout?plan=coach&cadence=monthly" class="tier-cta" data-tier-cta="coach">Start with Coach</a>
   </div>
 
-  <!-- CLASSROOM -->
-  <div class="tier">
-    <div class="tier-name">Classroom</div>
-    <div class="tier-tagline">For institutions training preachers — a seminary course, a church planting cohort, a denominational track.</div>
-    <div class="price-row">
-      <span class="price-now"><span class="currency">from $</span><span data-price="cohort">125</span></span>
-      <span class="price-period" data-period="cohort">/mo</span>
-    </div>
-    <div class="price-note" data-note="cohort">$25 per seat, five-seat minimum. Billed by the term.</div>
-    <ul class="tier-features">
-      <li><strong>$25 per seat, per month</strong> — billed by the term, with a five-seat floor</li>
-      <li><strong>4 credits per seat</strong> each month, pooled across the class</li>
-      <li>The instructor seat is free</li>
-      <li>Everything in Coach for every preacher in the class</li>
-      <li>Each preacher keeps a private library — visible to the instructor, never to classmates</li>
-      <li>One invoice for the institution. We set up the class by hand before your term starts</li>
-    </ul>
-    <a href="mailto:chris@sermoncoach.online?subject=Classroom%20interest" class="tier-cta" data-tier-cta="cohort">Tell us about your class</a>
-  </div>
-
 </section>
-
-
-<!-- MENTORING -->
-<div class="section-header">
-  <h2>Mentoring</h2>
-  <p>A Coach subscription evaluates your own preaching; a seat gives another preacher his own account, his own submissions, and a library you can read.</p>
-</div>
-
-<section class="subs develop-others">
-
-  <div class="tier start-here">
-    <div class="pack-best-value">Start Here</div>
-    <div class="tier-name">Apprentice</div>
-    <div class="tier-tagline">For the associate, the lay preacher, the church planter you are bringing along.</div>
-    <div class="price-row">
-      <span class="price-now"><span class="currency">$</span>12</span>
-      <span class="price-period">/mo</span>
-    </div>
-    <div class="price-note">Per seat, billed monthly.</div>
-    <ul class="tier-features">
-      <li>Two submissions a month, drawn from the seat and not from your credits</li>
-      <li>He reads the coaching debrief and How It Preaches</li>
-      <li>The scored evaluation is generated and held until you release it</li>
-      <li>His own account and his own library, which you can read</li>
-    </ul>
-    <a href="mailto:chris@sermoncoach.online?subject=Mentoring%20seat" class="tier-cta">Tell us who you're developing</a>
-  </div>
-
-  <div class="tier">
-    <div class="tier-name">Colleague</div>
-    <div class="tier-tagline">For the peer you are reading, and who is ready to see everything.</div>
-    <div class="price-row">
-      <span class="price-now"><span class="currency">$</span>25</span>
-      <span class="price-period">/mo</span>
-    </div>
-    <div class="price-note">Per seat, billed monthly.</div>
-    <ul class="tier-features">
-      <li>Four submissions a month, drawn from the seat</li>
-      <li>He reads everything the moment it is ready, including the score</li>
-      <li>His own account and his own library, which you can read</li>
-    </ul>
-    <a href="mailto:chris@sermoncoach.online?subject=Mentoring%20seat" class="tier-cta">Tell us who you're developing</a>
-  </div>
-
-  <div class="tier">
-    <div class="tier-name">Classroom</div>
-    <div class="tier-tagline">For institutions training preachers — a seminary course, a church planting cohort, a denominational track.</div>
-    <div class="price-row">
-      <span class="price-now"><span class="currency">from $</span>125</span>
-      <span class="price-period">/mo</span>
-    </div>
-    <div class="price-note">$25 per seat, five-seat minimum. Billed by the term.</div>
-    <ul class="tier-features">
-      <li><strong>$25 per seat, per month</strong> — billed by the term, with a five-seat floor; the instructor seat is free</li>
-      <li><strong>4 credits per seat</strong> each month, pooled across the class</li>
-      <li>Everything in Coach for every preacher in the class, with a private library visible to the instructor, never to classmates</li>
-      <li>One invoice for the institution. We set up the class by hand before your term starts</li>
-    </ul>
-    <a href="mailto:chris@sermoncoach.online?subject=Classroom%20interest" class="tier-cta">Tell us about your class</a>
-  </div>
-
-</section>
-
-
-<!-- OR DIVIDER -->
-<div class="or-divider"><span>Or</span></div>
-
-<!-- PACKS SECTION -->
-<div class="section-header">
-  <h2>Not on a subscription? Buy a pack.</h2>
-  <p>A one-time purchase, no subscription required — from a single guest spot to a full quarter of preaching. Your credits stay valid for 18 months; use them whenever you step into the pulpit.</p>
-</div>
 
 <!-- PACKS -->
 <!-- Pack Stripe Payment Links (inactive on pricing page until in-dashboard purchase):
@@ -1062,9 +980,74 @@
 
 </section>
 
-<!-- INTENSIVE -->
+<p class="pack-note">Start preaching more often and you can subscribe later. Your remaining pack credits stay valid.</p>
+
+<!-- SECTION 2: MENTORING -->
 <div class="section-header" style="margin-top: 56px;">
-  <h2>Or work one on one.</h2>
+  <h2>Mentoring</h2>
+  <p>A seat gives another preacher his own account, his own submissions, and a library you can read.</p>
+</div>
+
+<section class="subs develop-others">
+
+  <div class="tier start-here">
+    <div class="pack-best-value">Start Here</div>
+    <div class="tier-name">Apprentice</div>
+    <div class="tier-tagline">For the associate, the lay preacher, the church planter you are bringing along.</div>
+    <div class="price-row">
+      <span class="price-now"><span class="currency">$</span>12</span>
+      <span class="price-period">/mo</span>
+    </div>
+    <div class="price-note">Per seat, billed monthly.</div>
+    <ul class="tier-features">
+      <li>Two submissions a month, drawn from the seat and not from your credits</li>
+      <li>He reads the coaching debrief and How It Preaches</li>
+      <li>The scored evaluation is generated and held until you release it</li>
+      <li>His own account and his own library, which you can read</li>
+    </ul>
+    <a href="mailto:chris@sermoncoach.online?subject=Mentoring%20seat" class="tier-cta">Tell us who you're developing</a>
+  </div>
+
+  <div class="tier">
+    <div class="tier-name">Colleague</div>
+    <div class="tier-tagline">For the peer you are reading, and who is ready to see everything.</div>
+    <div class="price-row">
+      <span class="price-now"><span class="currency">$</span>25</span>
+      <span class="price-period">/mo</span>
+    </div>
+    <div class="price-note">Per seat, billed monthly.</div>
+    <ul class="tier-features">
+      <li>Four submissions a month, drawn from the seat</li>
+      <li>He reads everything the moment it is ready, including the score</li>
+      <li>His own account and his own library, which you can read</li>
+    </ul>
+    <a href="mailto:chris@sermoncoach.online?subject=Mentoring%20seat" class="tier-cta">Tell us who you're developing</a>
+  </div>
+
+  <div class="tier">
+    <div class="tier-name">Classroom</div>
+    <div class="tier-tagline">For institutions training preachers — a seminary course, a church planting cohort, a denominational track.</div>
+    <div class="price-row">
+      <span class="price-now"><span class="currency">from $</span><span data-price="cohort">125</span></span>
+      <span class="price-period" data-period="cohort">/mo</span>
+    </div>
+    <div class="price-note" data-note="cohort">$25 per seat, five-seat minimum. Billed by the term.</div>
+    <ul class="tier-features">
+      <li><strong>$25 per seat, per month</strong> — billed by the term, with a five-seat floor</li>
+      <li><strong>4 credits per seat</strong> each month, pooled across the class</li>
+      <li>The instructor seat is free</li>
+      <li>Everything in Coach for every preacher in the class</li>
+      <li>Each preacher keeps a private library — visible to the instructor, never to classmates</li>
+      <li>One invoice for the institution. We set up the class by hand before your term starts</li>
+    </ul>
+    <a href="mailto:chris@sermoncoach.online?subject=Classroom%20interest" class="tier-cta" data-tier-cta="cohort">Tell us about your class</a>
+  </div>
+
+</section>
+
+<!-- SECTION 3: WORKING ONE ON ONE -->
+<div class="section-header" style="margin-top: 56px;">
+  <h2>Working one on one</h2>
   <p>A personal preaching intensive. The whole arc of how you preach, not just a single sermon.</p>
 </div>
 
@@ -1088,8 +1071,6 @@
     <div class="intensive-capacity">A few spots open each month. Apply, and we'll reply about fit and timing.</div>
   </div>
 </div>
-
-<p class="pack-note">Start preaching more often and you can subscribe later. Your remaining pack credits stay valid.</p>
 
 <!-- MISSION -->
 <div class="explainer">

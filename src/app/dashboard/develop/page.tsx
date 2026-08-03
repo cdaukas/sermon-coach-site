@@ -74,15 +74,15 @@ const CARDS: SeatCard[] = [
     features: [
       <>
         <strong>$25 per seat, per month</strong>
-        {
-          " — billed by the term, with a five-seat floor; the instructor seat is free"
-        }
+        {" — billed by the term, with a five-seat floor"}
       </>,
       <>
         <strong>4 credits per seat</strong>
         {" each month, pooled across the class"}
       </>,
-      "Everything in Coach for every preacher in the class, with a private library visible to the instructor, never to classmates",
+      "The instructor seat is free",
+      "Everything in Coach for every preacher in the class",
+      "Each preacher keeps a private library — visible to the instructor, never to classmates",
       "One invoice for the institution. We set up the class by hand before your term starts",
     ],
     ctaLabel: CLASSROOM_CTA_LABEL,
