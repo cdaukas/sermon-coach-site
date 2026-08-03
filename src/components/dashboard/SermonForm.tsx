@@ -22,11 +22,21 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 const WORDS_PER_MINUTE = 140;
 
-const contextFieldClassName =
+const contextTextareaClassName =
   "w-full resize-y rounded border px-3 py-2.5 text-[15px] leading-relaxed outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20";
 
-const contextFieldStyle = {
+const contextTextareaStyle = {
   ...uiFont,
+  minHeight: 80,
+  background: "var(--sc-panel)",
+  borderColor: "var(--sc-rule)",
+  color: "var(--sc-ink)",
+};
+
+const manuscriptTextareaStyle = {
+  ...uiFont,
+  minHeight: 280,
+  fieldSizing: "content" as const,
   background: "var(--sc-panel)",
   borderColor: "var(--sc-rule)",
   color: "var(--sc-ink)",
@@ -358,15 +368,10 @@ export function SermonForm({
               }
             }}
             disabled={formDisabled}
-            rows={16}
+            rows={1}
             placeholder="Paste your manuscript or transcript here..."
             className="w-full resize-y rounded border px-3 py-2.5 text-[15px] leading-relaxed outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20"
-            style={{
-              ...uiFont,
-              background: "var(--sc-panel)",
-              borderColor: "var(--sc-rule)",
-              color: "var(--sc-ink)",
-            }}
+            style={manuscriptTextareaStyle}
           />
           {wordCount > 0 ? (
             <p
@@ -483,39 +488,35 @@ export function SermonForm({
         </summary>
 
         <div className="mt-4 flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <AuthLabel htmlFor="sermon-context-occasion">
-              What&apos;s the occasion?
-            </AuthLabel>
-            <textarea
-              id="sermon-context-occasion"
-              name="context-occasion"
-              value={occasion}
-              onChange={(event) => setOccasion(event.target.value)}
-              disabled={formDisabled}
-              rows={2}
-              placeholder="Sunday morning, a funeral, a conference, a guest pulpit, a chapel service."
-              className={contextFieldClassName}
-              style={contextFieldStyle}
-            />
-          </div>
+          <AuthField
+            id="sermon-context-occasion"
+            label="What's the occasion?"
+            inputProps={{
+              name: "context-occasion",
+              type: "text",
+              autoComplete: "off",
+              value: occasion,
+              onChange: (event) => setOccasion(event.target.value),
+              disabled: formDisabled,
+              placeholder:
+                "Sunday morning, a funeral, a conference, a guest pulpit, a chapel service.",
+            }}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <AuthLabel htmlFor="sermon-context-audience">
-              Who&apos;s in the seats?
-            </AuthLabel>
-            <textarea
-              id="sermon-context-audience"
-              name="context-audience"
-              value={audience}
-              onChange={(event) => setAudience(event.target.value)}
-              disabled={formDisabled}
-              rows={2}
-              placeholder="A rural plant, a college town, a Reformed church, a mixed-belief crowd on Easter."
-              className={contextFieldClassName}
-              style={contextFieldStyle}
-            />
-          </div>
+          <AuthField
+            id="sermon-context-audience"
+            label="Who's in the seats?"
+            inputProps={{
+              name: "context-audience",
+              type: "text",
+              autoComplete: "off",
+              value: audience,
+              onChange: (event) => setAudience(event.target.value),
+              disabled: formDisabled,
+              placeholder:
+                "A rural plant, a college town, a Reformed church, a mixed-belief crowd on Easter.",
+            }}
+          />
 
           <div className="flex flex-col gap-1.5">
             <AuthLabel htmlFor="sermon-context-series">Part of a series?</AuthLabel>
@@ -527,8 +528,8 @@ export function SermonForm({
               disabled={formDisabled}
               rows={2}
               placeholder="If this is week three of six, say so. It explains what you don't have to re-establish."
-              className={contextFieldClassName}
-              style={contextFieldStyle}
+              className={contextTextareaClassName}
+              style={contextTextareaStyle}
             />
           </div>
 
@@ -544,8 +545,8 @@ export function SermonForm({
               disabled={formDisabled}
               rows={2}
               placeholder="The thing you'd tell a friend before he read your manuscript."
-              className={contextFieldClassName}
-              style={contextFieldStyle}
+              className={contextTextareaClassName}
+              style={contextTextareaStyle}
             />
           </div>
         </div>

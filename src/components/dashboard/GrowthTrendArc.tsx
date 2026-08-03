@@ -138,6 +138,24 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
   );
   const activePoint = plotted.find((point) => point.evaluationId === activePointId) ?? null;
 
+  // Label first, most recent, lowest, highest — at most four points, no collisions.
+  const labeledScoreIds = new Set<string>();
+  labeledScoreIds.add(firstPoint.evaluationId);
+  labeledScoreIds.add(lastPoint.evaluationId);
+
+  let lowest = firstPoint;
+  let highest = firstPoint;
+  for (const point of plotted) {
+    if (point.compositeWeighted < lowest.compositeWeighted) {
+      lowest = point;
+    }
+    if (point.compositeWeighted > highest.compositeWeighted) {
+      highest = point;
+    }
+  }
+  labeledScoreIds.add(lowest.evaluationId);
+  labeledScoreIds.add(highest.evaluationId);
+
   const linePoints = plotted.map((point) => `${point.x},${point.y}`).join(" ");
 
   return (
@@ -251,7 +269,11 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
                   current === point.evaluationId ? null : point.evaluationId,
                 )
               }
-            />
+            >
+              <title>
+                {point.sermonTitle} · {point.displayScore}
+              </title>
+            </circle>
             <circle
               cx={point.x}
               cy={point.y}
@@ -261,15 +283,17 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
               strokeWidth="1.5"
               pointerEvents="none"
             />
-            <text
-              x={point.x}
-              y={point.y - 10}
-              textAnchor="middle"
-              pointerEvents="none"
-              style={{ ...uiFont, fontSize: "10px", fill: "var(--sc-ink-mid)" }}
-            >
-              {point.displayScore}
-            </text>
+            {labeledScoreIds.has(point.evaluationId) ? (
+              <text
+                x={point.x}
+                y={point.y - 10}
+                textAnchor="middle"
+                pointerEvents="none"
+                style={{ ...uiFont, fontSize: "10px", fill: "var(--sc-ink-mid)" }}
+              >
+                {point.displayScore}
+              </text>
+            ) : null}
           </g>
         ))}
 

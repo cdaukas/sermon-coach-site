@@ -7,21 +7,9 @@ export function formatEvaluationCreditLine(
     return null;
   }
 
-  if (entitlement.creditSource === "subscription" && entitlement.usage) {
-    const remaining = Math.max(
-      0,
-      entitlement.usage.limit - entitlement.usage.used,
-    );
-    return `This uses one credit. You have ${remaining} left this month.`;
-  }
-
-  if (entitlement.creditSource === "pack" && entitlement.packRemaining > 0) {
-    return `${entitlement.packRemaining} pack credit${entitlement.packRemaining === 1 ? "" : "s"} remaining`;
-  }
-
-  if (entitlement.creditSource === "free" && entitlement.freeRemaining > 0) {
+  if (entitlement.creditSource === "free") {
     return "Your first evaluation is free.";
   }
 
-  return null;
+  return "This uses one credit.";
 }
