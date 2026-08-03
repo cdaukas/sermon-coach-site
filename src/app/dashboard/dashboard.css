@@ -157,6 +157,7 @@
   gap: 20px;
   padding-top: 14px;
   overflow: visible;
+  align-items: stretch;
 }
 
 .develop-seat-card {
@@ -166,14 +167,17 @@
   background: var(--sc-panel);
   box-shadow: var(--sc-shadow);
   border-radius: 4px;
-  padding: 28px 24px;
+  border: none;
+  padding: 32px 28px;
   min-width: 0;
   overflow: visible;
+  text-align: center;
 }
 
 .develop-seat-card.is-start-here {
   border-top: 3px solid var(--sc-accent-soft);
-  padding-top: 30px;
+  box-shadow: var(--sc-shadow-lift);
+  padding-top: 32px;
 }
 
 .develop-seat-ribbon {
@@ -212,6 +216,7 @@
 .develop-seat-price-row {
   display: flex;
   align-items: baseline;
+  justify-content: center;
   gap: 8px;
   margin-bottom: 6px;
 }
@@ -249,6 +254,7 @@
   margin: 12px 0 24px;
   padding: 0;
   flex-grow: 1;
+  text-align: left;
 }
 
 .develop-seat-features li {
@@ -276,6 +282,8 @@
 .develop-seat-cta {
   display: block;
   margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
   padding: 13px 16px;
   border: 1px solid var(--sc-ink);
   border-radius: 4px;
@@ -293,6 +301,132 @@
   background: var(--sc-ink-mid);
 }
 
+/* Buy-page pack cards — match pricing.html .pack */
+.dashboard-pack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.dashboard-pack-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--sc-panel);
+  box-shadow: var(--sc-shadow);
+  border-radius: 4px;
+  border: none;
+  padding: 32px 28px;
+  min-width: 0;
+  text-align: center;
+  overflow: visible;
+}
+
+.dashboard-pack-card.is-featured {
+  box-shadow: var(--sc-shadow-lift);
+  border-top: 3px solid var(--sc-accent-soft);
+}
+
+.dashboard-pack-ribbon {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sc-accent-soft);
+  color: var(--sc-ink);
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashboard-pack-name {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--sc-ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.dashboard-pack-price {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--sc-ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.dashboard-pack-per {
+  font-size: 13px;
+  color: var(--sc-ink-soft);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+
+.dashboard-pack-tagline {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--sc-ink-soft);
+  line-height: 1.5;
+}
+
+.dashboard-pack-features {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.dashboard-pack-features li {
+  position: relative;
+  padding: 8px 0 8px 22px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--sc-ink-mid);
+  border-bottom: 1px solid var(--sc-rule);
+}
+
+.dashboard-pack-features li:last-child {
+  border-bottom: none;
+}
+
+.dashboard-pack-features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--sc-accent);
+  font-weight: 700;
+}
+
+.dashboard-pack-cta {
+  display: block;
+  margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border: 1px solid var(--sc-ink);
+  border-radius: 4px;
+  background: var(--sc-ink);
+  color: var(--sc-bg);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.dashboard-pack-cta:hover {
+  background: var(--sc-ink-mid);
+}
+
 @media (max-width: 860px) {
   .develop-seats-grid {
     grid-template-columns: 1fr;
@@ -301,6 +435,11 @@
 
   .develop-seat-tagline {
     min-height: 0;
+  }
+
+  .dashboard-pack-grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
   }
 }
 

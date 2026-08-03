@@ -54,97 +54,36 @@ const BUY_PACK_CARDS: BuyPackCard[] = [
 
 export function BuyPackCards() {
   return (
-    <div className="grid items-stretch gap-3 sm:grid-cols-3">
+    <div className="dashboard-pack-grid">
       {BUY_PACK_CARDS.map((card) => (
         <div
           key={card.packKey}
-          className="relative flex flex-col rounded border px-5 pb-5"
-          style={{
-            background: "var(--sc-panel)",
-            borderColor: "var(--sc-rule)",
-            borderTopWidth: card.featured ? "3px" : "1px",
-            borderTopColor: card.featured
-              ? "var(--sc-accent-soft)"
-              : "var(--sc-rule)",
-            paddingTop: card.featured ? "30px" : "20px",
-            boxShadow: card.featured
-              ? "0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06)"
-              : "0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04)",
-          }}
+          className={`dashboard-pack-card${card.featured ? " is-featured" : ""}`}
         >
           {card.featured ? (
-            <div
-              style={{
-                ...uiFont,
-                position: "absolute",
-                top: -11,
-                left: "50%",
-                transform: "translateX(-50%)",
-                background: "var(--sc-accent-soft)",
-                color: "var(--sc-ink)",
-                padding: "4px 12px",
-                borderRadius: 3,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <div className="dashboard-pack-ribbon" style={uiFont}>
               Best value
             </div>
           ) : null}
 
-          <div
-            className="sc-heading text-[18px] font-semibold"
-            style={{ color: "var(--sc-ink)" }}
-          >
+          <div className="dashboard-pack-name" style={serifFont}>
             {card.name}
           </div>
 
-          <div className="mt-1 flex items-baseline gap-2">
-            <span
-              className="text-[26px] font-semibold"
-              style={{ ...uiFont, color: "var(--sc-ink)" }}
-            >
-              {card.price}
-            </span>
+          <div className="dashboard-pack-price" style={serifFont}>
+            {card.price}
           </div>
-          <div
-            className="text-[12px]"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          >
+          <div className="dashboard-pack-per" style={uiFont}>
             {card.perEval}
           </div>
 
-          <p
-            className="pack-tagline mt-2 mb-0"
-            style={{
-              ...serifFont,
-              fontSize: 14,
-              fontStyle: "italic",
-              color: "#4a5568",
-            }}
-          >
+          <p className="dashboard-pack-tagline" style={serifFont}>
             {card.tagline}
           </p>
 
-          <ul
-            className="mt-3 mb-4 list-none space-y-2"
-            style={{ flexGrow: 1 }}
-          >
+          <ul className="dashboard-pack-features">
             {card.features.map((f, i) => (
-              <li
-                key={i}
-                className="relative pl-5 text-[13px]"
-                style={{ color: "var(--sc-ink-mid)" }}
-              >
-                <span
-                  className="absolute left-0 font-bold"
-                  style={{ ...uiFont, color: "var(--sc-accent)" }}
-                >
-                  {"\u2713"}
-                </span>
+              <li key={i} style={uiFont}>
                 {f}
               </li>
             ))}
@@ -152,13 +91,8 @@ export function BuyPackCards() {
 
           <Link
             href={buildPackCheckoutPath(card.packKey)}
-            className="mt-auto block w-full rounded border px-4 py-2.5 text-center text-[13px] font-semibold tracking-wide no-underline transition-colors"
-            style={{
-              ...uiFont,
-              background: "var(--sc-ink)",
-              color: "var(--sc-bg)",
-              borderColor: "var(--sc-ink)",
-            }}
+            className="dashboard-pack-cta"
+            style={uiFont}
           >
             {card.ctaLabel}
           </Link>
