@@ -4,7 +4,7 @@ import { ActiveMenteesList } from "@/components/mentor/ActiveMenteesList";
 import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
 import { MentoredSubmissionsList } from "@/components/mentor/MentoredSubmissionsList";
 import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
-import { listMentorSeatsForMentor } from "@/lib/mentor/relationships";
+import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
 import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
