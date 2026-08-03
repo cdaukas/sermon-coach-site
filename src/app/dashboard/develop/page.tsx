@@ -92,14 +92,7 @@ const CARDS: SeatCard[] = [
 
 export default function DevelopPage() {
   return (
-    <main
-      className="develop-seats-page rounded px-8 py-10"
-      style={{
-        background: "var(--sc-panel)",
-        border: "1px solid var(--sc-rule)",
-        boxShadow: "var(--sc-shadow-lift)",
-      }}
-    >
+    <main className="develop-seats-page">
       <div className="mb-8">
         <h1
           className="text-[32px] font-semibold leading-tight tracking-tight"

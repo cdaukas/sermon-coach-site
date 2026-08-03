@@ -46,14 +46,7 @@ export default async function BuyPage() {
     hasActiveSubscription && Boolean(stripeCustomerId);
 
   return (
-    <main
-      className="rounded px-8 py-10"
-      style={{
-        background: "var(--sc-panel)",
-        border: "1px solid var(--sc-rule)",
-        boxShadow: "var(--sc-shadow-lift)",
-      }}
-    >
+    <main>
       <div className="mb-8">
         <p
           className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
