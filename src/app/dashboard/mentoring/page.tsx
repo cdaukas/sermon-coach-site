@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ActiveMenteesList } from "@/components/mentor/ActiveMenteesList";
 import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
 import { MentoredSubmissionsList } from "@/components/mentor/MentoredSubmissionsList";
+import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
+import { listMentorSeatsForMentor } from "@/lib/mentor/relationships";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
 import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
@@ -34,7 +37,10 @@ export default async function MentoringPage() {
   initialDisplayName =
     typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
 
-  const submissions = await listMentoredEvaluationsForMentor();
+  const [submissions, seats] = await Promise.all([
+    listMentoredEvaluationsForMentor(),
+    listMentorSeatsForMentor(),
+  ]);
 
   return (
     <main
@@ -62,6 +68,10 @@ export default async function MentoringPage() {
       </div>
 
       <MentorInvitePanel initialDisplayName={initialDisplayName} />
+
+      <PendingInvitesList invites={seats.pending} />
+
+      <ActiveMenteesList mentees={seats.active} />
 
       <MentoredSubmissionsList submissions={submissions} />
     </main>
