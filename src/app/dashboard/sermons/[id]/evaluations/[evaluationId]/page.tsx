@@ -22,7 +22,6 @@ import {
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
 import { createClient } from "@/lib/supabase/server";
-import "@/app/evaluation-pdf-capture.css";
 import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -155,6 +154,7 @@ export default async function EvaluationPage({
   return (
     <main
       className="evaluation-page-main rounded px-6 py-10 md:px-8"
+      data-pdf-capture={pdfCapture ? "1" : undefined}
       style={{
         background: "var(--sc-panel)",
         border: pdfCapture ? undefined : "1px solid var(--sc-rule)",

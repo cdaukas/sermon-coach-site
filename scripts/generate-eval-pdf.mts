@@ -241,7 +241,7 @@ async function waitForEvaluationRender(page: Page): Promise<void> {
       break-inside: avoid !important;
       page-break-inside: avoid !important;
     }
-    html[data-pdf-capture="1"] .evaluation-category-card > header,
+    .evaluation-category-card > header,
     [data-pdf-bond="1"] > header {
       min-height: 0 !important;
       height: auto !important;

@@ -1,3 +1,9 @@
+/**
+ * Single source of truth for evaluation print and Puppeteer PDF export
+ * (generate-eval-pdf.mts uses emulateMediaType("print")).
+ *
+ * Do not reintroduce a parallel capture stylesheet that fights these rules.
+ */
 .print-only {
   display: none;
 }
@@ -12,7 +18,6 @@
     color: var(--sc-ink) !important;
     font-size: 11pt;
     line-height: 1.45;
-    counter-reset: page;
   }
 
   .print-only {
@@ -21,13 +26,35 @@
 
   .screen-only,
   .dashboard-shell > header,
-  .dashboard-app-header {
+  .dashboard-app-header,
+  .dashboard-rail {
     display: none !important;
   }
 
-  .dashboard-shell {
+  .dashboard-shell,
+  .dashboard-shell--pdf-export {
     max-width: none !important;
     padding: 0 !important;
+  }
+
+  .dashboard-content--pdf-export {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  /* Export shell wordmark (rail is not in the tree during ?pdf=1). */
+  .evaluation-pdf-export-wordmark {
+    display: block !important;
+    margin: 0 0 0.85rem;
+    padding: 0 0 0.55rem;
+    border-bottom: 1px solid var(--sc-rule);
+    font-family: var(--font-ui);
+    font-size: 11pt;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sc-ink);
   }
 
   .evaluation-page-main {
@@ -36,6 +63,161 @@
     background: #fff !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  nextjs-portal {
+    display: none !important;
+  }
+
+  /* —— Cover page (PDF export with &for=) —— */
+  .evaluation-pdf-cover {
+    display: flex;
+    flex-direction: column;
+    min-height: 10in;
+    break-after: page;
+    page-break-after: always;
+    background: #fff;
+  }
+
+  .evaluation-pdf-cover-band {
+    background: var(--sc-ink);
+    padding: 0.55in 0.65in 0.45in;
+  }
+
+  .evaluation-pdf-cover-wordmark {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sc-accent-soft);
+  }
+
+  .evaluation-pdf-cover-band-rule {
+    margin-top: 0.45rem;
+    width: 2.5rem;
+    height: 2px;
+    background: var(--sc-accent);
+  }
+
+  .evaluation-pdf-cover-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 0.65in 0.65in 0.5in;
+  }
+
+  .evaluation-pdf-cover-eyebrow {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sc-accent);
+  }
+
+  .evaluation-pdf-cover-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-pdf-cover-passage {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-pdf-cover-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem 1.5rem;
+    margin: 1.35rem 0 1.5rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--sc-rule);
+    border-bottom: 1px solid var(--sc-rule);
+  }
+
+  .evaluation-pdf-cover-facts dt {
+    margin: 0 0 0.2rem;
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-pdf-cover-facts dd {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-pdf-cover-prepared {
+    margin: 0 0 1.1rem;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-pdf-cover-prepared span {
+    color: var(--sc-ink);
+    font-weight: 600;
+  }
+
+  .evaluation-pdf-cover-copy p {
+    margin: 0 0 0.85rem;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .evaluation-pdf-cover-copy p:last-child {
+    margin-bottom: 0;
+  }
+
+  .evaluation-pdf-cover-spacer {
+    flex: 1;
+    min-height: 0.35in;
+  }
+
+  .evaluation-pdf-cover-cta {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border-left: 3px solid var(--sc-accent);
+    background: var(--sc-accent-pale);
+  }
+
+  .evaluation-pdf-cover-cta-lead {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-pdf-cover-cta-url {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    color: var(--sc-accent);
+  }
+
+  .evaluation-pdf-cover-cta-url a {
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
   }
 
   .evaluation-print-header {
@@ -88,10 +270,6 @@
     color: var(--sc-ink-soft);
     text-align: center;
     background: #fff;
-  }
-
-  .evaluation-print-footer::after {
-    content: " · page " counter(page);
   }
 
   .evaluation-report-meta {
@@ -155,9 +333,11 @@
     page-break-inside: avoid;
   }
 
+  /*
+   * Category cards are tall; keep break-inside auto so the first category can
+   * fill the lower half of page 1. Criteria blocks stay avoid (below).
+   */
   .evaluation-category-card {
-    break-inside: avoid;
-    page-break-inside: avoid;
     margin-bottom: 1rem !important;
     box-shadow: none !important;
     border: 1px solid var(--sc-rule) !important;
@@ -194,6 +374,10 @@
   }
 
   .evaluation-criterion > summary span[aria-hidden] {
+    display: none !important;
+  }
+
+  .evaluation-disclosure-chevron {
     display: none !important;
   }
 
@@ -292,12 +476,15 @@
   }
 
   .evaluation-methodology {
+    break-before: page;
+    page-break-before: always;
     break-inside: avoid-page;
     page-break-inside: avoid;
     box-shadow: none !important;
     border: 1px solid var(--sc-rule) !important;
     border-top: 2px solid var(--sc-ink) !important;
     margin-top: 1rem !important;
+    line-height: 1.35;
   }
 
   .evaluation-methodology > summary span[aria-hidden] {
@@ -307,6 +494,8 @@
   .evaluation-methodology > summary {
     break-after: avoid;
     page-break-after: avoid;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
 
   .evaluation-methodology table tbody tr {
@@ -338,8 +527,23 @@
     border: 1px solid var(--sc-rule) !important;
   }
 
+  summary {
+    list-style: none !important;
+  }
+
+  summary::marker,
+  summary::-webkit-details-marker {
+    display: none !important;
+    content: none !important;
+  }
+
   a {
     color: var(--sc-ink) !important;
     text-decoration: none !important;
   }
+}
+
+/* Screen: export wordmark only needed under print media */
+.evaluation-pdf-export-wordmark {
+  display: none;
 }

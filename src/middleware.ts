@@ -6,10 +6,21 @@ import {
 } from "@/lib/auth/acquisition-gate";
 import { START_PATH } from "@/lib/auth/start";
 
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+/** Request header so Server Components can omit dashboard chrome for PDF export. */
+const PDF_CAPTURE_HEADER = "x-sc-pdf-capture";
+
+function nextWithRequestHeaders(request: NextRequest): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  if (request.nextUrl.searchParams.get("pdf") === "1") {
+    requestHeaders.set(PDF_CAPTURE_HEADER, "1");
+  }
+  return NextResponse.next({
+    request: { headers: requestHeaders },
   });
+}
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = nextWithRequestHeaders(request);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,9 +34,7 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = nextWithRequestHeaders(request);
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
