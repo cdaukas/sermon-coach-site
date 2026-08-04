@@ -317,14 +317,6 @@
     color: var(--sc-ink-soft) !important;
   }
 
-  .evaluation-score-weight {
-    display: block !important;
-    margin-top: 0.35rem;
-    font-family: var(--font-ui);
-    font-size: 9pt;
-    color: var(--sc-ink-soft) !important;
-  }
-
   .evaluation-verdict-panel {
     border-left: 2px solid var(--sc-accent) !important;
     background: #fff !important;

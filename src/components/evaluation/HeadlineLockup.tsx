@@ -37,9 +37,6 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
         >
           See methodology for score
         </p>
-        <p className="evaluation-score-weight print-only">
-          {scoring.composite_weighted}/55 weighted
-        </p>
       </div>
       <div
         className="evaluation-verdict-panel flex flex-col justify-center border-l-[3px] px-8 py-9"
