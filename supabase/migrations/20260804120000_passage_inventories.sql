@@ -27,7 +27,7 @@ comment on column public.passage_inventories.passage_ref_raw is
   'Passage as the preacher (or operator) supplied it before normalization.';
 
 comment on column public.passage_inventories.passage_ref_normalized is
-  'Canonical key: full book name, colon separator, hyphen range, no spaces (e.g. Hebrews 3:1-6).';
+  'Canonical key: full English book name; whole chapter (Hebrews 3), same-chapter range (Hebrews 3:1-6), or cross-chapter range (1 Corinthians 10:31-11:1). Single-chapter books use explicit 1:verse form (2 John 1:1-13).';
 
 comment on column public.passage_inventories.contested_cruxes is
   'jsonb array of { crux, positions[], why_it_matters }. Variable-length structured list; not flattened.';
