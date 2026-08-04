@@ -5,6 +5,10 @@ import type {
   GrowthReportPresentation,
   QuotePair,
 } from "@/lib/evaluation/growth-report-types";
+import {
+  GROWTH_RUBRIC_BOUNDARY_CRITERION_MESSAGE,
+  GROWTH_RUBRIC_BOUNDARY_PAIR_DELTA_MESSAGE,
+} from "@/lib/evaluation/growth-report-types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -60,18 +64,6 @@ const deltaToneStyles = {
 
 const CRITERION_SCORE_COLUMN_WIDTH = "4.5rem";
 
-const criterionMovementTableClassName =
-  "w-full min-w-[520px] table-fixed border-collapse";
-
-const criterionMovementColGroup = (
-  <colgroup>
-    <col />
-    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
-    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
-    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
-  </colgroup>
-);
-
 const CRITERION_DISPLAY_LABELS: Record<string, string> = {
   "Fallen Condition Focus": "Fallen condition focus",
 };
@@ -85,7 +77,8 @@ function OverallMovementPanel({
 }: {
   headlines: GrowthReportHeadlines;
 }) {
-  const { composite_weighted_delta: delta } = headlines;
+  const { composite_weighted_delta: delta, spans_rubric_boundary: spansBoundary } =
+    headlines;
   const bandChanged = headlines.band_a !== headlines.band_b;
 
   return (
@@ -97,7 +90,7 @@ function OverallMovementPanel({
         className="mb-4 text-[20px] font-semibold"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Overall movement
+        {spansBoundary ? "Overall scores" : "Overall movement"}
       </h2>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -132,17 +125,41 @@ function OverallMovementPanel({
         </span>
       </div>
 
-      <p className="text-[15px] leading-relaxed" style={{ ...uiFont, color: "var(--sc-ink)" }}>
-        {delta > 0 ? "+" : ""}
-        {delta} weighted points · {headlines.display_score_a} → {headlines.display_score_b}{" "}
-        / 10 display
-      </p>
+      {spansBoundary ? (
+        <>
+          <p
+            className="mb-3 text-[15px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink)" }}
+          >
+            {headlines.display_score_a} → {headlines.display_score_b} / 10 display
+          </p>
+          <p
+            className="text-[15px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            role="status"
+          >
+            {GROWTH_RUBRIC_BOUNDARY_PAIR_DELTA_MESSAGE}
+          </p>
+        </>
+      ) : (
+        <p className="text-[15px] leading-relaxed" style={{ ...uiFont, color: "var(--sc-ink)" }}>
+          {delta > 0 ? "+" : ""}
+          {delta} weighted points · {headlines.display_score_a} → {headlines.display_score_b}{" "}
+          / 10 display
+        </p>
+      )}
     </section>
   );
 }
 
-function CriterionMovementRow({ row }: { row: GrowthReportCriterionDelta }) {
-  const tone = deltaTone(row.delta);
+function CriterionMovementRow({
+  row,
+  spansBoundary,
+}: {
+  row: GrowthReportCriterionDelta;
+  spansBoundary: boolean;
+}) {
+  const tone = spansBoundary ? "held" : deltaTone(row.delta);
   const toneStyle = deltaToneStyles[tone];
 
   return (
@@ -188,13 +205,14 @@ function CriterionMovementRow({ row }: { row: GrowthReportCriterionDelta }) {
         className="px-4 py-3 text-right text-[14px] font-semibold tabular-nums"
         style={{ ...uiFont, color: toneStyle.color }}
       >
-        {formatCriterionDelta(row.delta)}
+        {spansBoundary ? "—" : formatCriterionDelta(row.delta)}
       </td>
     </tr>
   );
 }
 
 function CriterionMovementTable({ data }: { data: GrowthReportPresentation }) {
+  const spansBoundary = data.spansRubricBoundary;
   const deltasByCategory = new Map<number, GrowthReportCriterionDelta[]>();
 
   for (const row of data.criterionDeltas) {
@@ -203,20 +221,23 @@ function CriterionMovementTable({ data }: { data: GrowthReportPresentation }) {
     deltasByCategory.set(row.category, rows);
   }
 
+  const tableClassName = "w-full min-w-[520px] table-fixed border-collapse";
+
   return (
     <section className="mb-10">
       <h2
         className="mb-2 text-[22px] font-semibold"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Criterion movement
+        {spansBoundary ? "Criterion scores" : "Criterion movement"}
       </h2>
       <p
         className="mb-6 text-[14px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        All eleven rubric criteria — baseline (A) to current (B). Green marks improvement,
-        muted rows held steady.
+        {spansBoundary
+          ? GROWTH_RUBRIC_BOUNDARY_CRITERION_MESSAGE
+          : "All eleven rubric criteria — baseline (A) to current (B). Green marks improvement, muted rows held steady."}
       </p>
 
       <div className="flex flex-col gap-5">
@@ -246,8 +267,13 @@ function CriterionMovementTable({ data }: { data: GrowthReportPresentation }) {
               </header>
 
               <div className="overflow-x-auto">
-                <table className={criterionMovementTableClassName}>
-                  {criterionMovementColGroup}
+                <table className={tableClassName}>
+                  <colgroup>
+                    <col />
+                    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
+                    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
+                    <col style={{ width: CRITERION_SCORE_COLUMN_WIDTH }} />
+                  </colgroup>
                   <thead>
                     <tr
                       className="border-b text-left"
@@ -281,7 +307,11 @@ function CriterionMovementTable({ data }: { data: GrowthReportPresentation }) {
                   </thead>
                   <tbody>
                     {rows.map((row) => (
-                      <CriterionMovementRow key={row.id} row={row} />
+                      <CriterionMovementRow
+                        key={row.id}
+                        row={row}
+                        spansBoundary={spansBoundary}
+                      />
                     ))}
                   </tbody>
                 </table>
@@ -397,7 +427,7 @@ function QuotePairCard({
 }
 
 export function GrowthReportView({ data }: GrowthReportViewProps) {
-  const { headlines, quotePairs } = data;
+  const { headlines, quotePairs, spansRubricBoundary } = data;
   const baselineScore = headlines.display_score_a;
   const currentScore = headlines.display_score_b;
 
@@ -428,7 +458,7 @@ export function GrowthReportView({ data }: GrowthReportViewProps) {
         className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        How your preaching is moving
+        {spansRubricBoundary ? "Two evaluations, two rubrics" : "How your preaching is moving"}
       </h1>
 
       <div className="mb-8 grid gap-4 md:grid-cols-2">
@@ -481,7 +511,8 @@ export function GrowthReportView({ data }: GrowthReportViewProps) {
 
       <CriterionMovementTable data={data} />
 
-      {quotePairs.length > 0 ? (
+      {/* Spanning pairs: hide "Where you moved" — it asserts preacher movement. */}
+      {spansRubricBoundary ? null : quotePairs.length > 0 ? (
         <section className="mt-10">
           <h2
             className="mb-2 text-[22px] font-semibold"

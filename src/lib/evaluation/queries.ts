@@ -301,7 +301,9 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
 
   const { data, error } = await supabase
     .from("sermon_evaluations")
-    .select("id, completed_at, created_at, sermon_version_id, overall_score")
+    .select(
+      "id, completed_at, created_at, sermon_version_id, overall_score, prompt_version",
+    )
     .eq("status", "complete")
     .not("result", "is", null)
     .not("completed_at", "is", null)
@@ -364,6 +366,10 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
       completedAt: row.completed_at,
       createdAt: row.created_at,
       compositeWeighted: row.overall_score,
+      promptVersion:
+        typeof row.prompt_version === "string" && row.prompt_version.trim()
+          ? row.prompt_version.trim()
+          : "unknown",
     });
   }
 

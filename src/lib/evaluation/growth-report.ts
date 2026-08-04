@@ -27,6 +27,12 @@ export type {
   RecentCompleteEvaluationItem,
 } from "./growth-report-types";
 
+export {
+  GROWTH_RUBRIC_BOUNDARY_CRITERION_MESSAGE,
+  GROWTH_RUBRIC_BOUNDARY_MARKER_LABEL,
+  GROWTH_RUBRIC_BOUNDARY_PAIR_DELTA_MESSAGE,
+} from "./growth-report-types";
+
 export const MAX_QUOTE_PAIRS = 3;
 
 export type GrowthReportEvaluationSnapshot = {
@@ -35,6 +41,7 @@ export type GrowthReportEvaluationSnapshot = {
   sermonTitle: string;
   completedAt: string;
   createdAt: string;
+  promptVersion: string;
   result: EvaluationResultStrict;
 };
 
@@ -54,6 +61,14 @@ export type CriterionScoreForPairing = {
   isDoubleWeighted: boolean;
 };
 
+/** True when two evaluations were scored under different instruments. */
+export function growthPairSpansRubricBoundary(
+  baselinePromptVersion: string,
+  currentPromptVersion: string,
+): boolean {
+  return baselinePromptVersion.trim() !== currentPromptVersion.trim();
+}
+
 function toSnapshot(
   row: EvaluationWithSermon & {
     evaluation: { result: EvaluationResultStrict; completed_at: string | null };
@@ -70,6 +85,11 @@ function toSnapshot(
     sermonTitle: row.sermon.title,
     completedAt,
     createdAt: row.evaluation.created_at,
+    promptVersion:
+      typeof row.evaluation.prompt_version === "string" &&
+      row.evaluation.prompt_version.trim()
+        ? row.evaluation.prompt_version.trim()
+        : "unknown",
     result: row.evaluation.result,
   };
 }
@@ -135,6 +155,10 @@ export function buildGrowthReportHeadlines(
 ): GrowthReportHeadlines {
   const composite_weighted_a = baseline.result.scoring.composite_weighted;
   const composite_weighted_b = current.result.scoring.composite_weighted;
+  const spans_rubric_boundary = growthPairSpansRubricBoundary(
+    baseline.promptVersion,
+    current.promptVersion,
+  );
 
   return {
     composite_weighted_a,
@@ -144,6 +168,7 @@ export function buildGrowthReportHeadlines(
     display_score_b: formatDisplayScoreBare(composite_weighted_b),
     band_a: baseline.result.scoring.band,
     band_b: current.result.scoring.band,
+    spans_rubric_boundary,
   };
 }
 
@@ -151,17 +176,23 @@ export function enrichGrowthReportData(data: {
   baseline: GrowthReportEvaluationSnapshot;
   current: GrowthReportEvaluationSnapshot;
 }): GrowthReportData {
-  const enriched = {
+  const spansBoundary = growthPairSpansRubricBoundary(
+    data.baseline.promptVersion,
+    data.current.promptVersion,
+  );
+
+  return {
     ...data,
     criterionDeltas: buildCriterionDeltas(data.baseline, data.current),
     headlines: buildGrowthReportHeadlines(data.baseline, data.current),
-    quotePairs: buildQuotePairs(
-      flattenCriteriaForPairing(data.baseline.result),
-      flattenCriteriaForPairing(data.current.result),
-    ),
+    // Quote pairs claim movement; omit when instruments differ.
+    quotePairs: spansBoundary
+      ? []
+      : buildQuotePairs(
+          flattenCriteriaForPairing(data.baseline.result),
+          flattenCriteriaForPairing(data.current.result),
+        ),
   };
-
-  return enriched;
 }
 
 /** Strips server-only evaluation payloads for presentational components. */
@@ -185,6 +216,7 @@ export function toGrowthReportPresentation(
     criterionDeltas: data.criterionDeltas,
     headlines: data.headlines,
     quotePairs: data.quotePairs,
+    spansRubricBoundary: data.headlines.spans_rubric_boundary,
   };
 }
 

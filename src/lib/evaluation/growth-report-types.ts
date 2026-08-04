@@ -16,6 +16,8 @@ export type TrendArcEvaluationItem = {
   completedAt: string;
   createdAt: string;
   compositeWeighted: number;
+  /** Scoring instrument that produced this point; used to mark version boundaries. */
+  promptVersion: string;
 };
 
 export type GrowthReportCriterionDelta = {
@@ -36,6 +38,11 @@ export type GrowthReportHeadlines = {
   display_score_b: string;
   band_a: string;
   band_b: string;
+  /**
+   * True when baseline and current were scored under different prompt versions.
+   * Numeric deltas are not a measure of preaching when this is true.
+   */
+  spans_rubric_boundary: boolean;
 };
 
 export type QuotePairState = "pair" | "baseline_only" | "current_only";
@@ -69,4 +76,15 @@ export type GrowthReportPresentation = {
   criterionDeltas: GrowthReportCriterionDelta[];
   headlines: GrowthReportHeadlines;
   quotePairs: QuotePair[];
+  /** Same as headlines.spans_rubric_boundary; convenience for view layer. */
+  spansRubricBoundary: boolean;
 };
+
+/** Pastor-facing strings for rubric-version discontinuity (approved copy). */
+export const GROWTH_RUBRIC_BOUNDARY_MARKER_LABEL = "Rubric updated";
+
+export const GROWTH_RUBRIC_BOUNDARY_PAIR_DELTA_MESSAGE =
+  "The rubric changed between these two sermons, so the difference between the scores is not a measure of your preaching. Both scores are still shown.";
+
+export const GROWTH_RUBRIC_BOUNDARY_CRITERION_MESSAGE =
+  "Not comparable across a rubric change.";

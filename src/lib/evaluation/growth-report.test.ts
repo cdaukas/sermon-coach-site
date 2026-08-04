@@ -58,6 +58,7 @@ function makeSnapshot(
   completedAt: string,
   compositeWeighted: number,
   createdAt: string = completedAt,
+  promptVersion: string = "v3.3",
 ): GrowthReportEvaluationSnapshot {
   const result = cloneFixture();
   result.scoring.composite_weighted = compositeWeighted;
@@ -68,6 +69,7 @@ function makeSnapshot(
     sermonTitle: `Sermon ${evaluationId}`,
     completedAt,
     createdAt,
+    promptVersion,
     result,
   };
 }
@@ -244,6 +246,28 @@ describe("buildGrowthReportHeadlines", () => {
     assert.equal(headlines.display_score_b, "7.1");
     assert.equal(headlines.band_a, "Strong");
     assert.equal(headlines.band_b, "Strong");
+    assert.equal(headlines.spans_rubric_boundary, false);
+  });
+
+  it("flags pairs scored under different prompt versions", () => {
+    const baseline = makeSnapshot(
+      "eval-a",
+      "2025-01-01T12:00:00.000Z",
+      42,
+      "2025-01-01T12:00:00.000Z",
+      "v3.2",
+    );
+    const current = makeSnapshot(
+      "eval-b",
+      "2025-06-01T12:00:00.000Z",
+      46,
+      "2025-06-01T12:00:00.000Z",
+      "v3.3",
+    );
+
+    const headlines = buildGrowthReportHeadlines(baseline, current);
+    assert.equal(headlines.spans_rubric_boundary, true);
+    assert.equal(headlines.composite_weighted_delta, 4);
   });
 });
 
@@ -260,6 +284,40 @@ describe("enrichGrowthReportData", () => {
     assert.equal(report.current.evaluationId, "eval-b");
     assert.equal(report.criterionDeltas.length, 11);
     assert.equal(report.headlines.composite_weighted_delta, 2);
+    assert.equal(report.headlines.spans_rubric_boundary, false);
+  });
+
+  it("omits quote pairs when the pair spans a rubric boundary", () => {
+    const olderResult = cloneFixture();
+    const newerResult = cloneFixture();
+    setCriterionScore(olderResult, 3, 2);
+    setCriterionScore(newerResult, 3, 5);
+    setCriterionQuote(olderResult, 3, "baseline quote about gospel");
+    setCriterionQuote(newerResult, 3, "current quote about gospel");
+
+    const older = makeSnapshot(
+      "eval-a",
+      "2025-01-01T12:00:00.000Z",
+      37,
+      "2025-01-01T12:00:00.000Z",
+      "v3.2",
+    );
+    const newer = makeSnapshot(
+      "eval-b",
+      "2025-06-01T12:00:00.000Z",
+      46,
+      "2025-06-01T12:00:00.000Z",
+      "v3.3",
+    );
+    older.result = olderResult;
+    newer.result = newerResult;
+
+    const report = enrichGrowthReportData(
+      orderGrowthReportSnapshotsByDate(older, newer),
+    );
+
+    assert.equal(report.headlines.spans_rubric_boundary, true);
+    assert.equal(report.quotePairs.length, 0);
   });
 });
 

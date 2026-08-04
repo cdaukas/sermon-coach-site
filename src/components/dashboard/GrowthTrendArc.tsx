@@ -4,7 +4,10 @@ import { useState } from "react";
 
 import { formatDisplayScoreBare } from "@/lib/evaluation/display-score";
 import { compareEvaluationChronology } from "@/lib/evaluation/growth-report-ordering";
-import type { TrendArcEvaluationItem } from "@/lib/evaluation/growth-report-types";
+import {
+  GROWTH_RUBRIC_BOUNDARY_MARKER_LABEL,
+  type TrendArcEvaluationItem,
+} from "@/lib/evaluation/growth-report-types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
@@ -60,6 +63,25 @@ type PlottedPoint = TrendArcEvaluationItem & {
   displayScore: string;
 };
 
+type VersionBoundary = {
+  /** Midpoint x between the last point of one version and the first of the next. */
+  x: number;
+  index: number;
+};
+
+function versionBoundaries(plotted: readonly PlottedPoint[]): VersionBoundary[] {
+  const boundaries: VersionBoundary[] = [];
+  for (let i = 1; i < plotted.length; i++) {
+    if (plotted[i].promptVersion !== plotted[i - 1].promptVersion) {
+      boundaries.push({
+        x: (plotted[i - 1].x + plotted[i].x) / 2,
+        index: i,
+      });
+    }
+  }
+  return boundaries;
+}
+
 function ArcDotTooltip({
   point,
   svgWidth,
@@ -103,9 +125,9 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
     return null;
   }
 
-  const margin = { top: 16, right: 20, bottom: 56, left: 92 };
+  const margin = { top: 28, right: 20, bottom: 56, left: 92 };
   const width = 720;
-  const height = 300;
+  const height = 312;
   const plotLeft = margin.left;
   const plotTop = margin.top;
   const plotWidth = width - margin.left - margin.right;
@@ -137,6 +159,7 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
     lastPoint.completedAt,
   );
   const activePoint = plotted.find((point) => point.evaluationId === activePointId) ?? null;
+  const boundaries = versionBoundaries(plotted);
 
   // Label first, most recent, lowest, highest — at most four points, no collisions.
   const labeledScoreIds = new Set<string>();
@@ -232,6 +255,28 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
         >
           Exemplary
         </text>
+
+        {boundaries.map((boundary) => (
+          <g key={`rubric-boundary-${boundary.index}`}>
+            <line
+              x1={boundary.x}
+              x2={boundary.x}
+              y1={plotTop}
+              y2={plotTop + plotHeight}
+              stroke="var(--sc-ink-soft)"
+              strokeWidth="1"
+              strokeDasharray="3 3"
+            />
+            <text
+              x={boundary.x}
+              y={plotTop - 8}
+              textAnchor="middle"
+              style={{ ...uiFont, fontSize: "10px", fill: "var(--sc-ink-soft)" }}
+            >
+              {GROWTH_RUBRIC_BOUNDARY_MARKER_LABEL}
+            </text>
+          </g>
+        ))}
 
         {plotted.length > 1 ? (
           <polyline
