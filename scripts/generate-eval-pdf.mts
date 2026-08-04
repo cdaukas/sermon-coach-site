@@ -298,7 +298,11 @@ async function main(): Promise<void> {
   const page = await browser.newPage();
 
   try {
-    await page.emulateMediaType("screen");
+    // Export path depends on print media so evaluation-print.css (@media print)
+    // applies. Do not flip back to "screen": that path bypasses print CSS and
+    // reintroduces a cluster of export defects at once (collapsed summary
+    // columns, sticky chrome side-effects, missing lockup rules, etc.).
+    await page.emulateMediaType("print");
     await page.setViewport({ width: 1100, height: 1400, deviceScaleFactor: 2 });
 
     await page.setCookie(...cookies.map((cookie) => toPuppeteerCookie(cookie, baseUrl)));
@@ -338,19 +342,18 @@ async function main(): Promise<void> {
 
     await waitForEvaluationRender(page);
 
-    await page.emulateMediaType("screen");
+    // Same media for PDF paint as for layout wait (must stay "print"; see above).
+    await page.emulateMediaType("print");
 
     await page.pdf({
       path: outputPath,
       format: "Letter",
       printBackground: true,
-      displayHeaderFooter: true,
-      headerTemplate: "<div></div>",
-      footerTemplate: `<div style="width:100%;font-size:8px;font-family:-apple-system,sans-serif;color:#4a5568;padding:0 0.55in;display:flex;justify-content:space-between;"><span>The Sermon Coach™</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>`,
+      displayHeaderFooter: false,
       margin: {
         top: "0.5in",
         right: "0.5in",
-        bottom: "0.7in",
+        bottom: "0.5in",
         left: "0.5in",
       },
     });
@@ -366,7 +369,7 @@ async function main(): Promise<void> {
       console.log(`  preacher=${preacher}`);
     }
     console.log(`  source=${url}`);
-    console.log("  capture=screen (?pdf=1 full-color render)");
+    console.log("  capture=print (?pdf=1; evaluation-print.css)");
   } finally {
     await browser.close();
   }
