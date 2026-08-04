@@ -39,6 +39,33 @@ export function isValidYoutubeUrl(rawUrl: string): boolean {
   return false;
 }
 
+/**
+ * True when the string parses as an http(s) URL whose host is not YouTube.
+ * Used to route Facebook/Vimeo/etc. into transcript help tab 3 without guessing
+ * among YouTube caption failure modes.
+ */
+export function isNonYoutubeHostUrl(rawUrl: string): boolean {
+  const parsed = hostnameOf(rawUrl);
+  if (!parsed) {
+    return false;
+  }
+
+  const protocol = parsed.protocol.toLowerCase();
+  if (protocol !== "http:" && protocol !== "https:") {
+    return false;
+  }
+
+  const host = parsed.hostname.toLowerCase();
+  if (host === "youtu.be" || host === "www.youtu.be") {
+    return false;
+  }
+  if (host.endsWith(YOUTUBE_HOST_SUFFIX)) {
+    return false;
+  }
+
+  return host.length > 0;
+}
+
 export function extractYoutubeVideoId(rawUrl: string): string | null {
   const trimmed = normalizeYoutubeUrl(rawUrl);
   if (!isValidYoutubeUrl(trimmed)) {

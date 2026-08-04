@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { plainTextFromSupadataContent } from "./supadata";
-import { isValidYoutubeUrl, extractYoutubeVideoId } from "./youtube-url";
+import {
+  extractYoutubeVideoId,
+  isNonYoutubeHostUrl,
+  isValidYoutubeUrl,
+} from "./youtube-url";
 
 describe("youtube url validation", () => {
   it("accepts watch, youtu.be, and live URLs", () => {
@@ -35,6 +39,26 @@ describe("youtube url validation", () => {
       extractYoutubeVideoId("https://www.youtube.com/live/OrCi6CMutus"),
       "OrCi6CMutus",
     );
+  });
+});
+
+describe("isNonYoutubeHostUrl", () => {
+  it("flags Facebook and other non-YouTube hosts", () => {
+    assert.equal(
+      isNonYoutubeHostUrl("https://www.facebook.com/watch?v=123"),
+      true,
+    );
+    assert.equal(isNonYoutubeHostUrl("https://vimeo.com/12345"), true);
+  });
+
+  it("does not flag YouTube hosts even when the path is invalid", () => {
+    assert.equal(isNonYoutubeHostUrl("https://www.youtube.com/watch"), false);
+    assert.equal(isNonYoutubeHostUrl("https://youtu.be/SVe7s1P05i4"), false);
+  });
+
+  it("does not flag bare non-URL text", () => {
+    assert.equal(isNonYoutubeHostUrl("not a url"), false);
+    assert.equal(isNonYoutubeHostUrl(""), false);
   });
 });
 
