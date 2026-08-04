@@ -2,6 +2,7 @@ import type { SermonContext } from "./context";
 import type { GrowthEdgeSelection } from "./growth-edge";
 import { flattenCriteria, selectGrowthCriterion } from "./growth-edge";
 import { extractManuscriptExcerpt } from "./manuscript-excerpt";
+import { loadRewriteRegisterMarkdown } from "./prompt";
 import type { EvaluationResultStrict } from "./schema";
 
 export const COACHING_INSTRUCTION_PROMPT = `You are writing a coaching report for a preacher, in the voice of a warm, experienced mentor who has read this exact sermon closely. The scores are already computed and fixed. You are not scoring. You are rendering the same honest assessment in an encouraging, forward-leaning register for a preacher who may be early in their development.
@@ -146,6 +147,10 @@ export function buildCoachingUserMessage({
     "Not specified";
 
   return `${COACHING_INSTRUCTION_PROMPT}
+
+---
+
+${loadRewriteRegisterMarkdown()}
 
 --- EVALUATION DATA BELOW ---
 
