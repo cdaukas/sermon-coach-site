@@ -2,20 +2,33 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildContextPreamble, type SermonContext } from "./context";
 
-export const EVALUATION_PROMPT_VERSION = "v3.3";
+export const EVALUATION_PROMPT_VERSION = "v3.4";
 
 /** Rows below this prompt_version use read-grandfather verdict caps (no 60/32 on dashboard parse). */
 export const VERDICT_STRICT_CAPS_FROM = "v2.3";
 
 const rubricPath = join(process.cwd(), "src/lib/evaluation/rubric.md");
+const rewriteRegisterPath = join(
+  process.cwd(),
+  "src/lib/evaluation/rewrite-register.md",
+);
 
 let cachedRubric: string | null = null;
+let cachedRewriteRegister: string | null = null;
 
 export function loadRubricMarkdown(): string {
   if (!cachedRubric) {
     cachedRubric = readFileSync(rubricPath, "utf8");
   }
   return cachedRubric;
+}
+
+/** Shared rewrite-register partial for scored eval and Mentor Mode. */
+export function loadRewriteRegisterMarkdown(): string {
+  if (!cachedRewriteRegister) {
+    cachedRewriteRegister = readFileSync(rewriteRegisterPath, "utf8");
+  }
+  return cachedRewriteRegister;
 }
 
 const STRUCTURAL_CONTRACT = `## STRUCTURAL CONTRACT (NON-NEGOTIABLE)
@@ -52,7 +65,12 @@ const SCORING_STRENGTH_GATE = `**REQUIRED per-criterion strength gate (procedura
 
 export function buildSystemPrompt(): string {
   const rubric = loadRubricMarkdown();
+  const rewriteRegister = loadRewriteRegisterMarkdown();
   return `${rubric}
+
+---
+
+${rewriteRegister}
 
 ---
 
