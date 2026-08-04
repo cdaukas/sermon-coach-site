@@ -14,6 +14,12 @@
  *
  * Strict primary_passage only — no meta.scripture_reference fallback.
  *
+ * Usage:
+ *   npm run passage:diff -- --evaluation-id=<uuid>
+ *   npm run passage:diff -- --series="Hebrews"
+ *   npm run passage:diff -- --all
+ *   Optional: --force
+ *
  * Env: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
 
@@ -40,13 +46,18 @@ import { normalizePassageRef } from "../src/lib/passage/normalize";
 import {
   createServiceClient,
   loadEnvLocalIfPresent,
+  parseFlag,
   parseJsonObject,
   parseOption,
   requireEnv,
 } from "./lib/script-env";
 
+
 const DIFF_OUT_DIR = join(process.cwd(), "output", "passage-diff");
 const CSV_PATH = join(DIFF_OUT_DIR, "summary.csv");
+const FAILED_CSV_PATH = join(DIFF_OUT_DIR, "failed.csv");
+const FAILED_CSV_HEADER = "evaluation_id,error,raw_path";
+const RAW_DIR = join(DIFF_OUT_DIR, "raw");
 const CSV_HEADER = [
   "evaluation_id",
   "passage",
@@ -127,23 +138,47 @@ const diffResultSchema = z.object({
 
 type Mode =
   | { kind: "evaluation"; id: string }
-  | { kind: "series"; series: string };
+  | { kind: "series"; series: string }
+  | { kind: "all" };
 
 function usage(): never {
   console.error(`Usage:
   npm run passage:diff -- --evaluation-id=<uuid>
   npm run passage:diff -- --series="Hebrews"
+  npm run passage:diff -- --all
+  Optional: --force  (re-diff even if already in summary.csv)
 `);
   process.exit(1);
 }
 
-function parseArgs(argv: string[]): Mode {
+function parseArgs(argv: string[]): { mode: Mode; force: boolean } {
   const tokens = argv.slice(2);
+  const force = parseFlag(tokens, "--force");
   const evaluationId = parseOption(tokens, "--evaluation-id");
   const series = parseOption(tokens, "--series");
-  if (evaluationId && !series) return { kind: "evaluation", id: evaluationId };
-  if (series && !evaluationId) return { kind: "series", series };
-  usage();
+  const all = parseFlag(tokens, "--all");
+
+  const set = [Boolean(evaluationId), Boolean(series), all].filter(Boolean)
+    .length;
+  if (set !== 1) usage();
+
+  if (evaluationId) return { mode: { kind: "evaluation", id: evaluationId }, force };
+  if (series) return { mode: { kind: "series", series }, force };
+  return { mode: { kind: "all" }, force };
+}
+
+/** Evaluation ids already present in summary.csv (first column). */
+function alreadyDiffedIds(): Set<string> {
+  if (!existsSync(CSV_PATH)) return new Set();
+  const lines = readFileSync(CSV_PATH, "utf8").split("\n").slice(1);
+  const ids = new Set<string>();
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    // First CSV field; ids are UUIDs without commas or quotes.
+    const first = line.split(",")[0]?.trim().replace(/^"|"$/g, "") ?? "";
+    if (first) ids.add(first);
+  }
+  return ids;
 }
 
 function csvEscape(value: string | number): string {
@@ -159,20 +194,56 @@ function rate(num: number, den: number): string {
 
 function ensureOutput(): void {
   mkdirSync(DIFF_OUT_DIR, { recursive: true });
+  mkdirSync(RAW_DIR, { recursive: true });
   if (!existsSync(CSV_PATH)) {
     writeFileSync(CSV_PATH, `${CSV_HEADER}\n`, "utf8");
-    return;
+  } else {
+    // Schema change: rewrite header if this file is pre-v2 columns.
+    const existing = readFileSync(CSV_PATH, "utf8");
+    const firstLine = existing.split("\n")[0]?.trim() ?? "";
+    if (firstLine !== CSV_HEADER) {
+      console.warn(
+        `summary.csv header outdated — rotating to ${CSV_PATH}.bak and starting fresh header`,
+      );
+      writeFileSync(`${CSV_PATH}.bak`, existing, "utf8");
+      writeFileSync(CSV_PATH, `${CSV_HEADER}\n`, "utf8");
+    }
   }
-  // Schema change: rewrite header if this file is pre-v2 columns.
-  const existing = readFileSync(CSV_PATH, "utf8");
-  const firstLine = existing.split("\n")[0]?.trim() ?? "";
-  if (firstLine !== CSV_HEADER) {
-    console.warn(
-      `summary.csv header outdated — rotating to ${CSV_PATH}.bak and starting fresh header`,
-    );
-    writeFileSync(`${CSV_PATH}.bak`, existing, "utf8");
-    writeFileSync(CSV_PATH, `${CSV_HEADER}\n`, "utf8");
+  if (!existsSync(FAILED_CSV_PATH)) {
+    writeFileSync(FAILED_CSV_PATH, `${FAILED_CSV_HEADER}\n`, "utf8");
   }
+}
+
+function appendFailedRow(row: {
+  evaluation_id: string;
+  error: string;
+  raw_path: string;
+}): void {
+  ensureOutput();
+  const line = [row.evaluation_id, row.error, row.raw_path]
+    .map(csvEscape)
+    .join(",");
+  appendFileSync(FAILED_CSV_PATH, `${line}\n`, "utf8");
+}
+
+/** Persist model text for parse/schema diagnosis. Returns relative path written. */
+function writeRawModelResponse(
+  evaluationId: string,
+  rawText: string,
+  meta?: { error?: string; stop_reason?: string | null },
+): string {
+  mkdirSync(RAW_DIR, { recursive: true });
+  const absPath = join(RAW_DIR, `${evaluationId}.json`);
+  const payload = {
+    evaluation_id: evaluationId,
+    saved_at: new Date().toISOString(),
+    error: meta?.error ?? null,
+    stop_reason: meta?.stop_reason ?? null,
+    char_length: rawText.length,
+    raw_text: rawText,
+  };
+  writeFileSync(absPath, JSON.stringify(payload, null, 2), "utf8");
+  return absPath;
 }
 
 function appendCsvRow(row: Record<string, string | number>): void {
@@ -310,6 +381,51 @@ async function listSeriesEvaluations(
   return ids;
 }
 
+/**
+ * Every complete evaluation with a parseable primary_passage and a matching
+ * passage_inventories row at the current inventory prompt_version.
+ */
+async function listAllDiffableEvaluations(
+  supabase: ReturnType<typeof createServiceClient>,
+): Promise<string[]> {
+  const { data: inventories, error: invError } = await supabase
+    .from("passage_inventories")
+    .select("passage_ref_normalized")
+    .eq("prompt_version", PASSAGE_INVENTORY_PROMPT_VERSION);
+
+  if (invError) {
+    throw new Error(`List inventories failed: ${invError.message}`);
+  }
+
+  const inventoried = new Set(
+    (inventories ?? []).map((r) => r.passage_ref_normalized as string),
+  );
+
+  const { data: evals, error } = await supabase
+    .from("sermon_evaluations")
+    .select(
+      "id, status, sermon_versions!inner(sermons!inner(primary_passage))",
+    )
+    .eq("status", "complete");
+
+  if (error) throw new Error(`List evaluations failed: ${error.message}`);
+
+  const ids: string[] = [];
+  for (const row of evals ?? []) {
+    const pp = (
+      row as {
+        sermon_versions?: { sermons?: { primary_passage?: string | null } };
+      }
+    ).sermon_versions?.sermons?.primary_passage;
+    if (typeof pp !== "string" || !pp.trim()) continue;
+    const n = normalizePassageRef(pp);
+    if (!n.ok) continue;
+    if (!inventoried.has(n.normalized)) continue;
+    ids.push(row.id as string);
+  }
+  return ids;
+}
+
 function validateItemCoverage(
   expectedIds: string[],
   diff: DiffModelResult,
@@ -329,6 +445,7 @@ async function runDiff(
   fields: PassageInventoryFields,
   passageRef: string,
   corpus: string,
+  evaluationId: string,
 ): Promise<DiffModelResult> {
   const items = inventoryItemsForDiff(fields);
   const response = await anthropic.messages.create({
@@ -352,14 +469,27 @@ async function runDiff(
     throw new Error("Diff model returned no text content.");
   }
 
-  const parsed = diffResultSchema.parse(
-    parseJsonObject(textBlock.text),
-  ) as DiffModelResult;
-  validateItemCoverage(
-    items.map((i) => i.id),
-    parsed,
-  );
-  return parsed;
+  const rawText = textBlock.text;
+  try {
+    const parsed = diffResultSchema.parse(
+      parseJsonObject(rawText),
+    ) as DiffModelResult;
+    validateItemCoverage(
+      items.map((i) => i.id),
+      parsed,
+    );
+    return parsed;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const rawPath = writeRawModelResponse(evaluationId, rawText, {
+      error: message,
+      stop_reason: response.stop_reason ?? null,
+    });
+    console.error(
+      `parse/schema failure for ${evaluationId} — raw saved to ${rawPath} (stop_reason=${response.stop_reason ?? "?"}, chars=${rawText.length})`,
+    );
+    throw err;
+  }
 }
 
 function renderMarkdown(input: {
@@ -493,6 +623,7 @@ async function diffOne(
     fields,
     normalized.normalized,
     corpus,
+    evaluationId,
   );
   const metrics = summarizeDiffItems(diff.item_results);
 
@@ -543,7 +674,7 @@ async function diffOne(
 
 async function main(): Promise<void> {
   loadEnvLocalIfPresent();
-  const mode = parseArgs(process.argv);
+  const { mode, force } = parseArgs(process.argv);
   requireEnv("ANTHROPIC_API_KEY");
   const supabase = createServiceClient();
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -553,22 +684,59 @@ async function main(): Promise<void> {
   let ids: string[];
   if (mode.kind === "evaluation") {
     ids = [mode.id];
-  } else {
+  } else if (mode.kind === "series") {
     ids = await listSeriesEvaluations(supabase, mode.series);
     console.log(
       `series ${JSON.stringify(mode.series)}: ${ids.length} complete evals with parseable primary_passage`,
     );
+  } else {
+    ids = await listAllDiffableEvaluations(supabase);
+    console.log(
+      `all: ${ids.length} complete evals with parseable primary_passage and inventory @${PASSAGE_INVENTORY_PROMPT_VERSION}`,
+    );
   }
 
-  let ok = 0;
-  let skip = 0;
-  for (const id of ids) {
-    const result = await diffOne(supabase, anthropic, id);
-    if (result === "ok") ok += 1;
-    else skip += 1;
+  const done = alreadyDiffedIds();
+  const totals = { ok: 0, skip: 0, already: 0, failed: 0 };
+  const total = ids.length;
+
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    const n = i + 1;
+    if (!force && done.has(id)) {
+      totals.already += 1;
+      console.log(`[${n}/${total}] skip already diffed: ${id}`);
+      continue;
+    }
+    console.log(`[${n}/${total}]`);
+    try {
+      const result = await diffOne(supabase, anthropic, id);
+      if (result === "ok") {
+        totals.ok += 1;
+        done.add(id);
+      } else {
+        totals.skip += 1;
+      }
+    } catch (err) {
+      totals.failed += 1;
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[${n}/${total}] FAILED ${id}: ${message}`);
+      const rawPath = join(RAW_DIR, `${id}.json`);
+      appendFailedRow({
+        evaluation_id: id,
+        error: message,
+        raw_path: existsSync(rawPath) ? rawPath : "",
+      });
+    }
   }
 
-  console.log(`done ok=${ok} skip=${skip} csv=${CSV_PATH}`);
+  console.log(
+    `tally: ok=${totals.ok} skip=${totals.skip} already=${totals.already} failed=${totals.failed} total=${total}`,
+  );
+  console.log(`done csv=${CSV_PATH}`);
+  if (totals.failed > 0) {
+    console.log(`failed log: ${FAILED_CSV_PATH}`);
+  }
 }
 
 main().catch((err) => {
