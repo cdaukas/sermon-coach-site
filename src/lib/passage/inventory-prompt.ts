@@ -34,7 +34,8 @@ JSON shape (all keys required):
       "term": string,              // original-language form (transliterated ok)
       "gloss": string,
       "semantic_range": string,    // actual range, not the maximalized gloss
-      "overreach_risk": string     // the specific overstatement a preacher is likely to make
+      "overstatement_risk": string | null,   // stretching the sense UP (e.g. nobility, rank, mystic technique)
+      "understatement_risk": string | null   // stretching the sense DOWN (e.g. lowly slave when the term is honorific)
     }
   ],
   "redemptive_elements": string[], // gospel / redemptive content the passage itself supplies
@@ -44,9 +45,11 @@ JSON shape (all keys required):
 Rules:
 - Be specific to THIS passage, not generic homiletics.
 - Prefer phrases that must be paid for (conditionals, connective logic, contested referents) over tourist Greek.
-- For original-language terms, name the real semantic range and the concrete overreach risk (e.g. nobility/rank vs. honored service).
+- For original-language terms: before writing either risk field, consider BOTH directions — overstatement (inflating rank, force, mysticism) AND understatement (flattening an honorific into slaves, blunting a demand). Write the concrete failure mode for each direction that is plausible; set a field to null only when that direction is not a real preaching risk for this term.
+- Example pattern for therapōn / therapon-type terms: understatement_risk = preaching Moses as a lowly slave to maximize contrast; overstatement_risk = elevating the term to nobility or rank it does not carry. Both can be non-null.
 - Include contested cruxes where faithful interpreters differ; name the live positions.
-- redemptive_elements must be content the passage itself supplies, not a forced Systematics dump.`;
+- redemptive_elements must be content the passage itself supplies, not a forced Systematics dump.
+- Do not include weight fields; the app assigns those after generation.`;
 }
 
 export function buildInventoryUserMessage(passageRef: string): string {

@@ -5,16 +5,19 @@
  *   output/passage-diff/<evaluationId>.md
  *   output/passage-diff/summary.csv  (append)
  *
- * Strict primary_passage only — evaluations without preacher-supplied passage skip.
+ * CSV columns (crux trichotomy is crux-only; binary unaddressed for the rest):
+ *   evaluation_id, passage, inventory_items, load_bearing_items,
+ *   items_unaddressed, load_bearing_unaddressed,
+ *   omission_rate_all, omission_rate_load_bearing,
+ *   crux_engaged, crux_mentioned_only, crux_absent,
+ *   overreach_flagged, overreach_missed
  *
- * Usage:
- *   npm run passage:diff -- --evaluation-id=<uuid>
- *   npm run passage:diff -- --series="Hebrews"
+ * Strict primary_passage only — no meta.scripture_reference fallback.
  *
  * Env: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  */
 
-import { mkdirSync, appendFileSync, existsSync, writeFileSync } from "node:fs";
+import { mkdirSync, appendFileSync, existsSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
@@ -22,9 +25,11 @@ import {
   buildDiffSystemPrompt,
   buildDiffUserMessage,
   buildEvaluationCorpus,
+  inventoryItemsForDiff,
+  summarizeDiffItems,
+  type DiffModelResult,
 } from "../src/lib/passage/diff-prompt";
 import {
-  countInventoryItems,
   PASSAGE_DIFF_MODEL,
   PASSAGE_INVENTORY_PROMPT_VERSION,
   passageInventoryFieldsSchema,
@@ -42,17 +47,70 @@ import {
 
 const DIFF_OUT_DIR = join(process.cwd(), "output", "passage-diff");
 const CSV_PATH = join(DIFF_OUT_DIR, "summary.csv");
-const CSV_HEADER =
-  "evaluation_id,passage,inventory_items,items_unaddressed,overreach_flagged,overreach_missed";
+const CSV_HEADER = [
+  "evaluation_id",
+  "passage",
+  "inventory_items",
+  "load_bearing_items",
+  "items_unaddressed",
+  "load_bearing_unaddressed",
+  "omission_rate_all",
+  "omission_rate_load_bearing",
+  "crux_engaged",
+  "crux_mentioned_only",
+  "crux_absent",
+  "overreach_flagged",
+  "overreach_missed",
+].join(",");
+
+const itemResultSchema = z
+  .object({
+    item_id: z.string(),
+    item_type: z.string(),
+    label: z.string(),
+    weight: z.enum(["load_bearing", "available"]),
+    weight_assigned_by: z.enum(["inventory", "diff_promotion"]),
+    addressed: z.boolean().optional(),
+    engagement: z.enum(["engaged", "mentioned_only", "absent"]).optional(),
+    note: z.string().optional(),
+  })
+  .superRefine((row, ctx) => {
+    if (row.item_type === "contested_crux") {
+      if (row.engagement == null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "contested_crux requires engagement",
+          path: ["engagement"],
+        });
+      }
+      if (row.addressed != null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "contested_crux must not set addressed",
+          path: ["addressed"],
+        });
+      }
+    } else {
+      if (row.addressed == null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "non-crux requires addressed",
+          path: ["addressed"],
+        });
+      }
+      if (row.engagement != null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "non-crux must not set engagement",
+          path: ["engagement"],
+        });
+      }
+    }
+  });
 
 const diffResultSchema = z.object({
   summary: z.string(),
-  omissions: z.array(
-    z.object({
-      item: z.string(),
-      where_should_appear: z.string(),
-    }),
-  ),
+  item_results: z.array(itemResultSchema).min(1),
   overreach_correctly_flagged: z.array(
     z.object({
       claim_or_risk: z.string(),
@@ -66,8 +124,6 @@ const diffResultSchema = z.object({
     }),
   ),
 });
-
-type DiffResult = z.infer<typeof diffResultSchema>;
 
 type Mode =
   | { kind: "evaluation"; id: string }
@@ -96,26 +152,42 @@ function csvEscape(value: string | number): string {
   return s;
 }
 
+function rate(num: number, den: number): string {
+  if (den === 0) return "0";
+  return (num / den).toFixed(4);
+}
+
 function ensureOutput(): void {
   mkdirSync(DIFF_OUT_DIR, { recursive: true });
   if (!existsSync(CSV_PATH)) {
     writeFileSync(CSV_PATH, `${CSV_HEADER}\n`, "utf8");
+    return;
+  }
+  // Schema change: rewrite header if this file is pre-v2 columns.
+  const existing = readFileSync(CSV_PATH, "utf8");
+  const firstLine = existing.split("\n")[0]?.trim() ?? "";
+  if (firstLine !== CSV_HEADER) {
+    console.warn(
+      `summary.csv header outdated — rotating to ${CSV_PATH}.bak and starting fresh header`,
+    );
+    writeFileSync(`${CSV_PATH}.bak`, existing, "utf8");
+    writeFileSync(CSV_PATH, `${CSV_HEADER}\n`, "utf8");
   }
 }
 
-function appendCsvRow(row: {
-  evaluation_id: string;
-  passage: string;
-  inventory_items: number;
-  items_unaddressed: number;
-  overreach_flagged: number;
-  overreach_missed: number;
-}): void {
+function appendCsvRow(row: Record<string, string | number>): void {
   const line = [
     row.evaluation_id,
     row.passage,
     row.inventory_items,
+    row.load_bearing_items,
     row.items_unaddressed,
+    row.load_bearing_unaddressed,
+    row.omission_rate_all,
+    row.omission_rate_load_bearing,
+    row.crux_engaged,
+    row.crux_mentioned_only,
+    row.crux_absent,
     row.overreach_flagged,
     row.overreach_missed,
   ]
@@ -155,6 +227,7 @@ type EvalBundle = {
   id: string;
   result: unknown;
   coaching_narrative: unknown;
+  how_it_preaches: unknown;
   primary_passage: string;
 };
 
@@ -165,7 +238,7 @@ async function loadEvaluation(
   const { data, error } = await supabase
     .from("sermon_evaluations")
     .select(
-      "id, status, result, coaching_narrative, sermon_versions!inner(sermons!inner(primary_passage))",
+      "id, status, result, coaching_narrative, how_it_preaches, sermon_versions!inner(sermons!inner(primary_passage))",
     )
     .eq("id", evaluationId)
     .maybeSingle();
@@ -201,6 +274,7 @@ async function loadEvaluation(
     result: (data as { result: unknown }).result,
     coaching_narrative: (data as { coaching_narrative: unknown })
       .coaching_narrative,
+    how_it_preaches: (data as { how_it_preaches: unknown }).how_it_preaches,
     primary_passage: pp.trim(),
   };
 }
@@ -229,7 +303,6 @@ async function listSeriesEvaluations(
     if (typeof pp !== "string" || !pp.trim()) continue;
     const n = normalizePassageRef(pp);
     if (!n.ok) continue;
-    // Match series by book name of normalized key (e.g. "Hebrews").
     if (n.normalized.toLowerCase().startsWith(needle)) {
       ids.push(row.id as string);
     }
@@ -237,22 +310,37 @@ async function listSeriesEvaluations(
   return ids;
 }
 
+function validateItemCoverage(
+  expectedIds: string[],
+  diff: DiffModelResult,
+): void {
+  const got = new Set(diff.item_results.map((r) => r.item_id));
+  const missing = expectedIds.filter((id) => !got.has(id));
+  const extra = [...got].filter((id) => !expectedIds.includes(id));
+  if (missing.length || extra.length) {
+    throw new Error(
+      `item_results coverage mismatch; missing=${missing.join(",") || "—"} extra=${extra.join(",") || "—"}`,
+    );
+  }
+}
+
 async function runDiff(
   anthropic: Anthropic,
-  inventory: PassageInventoryFields,
+  fields: PassageInventoryFields,
   passageRef: string,
   corpus: string,
-): Promise<DiffResult> {
+): Promise<DiffModelResult> {
+  const items = inventoryItemsForDiff(fields);
   const response = await anthropic.messages.create({
     model: PASSAGE_DIFF_MODEL,
-    max_tokens: 4_000,
+    max_tokens: 8_000,
     system: buildDiffSystemPrompt(),
     messages: [
       {
         role: "user",
         content: buildDiffUserMessage({
           passageRef,
-          inventory,
+          items,
           evaluationCorpus: corpus,
         }),
       },
@@ -264,7 +352,14 @@ async function runDiff(
     throw new Error("Diff model returned no text content.");
   }
 
-  return diffResultSchema.parse(parseJsonObject(textBlock.text));
+  const parsed = diffResultSchema.parse(
+    parseJsonObject(textBlock.text),
+  ) as DiffModelResult;
+  validateItemCoverage(
+    items.map((i) => i.id),
+    parsed,
+  );
+  return parsed;
 }
 
 function renderMarkdown(input: {
@@ -272,9 +367,10 @@ function renderMarkdown(input: {
   passageRaw: string;
   passageNormalized: string;
   inventoryId: string;
-  inventoryItems: number;
-  diff: DiffResult;
+  metrics: ReturnType<typeof summarizeDiffItems>;
+  diff: DiffModelResult;
 }): string {
+  const m = input.metrics;
   const lines: string[] = [];
   lines.push(`# Passage inventory diff`);
   lines.push("");
@@ -282,9 +378,18 @@ function renderMarkdown(input: {
   lines.push(`- passage (raw): ${input.passageRaw}`);
   lines.push(`- passage (normalized): ${input.passageNormalized}`);
   lines.push(`- inventory_id: \`${input.inventoryId}\``);
-  lines.push(`- inventory_items: ${input.inventoryItems}`);
+  lines.push(`- inventory_items: ${m.inventory_items}`);
+  lines.push(`- load_bearing_items: ${m.load_bearing_items}`);
+  lines.push(`- items_unaddressed: ${m.items_unaddressed}`);
+  lines.push(`- load_bearing_unaddressed: ${m.load_bearing_unaddressed}`);
   lines.push(
-    `- items_unaddressed: ${input.diff.omissions.length}`,
+    `- omission_rate_all: ${rate(m.items_unaddressed, m.inventory_items)}`,
+  );
+  lines.push(
+    `- omission_rate_load_bearing: ${rate(m.load_bearing_unaddressed, m.load_bearing_items)}`,
+  );
+  lines.push(
+    `- crux engagement: engaged=${m.crux_engaged} mentioned_only=${m.crux_mentioned_only} absent=${m.crux_absent}`,
   );
   lines.push(
     `- overreach_flagged (correctly): ${input.diff.overreach_correctly_flagged.length}`,
@@ -295,13 +400,33 @@ function renderMarkdown(input: {
   lines.push("");
   lines.push(input.diff.summary);
   lines.push("");
-  lines.push(`## Omissions`);
+  lines.push(`## Contested crux engagement`);
   lines.push("");
-  if (input.diff.omissions.length === 0) {
+  const cruxes = input.diff.item_results.filter(
+    (r) => r.item_type === "contested_crux",
+  );
+  if (cruxes.length === 0) {
     lines.push("_None._");
   } else {
-    for (const o of input.diff.omissions) {
-      lines.push(`- **${o.item}** — ${o.where_should_appear}`);
+    for (const c of cruxes) {
+      lines.push(
+        `- **[${c.engagement}]** ${c.label}${c.note ? ` — ${c.note}` : ""} (weight=${c.weight}, by=${c.weight_assigned_by})`,
+      );
+    }
+  }
+  lines.push("");
+  lines.push(`## Non-crux unaddressed`);
+  lines.push("");
+  const nonCruxMiss = input.diff.item_results.filter(
+    (r) => r.item_type !== "contested_crux" && r.addressed === false,
+  );
+  if (nonCruxMiss.length === 0) {
+    lines.push("_None._");
+  } else {
+    for (const o of nonCruxMiss) {
+      lines.push(
+        `- **${o.label}** (${o.item_type}, weight=${o.weight}, by=${o.weight_assigned_by})${o.note ? ` — ${o.note}` : ""}`,
+      );
     }
   }
   lines.push("");
@@ -353,10 +478,10 @@ async function diffOne(
   }
 
   const fields = rowToFields(inv);
-  const inventoryItems = countInventoryItems(fields);
   const corpus = buildEvaluationCorpus({
     result: evalRow.result,
     coaching_narrative: evalRow.coaching_narrative,
+    how_it_preaches: evalRow.how_it_preaches,
   });
 
   console.log(
@@ -369,13 +494,14 @@ async function diffOne(
     normalized.normalized,
     corpus,
   );
+  const metrics = summarizeDiffItems(diff.item_results);
 
   const md = renderMarkdown({
     evaluationId,
     passageRaw: evalRow.primary_passage,
     passageNormalized: normalized.normalized,
     inventoryId: inv.id,
-    inventoryItems,
+    metrics,
     diff,
   });
 
@@ -386,15 +512,31 @@ async function diffOne(
   appendCsvRow({
     evaluation_id: evaluationId,
     passage: normalized.normalized,
-    inventory_items: inventoryItems,
-    items_unaddressed: diff.omissions.length,
+    inventory_items: metrics.inventory_items,
+    load_bearing_items: metrics.load_bearing_items,
+    items_unaddressed: metrics.items_unaddressed,
+    load_bearing_unaddressed: metrics.load_bearing_unaddressed,
+    omission_rate_all: rate(
+      metrics.items_unaddressed,
+      metrics.inventory_items,
+    ),
+    omission_rate_load_bearing: rate(
+      metrics.load_bearing_unaddressed,
+      metrics.load_bearing_items,
+    ),
+    crux_engaged: metrics.crux_engaged,
+    crux_mentioned_only: metrics.crux_mentioned_only,
+    crux_absent: metrics.crux_absent,
     overreach_flagged: diff.overreach_correctly_flagged.length,
     overreach_missed: diff.overreach_missed.length,
   });
 
   console.log(`wrote ${mdPath}`);
   console.log(
-    `  omissions=${diff.omissions.length} overreach_flagged=${diff.overreach_correctly_flagged.length} overreach_missed=${diff.overreach_missed.length}`,
+    `  unaddressed=${metrics.items_unaddressed}/${metrics.inventory_items} ` +
+      `lb_unaddressed=${metrics.load_bearing_unaddressed}/${metrics.load_bearing_items} ` +
+      `crux e/m/a=${metrics.crux_engaged}/${metrics.crux_mentioned_only}/${metrics.crux_absent} ` +
+      `overreach_missed=${diff.overreach_missed.length}`,
   );
   return "ok";
 }

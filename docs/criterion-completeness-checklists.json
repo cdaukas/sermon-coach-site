@@ -1,0 +1,44 @@
+{
+  "$schema_note": "Criterion-level completeness checklists. Passage-independent. Edit by hand — do not invent content beyond the worked gospel-clarity example. Placeholder criteria ship empty until Chris fills them.",
+  "version": "v0",
+  "criteria": [
+    {
+      "id": "gospel_clarity",
+      "canonical_name": "Gospel clarity",
+      "status": "worked_example",
+      "rubric": "A high score on this criterion implies the evaluation found a full gospel presentation (or named what was missing). Score alone is not enough — the checklist asks whether the evaluation noticed required elements of a gospel presentation when the sermon attempted one.",
+      "checklist": [
+        {
+          "id": "gc_names_cross",
+          "requirement": "When the sermon presents the gospel (call to trust, hope, confidence, salvation), the evaluation checks whether the cross or atoning death of Christ is named or clearly implied.",
+          "absence_is_diagnostic": true
+        },
+        {
+          "id": "gc_names_resurrection",
+          "requirement": "When the sermon presents the gospel and orients on hope, confidence, or living hope, the evaluation checks whether the resurrection (or living Christ / risen Lord) is named as the ground of that hope.",
+          "absence_is_diagnostic": true,
+          "example_failure": "Hebrews 3 evaluation scoring gospel clarity 5/5 on a presentation that never names the resurrection while the sermon's own close appeals to confidence and boasting in hope."
+        },
+        {
+          "id": "gc_response_shaped",
+          "requirement": "When the sermon calls for a response (believe, hold fast, come, repent), the evaluation checks whether that response is concretely shaped by the gospel content already preached, not a generic exhortation detached from the good news just announced.",
+          "absence_is_diagnostic": true
+        }
+      ]
+    },
+    {
+      "id": "christ_centered_redemptive_arc",
+      "canonical_name": "Christ-centered / redemptive arc",
+      "status": "placeholder",
+      "rubric": "PLACEHOLDER — Chris fills. What a full treatment of this criterion requires, independent of any one passage.",
+      "checklist": []
+    },
+    {
+      "id": "application_to_present_audience",
+      "canonical_name": "Application to present audience",
+      "status": "placeholder",
+      "rubric": "PLACEHOLDER — Chris fills. What a full treatment of this criterion requires, independent of any one passage.",
+      "checklist": []
+    }
+  ]
+}

@@ -13,7 +13,8 @@
     "pdf:eval": "tsx scripts/generate-eval-pdf.mts",
     "blog:send": "tsx scripts/send-blog-email.mts",
     "passage:inventory": "tsx scripts/passage-inventory.ts",
-    "passage:diff": "tsx scripts/passage-inventory-diff.ts"
+    "passage:diff": "tsx scripts/passage-inventory-diff.ts",
+    "criterion:completeness": "tsx scripts/criterion-completeness.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

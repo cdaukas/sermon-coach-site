@@ -27,6 +27,7 @@ import {
   buildInventoryUserMessage,
 } from "../src/lib/passage/inventory-prompt";
 import {
+  applyDefaultInventoryWeights,
   PASSAGE_INVENTORY_MODEL,
   PASSAGE_INVENTORY_PROMPT_VERSION,
   passageInventoryFieldsSchema,
@@ -163,7 +164,9 @@ async function generateInventory(
     );
   }
 
-  return passageInventoryFieldsSchema.parse(parsed);
+  const raw = passageInventoryFieldsSchema.parse(parsed);
+  // Passage-alone weights (no sermon). Terms start available; crux/arg/hinge/burden load-bearing.
+  return applyDefaultInventoryWeights(raw);
 }
 
 async function hasExisting(
