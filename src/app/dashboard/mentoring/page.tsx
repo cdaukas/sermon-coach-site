@@ -51,13 +51,21 @@ export default async function MentoringPage() {
         boxShadow: "var(--sc-shadow-lift)",
       }}
     >
-      <div className="mb-8">
-        <h1
-          className="text-[32px] font-semibold leading-tight tracking-tight"
+      <h1
+        className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
+      >
+        Mentoring
+      </h1>
+
+      <section aria-labelledby="invite-heading">
+        <h2
+          id="invite-heading"
+          className="text-[28px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
           Invite someone you are developing
-        </h1>
+        </h2>
         <p
           className="mt-3 max-w-2xl text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
@@ -65,9 +73,11 @@ export default async function MentoringPage() {
           They preach. You read. The seat is yours, not theirs, and you can end
           it whenever the season is over.
         </p>
-      </div>
 
-      <MentorInvitePanel initialDisplayName={initialDisplayName} />
+        <div className="mt-6">
+          <MentorInvitePanel initialDisplayName={initialDisplayName} />
+        </div>
+      </section>
 
       <PendingInvitesList invites={seats.pending} />
 

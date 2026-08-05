@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { AuthMessage } from "@/components/auth/AuthMessage";
 import {
   revokeMentorInviteErrorMessage,
@@ -13,12 +13,6 @@ import { createClient } from "@/lib/supabase/client";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
-
-const QUIET_ACTION = {
-  ...uiFont,
-  color: "#4a5568",
-  cursor: "pointer",
-} as const;
 
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
@@ -38,28 +32,6 @@ function emailMeta(item: PendingMentorInvite): string {
     return `Email recorded for ${item.inviteEmailTo}`;
   }
   return "Not emailed yet";
-}
-
-function QuietAction({
-  children,
-  disabled,
-  onClick,
-}: {
-  children: ReactNode;
-  disabled?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className="border-0 bg-transparent p-0 text-[13px] font-medium underline-offset-2 hover:underline disabled:cursor-wait disabled:no-underline disabled:opacity-60"
-      style={QUIET_ACTION}
-    >
-      {children}
-    </button>
-  );
 }
 
 function PendingInviteRow({
@@ -148,26 +120,40 @@ function PendingInviteRow({
           <span aria-hidden="true"> · </span>
           {emailMeta(item)}
         </p>
-        <p
-          className="mt-2 break-all text-[13px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          {link}
-        </p>
 
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <QuietAction onClick={() => void handleCopy()}>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void handleCopy()}
+            className="rounded border px-4 py-2 text-[13px] font-semibold"
+            style={{
+              ...uiFont,
+              background: "var(--sc-ink)",
+              color: "var(--sc-bg)",
+              borderColor: "var(--sc-ink)",
+              cursor: "pointer",
+            }}
+          >
             {copied ? "Copied" : "Copy link"}
-          </QuietAction>
+          </button>
           {!confirming ? (
-            <QuietAction
+            <button
+              type="button"
               onClick={() => {
                 setError(null);
                 setConfirming(true);
               }}
+              className="rounded border px-4 py-2 text-[13px] font-medium"
+              style={{
+                ...uiFont,
+                background: "var(--sc-panel)",
+                color: "var(--sc-ink-mid)",
+                borderColor: "var(--sc-rule)",
+                cursor: "pointer",
+              }}
             >
               Revoke
-            </QuietAction>
+            </button>
           ) : null}
         </div>
 
@@ -188,21 +174,40 @@ function PendingInviteRow({
             </p>
             {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
             <div className="flex flex-wrap gap-3">
-              <QuietAction
+              <button
+                type="button"
                 disabled={revoking}
                 onClick={() => void handleRevoke()}
+                className="rounded border px-4 py-2 text-[13px] font-semibold"
+                style={{
+                  ...uiFont,
+                  background: "var(--sc-ink)",
+                  color: "var(--sc-bg)",
+                  borderColor: "var(--sc-ink)",
+                  cursor: revoking ? "wait" : "pointer",
+                  opacity: revoking ? 0.7 : 1,
+                }}
               >
                 {revoking ? "Revoking…" : "Revoke invitation"}
-              </QuietAction>
-              <QuietAction
+              </button>
+              <button
+                type="button"
                 disabled={revoking}
                 onClick={() => {
                   setConfirming(false);
                   setError(null);
                 }}
+                className="rounded border px-4 py-2 text-[13px] font-medium"
+                style={{
+                  ...uiFont,
+                  background: "var(--sc-panel)",
+                  color: "var(--sc-ink-mid)",
+                  borderColor: "var(--sc-rule)",
+                  cursor: revoking ? "wait" : "pointer",
+                }}
               >
                 Cancel
-              </QuietAction>
+              </button>
             </div>
           </div>
         ) : error ? (
@@ -250,7 +255,7 @@ export function PendingInvitesList({
           style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
         >
           No open invitations. When you create one, it stays here until they
-          accept or you revoke it—so a reload does not lose the link.
+          accept or you revoke it, so a reload does not lose the link.
         </p>
       ) : (
         <ul className="mt-2">
