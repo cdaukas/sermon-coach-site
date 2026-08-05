@@ -20,7 +20,7 @@ This is summarization, not judgment. The narratives already contain the verdict.
 
 COPY CONTRACT (every line must obey all):
 
-1. Fragment, not sentence. No terminal period. Eight to fourteen words.
+1. Fragment, not sentence. No terminal period. Target eight to twelve words; fourteen is a hard cap, not a landing zone. Prefer the short end.
 2. Name something specific from THIS sermon. A line that would fit any sermon is a failed line.
 3. Two-part structure with a hinge. Almost every good line pivots.
 4. The hinge carries the score (load-bearing):
@@ -28,15 +28,16 @@ COPY CONTRACT (every line must obey all):
    - Mid scores (3–4): concession — "X but Y" or "X; Y."
    - Low scores (1–2): lead with the problem; any credit second.
    A preacher learns the grammar in one report and can read his score off the connective before the number.
-5. No score restated, no band adjective. The row already shows N/5. "Strong textual work" is wasted words.
-6. Present tense, about the sermon, not about the preacher. "Transitions feel labeled not earned," not "you labeled your transitions."
-7. House rules: no em-dashes, no exclamation points, sentence case. Use a semicolon or a comma where an em-dash wants to go.
+5. Elision between clauses is allowed; elision within one clause is not. Write "named, but not pressed" — never "named not pressed." Compact grammar must not eat the connective between the two halves.
+6. No score restated, no band adjective. The row already shows N/5. "Strong textual work" is wasted words.
+7. Present tense, about the sermon, not about the preacher. "Transitions feel labeled, not earned," not "you labeled your transitions."
+8. House rules: no em-dashes, no exclamation points, sentence case. Use a semicolon or a comma where an em-dash wants to go.
 
 Structure-only examples (do not copy content):
-- Text genuinely opened; the servant and son distinction is exegetically grounded
+- Text genuinely opened; the servant and son distinction holds
 - Propitiation handled with care, but the therapon claim outruns the word
 - Gospel drives the argument rather than arriving after it
-- Clear spine holds, but the transitions announce movement instead of creating it
+- Clear spine holds, but transitions announce rather than create
 
 When an anchored_quote is provided, prefer its specific nouns when they sharpen the line. The line must still work from the narrative alone.
 

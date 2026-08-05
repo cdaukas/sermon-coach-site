@@ -36,7 +36,7 @@ export const submitCriterionVerdictLinesTool: Tool = {
             verdict_line: {
               type: "string",
               description:
-                "Fragment, 8–14 words, hinge grammar, no terminal period, no em-dash.",
+                "Fragment, target 8–12 words (14 hard max), hinge grammar, elision only between clauses, no terminal period, no em-dash.",
             },
           },
         },
