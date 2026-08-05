@@ -424,12 +424,12 @@
 
   .evaluation-criterion > summary .evaluation-criterion-verdict {
     margin: 0.3rem 0 0 !important;
-    max-width: 34ch !important;
+    max-width: 42ch !important;
     font-family: var(--font-ui) !important;
     /* Name is 11pt above; keep this ~0.9 of that header size. */
     font-size: 10pt !important;
     font-weight: 400 !important;
-    font-style: italic !important;
+    font-style: normal !important;
     line-height: 1.35 !important;
     color: var(--sc-ink-soft) !important;
   }

@@ -115,7 +115,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
                 </p>
                 {criterion.verdict_line ? (
                   <p
-                    className="evaluation-criterion-verdict mt-1.5 max-w-[34ch] text-[0.9em] leading-snug italic"
+                    className="evaluation-criterion-verdict mt-1.5 max-w-[42ch] text-[0.9em] leading-snug"
                     style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
                   >
                     {criterion.verdict_line}
