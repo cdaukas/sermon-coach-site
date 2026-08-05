@@ -90,8 +90,8 @@ function DebriefDisclosure({ mentorName }: { mentorName: string }) {
         style={{ color: "var(--sc-ink-soft)" }}
       >
         An evaluation names weaknesses bluntly. A mentor worth having wants to
-        say those to you himself before you read them cold on a screen. Nothing
-        is hidden from you permanently. It is held until the conversation
+        say those to you themselves before you read them cold on a screen.
+        Nothing is hidden from you permanently. It is held until the conversation
         happens.
       </p>
     </div>
@@ -224,7 +224,7 @@ export function InviteAcceptPanel({
   if (accepted) {
     const successBody =
       seatType === "debrief"
-        ? "You are connected. Submit sermons the way you normally would. Your mentor reads every debrief, and the full evaluations stay closed to you until he opens one."
+        ? "You are connected. Submit sermons the way you normally would. Your mentor reads every debrief, and the full evaluations stay closed to you until they open one."
         : "You are connected. Submit sermons the way you normally would. Your mentor reads everything you read, at the same time you read it.";
 
     return (

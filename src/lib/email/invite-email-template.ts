@@ -18,7 +18,7 @@ export function renderInviteEmailHtml(params: RenderInviteEmailParams): string {
   const inviteUrl = escapeHtml(
     `${CANONICAL_SITE_ORIGIN}/invite/${encodeURIComponent(params.token.trim())}`,
   );
-  const preheader = escapeHtml("A seat on The Sermon Coach, on him.");
+  const preheader = escapeHtml("A seat on The Sermon Coach, on them.");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -43,8 +43,8 @@ export function renderInviteEmailHtml(params: RenderInviteEmailParams): string {
           <tr>
             <td style="padding:0 32px 28px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#2a3447;">
               <p style="margin:0 0 16px;">${displayName} has invited you to be mentored through The Sermon Coach.</p>
-              <p style="margin:0 0 16px;">You submit sermons the way you already do. He reads what comes back. The seat is his, so there is nothing for you to pay.</p>
-              <p style="margin:0 0 24px;">The invitation itself explains exactly what he sees and what you see. Worth reading before you decide.</p>
+              <p style="margin:0 0 16px;">You submit sermons the way you already do. They read what comes back. The seat is theirs, so there is nothing for you to pay.</p>
+              <p style="margin:0 0 24px;">The invitation itself explains exactly what they see and what you see. Worth reading before you decide.</p>
             </td>
           </tr>
           <tr>

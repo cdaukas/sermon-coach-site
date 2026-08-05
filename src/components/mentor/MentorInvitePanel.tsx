@@ -26,13 +26,13 @@ const SEAT_OPTIONS = [
   {
     value: "debrief" as const,
     title: `${mentorSeatDisplayName("debrief")} · $12/mo`,
-    body: "Two submissions a month, drawn from the seat rather than your credits. He reads the coaching debrief and How It Preaches. The scored evaluation is generated and held until you release it.",
+    body: "Two submissions a month, drawn from the seat rather than their credits. They read the coaching debrief and How It Preaches. The scored evaluation is generated and held until you release it.",
     caption: "Start here for anyone in their first few years of preaching.",
   },
   {
     value: "evaluation" as const,
     title: `${mentorSeatDisplayName("evaluation")} · $25/mo`,
-    body: "Four submissions a month, drawn from the seat. He reads everything the moment it is ready, including the score.",
+    body: "Four submissions a month, drawn from the seat. They read everything the moment it is ready, including the score.",
     caption: "For a preacher who is ready to be measured against the rubric.",
   },
 ] as const;
@@ -312,7 +312,7 @@ export function MentorInvitePanel({
 
           {emailSentTo ? (
             <AuthMessage variant="success">
-              Sent to {emailSentTo}. Nothing happens until he accepts.
+              Sent to {emailSentTo}. Nothing happens until they accept.
             </AuthMessage>
           ) : null}
 
@@ -357,8 +357,8 @@ export function MentorInvitePanel({
           className="text-[13px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          Nothing happens until he accepts. You will see him appear here when he
-          does.
+          Nothing happens until they accept. You will see them appear here when
+          they do.
         </p>
       </div>
     );
