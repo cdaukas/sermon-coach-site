@@ -17,6 +17,11 @@ import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-error
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import { createSermon } from "@/lib/sermons/actions";
 import type { TranscriptErrorCode } from "@/lib/transcripts/types";
+import { isNonYoutubeHostUrl } from "@/lib/transcripts/youtube-url";
+import {
+  TranscriptHelp,
+  type TranscriptHelpTabId,
+} from "./TranscriptHelp";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -107,6 +112,9 @@ export function SermonForm({
   const [youtubeError, setYoutubeError] = useState<string | null>(null);
   const [youtubeFetching, setYoutubeFetching] = useState(false);
   const [contentFromYoutube, setContentFromYoutube] = useState(false);
+  const [transcriptHelpOpen, setTranscriptHelpOpen] = useState(false);
+  const [transcriptHelpTab, setTranscriptHelpTab] =
+    useState<TranscriptHelpTabId>("youtube-captions");
 
   const canEvaluate = entitlement?.canEvaluate ?? false;
   const mayRunEvaluation = isMentoredMentee || canEvaluate;
@@ -136,12 +144,23 @@ export function SermonForm({
   const wordCount = useMemo(() => countWords(content), [content]);
   const sermonMinutes = useMemo(() => estimateSermonMinutes(wordCount), [wordCount]);
 
+  function openTranscriptHelp(tab: TranscriptHelpTabId) {
+    setTranscriptHelpTab(tab);
+    setTranscriptHelpOpen(true);
+  }
+
   async function handleFetchYoutubeTranscript() {
     setYoutubeError(null);
 
     const trimmedUrl = youtubeUrl.trim();
     if (!trimmedUrl) {
       setYoutubeError(YOUTUBE_ERROR_MESSAGES.INVALID_URL);
+      return;
+    }
+
+    if (isNonYoutubeHostUrl(trimmedUrl)) {
+      setYoutubeError(YOUTUBE_ERROR_MESSAGES.INVALID_URL);
+      openTranscriptHelp("audio-other");
       return;
     }
 
@@ -164,6 +183,9 @@ export function SermonForm({
             YOUTUBE_ERROR_MESSAGES[code] ||
             YOUTUBE_ERROR_MESSAGES.PROVIDER_ERROR,
         );
+        if (code === "NO_CAPTIONS") {
+          openTranscriptHelp("youtube-captions");
+        }
         return;
       }
 
@@ -424,6 +446,13 @@ export function SermonForm({
             <AuthMessage variant="error">{youtubeError}</AuthMessage>
           ) : null}
         </div>
+
+        <TranscriptHelp
+          open={transcriptHelpOpen}
+          onOpenChange={setTranscriptHelpOpen}
+          activeTab={transcriptHelpTab}
+          onActiveTabChange={setTranscriptHelpTab}
+        />
       </div>
 
       <AuthField
