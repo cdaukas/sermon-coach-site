@@ -48,8 +48,12 @@ controlling whether an evaluation runs.
 - Monthly period reset and billing-anchored allotment are deferred until Develop
   Others has Stripe billing. There is no billing cycle to anchor to yet.
   **Changed 2026-08-03.**
-- Grandfathering for existing Mentor Mode users goes to the evaluation /
-  Colleague seat.
+- Grandfathered free seat for active Coach subscribers: one permanent
+  Apprentice (`debrief`) capacity outside Stripe
+  (`profiles.comp_debrief_seats`). Recorded 2026-08-04 before the seat
+  purchase entitlement check ships. Does not expire by calendar. Future
+  `create_mentor_invite` must read this column before Stripe inventory so
+  those mentors never paywall on a gift they already hold.
 
 ### Open gap: Apprentice allotment in code vs promise
 
@@ -252,7 +256,9 @@ your own invites without burning them.
   `privacy.html` as documents, or also the mentor model and asymmetric read. If
   only the former, the accept-invite disclosure is still unread.
 - No verification that a mentor pays for the seats he creates.
-- Nothing records seats purchased versus seats assigned.
+- Purchased seat inventory is not yet modeled. Complimentary Apprentice
+  capacity is recorded on `profiles.comp_debrief_seats` (2026-08-04);
+  wire that into `create_mentor_invite` when purchase lands, before Stripe.
 - Invites never expire.
 - Release on seat upgrade. Apprentice (`debrief`) to Colleague (`evaluation`)
   should open everything held.
