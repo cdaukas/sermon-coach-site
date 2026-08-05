@@ -409,11 +409,27 @@
     display: none !important;
   }
 
-  .evaluation-criterion > summary > p.text-base {
+  .evaluation-criterion > summary > p.text-base,
+  .evaluation-criterion > summary > div.min-w-0 > p.text-base {
     flex: 1 1 auto;
     min-width: 0;
     margin: 0 !important;
     font-size: 11pt !important;
+  }
+
+  .evaluation-criterion > summary > div.min-w-0 {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .evaluation-criterion > summary .evaluation-criterion-verdict {
+    margin: 0.15rem 0 0 !important;
+    font-family: var(--font-ui) !important;
+    font-size: 9.5pt !important;
+    font-weight: 400 !important;
+    line-height: 1.35 !important;
+    color: var(--sc-ink-mid) !important;
+    font-style: normal !important;
   }
 
   .evaluation-criterion > summary > p.text-right {

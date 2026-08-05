@@ -23,6 +23,13 @@ export const MODEL_RATES_USD_PER_MTOK: Record<string, ModelRatesUsdPerMtok> = {
     cache_write: 3.75,
     cache_read: 0.3,
   },
+  // Criterion verdict_line summarization pass (runCriterionVerdictLines).
+  "claude-haiku-4-5": {
+    input: 1,
+    output: 5,
+    cache_write: 1.25,
+    cache_read: 0.1,
+  },
 };
 
 export type EvalUsageTotals = {
