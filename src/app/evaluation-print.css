@@ -423,13 +423,15 @@
   }
 
   .evaluation-criterion > summary .evaluation-criterion-verdict {
-    margin: 0.15rem 0 0 !important;
+    margin: 0.3rem 0 0 !important;
+    max-width: 34ch !important;
     font-family: var(--font-ui) !important;
-    font-size: 9.5pt !important;
+    /* Name is 11pt above; keep this ~0.9 of that header size. */
+    font-size: 10pt !important;
     font-weight: 400 !important;
+    font-style: italic !important;
     line-height: 1.35 !important;
-    color: var(--sc-ink-mid) !important;
-    font-style: normal !important;
+    color: var(--sc-ink-soft) !important;
   }
 
   .evaluation-criterion > summary > p.text-right {
