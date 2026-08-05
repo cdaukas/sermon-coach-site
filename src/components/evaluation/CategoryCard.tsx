@@ -103,7 +103,10 @@ export function CategoryCard({ category }: CategoryCardProps) {
                 ▸
               </span>
               <div className="min-w-0">
-                <p className="text-base font-medium" style={{ ...serifFont, color: "var(--sc-ink)" }}>
+                <p
+                  className="evaluation-criterion-name text-[13px] font-normal leading-snug"
+                  style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+                >
                   {criterion.name}
                   <span
                     className="text-[11px] font-normal tracking-normal"
@@ -115,8 +118,8 @@ export function CategoryCard({ category }: CategoryCardProps) {
                 </p>
                 {criterion.verdict_line ? (
                   <p
-                    className="evaluation-criterion-verdict mt-1.5 max-w-[42ch] text-[0.9em] leading-snug"
-                    style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                    className="evaluation-criterion-verdict mt-2.5 max-w-[42ch] text-[1.05em] leading-snug"
+                    style={{ ...serifFont, color: "var(--sc-ink)" }}
                   >
                     {criterion.verdict_line}
                   </p>

@@ -409,12 +409,13 @@
     display: none !important;
   }
 
-  .evaluation-criterion > summary > p.text-base,
-  .evaluation-criterion > summary > div.min-w-0 > p.text-base {
+  .evaluation-criterion > summary > div.min-w-0 > .evaluation-criterion-name {
     flex: 1 1 auto;
     min-width: 0;
     margin: 0 !important;
-    font-size: 11pt !important;
+    font-size: 9pt !important;
+    font-weight: 400 !important;
+    color: var(--sc-ink-soft) !important;
   }
 
   .evaluation-criterion > summary > div.min-w-0 {
@@ -423,15 +424,14 @@
   }
 
   .evaluation-criterion > summary .evaluation-criterion-verdict {
-    margin: 0.3rem 0 0 !important;
+    margin: 0.45rem 0 0 !important;
     max-width: 42ch !important;
-    font-family: var(--font-ui) !important;
-    /* Name is 11pt above; keep this ~0.9 of that header size. */
-    font-size: 10pt !important;
+    font-family: var(--font-serif) !important;
+    font-size: 11.5pt !important;
     font-weight: 400 !important;
     font-style: normal !important;
     line-height: 1.35 !important;
-    color: var(--sc-ink-soft) !important;
+    color: var(--sc-ink) !important;
   }
 
   .evaluation-criterion > summary > p.text-right {
