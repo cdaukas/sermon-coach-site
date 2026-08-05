@@ -17,12 +17,14 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 const EMPTY_COPY =
   "No submissions yet. When someone you are mentoring submits a sermon, it will show up here.";
 
-const CONTROL_LABEL = "Release the evaluation";
+const CONTROL_LABEL = "Release the score";
+const CONFIRM_HEADING = "Release the score?";
 const CONFIRM_BODY =
-  "This hands him the scored evaluation. He will see it the next time he opens the sermon, and you cannot take it back.";
-const CONFIRM_RELEASE = "Release";
+  "Once released, your mentee can see the scored evaluation. This cannot be undone.";
+const CONFIRM_RELEASE = "Release the score";
 const CONFIRM_CANCEL = "Cancel";
-const RELEASED_STATE = "Released";
+const HELD_STATUS =
+  "Held. The coaching debrief and How It Preaches are already shared.";
 
 type MentoredSubmissionsListProps = {
   submissions: MentoredSubmissionListItem[];
@@ -65,44 +67,8 @@ function showsReleased(item: MentoredSubmissionListItem): boolean {
   return isDebriefComplete(item) && item.releasedToMenteeAt != null;
 }
 
-function SubmissionMeta({ item }: { item: MentoredSubmissionListItem }) {
-  const status = statusLabel(item.status);
-  const score =
-    item.status === "complete" ? completeScoreLabel(item) : null;
-
-  return (
-    <p
-      className="mt-1.5 text-[13px] leading-relaxed"
-      style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-    >
-      {item.menteeEmail}
-      <span aria-hidden="true"> · </span>
-      {formatSubmittedAt(item.createdAt)}
-      {status ? (
-        <>
-          <span aria-hidden="true"> · </span>
-          {status}
-        </>
-      ) : null}
-      {score ? (
-        <>
-          <span aria-hidden="true"> · </span>
-          {score}
-        </>
-      ) : null}
-    </p>
-  );
-}
-
-function SubmissionTitle({ title }: { title: string }) {
-  return (
-    <p
-      className="text-[17px] font-semibold leading-snug tracking-tight"
-      style={{ ...serifFont, color: "var(--sc-ink)" }}
-    >
-      {title}
-    </p>
-  );
+function evaluationHref(item: MentoredSubmissionListItem): string {
+  return `/dashboard/sermons/${item.sermonId}/evaluations/${item.evaluationId}`;
 }
 
 function ReleaseControl({
@@ -163,7 +129,7 @@ function ReleaseControl({
 
   if (!confirming) {
     return (
-      <div className="mt-3 space-y-2">
+      <div className="space-y-2">
         {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
         <button
           type="button"
@@ -171,8 +137,14 @@ function ReleaseControl({
             setError(null);
             setConfirming(true);
           }}
-          className="border-0 bg-transparent p-0 text-[13px] font-medium underline-offset-2 hover:underline"
-          style={{ ...uiFont, color: "var(--sc-accent)", cursor: "pointer" }}
+          className="rounded border px-4 py-2 text-[13px] font-medium"
+          style={{
+            ...uiFont,
+            background: "var(--sc-panel)",
+            color: "var(--sc-ink-mid)",
+            borderColor: "var(--sc-rule)",
+            cursor: "pointer",
+          }}
         >
           {CONTROL_LABEL}
         </button>
@@ -182,12 +154,18 @@ function ReleaseControl({
 
   return (
     <div
-      className="mt-3 space-y-3 rounded px-4 py-3"
+      className="space-y-3 rounded px-4 py-3"
       style={{
         background: "var(--sc-bg)",
         border: "1px solid var(--sc-rule)",
       }}
     >
+      <p
+        className="text-[15px] font-semibold leading-snug"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
+      >
+        {CONFIRM_HEADING}
+      </p>
       <p
         className="text-[13px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
@@ -246,50 +224,93 @@ function SubmissionRow({
   showDivider: boolean;
   onReleased: (evaluationId: string, releasedAt: string) => void;
 }) {
-  const body = (
-    <>
-      <SubmissionTitle title={item.sermonTitle} />
-      <SubmissionMeta item={item} />
-    </>
-  );
+  const processStatus = statusLabel(item.status);
+  const score =
+    item.status === "complete" ? completeScoreLabel(item) : null;
+  const openHref = evaluationHref(item);
+  const held = canRelease(item);
+  const released = showsReleased(item);
 
   const liStyle = showDivider
     ? { borderTop: "1px solid var(--sc-rule)" }
     : undefined;
 
-  const releaseSlot = canRelease(item) ? (
-    <ReleaseControl
-      evaluationId={item.evaluationId}
-      onReleased={(releasedAt) => onReleased(item.evaluationId, releasedAt)}
-    />
-  ) : showsReleased(item) ? (
-    <p
-      className="mt-3 text-[13px] leading-relaxed"
-      style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-    >
-      {RELEASED_STATE}
-    </p>
-  ) : null;
-
-  if (item.status === "complete") {
-    return (
-      <li style={liStyle}>
-        <div className="px-1 py-4">
-          <Link
-            href={`/dashboard/sermons/${item.sermonId}/evaluations/${item.evaluationId}`}
-            className="block rounded no-underline transition-opacity hover:opacity-80"
-          >
-            {body}
-          </Link>
-          {releaseSlot}
-        </div>
-      </li>
-    );
-  }
-
   return (
     <li style={liStyle}>
-      <div className="px-1 py-4">{body}</div>
+      <div className="px-1 py-4">
+        <p
+          className="text-[17px] font-semibold leading-snug tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          {item.sermonTitle}
+        </p>
+        <p
+          className="mt-1.5 text-[13px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          {item.menteeEmail}
+          <span aria-hidden="true"> · </span>
+          {formatSubmittedAt(item.createdAt)}
+          {processStatus ? (
+            <>
+              <span aria-hidden="true"> · </span>
+              {processStatus}
+            </>
+          ) : null}
+        </p>
+
+        {score ? (
+          <p
+            className="mt-1.5 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            {score}
+          </p>
+        ) : null}
+
+        {held ? (
+          <p
+            className="mt-2 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            {HELD_STATUS}
+          </p>
+        ) : null}
+
+        {released && item.releasedToMenteeAt ? (
+          <p
+            className="mt-2 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            Released {formatSubmittedAt(item.releasedToMenteeAt)}.
+          </p>
+        ) : null}
+
+        {item.status === "complete" ? (
+          <div className="mt-3 flex flex-wrap items-start gap-3">
+            <Link
+              href={openHref}
+              className="rounded border px-4 py-2 text-[13px] font-semibold no-underline"
+              style={{
+                ...uiFont,
+                background: "var(--sc-ink)",
+                color: "var(--sc-bg)",
+                borderColor: "var(--sc-ink)",
+              }}
+            >
+              Open evaluation
+            </Link>
+            {held ? (
+              <ReleaseControl
+                evaluationId={item.evaluationId}
+                onReleased={(releasedAt) =>
+                  onReleased(item.evaluationId, releasedAt)
+                }
+              />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </li>
   );
 }
