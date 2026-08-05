@@ -9,8 +9,25 @@
 }
 
 @media print {
+  /*
+   * Margin SoT: page.pdf() margin 0.5in on all sides (scripts/generate-eval-pdf.mts).
+   * That option is what Chromium/Puppeteer applies as the paper inset; the prior
+   * @page 0.75/0.7/1in declared a second box that layout largely ignored against
+   * the PDF params (cover overflow math used a 10in content height = 11in − 2×0.5in).
+   * Align @page so the two declarations stop competing without changing effective margin.
+   */
   @page {
-    margin: 0.75in 0.7in 1in;
+    margin: 0.5in;
+  }
+
+  /*
+   * Keep gradients and panel fills for on-screen PDF readers (the common path).
+   * Scoped to the report shell so browser chrome outside stays free to flatten.
+   */
+  .evaluation-page-main,
+  .evaluation-page-main * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   body {
@@ -57,6 +74,12 @@
     color: var(--sc-ink);
   }
 
+  /* Cover carries its own band wordmark; shell mark above it piles height and
+     forced the CTA URL onto a near-empty second page. */
+  .dashboard-shell--pdf-export:has(.evaluation-pdf-cover) .evaluation-pdf-export-wordmark {
+    display: none !important;
+  }
+
   .evaluation-page-main {
     box-shadow: none !important;
     border: none !important;
@@ -73,7 +96,9 @@
   .evaluation-pdf-cover {
     display: flex;
     flex-direction: column;
-    min-height: 10in;
+    /* No fixed min-height: a 10in floor equals the full content box under 0.5in
+       letter margins and leaves the CTA with nowhere to land (overflow to page 2).
+       break-after: page still isolates the cover; spacer takes remaining air. */
     break-after: page;
     page-break-after: always;
     background: #fff;
@@ -105,7 +130,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 0.65in 0.65in 0.5in;
+    padding: 0.5in 0.55in 0.35in;
   }
 
   .evaluation-pdf-cover-eyebrow {
@@ -189,14 +214,16 @@
 
   .evaluation-pdf-cover-spacer {
     flex: 1;
-    min-height: 0.35in;
+    min-height: 0;
   }
 
   .evaluation-pdf-cover-cta {
-    margin: 0 0 1rem;
-    padding: 0.85rem 1rem;
+    margin: 0;
+    padding: 0.7rem 1rem;
     border-left: 3px solid var(--sc-accent);
     background: var(--sc-accent-pale);
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .evaluation-pdf-cover-cta-lead {
@@ -297,24 +324,24 @@
   }
 
   .evaluation-score-panel {
-    background: #fff !important;
-    color: var(--sc-ink) !important;
+    background: linear-gradient(165deg, #1a2332 0%, #2a3548 100%) !important;
+    color: #faf8f3 !important;
     border-right: 1px solid var(--sc-rule) !important;
     padding: 1rem !important;
   }
 
   .evaluation-score-panel p {
-    color: var(--sc-ink) !important;
+    color: #faf8f3 !important;
   }
 
   .evaluation-score-panel-band {
-    color: var(--sc-accent) !important;
+    color: var(--sc-accent-soft) !important;
     font-size: 24pt !important;
     font-weight: 600 !important;
   }
 
   .evaluation-score-panel .evaluation-score-method-note {
-    color: var(--sc-ink-soft) !important;
+    color: rgba(250, 248, 243, 0.55) !important;
   }
 
   .evaluation-verdict-panel {
@@ -336,8 +363,8 @@
   }
 
   .evaluation-category-card > header {
-    background: #fff !important;
-    color: var(--sc-ink) !important;
+    background: linear-gradient(165deg, #1a2332 0%, #2a3548 100%) !important;
+    color: #faf8f3 !important;
     border-bottom: 1px solid var(--sc-rule) !important;
     padding: 0.65rem 0.85rem !important;
     break-after: avoid;
@@ -346,11 +373,15 @@
 
   .evaluation-category-card > header h2,
   .evaluation-category-card > header p {
-    color: var(--sc-ink) !important;
+    color: #faf8f3 !important;
   }
 
   .evaluation-category-card > header h2 span {
-    color: var(--sc-accent) !important;
+    color: var(--sc-accent-soft) !important;
+  }
+
+  .evaluation-category-card > header p {
+    color: rgba(250, 248, 243, 0.7) !important;
   }
 
   .evaluation-criterion > summary {
