@@ -39,10 +39,10 @@ const CARDS: SeatCard[] = [
     tagline:
       "For the associate, the lay preacher, the church planter you are bringing along.",
     features: [
-      "Two submissions a month, drawn from the seat and not from your credits",
-      "He reads the coaching debrief and How It Preaches",
+      "Two submissions a month, drawn from the seat and not from their credits",
+      "They read the coaching debrief and How It Preaches",
       "The scored evaluation is generated and held until you release it",
-      "His own account and his own library, which you can read",
+      "Their own account and their own library, which you can read",
     ],
     ctaLabel: CTA_LABEL,
     ctaHref: CTA_HREF,
@@ -57,8 +57,8 @@ const CARDS: SeatCard[] = [
     tagline: "For the peer you are reading, and who is ready to see everything.",
     features: [
       "Four submissions a month, drawn from the seat",
-      "He reads everything the moment it is ready, including the score",
-      "His own account and his own library, which you can read",
+      "They read everything the moment it is ready, including the score",
+      "Their own account and their own library, which you can read",
     ],
     ctaLabel: CTA_LABEL,
     ctaHref: CTA_HREF,
@@ -70,11 +70,11 @@ const CARDS: SeatCard[] = [
     priceSuffix: "/mo",
     priceNote: "$25 per seat, five-seat minimum. Billed by the term.",
     tagline:
-      "For institutions training preachers — a seminary course, a church planting cohort, a denominational track.",
+      "For institutions training preachers, a seminary course, a church planting cohort, a denominational track.",
     features: [
       <>
         <strong>$25 per seat, per month</strong>
-        {" — billed by the term, with a five-seat floor"}
+        {", billed by the term, with a five-seat floor"}
       </>,
       <>
         <strong>4 credits per seat</strong>
@@ -82,7 +82,7 @@ const CARDS: SeatCard[] = [
       </>,
       "The instructor seat is free",
       "Everything in Coach for every preacher in the class",
-      "Each preacher keeps a private library — visible to the instructor, never to classmates",
+      "Each preacher keeps a private library, visible to the instructor, never to classmates",
       "One invoice for the institution. We set up the class by hand before your term starts",
     ],
     ctaLabel: CLASSROOM_CTA_LABEL,
@@ -102,7 +102,7 @@ export default function DevelopPage() {
         </h1>
         <p className="develop-seats-lede">
           A Coach subscription evaluates your own preaching; a seat gives
-          another preacher his own account, his own submissions, and a library
+          another preacher their own account, their own submissions, and a library
           you can read.
         </p>
       </div>

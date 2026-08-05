@@ -97,7 +97,7 @@ function InvalidInvite() {
         className="text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
       >
-        It may have been used already, or the mentor may have ended it. Ask him
+        It may have been used already, or the mentor may have ended it. Ask them
         for a fresh link. If you already have an account here, sign in and check
         whether it went through.
       </p>
