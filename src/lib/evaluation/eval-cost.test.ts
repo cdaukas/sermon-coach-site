@@ -31,6 +31,17 @@ describe("eval cost logging", () => {
     assert.equal(cost, 0.02);
   });
 
+  it("resolves rates when response.model includes a dated snapshot suffix", () => {
+    const cost = computeEvalCostUsd("claude-haiku-4-5-20251001", {
+      input_tokens: 10_000,
+      output_tokens: 2_000,
+      cache_creation_input_tokens: 0,
+      cache_read_input_tokens: 0,
+    });
+
+    assert.equal(cost, 0.02);
+  });
+
   it("returns null cost when model is absent from the rate table", () => {
     const cost = computeEvalCostUsd("claude-test-model", {
       input_tokens: 100,

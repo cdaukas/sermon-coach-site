@@ -121,6 +121,26 @@ function countFilled(result: EvaluationResultStrict): number {
   return n;
 }
 
+function printVerdictLines(result: EvaluationResultStrict): void {
+  const rows: { id: number; name: string; verdict_line: string | null }[] =
+    [];
+  for (const category of result.categories) {
+    for (const c of category.criteria) {
+      rows.push({
+        id: c.id,
+        name: c.name,
+        verdict_line: c.verdict_line?.trim() ? c.verdict_line : null,
+      });
+    }
+  }
+  rows.sort((a, b) => a.id - b.id);
+  for (const row of rows) {
+    console.log(
+      `  [${row.id}] ${row.name}: ${row.verdict_line ?? "(null)"}`,
+    );
+  }
+}
+
 async function main(): Promise<void> {
   loadEnvLocalIfPresent();
   const { apply, limit } = parseArgs(process.argv);
@@ -171,7 +191,14 @@ async function main(): Promise<void> {
     const schema = evaluationResultSchemaForPromptVersion(promptVersion);
     const parsed = schema.safeParse(row.result);
     if (!parsed.success) {
-      console.warn(`[skip] ${row.id}: result failed schema parse`);
+      const head = parsed.error.issues[0];
+      const path = head ? head.path.join(".") : "(root)";
+      console.warn(
+        `[skip] ${row.id}: result failed schema parse` +
+          (head
+            ? ` — path=${path || "(root)"} code=${head.code} ${head.message}`
+            : ""),
+      );
       skipped += 1;
       continue;
     }
@@ -203,6 +230,7 @@ async function main(): Promise<void> {
         console.log(
           `[dry-run] ${row.id}: would write ${filled}/11 lines (haiku tokens in=${pass.inputTokens} out=${pass.outputTokens})`,
         );
+        printVerdictLines(merged);
         continue;
       }
 
