@@ -68,6 +68,7 @@ export function normalizeVerdictLine(raw: string): string {
 /**
  * Words that leave a truncated sentence incomplete — they require a following
  * object, complement, or clause. Shipping these dangling is worse than a long line.
+ * Prefer a complete 22-word sentence over an 18-word fragment.
  */
 const INCOMPLETE_TERMINAL_WORDS = new Set([
   // Coordinating / subordinating conjunctions
@@ -157,7 +158,10 @@ const INCOMPLETE_TERMINAL_WORDS = new Set([
   "any",
   "some",
   "no",
-  // Incomplete verb forms needing complement
+  "one",
+  "two",
+  "three",
+  // Incomplete verb forms needing complement (aux / modal + bare transitive)
   "is",
   "are",
   "was",
@@ -180,6 +184,80 @@ const INCOMPLETE_TERMINAL_WORDS = new Set([
   "may",
   "might",
   "must",
+  "become",
+  "becomes",
+  "became",
+  "go",
+  "goes",
+  "went",
+  "get",
+  "gets",
+  "got",
+  "make",
+  "makes",
+  "made",
+  "take",
+  "takes",
+  "took",
+  "give",
+  "gives",
+  "gave",
+  "keep",
+  "keeps",
+  "kept",
+  "leave",
+  "leaves",
+  "left",
+  "put",
+  "puts",
+  "bring",
+  "brings",
+  "brought",
+  "stay",
+  "stays",
+  "stayed",
+  "remain",
+  "remains",
+  "remained",
+  "seem",
+  "seems",
+  "seemed",
+  "appear",
+  "appears",
+  "appeared",
+  "need",
+  "needs",
+  "needed",
+  "want",
+  "wants",
+  "wanted",
+  "try",
+  "tries",
+  "tried",
+  "begin",
+  "begins",
+  "began",
+  "start",
+  "starts",
+  "started",
+  "continue",
+  "continues",
+  "continued",
+  "allow",
+  "allows",
+  "allowed",
+  "require",
+  "requires",
+  "required",
+  "include",
+  "includes",
+  "included",
+  "portray",
+  "portrays",
+  "portraying",
+  "defuse",
+  "defuses",
+  "defusing",
   // Relative / interrogative lead-ins
   "which",
   "who",
@@ -190,6 +268,475 @@ const INCOMPLETE_TERMINAL_WORDS = new Set([
   "not",
 ]);
 
+/** Prepositions used for "adjective after prep" incomplete detection. */
+const TERMINAL_PREPOSITIONS = new Set([
+  "of",
+  "to",
+  "with",
+  "in",
+  "on",
+  "at",
+  "by",
+  "for",
+  "from",
+  "into",
+  "about",
+  "against",
+  "between",
+  "among",
+  "through",
+  "during",
+  "without",
+  "within",
+  "across",
+  "behind",
+  "beyond",
+  "under",
+  "over",
+  "after",
+  "before",
+  "around",
+  "near",
+  "upon",
+  "toward",
+  "towards",
+  "via",
+  "per",
+  "vs",
+  "versus",
+  "as",
+  "than",
+]);
+
+/**
+ * -ing forms that are finite sentence endings as nouns (not dangling gerunds).
+ */
+const ING_NOUN_EXCEPTIONS = new Set([
+  "nothing",
+  "something",
+  "everything",
+  "anything",
+  "morning",
+  "evening",
+  "preaching",
+  "teaching",
+  "meaning",
+  "opening",
+  "closing",
+  "hearing",
+  "feeling",
+  "meeting",
+  "reading",
+  "writing",
+  "building",
+  "understanding",
+  "beginning",
+  "ending",
+  "warning",
+  "blessing",
+  "calling",
+]);
+
+/**
+ * -ly forms that are not manner/sentence adverbs (or are finite enough as ends).
+ */
+const LY_NON_ADVERB_EXCEPTIONS = new Set([
+  "only",
+  "family",
+  "assembly",
+  "reply",
+  "supply",
+  "apply",
+  "rely",
+  "multiply",
+  "early",
+  "holy",
+  "silly",
+  "ugly",
+  "friendly",
+  "lonely",
+  "likely",
+]);
+
+/**
+ * Attributive adjectives / participles that need a following noun when they
+ * close a truncate (e.g. "one actual.", "one sustained.").
+ */
+const ATTRIBUTIVE_TERMINAL_ADJECTIVES = new Set([
+  "actual",
+  "real",
+  "concrete",
+  "specific",
+  "particular",
+  "certain",
+  "single",
+  "double",
+  "full",
+  "main",
+  "primary",
+  "central",
+  "major",
+  "minor",
+  "whole",
+  "same",
+  "other",
+  "own",
+  "true",
+  "false",
+  "new",
+  "old",
+  "next",
+  "last",
+  "first",
+  "final",
+  "strong",
+  "weak",
+  "long",
+  "short",
+  "high",
+  "low",
+  "good",
+  "bad",
+  "clear",
+  "structural",
+  "argumentative",
+  "exegetical",
+  "textual",
+  "spiritual",
+  "gospel",
+  "biblical",
+  "theological",
+  "sustained",
+  "named",
+  "quoted",
+  "spoken",
+  "written",
+  "buried",
+  "hidden",
+  "open",
+  "closed",
+  "shared",
+  "stated",
+  "asserted",
+  "implied",
+  "required",
+  "needed",
+  "given",
+  "taken",
+  "made",
+  "done",
+  "left",
+  "kept",
+  "held",
+  "shown",
+  "missed",
+  "earned",
+  "lost",
+  "gained",
+]);
+
+/** Determiners / quantifiers that leave a following adjective incomplete. */
+const TERMINAL_DETERMINERS = new Set([
+  "a",
+  "an",
+  "the",
+  "its",
+  "their",
+  "his",
+  "her",
+  "our",
+  "my",
+  "your",
+  "this",
+  "that",
+  "these",
+  "those",
+  "each",
+  "every",
+  "any",
+  "some",
+  "no",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "many",
+  "few",
+  "several",
+  "both",
+  "another",
+  "such",
+]);
+
+const COPULA_TERMINALS = new Set([
+  "is",
+  "are",
+  "was",
+  "were",
+  "be",
+  "been",
+  "being",
+  "seems",
+  "seem",
+  "appears",
+  "appear",
+  "feels",
+  "feel",
+  "looks",
+  "look",
+  "remains",
+  "remain",
+  "stays",
+  "stay",
+]);
+
+/** Strip trailing non-letter punctuation and lowercase a token. */
+function normalizeTerminalToken(raw: string): string {
+  return raw.replace(/[^a-zA-Z'-]+$/g, "").toLowerCase();
+}
+
+function looksLikeLyAdverb(word: string): boolean {
+  if (word.length < 4 || !word.endsWith("ly")) return false;
+  if (LY_NON_ADVERB_EXCEPTIONS.has(word)) return false;
+  return true;
+}
+
+function looksLikeGerundOrPresentParticiple(word: string): boolean {
+  if (word.length < 5 || !word.endsWith("ing")) return false;
+  if (ING_NOUN_EXCEPTIONS.has(word)) return false;
+  // "thing" already covered; reject stringing-style participle tails.
+  return true;
+}
+
+const NON_COMPARATIVE_ER = new Set([
+  "rather",
+  "after",
+  "never",
+  "other",
+  "under",
+  "over",
+  "proper",
+  "power",
+  "paper",
+  "order",
+  "number",
+  "matter",
+  "master",
+  "leader",
+  "reader",
+  "speaker",
+  "preacher",
+  "teacher",
+  "hearer",
+  "worker",
+  "answer",
+  "chapter",
+  "center",
+  "centre",
+  "wonder",
+  "timber",
+  "finger",
+  "member",
+  "danger",
+  "anger",
+  "eager",
+  "bitter",
+  "latter",
+  "former",
+  "upper",
+  "inner",
+  "outer",
+  "either",
+  "neither",
+  "whether",
+  "together",
+  "further",
+  "father",
+  "mother",
+  "brother",
+  "sister",
+  "water",
+  "corner",
+  "cover",
+  "enter",
+  "offer",
+  "suffer",
+  "deliver",
+  "recover",
+  "remember",
+  "consider",
+  "however",
+  "wherever",
+  "whenever",
+  "whatever",
+  "whoever",
+]);
+
+const NON_SUPERLATIVE_EST = new Set([
+  "honest",
+  "forest",
+  "arrest",
+  "contest",
+  "protest",
+  "interest",
+  "harvest",
+  "request",
+  "suggest",
+  "manifest",
+]);
+
+function looksLikeComparativeOrSuperlative(word: string): boolean {
+  if (word === "better" || word === "worse" || word === "best" || word === "worst") {
+    return true;
+  }
+  // "-er" comparatives that need a than-clause or object ("clearer", "deeper").
+  if (word.length >= 5 && word.endsWith("er") && !NON_COMPARATIVE_ER.has(word)) {
+    return true;
+  }
+  if (word.length >= 6 && word.endsWith("est") && !NON_SUPERLATIVE_EST.has(word)) {
+    return true;
+  }
+  return false;
+}
+
+function looksLikePastParticipleForm(word: string): boolean {
+  if (
+    word === "shown" ||
+    word === "given" ||
+    word === "taken" ||
+    word === "made" ||
+    word === "done" ||
+    word === "left" ||
+    word === "kept" ||
+    word === "held" ||
+    word === "seen" ||
+    word === "been"
+  ) {
+    return true;
+  }
+  return (
+    (word.length >= 5 && word.endsWith("ed")) ||
+    (word.length >= 5 && word.endsWith("en")) ||
+    (word.length >= 4 && word.endsWith("wn"))
+  );
+}
+
+function looksLikeAttributiveAdjective(word: string): boolean {
+  if (ATTRIBUTIVE_TERMINAL_ADJECTIVES.has(word)) return true;
+  // Adjective morphology when left mid-NP ("spiritual" without -ly path).
+  return /(?:ual|ive|ous|ical|able|ible|ary|ory|ent|ant)$/.test(word);
+}
+
+/**
+ * Prep + complement that already finishes a phrase ("in full.", "at all.").
+ * These must not flag as mid-NP adjective truncates.
+ */
+const COMPLETE_PREPOSITIONAL_COMPLEMENTS = new Set([
+  "full",
+  "all",
+  "short",
+  "sum",
+  "part",
+  "common",
+  "general",
+  "turn",
+  "hand",
+  "view",
+  "mind",
+  "fact",
+  "effect",
+  "practice",
+  "particular",
+  "public",
+  "private",
+]);
+
+/** Possessive determiner + "own" finishes ("of its own."). */
+const POSSESSIVE_DETERMINERS = new Set([
+  "its",
+  "their",
+  "his",
+  "her",
+  "our",
+  "my",
+  "your",
+]);
+
+/**
+ * Adjective after a determiner / preposition / bare quantifier is mid-NP.
+ * Predicate adjectives after a copula (or "is clear and memorable") are complete.
+ * Complements after "than"/"as" ("rather than shown") stay finite.
+ */
+function endsOnOrphanedAttributive(
+  words: string[],
+  lastIndex: number,
+  last: string,
+): boolean {
+  const isAttributive =
+    looksLikeAttributiveAdjective(last) || looksLikePastParticipleForm(last);
+  if (!isAttributive) return false;
+
+  // Walk back through "and"/"or" + adjectives; complete if a copula heads the chain.
+  let i = lastIndex - 1;
+  while (i >= 0) {
+    const w = normalizeTerminalToken(words[i]!);
+    if (!w) {
+      i -= 1;
+      continue;
+    }
+    if (w === "and" || w === "or") {
+      i -= 1;
+      continue;
+    }
+    if (looksLikeAttributiveAdjective(w) || looksLikePastParticipleForm(w)) {
+      i -= 1;
+      continue;
+    }
+    if (COPULA_TERMINALS.has(w)) {
+      return false; // "is clear and memorable"
+    }
+    if (TERMINAL_DETERMINERS.has(w)) {
+      // "of its own" finishes; "one own" would be rare nonsense still incomplete if not possessive.
+      if (last === "own" && POSSESSIVE_DETERMINERS.has(w)) {
+        return false;
+      }
+      return true; // "one actual", "one sustained", "the named"
+    }
+    if (w === "than" || w === "as") {
+      // "rather than shown" / "as named" — comparison complement can finish the sentence.
+      return false;
+    }
+    if (TERMINAL_PREPOSITIONS.has(w)) {
+      if (COMPLETE_PREPOSITIONAL_COMPLEMENTS.has(last)) {
+        return false; // "in full", "at all"
+      }
+      // "in actual", "without spiritual" — need a following noun.
+      // Participle after of ("instead of buried") can finish; pure adj cannot.
+      if (looksLikePastParticipleForm(last) && !looksLikeAttributiveAdjective(last)) {
+        return false;
+      }
+      // Participial forms also listed as attributive ("sustained") after prep are still mid-NP.
+      if (looksLikeAttributiveAdjective(last) && !looksLikePastParticipleForm(last)) {
+        return true;
+      }
+      if (looksLikePastParticipleForm(last)) {
+        // "of sustained" / "in buried" — still mid-NP; keep as incomplete.
+        return true;
+      }
+      return true;
+    }
+    // Content word that is not a copula before the adjective — e.g. "room loud".
+    // Prefer incomplete for known attributives; allow participles ("claims asserted").
+    if (looksLikeAttributiveAdjective(last) && !looksLikePastParticipleForm(last)) {
+      return true;
+    }
+    return false;
+  }
+  // Leading adjective / "And memorable." — treat as incomplete.
+  return true;
+}
+
 /** Last content word before the terminal period (lowercased, stripped of trailing punct). */
 export function terminalContentWord(text: string): string {
   const normalized = normalizeVerdictLine(text);
@@ -197,13 +744,17 @@ export function terminalContentWord(text: string): string {
   if (!withoutPeriod) return "";
   const words = withoutPeriod.split(/\s+/).filter(Boolean);
   const last = words[words.length - 1] ?? "";
-  return last.replace(/[^a-zA-Z'-]+$/g, "").toLowerCase();
+  return normalizeTerminalToken(last);
 }
 
 /**
  * True when a truncated (or model) line ends on a word that needs a following
- * object — conjunction, preposition, comparative, determiner, incomplete verb, etc.
+ * object — conjunction, preposition, comparative, determiner, incomplete verb,
+ * gerund, adverb, adjective mid-NP, etc.
  * Pure digit/symbol tokens still count as finished terminals (not incomplete).
+ *
+ * Prefer rejecting a truncate and keeping an overlong complete sentence over
+ * shipping an 18-word fragment.
  */
 export function endsOnIncompleteGrammaticalTail(text: string): boolean {
   const normalized = normalizeVerdictLine(text);
@@ -214,12 +765,73 @@ export function endsOnIncompleteGrammaticalTail(text: string): boolean {
   const rawLast = words[words.length - 1] ?? "";
   if (!rawLast) return true;
 
-  const last = rawLast.replace(/[^a-zA-Z'-]+$/g, "").toLowerCase();
+  const last = normalizeTerminalToken(rawLast);
   // "word 1" / verse marks — digit-only terminal is finite enough not to dangle.
   if (!last) {
     return !/[a-zA-Z0-9]/.test(rawLast);
   }
-  return INCOMPLETE_TERMINAL_WORDS.has(last);
+
+  if (INCOMPLETE_TERMINAL_WORDS.has(last)) return true;
+
+  // Gerunds / present participles: "…and staying.", "…without defusing."
+  if (looksLikeGerundOrPresentParticiple(last)) return true;
+
+  // Manner / sentence adverbs: "…or spiritually."
+  if (looksLikeLyAdverb(last)) return true;
+
+  const prev =
+    words.length >= 2
+      ? normalizeTerminalToken(words[words.length - 2]!)
+      : "";
+
+  // Bare comparative / superlative needing complement: "…rather deeper."
+  // Predicate after copula ("is clearer.") is finite enough to keep.
+  if (
+    looksLikeComparativeOrSuperlative(last) &&
+    !COPULA_TERMINALS.has(prev)
+  ) {
+    return true;
+  }
+
+  // Orphaned attributive adjectives / participles after det/prep/quantifier.
+  if (endsOnOrphanedAttributive(words, words.length - 1, last)) return true;
+
+  return false;
+}
+
+/**
+ * Known rubric / register misspellings that should force a quality retry.
+ * Map: misspelling → preferred form (for logging only).
+ */
+const KNOWN_MISSPELLINGS = new Map<string, string>([
+  ["exgetically", "exegetically"],
+  ["exgetical", "exegetical"],
+  ["exegesisly", "exegetically"],
+]);
+
+/** First known misspelling token in the line, or null. */
+export function findKnownMisspelling(text: string): {
+  found: string;
+  preferred: string;
+} | null {
+  const normalized = normalizeVerdictLine(text);
+  const withoutPeriod = normalized.replace(/\.+$/, "").trim();
+  if (!withoutPeriod) return null;
+  for (const raw of withoutPeriod.split(/\s+/).filter(Boolean)) {
+    const token = normalizeTerminalToken(raw);
+    const preferred = KNOWN_MISSPELLINGS.get(token);
+    if (preferred) return { found: token, preferred };
+  }
+  return null;
+}
+
+/**
+ * True when a truncate candidate would still fail completeness (dangling
+ * terminal including gerund/adverb/adjective/bare verb). Prefer rejecting
+ * truncate entirely over an 18-word fragment.
+ */
+function isCompleteTruncateCandidate(candidate: string): boolean {
+  return !endsOnIncompleteGrammaticalTail(candidate);
 }
 
 /**
@@ -227,8 +839,9 @@ export function endsOnIncompleteGrammaticalTail(text: string): boolean {
  * Prefer ; : — , then word boundary. Always keeps a final period.
  *
  * Returns null when no complete sentence can be formed within the cap (e.g.
- * every candidate ends on "than", "but", "of", "to", "with"). Callers must
- * fall back to the uncapped attempt rather than ship a broken sentence.
+ * every candidate ends mid-phrase on a gerund, adverb, adjective, or dangling
+ * conjunction/preposition). Callers must fall back to the uncapped attempt —
+ * a complete 22-word line beats an 18-word fragment.
  */
 export function truncateVerdictLineToMaxWords(
   text: string,
@@ -238,7 +851,7 @@ export function truncateVerdictLineToMaxWords(
   if (!normalized) return normalized;
   if (countWords(normalized) <= maxWords) {
     // Already under cap — still reject incomplete tails (shouldn't happen on model output often).
-    if (endsOnIncompleteGrammaticalTail(normalized)) return null;
+    if (!isCompleteTruncateCandidate(normalized)) return null;
     return normalized;
   }
 
@@ -258,7 +871,7 @@ export function truncateVerdictLineToMaxWords(
       const before = slice.slice(0, lastClause).trim();
       if (countWords(before) >= 8) {
         const candidate = normalizeVerdictLine(before);
-        if (!endsOnIncompleteGrammaticalTail(candidate)) {
+        if (isCompleteTruncateCandidate(candidate)) {
           return candidate;
         }
       }
@@ -268,12 +881,12 @@ export function truncateVerdictLineToMaxWords(
   // No usable clause mark — hard word cap at longest complete (non-dangling) prefix.
   for (let end = maxWords; end >= Math.min(8, maxWords); end--) {
     const candidate = normalizeVerdictLine(words.slice(0, end).join(" "));
-    if (!endsOnIncompleteGrammaticalTail(candidate)) {
+    if (isCompleteTruncateCandidate(candidate)) {
       return candidate;
     }
   }
 
-  // Every candidate dangles (e.g. ends on "than") — refuse rather than break.
+  // Every candidate is incomplete — refuse rather than ship a fragment.
   return null;
 }
 
@@ -644,7 +1257,8 @@ export function detectSubjectVerbAgreementIssue(
 
 export type VerdictLineQualityIssueReason =
   | "incomplete_grammatical_tail"
-  | "subject_verb_agreement";
+  | "subject_verb_agreement"
+  | "known_misspelling";
 
 export type VerdictLineQualityIssue = {
   id: number;
@@ -661,7 +1275,8 @@ export type SentenceParseIssue = {
 
 /**
  * Whether the line fails to parse as a coherent sentence under practical
- * heuristics: dangling terminal words, or basic 3sg subject-verb disagreement.
+ * heuristics: dangling terminal words, basic 3sg subject-verb disagreement,
+ * or known rubric misspellings (e.g. "exgetically").
  * Single-clause lines (no hinge) are valid when the narrative is single-clause.
  */
 export function detectSentenceParseIssues(
@@ -692,6 +1307,14 @@ export function detectSentenceParseIssues(
     issues.push({
       reason: "subject_verb_agreement",
       detail: `subject-verb agreement: singular "${sv.subject}" + bare verb "${sv.verb}" (needs 3sg -s)`,
+    });
+  }
+
+  const misspelling = findKnownMisspelling(normalized);
+  if (misspelling) {
+    issues.push({
+      reason: "known_misspelling",
+      detail: `known misspelling "${misspelling.found}" (prefer "${misspelling.preferred}")`,
     });
   }
 

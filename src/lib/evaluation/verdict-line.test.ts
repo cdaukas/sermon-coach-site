@@ -202,6 +202,153 @@ describe("criterion verdict_line schema gate", () => {
     assert.equal(terminalContentWord("… less clearly than."), "than");
   });
 
+  it("endsOnIncompleteGrammaticalTail flags mid-sentence fragment terminals from dry-run", () => {
+    const fragments = [
+      "The claim lands as explanation becomes.",
+      "The sermon risks portraying one actual person in actual.",
+      "The arc holds in one concrete situation and staying.",
+      "The pastoral move arrives without defusing or spiritually.",
+      "The unit is two brief notes rather than one sustained.",
+    ];
+    for (const line of fragments) {
+      assert.equal(
+        endsOnIncompleteGrammaticalTail(line),
+        true,
+        `expected incomplete tail: ${line}`,
+      );
+      assert.equal(
+        failsSentenceParse(line),
+        true,
+        `expected parse failure: ${line}`,
+      );
+    }
+  });
+
+  it("enforce path rejects incomplete truncates for the five fragment endings", () => {
+    // Overlong lines whose naïve 18-word cut would end on each bad terminal.
+    const pad =
+      "The sermon works carefully through the text and frame today so filler words pad past the length";
+    // Build: ... pad (many words) ending forced via known bad terminals by using lines
+    // long enough that hard-cut at 18 would hit the fragment end.
+    const cases: Array<{ ending: string; last: string }> = [
+      {
+        ending:
+          "The claim finally settles as explanation becomes",
+        last: "becomes",
+      },
+      {
+        ending:
+          "The sermon risks portraying one actual person in actual",
+        last: "actual",
+      },
+      {
+        ending:
+          "The arc holds only in one concrete situation and staying",
+        last: "staying",
+      },
+      {
+        ending:
+          "The pastoral move arrives without defusing or spiritually",
+        last: "spiritually",
+      },
+      {
+        ending:
+          "The unit remains two brief notes rather than one sustained",
+        last: "sustained",
+      },
+    ];
+
+    for (const { ending, last } of cases) {
+      // Ensure over-cap when combined, and 18-word prefix ends on the bad word.
+      const words = ending.split(/\s+/);
+      assert.ok(
+        words.length <= VERDICT_LINE_MAX_WORDS,
+        `base ending for ${last} should be ≤ max for prefix control`,
+      );
+      // Prefix the ending so total exceeds cap; walk-back should still only
+      // find under-cap cuts at or before the incomplete last word.
+      const overlong = normalizePeriod(
+        `${pad} ${ending}`,
+      );
+      assert.ok(
+        countWords(overlong) > VERDICT_LINE_MAX_WORDS,
+        `need overlong for ${last}`,
+      );
+      assert.equal(
+        terminalContentWord(ending + "."),
+        last,
+        `fixture ends on ${last}`,
+      );
+      assert.equal(endsOnIncompleteGrammaticalTail(ending + "."), true);
+
+      // Direct truncate of a sentence that hard-caps onto the fragment.
+      // Construct: first (max- lastWordCount) neutral words + ending words so end === 18.
+      const endingWords = ending.split(/\s+/);
+      const headCount = VERDICT_LINE_MAX_WORDS - endingWords.length;
+      assert.ok(headCount >= 1, `need head room for ${last}`);
+      const head = Array.from({ length: headCount }, () => "word").join(" ");
+      const forced = normalizePeriod(`${head} ${ending}`);
+      assert.equal(countWords(forced), VERDICT_LINE_MAX_WORDS);
+      // Under-cap already: enforce no-ops; endsOn still flags.
+      // Make it overlong by prepending, forcing truncate path.
+      const forceTruncate = normalizePeriod(
+        `Extra words fill the front of this line for length ${forced}`,
+      );
+      assert.ok(countWords(forceTruncate) > VERDICT_LINE_MAX_WORDS);
+
+      const truncated = truncateVerdictLineToMaxWords(
+        forceTruncate,
+        VERDICT_LINE_MAX_WORDS,
+      );
+      if (truncated !== null) {
+        assert.notEqual(
+          terminalContentWord(truncated),
+          last,
+          `truncate must not end on ${last}: ${truncated}`,
+        );
+        assert.equal(
+          endsOnIncompleteGrammaticalTail(truncated),
+          false,
+          `truncate must be complete: ${truncated}`,
+        );
+      }
+
+      const { lines, rejectedBrokenTruncate } = enforceVerdictLineWordCap(
+        new Map([[1, forceTruncate]]),
+        VERDICT_LINE_MAX_WORDS,
+      );
+      const shipped = lines.get(1)!;
+      assert.notEqual(
+        terminalContentWord(shipped),
+        last,
+        `enforce must not ship ending "${last}": ${shipped}`,
+      );
+      assert.equal(
+        endsOnIncompleteGrammaticalTail(shipped),
+        false,
+        `shipped line must parse complete: ${shipped}`,
+      );
+      // Either truncated to a complete under-cap line, or kept full complete overlong.
+      if (countWords(shipped) > VERDICT_LINE_MAX_WORDS) {
+        assert.ok(
+          rejectedBrokenTruncate.some((r) => r.id === 1),
+          `overlong keep for ${last} should be logged`,
+        );
+      }
+    }
+  });
+
+  it("flags known misspelling exgetically for quality retry", () => {
+    const line =
+      "The servant and son distinction is exgetically grounded in the text.";
+    const issues = detectSentenceParseIssues(line);
+    assert.ok(
+      issues.some((i) => i.reason === "known_misspelling"),
+      "expected known_misspelling issue",
+    );
+    assert.equal(failsSentenceParse(line), true);
+  });
+
   it("truncate rejects a hard cut ending on dangling than (no broken than.)", () => {
     assert.ok(countWords(LINE_DANGLING_THAN) > VERDICT_LINE_MAX_WORDS);
     const truncated = truncateVerdictLineToMaxWords(LINE_DANGLING_THAN, 18);

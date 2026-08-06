@@ -195,10 +195,12 @@ function mergeQualityRetryFixes(
  *
  * Length: 12–18 words is advised in the prompt. Overlong batch → one full
  * retry with a hard-cap reminder. Then sentence-parse checks (incomplete
- * grammatical tail + subject-verb agreement) with one targeted retry for
- * failing ids. Hinge is never required for acceptance. Then clause-boundary
- * cap before merge. Incomplete truncates (dangling "than"/"but"/prepositions)
- * are rejected: keep the uncapped attempt and log the overshoot.
+ * grammatical tail + subject-verb agreement + known misspellings) with one
+ * targeted retry for failing ids. Hinge is never required for acceptance.
+ * Then clause-boundary cap before merge. Incomplete truncates (dangling
+ * gerunds, adverbs, adjectives, bare verbs, conjunctions, prepositions) are
+ * rejected: keep the uncapped complete attempt and log the overshoot.
+ * Prefer a complete 22-word sentence over an 18-word mid-sentence fragment.
  *
  * Path (always):
  *   tool → validateAndMap → [optional retry if hasOverlong] →
@@ -326,12 +328,12 @@ export async function runCriterionVerdictLines(
   }
 
   // Prefer clause-boundary cap before merge. Truncate is a no-op under the
-  // ceiling. If every candidate ends incomplete (dangling comparative /
-  // conjunction / preposition), keep the uncapped attempt rather than ship
-  // a sentence that does not parse.
+  // ceiling. If every under-cap candidate ends incomplete (gerund, adverb,
+  // orphaned adjective, comparative, conjunction, preposition, bare
+  // transitive), keep the uncapped complete attempt rather than ship a fragment.
   if (hasOverlongVerdictLine(linesById, VERDICT_LINE_MAX_WORDS)) {
     console.warn(
-      `[verdict-lines] Cap still exceeded; truncating to clause boundary at ${VERDICT_LINE_MAX_WORDS} words.`,
+      `[verdict-lines] Cap still exceeded; truncating to clause boundary at ${VERDICT_LINE_MAX_WORDS} words when a complete under-cap sentence exists.`,
     );
   }
   const capped = enforceVerdictLineWordCap(linesById, VERDICT_LINE_MAX_WORDS);

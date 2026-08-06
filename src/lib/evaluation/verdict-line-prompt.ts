@@ -114,6 +114,9 @@ export function buildVerdictLineQualityRetryNote(
     if (issue.reason === "subject_verb_agreement") {
       return `Criterion ${issue.id} (score ${issue.score}/5): ${issue.detail}. Fix agreement so singular subjects take a singular verb form (e.g. reversal detonates, not reversal detonate). Failed line: "${preview}"`;
     }
+    if (issue.reason === "known_misspelling") {
+      return `Criterion ${issue.id} (score ${issue.score}/5): ${issue.detail}. Correct the misspelling. Failed line: "${preview}"`;
+    }
     return `Criterion ${issue.id} (score ${issue.score}/5): ${issue.detail}. Failed line: "${preview}"`;
   });
 
