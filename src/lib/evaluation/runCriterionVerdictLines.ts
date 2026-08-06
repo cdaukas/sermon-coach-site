@@ -194,14 +194,15 @@ function mergeQualityRetryFixes(
  * Call after runEvaluation; merge into result before the single complete write.
  *
  * Length: 12–18 words is advised in the prompt. Overlong batch → one full
- * retry with a hard-cap reminder. Then quality checks (hinge below 5 + SV
- * agreement) with one targeted retry for failing ids. Then clause-boundary
+ * retry with a hard-cap reminder. Then sentence-parse checks (incomplete
+ * grammatical tail + subject-verb agreement) with one targeted retry for
+ * failing ids. Hinge is never required for acceptance. Then clause-boundary
  * cap before merge. Incomplete truncates (dangling "than"/"but"/prepositions)
  * are rejected: keep the uncapped attempt and log the overshoot.
  *
  * Path (always):
  *   tool → validateAndMap → [optional retry if hasOverlong] →
- *   quality (hinge + SV) → [optional targeted retry] →
+ *   quality (sentence parse) → [optional targeted retry] →
  *   enforceVerdictLineWordCap → mergeCriterionVerdictLines
  * Job path and backfill both call this function; there is no bypass merge.
  */
@@ -275,8 +276,8 @@ export async function runCriterionVerdictLines(
     }
   }
 
-  // Hinge (score < 5) + subject-verb agreement — hard validation with one
-  // targeted retry. Score 5 is exempt from hinge only.
+  // Sentence parse (incomplete tail + SV agreement) — hard validation with
+  // one targeted retry. Single-clause lines are valid (no hinge required).
   let qualityIssues = collectVerdictLineQualityIssues(linesById, scoresById);
   if (qualityIssues.length > 0) {
     logQualityIssues("Quality invalid on first pass", qualityIssues);

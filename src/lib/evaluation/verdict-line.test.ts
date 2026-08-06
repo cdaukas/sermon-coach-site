@@ -19,10 +19,10 @@ import {
   endsOnIncompleteGrammaticalTail,
   terminalContentWord,
   submitCriterionVerdictLinesTool,
-  hasVerdictHinge,
-  isSingleClauseVerdictLine,
   hasSubjectVerbAgreementIssue,
   detectSubjectVerbAgreementIssue,
+  detectSentenceParseIssues,
+  failsSentenceParse,
   collectVerdictLineQualityIssues,
 } from "./verdict-line-schema";
 import {
@@ -255,46 +255,33 @@ describe("criterion verdict_line schema gate", () => {
     assert.equal(rejectedBrokenTruncate[0]?.id, 3);
   });
 
-  it("copy contract requires hinge below 5 and forbids prescription", () => {
+  it("copy contract keeps anti-prescription and allows single-clause", () => {
     const prompt = buildVerdictLineSystemPrompt();
     assert.match(prompt, /must.*should.*would/i);
     assert.match(prompt, /never what the preacher should do next/i);
     assert.match(prompt, /Failed shapes/i);
-    assert.match(prompt, /single-clause line.*failed line on any score below 5/i);
-    assert.match(prompt, /Do not drop the concession half/i);
-    assert.match(
+    assert.match(prompt, /single-clause takeaway is correct/i);
+    assert.doesNotMatch(
       prompt,
-      /Greek is asserted rather than shown/i,
+      /single-clause line with no second half is a failed line/i,
     );
+    assert.doesNotMatch(prompt, /scores 1–4 never drop the second half/i);
+    assert.match(prompt, /subject and verb must agree/i);
+    assert.match(prompt, /Greek is asserted rather than shown/i);
   });
 });
 
-describe("verdict-line hinge and SV quality heuristics", () => {
+describe("verdict-line sentence parse heuristics", () => {
   const LINE_WITH_BUT =
     "Propitiation is handled with care, but the claim outruns the quoted word.";
-  const LINE_WITH_SEMI =
-    "The spine is clear; the transitions announce movement instead of creating it.";
-  const LINE_WITH_COMMA_AND =
-    "The servant and son distinction is grounded, and the text opens on that hinge.";
   const LINE_SINGLE =
     "The Lion-Lamb reversal lands as the text's own structural hinge tonight.";
   const LINE_DETONATE =
     "The Lion-Lamb reversal detonate as the text's own hinge.";
+  const LINE_DANGLING =
+    "The Lion-Lamb reversal lands as the text's own hinge of.";
 
-  it("detects single-clause lines without hinge markers", () => {
-    assert.equal(isSingleClauseVerdictLine(LINE_SINGLE), true);
-    assert.equal(hasVerdictHinge(LINE_SINGLE), false);
-
-    assert.equal(isSingleClauseVerdictLine(LINE_WITH_BUT), false);
-    assert.equal(hasVerdictHinge(LINE_WITH_BUT), true);
-    assert.equal(hasVerdictHinge(LINE_WITH_SEMI), true);
-    assert.equal(hasVerdictHinge(LINE_WITH_COMMA_AND), true);
-    assert.equal(hasVerdictHinge("Clear claim though the quote is thin."), true);
-    assert.equal(hasVerdictHinge("A spine holds while the arc stalls."), true);
-    assert.equal(hasVerdictHinge("The claim stands yet the cost is unnamed."), true);
-  });
-
-  it("score 5 is exempt from the both-halves rule; score 4 single-clause is invalid", () => {
+  it("accepts single-clause lines at any score (hinge not required)", () => {
     const lines = new Map([
       [1, LINE_SINGLE],
       [2, LINE_SINGLE],
@@ -303,33 +290,26 @@ describe("verdict-line hinge and SV quality heuristics", () => {
     const scores = new Map([
       [1, 5],
       [2, 4],
-      [3, 4],
+      [3, 3],
     ]);
     const issues = collectVerdictLineQualityIssues(lines, scores);
-    const hingeIssues = issues.filter((i) => i.reason === "missing_hinge");
-    assert.equal(
-      hingeIssues.some((i) => i.id === 1),
-      false,
-      "score 5 single-clause should be exempt",
-    );
-    assert.equal(
-      hingeIssues.some((i) => i.id === 2),
-      true,
-      "score 4 single-clause must be invalid",
-    );
-    assert.equal(
-      hingeIssues.some((i) => i.id === 3),
-      false,
-      "hinged score 4 is valid",
-    );
+    assert.equal(issues.length, 0, "single-clause must not fail quality");
+    assert.equal(failsSentenceParse(LINE_SINGLE), false);
+    assert.equal(failsSentenceParse(LINE_WITH_BUT), false);
   });
 
   it("flags the detonate subject-verb agreement slip", () => {
     assert.equal(hasSubjectVerbAgreementIssue(LINE_DETONATE), true);
+    assert.equal(failsSentenceParse(LINE_DETONATE), true);
     const hit = detectSubjectVerbAgreementIssue(LINE_DETONATE);
     assert.ok(hit);
     assert.match(hit!.subject, /reversal/i);
     assert.equal(hit!.verb, "detonate");
+
+    const parseIssues = detectSentenceParseIssues(LINE_DETONATE);
+    assert.ok(
+      parseIssues.some((i) => i.reason === "subject_verb_agreement"),
+    );
 
     // Correct agreement should pass.
     assert.equal(
@@ -338,17 +318,31 @@ describe("verdict-line hinge and SV quality heuristics", () => {
       ),
       false,
     );
+    assert.equal(
+      failsSentenceParse(
+        "The Lion-Lamb reversal detonates as the text's own hinge.",
+      ),
+      false,
+    );
     // Good two-part line should not false-positive on SV.
     assert.equal(hasSubjectVerbAgreementIssue(LINE_WITH_BUT), false);
   });
 
-  it("collectVerdictLineQualityIssues stacks hinge and SV reasons", () => {
+  it("flags dangling grammatical tails as parse failures", () => {
+    assert.equal(endsOnIncompleteGrammaticalTail(LINE_DANGLING), true);
+    assert.equal(failsSentenceParse(LINE_DANGLING), true);
+    const issues = detectSentenceParseIssues(LINE_DANGLING);
+    assert.ok(
+      issues.some((i) => i.reason === "incomplete_grammatical_tail"),
+    );
+  });
+
+  it("collectVerdictLineQualityIssues reports SV without requiring hinge", () => {
     const lines = new Map([[2, LINE_DETONATE]]);
-    // detonate line is also single-clause; score 3
     const issues = collectVerdictLineQualityIssues(lines, new Map([[2, 3]]));
-    const reasons = new Set(issues.map((i) => i.reason));
-    assert.ok(reasons.has("missing_hinge"));
-    assert.ok(reasons.has("subject_verb_agreement"));
+    assert.equal(issues.length, 1);
+    assert.equal(issues[0]?.reason, "subject_verb_agreement");
+    assert.ok(!issues.some((i) => i.reason === "incomplete_grammatical_tail"));
   });
 });
 
@@ -465,7 +459,7 @@ describe("runCriterionVerdictLines length gate", () => {
     }
   });
 
-  it("retries once for quality (hinge/SV) and merges only fixed ids", async () => {
+  it("retries once for sentence-parse (SV) and merges only fixed ids", async () => {
     process.env.ANTHROPIC_API_KEY = "test-key";
 
     const SINGLE =
@@ -473,9 +467,8 @@ describe("runCriterionVerdictLines length gate", () => {
     const DETONATE =
       "The Lion-Lamb reversal detonate as the text's own hinge.";
     const FIXED =
-      "The Lion-Lamb reversal detonates, but the cost half stays named.";
+      "The Lion-Lamb reversal detonates as the text's own structural hinge.";
 
-    // Build a fixture where criteria 2 and 3 score below 5 (need hinge).
     const base = clearCriterionVerdictLines(
       structuredClone(EVALUATION_FIXTURE) as never,
     );
@@ -495,7 +488,7 @@ describe("runCriterionVerdictLines length gate", () => {
           : "";
 
       if (createCalls === 1) {
-        // id 2: single-clause (invalid at score 3); id 3: SV slip; id 5: single ok at 5
+        // id 2: single-clause OK at score 3; id 3: SV slip only; id 5: single OK
         return messageWithVerdictLines(
           elevenLines({
             2: SINGLE,
@@ -505,12 +498,11 @@ describe("runCriterionVerdictLines length gate", () => {
         );
       }
 
-      // Quality retry: only repair requested ids.
+      // Quality retry: only id 3 (SV) — single-clause must not trigger retry.
       assert.match(user, /RETRY \(targeted criteria/);
-      assert.match(user, /Criterion 2/);
       assert.match(user, /Criterion 3/);
+      assert.doesNotMatch(user, /Criterion 2/);
       return messageWithVerdictLines([
-        { id: 2, verdict_line: FIXED },
         { id: 3, verdict_line: FIXED },
       ]);
     };
@@ -523,9 +515,8 @@ describe("runCriterionVerdictLines length gate", () => {
         cat.criteria.map((c) => [c.id, c.verdict_line] as const),
       ),
     );
-    assert.equal(byId.get(2), normalizePeriod(FIXED));
+    assert.equal(byId.get(2), normalizePeriod(SINGLE));
     assert.equal(byId.get(3), normalizePeriod(FIXED));
-    // Score 5 single-clause kept without forcing a second half.
     assert.equal(byId.get(5), normalizePeriod(SINGLE));
   });
 });

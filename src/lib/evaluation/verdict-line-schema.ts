@@ -39,7 +39,7 @@ export const submitCriterionVerdictLinesTool: Tool = {
             id: { type: "integer", minimum: 1, maximum: 11 },
             verdict_line: {
               type: "string",
-              description: `One complete sentence, ${VERDICT_LINE_MIN_WORDS}–${VERDICT_LINE_MAX_WORDS} words, ending with a period; takeaway not opening paraphrase; hinge grammar; no em-dash; no restated score.`,
+              description: `One complete sentence, ${VERDICT_LINE_MIN_WORDS}–${VERDICT_LINE_MAX_WORDS} words, ending with a period; takeaway not opening paraphrase; subject-verb agreement; no em-dash; no restated score.`,
             },
           },
         },
@@ -203,10 +203,22 @@ export function terminalContentWord(text: string): string {
 /**
  * True when a truncated (or model) line ends on a word that needs a following
  * object — conjunction, preposition, comparative, determiner, incomplete verb, etc.
+ * Pure digit/symbol tokens still count as finished terminals (not incomplete).
  */
 export function endsOnIncompleteGrammaticalTail(text: string): boolean {
-  const last = terminalContentWord(text);
-  if (!last) return true;
+  const normalized = normalizeVerdictLine(text);
+  const withoutPeriod = normalized.replace(/\.+$/, "").trim();
+  if (!withoutPeriod) return true;
+
+  const words = withoutPeriod.split(/\s+/).filter(Boolean);
+  const rawLast = words[words.length - 1] ?? "";
+  if (!rawLast) return true;
+
+  const last = rawLast.replace(/[^a-zA-Z'-]+$/g, "").toLowerCase();
+  // "word 1" / verse marks — digit-only terminal is finite enough not to dangle.
+  if (!last) {
+    return !/[a-zA-Z0-9]/.test(rawLast);
+  }
   return INCOMPLETE_TERMINAL_WORDS.has(last);
 }
 
@@ -276,41 +288,8 @@ export function hasOverlongVerdictLine(
 }
 
 // ---------------------------------------------------------------------------
-// Both-halves (hinge) + subject-verb agreement heuristics
+// Sentence parse heuristics (incomplete tail + subject-verb agreement)
 // ---------------------------------------------------------------------------
-
-/**
- * Comma-plus-conjunction hinge markers. Matched case-insensitively on the
- * normalized line (articles / spacing already collapsed).
- */
-const COMMA_CONJUNCTION_HINGE =
-  /,\s*(?:and|but|or|yet|though|while)\b/i;
-
-/**
- * Standalone hinge words (not only after comma). Word-boundary match avoids
- * false hits inside words like "without".
- */
-const HINGE_WORD =
-  /\b(?:but|though|while|yet)\b/i;
-
-/**
- * True when the line has a two-part structure: semicolon, hinge word
- * (but / though / while / yet), or comma-plus-conjunction
- * (, and / , but / , or / , yet / , though / , while).
- */
-export function hasVerdictHinge(text: string): boolean {
-  const normalized = normalizeVerdictLine(text);
-  if (!normalized) return false;
-  if (normalized.includes(";")) return true;
-  if (COMMA_CONJUNCTION_HINGE.test(normalized)) return true;
-  if (HINGE_WORD.test(normalized)) return true;
-  return false;
-}
-
-/** Inverse of hasVerdictHinge — single-clause line with no half-marker. */
-export function isSingleClauseVerdictLine(text: string): boolean {
-  return !hasVerdictHinge(text);
-}
 
 /**
  * Common bare present-tense verbs that need -s/-es under a 3sg subject.
@@ -664,7 +643,7 @@ export function detectSubjectVerbAgreementIssue(
 }
 
 export type VerdictLineQualityIssueReason =
-  | "missing_hinge"
+  | "incomplete_grammatical_tail"
   | "subject_verb_agreement";
 
 export type VerdictLineQualityIssue = {
@@ -675,9 +654,59 @@ export type VerdictLineQualityIssue = {
   line: string;
 };
 
+export type SentenceParseIssue = {
+  reason: VerdictLineQualityIssueReason;
+  detail: string;
+};
+
 /**
- * Collect quality invalidations: single-clause below score 5, and SV slips.
- * Score 5 is exempt from the both-halves rule only.
+ * Whether the line fails to parse as a coherent sentence under practical
+ * heuristics: dangling terminal words, or basic 3sg subject-verb disagreement.
+ * Single-clause lines (no hinge) are valid when the narrative is single-clause.
+ */
+export function detectSentenceParseIssues(
+  text: string,
+): SentenceParseIssue[] {
+  const issues: SentenceParseIssue[] = [];
+  const normalized = normalizeVerdictLine(text);
+  if (!normalized) {
+    issues.push({
+      reason: "incomplete_grammatical_tail",
+      detail: "empty after normalize",
+    });
+    return issues;
+  }
+
+  if (endsOnIncompleteGrammaticalTail(normalized)) {
+    const last = terminalContentWord(normalized);
+    issues.push({
+      reason: "incomplete_grammatical_tail",
+      detail: last
+        ? `ends on incomplete tail "${last}"`
+        : "ends on empty terminal word",
+    });
+  }
+
+  const sv = detectSubjectVerbAgreementIssue(normalized);
+  if (sv) {
+    issues.push({
+      reason: "subject_verb_agreement",
+      detail: `subject-verb agreement: singular "${sv.subject}" + bare verb "${sv.verb}" (needs 3sg -s)`,
+    });
+  }
+
+  return issues;
+}
+
+/** True when any sentence-parse heuristic fails. */
+export function failsSentenceParse(text: string): boolean {
+  return detectSentenceParseIssues(text).length > 0;
+}
+
+/**
+ * Collect quality invalidations for retry: lines that do not parse as a
+ * complete sentence (incomplete grammatical tail or SV disagreement).
+ * Hinge / both-halves is never required for acceptance.
  */
 export function collectVerdictLineQualityIssues(
   linesById: ReadonlyMap<number, string>,
@@ -687,26 +716,12 @@ export function collectVerdictLineQualityIssues(
 
   for (const [id, line] of linesById) {
     const score = scoresById.get(id) ?? 0;
-
-    // Hinge required for any score below 5; pure 5 may be single-clause.
-    if (score < 5 && isSingleClauseVerdictLine(line)) {
+    for (const parseIssue of detectSentenceParseIssues(line)) {
       issues.push({
         id,
         score,
-        reason: "missing_hinge",
-        detail:
-          "single-clause with no hinge (no but/though/while/yet, no semicolon, no comma-plus-conjunction)",
-        line,
-      });
-    }
-
-    const sv = detectSubjectVerbAgreementIssue(line);
-    if (sv) {
-      issues.push({
-        id,
-        score,
-        reason: "subject_verb_agreement",
-        detail: `subject-verb agreement: singular "${sv.subject}" + bare verb "${sv.verb}" (needs 3sg -s)`,
+        reason: parseIssue.reason,
+        detail: parseIssue.detail,
         line,
       });
     }
