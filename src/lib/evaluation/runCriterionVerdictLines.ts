@@ -20,8 +20,8 @@ import {
   type VerdictLineCriterionInput,
 } from "./verdict-line-prompt";
 import {
+  collectOverlongVerdictLines,
   collectVerdictLineQualityIssues,
-  enforceVerdictLineWordCap,
   hasOverlongVerdictLine,
   submitCriterionVerdictLinesTool,
   validateAndMapVerdictLines,
@@ -193,19 +193,16 @@ function mergeQualityRetryFixes(
  * Batched Haiku pass: eleven lines from finished criterion narratives.
  * Call after runEvaluation; merge into result before the single complete write.
  *
- * Length: 12–18 words is advised in the prompt. Overlong batch → one full
- * retry with a hard-cap reminder. Then sentence-parse checks (incomplete
- * grammatical tail + subject-verb agreement + known misspellings) with one
- * targeted retry for failing ids. Hinge is never required for acceptance.
- * Then clause-boundary cap before merge. Incomplete truncates (dangling
- * gerunds, adverbs, adjectives, bare verbs, conjunctions, prepositions) are
- * rejected: keep the uncapped complete attempt and log the overshoot.
- * Prefer a complete 22-word sentence over an 18-word mid-sentence fragment.
+ * Length: 12–18 words is a prompt target, not a hard ceiling after retry.
+ * Overlong batch → one full retry with a length reminder. Whatever the retry
+ * returns ships (overages are logged). Never truncates.
+ * Sentence-parse checks (incomplete grammatical tail + subject-verb agreement
+ * + known misspellings) get one targeted quality retry. Hinge is never required.
  *
  * Path (always):
- *   tool → validateAndMap → [optional retry if hasOverlong] →
+ *   tool → validateAndMap → [optional length retry if hasOverlong] →
  *   quality (sentence parse) → [optional targeted retry] →
- *   enforceVerdictLineWordCap → mergeCriterionVerdictLines
+ *   log remaining overages → mergeCriterionVerdictLines
  * Job path and backfill both call this function; there is no bypass merge.
  */
 export async function runCriterionVerdictLines(
@@ -327,20 +324,11 @@ export async function runCriterionVerdictLines(
     }
   }
 
-  // Prefer clause-boundary cap before merge. Truncate is a no-op under the
-  // ceiling. If every under-cap candidate ends incomplete (gerund, adverb,
-  // orphaned adjective, comparative, conjunction, preposition, bare
-  // transitive), keep the uncapped complete attempt rather than ship a fragment.
-  if (hasOverlongVerdictLine(linesById, VERDICT_LINE_MAX_WORDS)) {
+  // 18 words is a target after one length retry — never truncate; log and ship.
+  const overlong = collectOverlongVerdictLines(linesById, VERDICT_LINE_MAX_WORDS);
+  for (const item of overlong) {
     console.warn(
-      `[verdict-lines] Cap still exceeded; truncating to clause boundary at ${VERDICT_LINE_MAX_WORDS} words when a complete under-cap sentence exists.`,
-    );
-  }
-  const capped = enforceVerdictLineWordCap(linesById, VERDICT_LINE_MAX_WORDS);
-  linesById = capped.lines;
-  for (const rejected of capped.rejectedBrokenTruncate) {
-    console.warn(
-      `[verdict-lines] Cap exceeded (reject-broken-truncate): criterion ${rejected.id} kept at ${rejected.wordCount} words (last word "${rejected.lastWord}") rather than shipping an incomplete sentence. Preview: ${rejected.attemptPreview}`,
+      `[verdict-lines] Overage (shipping as-is): criterion ${item.id} at ${item.wordCount} words (target ${VERDICT_LINE_MAX_WORDS}, last word "${item.lastWord}"). Preview: ${item.attemptPreview}`,
     );
   }
 

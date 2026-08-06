@@ -66,9 +66,8 @@ export function normalizeVerdictLine(raw: string): string {
 }
 
 /**
- * Words that leave a truncated sentence incomplete — they require a following
- * object, complement, or clause. Shipping these dangling is worse than a long line.
- * Prefer a complete 22-word sentence over an 18-word fragment.
+ * Words that leave a sentence incomplete — they require a following object,
+ * complement, or clause. Used to flag dangling model output for quality retry.
  */
 const INCOMPLETE_TERMINAL_WORDS = new Set([
   // Coordinating / subordinating conjunctions
@@ -360,7 +359,7 @@ const LY_NON_ADVERB_EXCEPTIONS = new Set([
 
 /**
  * Attributive adjectives / participles that need a following noun when they
- * close a truncate (e.g. "one actual.", "one sustained.").
+ * end a line mid-NP (e.g. "one actual.", "one sustained.").
  */
 const ATTRIBUTIVE_TERMINAL_ADJECTIVES = new Set([
   "actual",
@@ -630,7 +629,7 @@ function looksLikeAttributiveAdjective(word: string): boolean {
 
 /**
  * Prep + complement that already finishes a phrase ("in full.", "at all.").
- * These must not flag as mid-NP adjective truncates.
+ * These must not flag as mid-NP adjective incompletes.
  */
 const COMPLETE_PREPOSITIONAL_COMPLEMENTS = new Set([
   "full",
@@ -748,13 +747,10 @@ export function terminalContentWord(text: string): string {
 }
 
 /**
- * True when a truncated (or model) line ends on a word that needs a following
- * object — conjunction, preposition, comparative, determiner, incomplete verb,
- * gerund, adverb, adjective mid-NP, etc.
+ * True when a line ends on a word that needs a following object — conjunction,
+ * preposition, comparative, determiner, incomplete verb, gerund, adverb,
+ * adjective mid-NP, etc. Used for model-quality retry, never for truncation.
  * Pure digit/symbol tokens still count as finished terminals (not incomplete).
- *
- * Prefer rejecting a truncate and keeping an overlong complete sentence over
- * shipping an 18-word fragment.
  */
 export function endsOnIncompleteGrammaticalTail(text: string): boolean {
   const normalized = normalizeVerdictLine(text);
@@ -825,71 +821,6 @@ export function findKnownMisspelling(text: string): {
   return null;
 }
 
-/**
- * True when a truncate candidate would still fail completeness (dangling
- * terminal including gerund/adverb/adjective/bare verb). Prefer rejecting
- * truncate entirely over an 18-word fragment.
- */
-function isCompleteTruncateCandidate(candidate: string): boolean {
-  return !endsOnIncompleteGrammaticalTail(candidate);
-}
-
-/**
- * Cut an overlong sentence at the last clause boundary that still ≤ maxWords.
- * Prefer ; : — , then word boundary. Always keeps a final period.
- *
- * Returns null when no complete sentence can be formed within the cap (e.g.
- * every candidate ends mid-phrase on a gerund, adverb, adjective, or dangling
- * conjunction/preposition). Callers must fall back to the uncapped attempt —
- * a complete 22-word line beats an 18-word fragment.
- */
-export function truncateVerdictLineToMaxWords(
-  text: string,
-  maxWords: number = VERDICT_LINE_MAX_WORDS,
-): string | null {
-  const normalized = normalizeVerdictLine(text);
-  if (!normalized) return normalized;
-  if (countWords(normalized) <= maxWords) {
-    // Already under cap — still reject incomplete tails (shouldn't happen on model output often).
-    if (!isCompleteTruncateCandidate(normalized)) return null;
-    return normalized;
-  }
-
-  const withoutPeriod = normalized.replace(/\.+$/, "");
-  const words = withoutPeriod.split(/\s+/);
-
-  // Walk back for clause punctuation inside a ≤maxWords prefix.
-  for (let end = maxWords; end >= Math.min(8, maxWords); end--) {
-    const slice = words.slice(0, end).join(" ");
-    // Prefer ending the slice at a clause mark so the cut is not mid-phrase.
-    const lastClause = Math.max(
-      slice.lastIndexOf(";"),
-      slice.lastIndexOf(":"),
-      slice.lastIndexOf(","),
-    );
-    if (lastClause >= 0) {
-      const before = slice.slice(0, lastClause).trim();
-      if (countWords(before) >= 8) {
-        const candidate = normalizeVerdictLine(before);
-        if (isCompleteTruncateCandidate(candidate)) {
-          return candidate;
-        }
-      }
-    }
-  }
-
-  // No usable clause mark — hard word cap at longest complete (non-dangling) prefix.
-  for (let end = maxWords; end >= Math.min(8, maxWords); end--) {
-    const candidate = normalizeVerdictLine(words.slice(0, end).join(" "));
-    if (isCompleteTruncateCandidate(candidate)) {
-      return candidate;
-    }
-  }
-
-  // Every candidate is incomplete — refuse rather than ship a fragment.
-  return null;
-}
-
 export function hasOverlongVerdictLine(
   linesById: ReadonlyMap<number, string>,
   maxWords: number = VERDICT_LINE_MAX_WORDS,
@@ -898,6 +829,35 @@ export function hasOverlongVerdictLine(
     if (countWords(line) > maxWords) return true;
   }
   return false;
+}
+
+export type OverlongVerdictLine = {
+  id: number;
+  wordCount: number;
+  lastWord: string;
+  attemptPreview: string;
+};
+
+/**
+ * Collect lines still over the word target after generation/retry.
+ * Never mutates text — 18 words is a target, not a hard ceiling.
+ */
+export function collectOverlongVerdictLines(
+  linesById: ReadonlyMap<number, string>,
+  maxWords: number = VERDICT_LINE_MAX_WORDS,
+): OverlongVerdictLine[] {
+  const overlong: OverlongVerdictLine[] = [];
+  for (const [id, line] of linesById) {
+    const wordCount = countWords(line);
+    if (wordCount <= maxWords) continue;
+    overlong.push({
+      id,
+      wordCount,
+      lastWord: terminalContentWord(line),
+      attemptPreview: line.length > 120 ? `${line.slice(0, 117)}...` : line,
+    });
+  }
+  return overlong;
 }
 
 // ---------------------------------------------------------------------------
@@ -1381,55 +1341,6 @@ export function validateAndMapVerdictLinesPartial(
   }
 
   return byId;
-}
-
-export type EnforceVerdictLineWordCapResult = {
-  lines: Map<number, string>;
-  /** Lines kept overlong because every safe truncate ended incomplete. */
-  rejectedBrokenTruncate: Array<{
-    id: number;
-    wordCount: number;
-    lastWord: string;
-    attemptPreview: string;
-  }>;
-};
-
-/**
- * Cap every overlong line at a clause boundary (post-retry fallthrough).
- * When truncation would end mid-grammatical-tail, keep the uncapped attempt
- * and record it for logging — never ship "…less clearly than."
- */
-export function enforceVerdictLineWordCap(
-  linesById: ReadonlyMap<number, string>,
-  maxWords: number = VERDICT_LINE_MAX_WORDS,
-): EnforceVerdictLineWordCapResult {
-  const out = new Map<number, string>();
-  const rejectedBrokenTruncate: EnforceVerdictLineWordCapResult["rejectedBrokenTruncate"] =
-    [];
-
-  for (const [id, line] of linesById) {
-    if (countWords(line) <= maxWords) {
-      out.set(id, line);
-      continue;
-    }
-
-    const truncated = truncateVerdictLineToMaxWords(line, maxWords);
-    if (truncated !== null && countWords(truncated) <= maxWords) {
-      out.set(id, truncated);
-      continue;
-    }
-
-    // Incomplete truncate or no candidate — keep uncapped attempt.
-    rejectedBrokenTruncate.push({
-      id,
-      wordCount: countWords(line),
-      lastWord: terminalContentWord(line),
-      attemptPreview: line.length > 120 ? `${line.slice(0, 117)}...` : line,
-    });
-    out.set(id, line);
-  }
-
-  return { lines: out, rejectedBrokenTruncate };
 }
 
 /** Validate count, unique ids, full 1–11 coverage. Returns Map id → line or throws. */

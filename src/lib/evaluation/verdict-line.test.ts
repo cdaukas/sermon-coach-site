@@ -13,9 +13,8 @@ import { EVALUATION_FIXTURE } from "./fixture";
 import {
   validateAndMapVerdictLines,
   countWords,
-  truncateVerdictLineToMaxWords,
   hasOverlongVerdictLine,
-  enforceVerdictLineWordCap,
+  collectOverlongVerdictLines,
   endsOnIncompleteGrammaticalTail,
   terminalContentWord,
   submitCriterionVerdictLinesTool,
@@ -35,22 +34,11 @@ import {
 } from "./runCriterionVerdictLines";
 import { EVALUATION_PROMPT_VERSION } from "./prompt";
 
-/** Observed-line samples (28- and 30-word class) that previously landed uncapped. */
+/** Observed-line samples (28- and 30-word class) for length-retry tests. */
 const LINE_28 =
   "The servant and son distinction is exegetically grounded in therapone's nobility, but the word study earns its place when tied back to the sermon's main claim in full.";
 const LINE_30 =
   "The two-point frame is clear and memorable, but the Moses comparison which is the argumentative heart is buried as sub-material inside point two without a named beat of its own.";
-
-/** Overlong line whose 18-word hard cut ends on dangling "than" (clause prefix too short for min-8). */
-const LINE_DANGLING_THAN =
-  "The verdict is vivid, but the offense of guilt precedes the comfort less clearly than grace would require of this room.";
-
-/**
- * No complete ≥8-word prefix under the 18-word cap (all 8..18 terminals
- * are incomplete tails), but the full line itself ends complete.
- */
-const LINE_FORCE_REJECT =
-  "and or but of to with for from than more less of to with for from than more less of to with for grounded claims.";
 
 const SHORT_OK =
   "Propitiation is handled with care, but the claim outruns the quoted word.";
@@ -172,15 +160,6 @@ describe("criterion verdict_line schema gate", () => {
     assert.equal(map.get(1), "Specific hinge line for criterion 1.");
   });
 
-  it("truncateVerdictLineToMaxWords cuts at a clause boundary", () => {
-    const truncated = truncateVerdictLineToMaxWords(LINE_30, 18);
-    assert.ok(truncated !== null);
-    assert.ok(countWords(truncated!) <= 18);
-    assert.ok(truncated!.endsWith("."));
-    // Prefer clause cut before ", but" when that prefix fits the cap.
-    assert.match(truncated!, /clear and memorable/i);
-  });
-
   it("endsOnIncompleteGrammaticalTail flags dangling than/but/of/to/with", () => {
     for (const dangling of [
       "The offense precedes the comfort less clearly than.",
@@ -224,120 +203,6 @@ describe("criterion verdict_line schema gate", () => {
     }
   });
 
-  it("enforce path rejects incomplete truncates for the five fragment endings", () => {
-    // Overlong lines whose naïve 18-word cut would end on each bad terminal.
-    const pad =
-      "The sermon works carefully through the text and frame today so filler words pad past the length";
-    // Build: ... pad (many words) ending forced via known bad terminals by using lines
-    // long enough that hard-cut at 18 would hit the fragment end.
-    const cases: Array<{ ending: string; last: string }> = [
-      {
-        ending:
-          "The claim finally settles as explanation becomes",
-        last: "becomes",
-      },
-      {
-        ending:
-          "The sermon risks portraying one actual person in actual",
-        last: "actual",
-      },
-      {
-        ending:
-          "The arc holds only in one concrete situation and staying",
-        last: "staying",
-      },
-      {
-        ending:
-          "The pastoral move arrives without defusing or spiritually",
-        last: "spiritually",
-      },
-      {
-        ending:
-          "The unit remains two brief notes rather than one sustained",
-        last: "sustained",
-      },
-    ];
-
-    for (const { ending, last } of cases) {
-      // Ensure over-cap when combined, and 18-word prefix ends on the bad word.
-      const words = ending.split(/\s+/);
-      assert.ok(
-        words.length <= VERDICT_LINE_MAX_WORDS,
-        `base ending for ${last} should be ≤ max for prefix control`,
-      );
-      // Prefix the ending so total exceeds cap; walk-back should still only
-      // find under-cap cuts at or before the incomplete last word.
-      const overlong = normalizePeriod(
-        `${pad} ${ending}`,
-      );
-      assert.ok(
-        countWords(overlong) > VERDICT_LINE_MAX_WORDS,
-        `need overlong for ${last}`,
-      );
-      assert.equal(
-        terminalContentWord(ending + "."),
-        last,
-        `fixture ends on ${last}`,
-      );
-      assert.equal(endsOnIncompleteGrammaticalTail(ending + "."), true);
-
-      // Direct truncate of a sentence that hard-caps onto the fragment.
-      // Construct: first (max- lastWordCount) neutral words + ending words so end === 18.
-      const endingWords = ending.split(/\s+/);
-      const headCount = VERDICT_LINE_MAX_WORDS - endingWords.length;
-      assert.ok(headCount >= 1, `need head room for ${last}`);
-      const head = Array.from({ length: headCount }, () => "word").join(" ");
-      const forced = normalizePeriod(`${head} ${ending}`);
-      assert.equal(countWords(forced), VERDICT_LINE_MAX_WORDS);
-      // Under-cap already: enforce no-ops; endsOn still flags.
-      // Make it overlong by prepending, forcing truncate path.
-      const forceTruncate = normalizePeriod(
-        `Extra words fill the front of this line for length ${forced}`,
-      );
-      assert.ok(countWords(forceTruncate) > VERDICT_LINE_MAX_WORDS);
-
-      const truncated = truncateVerdictLineToMaxWords(
-        forceTruncate,
-        VERDICT_LINE_MAX_WORDS,
-      );
-      if (truncated !== null) {
-        assert.notEqual(
-          terminalContentWord(truncated),
-          last,
-          `truncate must not end on ${last}: ${truncated}`,
-        );
-        assert.equal(
-          endsOnIncompleteGrammaticalTail(truncated),
-          false,
-          `truncate must be complete: ${truncated}`,
-        );
-      }
-
-      const { lines, rejectedBrokenTruncate } = enforceVerdictLineWordCap(
-        new Map([[1, forceTruncate]]),
-        VERDICT_LINE_MAX_WORDS,
-      );
-      const shipped = lines.get(1)!;
-      assert.notEqual(
-        terminalContentWord(shipped),
-        last,
-        `enforce must not ship ending "${last}": ${shipped}`,
-      );
-      assert.equal(
-        endsOnIncompleteGrammaticalTail(shipped),
-        false,
-        `shipped line must parse complete: ${shipped}`,
-      );
-      // Either truncated to a complete under-cap line, or kept full complete overlong.
-      if (countWords(shipped) > VERDICT_LINE_MAX_WORDS) {
-        assert.ok(
-          rejectedBrokenTruncate.some((r) => r.id === 1),
-          `overlong keep for ${last} should be logged`,
-        );
-      }
-    }
-  });
-
   it("flags known misspelling exgetically for quality retry", () => {
     const line =
       "The servant and son distinction is exgetically grounded in the text.";
@@ -347,21 +212,6 @@ describe("criterion verdict_line schema gate", () => {
       "expected known_misspelling issue",
     );
     assert.equal(failsSentenceParse(line), true);
-  });
-
-  it("truncate rejects a hard cut ending on dangling than (no broken than.)", () => {
-    assert.ok(countWords(LINE_DANGLING_THAN) > VERDICT_LINE_MAX_WORDS);
-    const truncated = truncateVerdictLineToMaxWords(LINE_DANGLING_THAN, 18);
-    // May shorten via walk-back, but never end on "than"
-    if (truncated !== null) {
-      assert.notEqual(terminalContentWord(truncated), "than");
-      assert.equal(endsOnIncompleteGrammaticalTail(truncated), false);
-      assert.ok(countWords(truncated) <= 18);
-    }
-  });
-
-  it("truncate returns null when every under-cap candidate is incomplete", () => {
-    assert.equal(truncateVerdictLineToMaxWords(LINE_FORCE_REJECT, 18), null);
   });
 
   it("hasOverlongVerdictLine is true for 28- and 30-word observed lines", () => {
@@ -378,28 +228,19 @@ describe("criterion verdict_line schema gate", () => {
     );
   });
 
-  it("enforceVerdictLineWordCap caps clean overlong lines and keeps broken-truncate rejects", () => {
+  it("collectOverlongVerdictLines reports overages without mutating lines", () => {
     const map = new Map([
       [2, LINE_28],
       [10, LINE_30],
       [1, SHORT_OK],
-      [3, LINE_FORCE_REJECT],
     ]);
-    const { lines: capped, rejectedBrokenTruncate } = enforceVerdictLineWordCap(
-      map,
-      VERDICT_LINE_MAX_WORDS,
-    );
-
-    assert.ok(countWords(capped.get(2)!) <= VERDICT_LINE_MAX_WORDS);
-    assert.ok(countWords(capped.get(10)!) <= VERDICT_LINE_MAX_WORDS);
-    assert.equal(capped.get(1), normalizePeriod(SHORT_OK));
-    assert.match(capped.get(10) ?? "", /clear and memorable/i);
-
-    // Force-reject line stays overlong rather than shipping dangling tail
-    assert.equal(capped.get(3), normalizePeriod(LINE_FORCE_REJECT));
-    assert.ok(countWords(capped.get(3)!) > VERDICT_LINE_MAX_WORDS);
-    assert.equal(rejectedBrokenTruncate.length, 1);
-    assert.equal(rejectedBrokenTruncate[0]?.id, 3);
+    const overlong = collectOverlongVerdictLines(map, VERDICT_LINE_MAX_WORDS);
+    assert.equal(overlong.length, 2);
+    assert.ok(overlong.some((o) => o.id === 2 && o.wordCount === 28));
+    assert.ok(overlong.some((o) => o.id === 10 && o.wordCount === 30));
+    // Source map unchanged
+    assert.equal(map.get(2), LINE_28);
+    assert.equal(map.get(10), LINE_30);
   });
 
   it("copy contract keeps anti-prescription and allows single-clause", () => {
@@ -509,7 +350,7 @@ describe("runCriterionVerdictLines length gate", () => {
     }
   });
 
-  it("retries once on overlong batch then truncates before merge", async () => {
+  it("retries once on overlong batch then ships overages without truncating", async () => {
     process.env.ANTHROPIC_API_KEY = "test-key";
 
     let createCalls = 0;
@@ -538,56 +379,20 @@ describe("runCriterionVerdictLines length gate", () => {
     assert.equal(inputTokens, 33);
     assert.equal(outputTokens, 36);
 
-    for (const category of result.categories) {
-      for (const c of category.criteria) {
-        assert.ok(c.verdict_line, `criterion ${c.id} missing verdict_line`);
-        assert.ok(
-          countWords(c.verdict_line) <= VERDICT_LINE_MAX_WORDS,
-          `criterion ${c.id} still overlong: ${countWords(c.verdict_line!)} words — ${c.verdict_line}`,
-        );
-      }
-    }
-
     const c2 = result.categories
       .flatMap((cat) => cat.criteria)
       .find((c) => c.id === 2);
     const c10 = result.categories
       .flatMap((cat) => cat.criteria)
       .find((c) => c.id === 10);
-    assert.ok(c2?.verdict_line);
-    assert.ok(c10?.verdict_line);
-    assert.notEqual(c2?.verdict_line, normalizePeriod(LINE_28));
-    assert.notEqual(c10?.verdict_line, normalizePeriod(LINE_30));
+    // Retry still overlong → ship full lines, never mid-sentence cut.
+    assert.equal(c2?.verdict_line, normalizePeriod(LINE_28));
+    assert.equal(c10?.verdict_line, normalizePeriod(LINE_30));
+    assert.equal(countWords(c2!.verdict_line!), 28);
+    assert.equal(countWords(c10!.verdict_line!), 30);
   });
 
-  it("keeps uncapped attempt when truncate would dangle rather than ship broken", async () => {
-    process.env.ANTHROPIC_API_KEY = "test-key";
-
-    let createCalls = 0;
-    const batch = elevenLines({ 3: LINE_FORCE_REJECT });
-
-    const createMessage: CreateVerdictLineMessage = async () => {
-      createCalls += 1;
-      return messageWithVerdictLines(batch, "claude-haiku-test", {
-        input_tokens: 15,
-        output_tokens: 18,
-      });
-    };
-
-    const base = clearCriterionVerdictLines(EVALUATION_FIXTURE as never);
-    const { result } = await runCriterionVerdictLines(base, { createMessage });
-
-    assert.ok(createCalls >= 1);
-    const c3 = result.categories
-      .flatMap((cat) => cat.criteria)
-      .find((c) => c.id === 3);
-    assert.equal(c3?.verdict_line, normalizePeriod(LINE_FORCE_REJECT));
-    assert.ok(countWords(c3!.verdict_line!) > VERDICT_LINE_MAX_WORDS);
-    assert.equal(endsOnIncompleteGrammaticalTail(c3!.verdict_line!), false);
-  });
-
-  it("enforces the word cap even when the first pass only is under the ceil path", async () => {
-    // Defense-in-depth: single short batch still goes through enforce (no-op).
+  it("ships short batch without a length retry", async () => {
     process.env.ANTHROPIC_API_KEY = "test-key";
     let createCalls = 0;
     const createMessage: CreateVerdictLineMessage = async () => {
