@@ -150,9 +150,12 @@ function printVerdictLines(result: EvaluationResultStrict): void {
   }
   rows.sort((a, b) => a.id - b.id);
   for (const row of rows) {
-    console.log(
-      `  [${row.id}] ${row.name}: ${row.verdict_line ?? "(null)"}`,
-    );
+    const line = row.verdict_line ?? "(null)";
+    const words =
+      row.verdict_line == null
+        ? 0
+        : row.verdict_line.trim().split(/\s+/).filter(Boolean).length;
+    console.log(`  [${row.id}] (${words}w) ${row.name}: ${line}`);
   }
 }
 

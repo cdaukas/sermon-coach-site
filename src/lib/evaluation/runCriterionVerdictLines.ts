@@ -12,6 +12,7 @@ import {
   type EvaluationResultStrict,
 } from "./schema";
 import {
+  buildVerdictLineQualityRetryNote,
   buildVerdictLineSystemPrompt,
   buildVerdictLineUserMessage,
   VERDICT_LINE_MAX_WORDS,
@@ -19,10 +20,13 @@ import {
   type VerdictLineCriterionInput,
 } from "./verdict-line-prompt";
 import {
+  collectVerdictLineQualityIssues,
   enforceVerdictLineWordCap,
   hasOverlongVerdictLine,
   submitCriterionVerdictLinesTool,
   validateAndMapVerdictLines,
+  validateAndMapVerdictLinesPartial,
+  type VerdictLineQualityIssue,
 } from "./verdict-line-schema";
 
 export type RunCriterionVerdictLinesSuccess = {
@@ -68,6 +72,12 @@ function flattenCriteria(
   }
   out.sort((a, b) => a.id - b.id);
   return out;
+}
+
+function scoresByIdFromCriteria(
+  criteria: VerdictLineCriterionInput[],
+): Map<number, number> {
+  return new Map(criteria.map((c) => [c.id, c.score]));
 }
 
 function extractToolInput(
@@ -127,18 +137,71 @@ async function callHaiku(
   };
 }
 
+function logQualityIssues(
+  label: string,
+  issues: VerdictLineQualityIssue[],
+): void {
+  for (const issue of issues) {
+    const preview =
+      issue.line.length > 100
+        ? `${issue.line.slice(0, 97)}...`
+        : issue.line;
+    console.warn(
+      `[verdict-lines] ${label}: criterion ${issue.id} (score ${issue.score}) — ${issue.reason}: ${issue.detail}. Preview: ${preview}`,
+    );
+  }
+}
+
+/**
+ * Merge retry lines for requested ids that no longer have quality issues.
+ * Leaves other ids unchanged. If the model returned all eleven, only
+ * requested ids are considered.
+ */
+function mergeQualityRetryFixes(
+  linesById: Map<number, string>,
+  retryLines: Map<number, string>,
+  requestedIds: ReadonlySet<number>,
+  scoresById: ReadonlyMap<number, number>,
+): { merged: Map<number, string>; fixedIds: number[]; stillBadIds: number[] } {
+  const merged = new Map(linesById);
+  const fixedIds: number[] = [];
+  const stillBadIds: number[] = [];
+
+  for (const id of requestedIds) {
+    const candidate = retryLines.get(id);
+    if (!candidate) {
+      stillBadIds.push(id);
+      continue;
+    }
+
+    const issues = collectVerdictLineQualityIssues(
+      new Map([[id, candidate]]),
+      scoresById,
+    );
+    if (issues.length === 0) {
+      merged.set(id, candidate);
+      fixedIds.push(id);
+    } else {
+      stillBadIds.push(id);
+    }
+  }
+
+  return { merged, fixedIds, stillBadIds };
+}
+
 /**
  * Batched Haiku pass: eleven lines from finished criterion narratives.
  * Call after runEvaluation; merge into result before the single complete write.
  *
  * Length: 12–18 words is advised in the prompt. Overlong batch → one full
- * retry with a hard-cap reminder. Then clause-boundary cap before merge
- * (no-op when already ≤ max). Incomplete truncates (dangling "than"/"but"/
- * prepositions) are rejected: keep the uncapped attempt and log the overshoot.
- * Word count is not rejected on first parse alone.
+ * retry with a hard-cap reminder. Then quality checks (hinge below 5 + SV
+ * agreement) with one targeted retry for failing ids. Then clause-boundary
+ * cap before merge. Incomplete truncates (dangling "than"/"but"/prepositions)
+ * are rejected: keep the uncapped attempt and log the overshoot.
  *
  * Path (always):
  *   tool → validateAndMap → [optional retry if hasOverlong] →
+ *   quality (hinge + SV) → [optional targeted retry] →
  *   enforceVerdictLineWordCap → mergeCriterionVerdictLines
  * Job path and backfill both call this function; there is no bypass merge.
  */
@@ -169,6 +232,7 @@ export async function runCriterionVerdictLines(
     );
   }
 
+  const scoresById = scoresByIdFromCriteria(criteria);
   const attemptUsages: EvalUsageTotals[] = [];
   let responseModel = model;
   let linesById: Map<number, string>;
@@ -208,6 +272,55 @@ export async function runCriterionVerdictLines(
         "Verdict-line response failed validation.",
         "schema",
       );
+    }
+  }
+
+  // Hinge (score < 5) + subject-verb agreement — hard validation with one
+  // targeted retry. Score 5 is exempt from hinge only.
+  let qualityIssues = collectVerdictLineQualityIssues(linesById, scoresById);
+  if (qualityIssues.length > 0) {
+    logQualityIssues("Quality invalid on first pass", qualityIssues);
+    const badIds = [...new Set(qualityIssues.map((i) => i.id))].sort(
+      (a, b) => a - b,
+    );
+    const repairCriteria = criteria.filter((c) => badIds.includes(c.id));
+    console.warn(
+      `[verdict-lines] Retrying ${badIds.length} criteria for quality: [${badIds.join(", ")}]`,
+    );
+
+    const qualityRetry = await callHaiku(
+      model,
+      repairCriteria,
+      createMessage,
+      buildVerdictLineQualityRetryNote(qualityIssues),
+    );
+    attemptUsages.push(qualityRetry.usage);
+    responseModel = qualityRetry.model;
+
+    try {
+      const retryLines = validateAndMapVerdictLinesPartial(
+        qualityRetry.toolInput,
+      );
+      const { merged, fixedIds, stillBadIds } = mergeQualityRetryFixes(
+        linesById,
+        retryLines,
+        new Set(badIds),
+        scoresById,
+      );
+      linesById = merged;
+      console.warn(
+        `[verdict-lines] Quality retry: fixed [${fixedIds.join(", ") || "none"}]; still invalid [${stillBadIds.join(", ") || "none"}]`,
+      );
+    } catch (error) {
+      console.error(
+        "[verdict-lines] Quality retry parse failed; keeping first-pass lines.",
+        error,
+      );
+    }
+
+    qualityIssues = collectVerdictLineQualityIssues(linesById, scoresById);
+    if (qualityIssues.length > 0) {
+      logQualityIssues("Quality still invalid after retry (shipping)", qualityIssues);
     }
   }
 

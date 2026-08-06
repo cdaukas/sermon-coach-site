@@ -19,6 +19,11 @@ import {
   endsOnIncompleteGrammaticalTail,
   terminalContentWord,
   submitCriterionVerdictLinesTool,
+  hasVerdictHinge,
+  isSingleClauseVerdictLine,
+  hasSubjectVerbAgreementIssue,
+  detectSubjectVerbAgreementIssue,
+  collectVerdictLineQualityIssues,
 } from "./verdict-line-schema";
 import {
   buildVerdictLineSystemPrompt,
@@ -264,6 +269,89 @@ describe("criterion verdict_line schema gate", () => {
   });
 });
 
+describe("verdict-line hinge and SV quality heuristics", () => {
+  const LINE_WITH_BUT =
+    "Propitiation is handled with care, but the claim outruns the quoted word.";
+  const LINE_WITH_SEMI =
+    "The spine is clear; the transitions announce movement instead of creating it.";
+  const LINE_WITH_COMMA_AND =
+    "The servant and son distinction is grounded, and the text opens on that hinge.";
+  const LINE_SINGLE =
+    "The Lion-Lamb reversal lands as the text's own structural hinge tonight.";
+  const LINE_DETONATE =
+    "The Lion-Lamb reversal detonate as the text's own hinge.";
+
+  it("detects single-clause lines without hinge markers", () => {
+    assert.equal(isSingleClauseVerdictLine(LINE_SINGLE), true);
+    assert.equal(hasVerdictHinge(LINE_SINGLE), false);
+
+    assert.equal(isSingleClauseVerdictLine(LINE_WITH_BUT), false);
+    assert.equal(hasVerdictHinge(LINE_WITH_BUT), true);
+    assert.equal(hasVerdictHinge(LINE_WITH_SEMI), true);
+    assert.equal(hasVerdictHinge(LINE_WITH_COMMA_AND), true);
+    assert.equal(hasVerdictHinge("Clear claim though the quote is thin."), true);
+    assert.equal(hasVerdictHinge("A spine holds while the arc stalls."), true);
+    assert.equal(hasVerdictHinge("The claim stands yet the cost is unnamed."), true);
+  });
+
+  it("score 5 is exempt from the both-halves rule; score 4 single-clause is invalid", () => {
+    const lines = new Map([
+      [1, LINE_SINGLE],
+      [2, LINE_SINGLE],
+      [3, LINE_WITH_BUT],
+    ]);
+    const scores = new Map([
+      [1, 5],
+      [2, 4],
+      [3, 4],
+    ]);
+    const issues = collectVerdictLineQualityIssues(lines, scores);
+    const hingeIssues = issues.filter((i) => i.reason === "missing_hinge");
+    assert.equal(
+      hingeIssues.some((i) => i.id === 1),
+      false,
+      "score 5 single-clause should be exempt",
+    );
+    assert.equal(
+      hingeIssues.some((i) => i.id === 2),
+      true,
+      "score 4 single-clause must be invalid",
+    );
+    assert.equal(
+      hingeIssues.some((i) => i.id === 3),
+      false,
+      "hinged score 4 is valid",
+    );
+  });
+
+  it("flags the detonate subject-verb agreement slip", () => {
+    assert.equal(hasSubjectVerbAgreementIssue(LINE_DETONATE), true);
+    const hit = detectSubjectVerbAgreementIssue(LINE_DETONATE);
+    assert.ok(hit);
+    assert.match(hit!.subject, /reversal/i);
+    assert.equal(hit!.verb, "detonate");
+
+    // Correct agreement should pass.
+    assert.equal(
+      hasSubjectVerbAgreementIssue(
+        "The Lion-Lamb reversal detonates as the text's own hinge.",
+      ),
+      false,
+    );
+    // Good two-part line should not false-positive on SV.
+    assert.equal(hasSubjectVerbAgreementIssue(LINE_WITH_BUT), false);
+  });
+
+  it("collectVerdictLineQualityIssues stacks hinge and SV reasons", () => {
+    const lines = new Map([[2, LINE_DETONATE]]);
+    // detonate line is also single-clause; score 3
+    const issues = collectVerdictLineQualityIssues(lines, new Map([[2, 3]]));
+    const reasons = new Set(issues.map((i) => i.reason));
+    assert.ok(reasons.has("missing_hinge"));
+    assert.ok(reasons.has("subject_verb_agreement"));
+  });
+});
+
 function normalizePeriod(s: string): string {
   const t = s.trim();
   return t.endsWith(".") ? t : `${t}.`;
@@ -375,5 +463,69 @@ describe("runCriterionVerdictLines length gate", () => {
         assert.ok(countWords(c.verdict_line) <= VERDICT_LINE_MAX_WORDS);
       }
     }
+  });
+
+  it("retries once for quality (hinge/SV) and merges only fixed ids", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+
+    const SINGLE =
+      "The Lion-Lamb reversal lands as the text's own structural hinge.";
+    const DETONATE =
+      "The Lion-Lamb reversal detonate as the text's own hinge.";
+    const FIXED =
+      "The Lion-Lamb reversal detonates, but the cost half stays named.";
+
+    // Build a fixture where criteria 2 and 3 score below 5 (need hinge).
+    const base = clearCriterionVerdictLines(
+      structuredClone(EVALUATION_FIXTURE) as never,
+    );
+    for (const category of base.categories) {
+      for (const c of category.criteria) {
+        if (c.id === 2 || c.id === 3) c.score = 3;
+        if (c.id === 5) c.score = 5;
+      }
+    }
+
+    let createCalls = 0;
+    const createMessage: CreateVerdictLineMessage = async (params) => {
+      createCalls += 1;
+      const user =
+        typeof params.messages[0]?.content === "string"
+          ? params.messages[0].content
+          : "";
+
+      if (createCalls === 1) {
+        // id 2: single-clause (invalid at score 3); id 3: SV slip; id 5: single ok at 5
+        return messageWithVerdictLines(
+          elevenLines({
+            2: SINGLE,
+            3: DETONATE,
+            5: SINGLE,
+          }),
+        );
+      }
+
+      // Quality retry: only repair requested ids.
+      assert.match(user, /RETRY \(targeted criteria/);
+      assert.match(user, /Criterion 2/);
+      assert.match(user, /Criterion 3/);
+      return messageWithVerdictLines([
+        { id: 2, verdict_line: FIXED },
+        { id: 3, verdict_line: FIXED },
+      ]);
+    };
+
+    const { result } = await runCriterionVerdictLines(base, { createMessage });
+    assert.equal(createCalls, 2);
+
+    const byId = new Map(
+      result.categories.flatMap((cat) =>
+        cat.criteria.map((c) => [c.id, c.verdict_line] as const),
+      ),
+    );
+    assert.equal(byId.get(2), normalizePeriod(FIXED));
+    assert.equal(byId.get(3), normalizePeriod(FIXED));
+    // Score 5 single-clause kept without forcing a second half.
+    assert.equal(byId.get(5), normalizePeriod(SINGLE));
   });
 });

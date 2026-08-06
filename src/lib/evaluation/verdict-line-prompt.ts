@@ -74,10 +74,56 @@ export function buildVerdictLineUserMessage(
     ].join("\n");
   });
 
+  const count = criteria.length;
+  const countPhrase =
+    count === 11
+      ? "each of the following eleven criteria"
+      : `each of the following ${count} criteria (repair pass — rewrite only these ids)`;
+  const returnPhrase =
+    count === 11
+      ? "Return all eleven, keyed by id, in a single tool call."
+      : `Return exactly these ${count} ids in a single tool call (other ids will be ignored).`;
+
   return [
-    "Write one complete verdict sentence for each of the following eleven criteria.",
-    "Twelve to eighteen words each, hard max eighteen. Return all eleven, keyed by id, in a single tool call.",
+    `Write one complete verdict sentence for ${countPhrase}.`,
+    `Twelve to eighteen words each, hard max eighteen. ${returnPhrase}`,
     "",
     blocks.join("\n\n"),
+  ].join("\n");
+}
+
+/** Build a quality-retry note naming what each invalid line fell short of. */
+export function buildVerdictLineQualityRetryNote(
+  issues: Array<{
+    id: number;
+    score: number;
+    reason: string;
+    detail: string;
+    line: string;
+  }>,
+): string {
+  const ids = [...new Set(issues.map((i) => i.id))].sort((a, b) => a - b);
+  const bullets = issues.map((issue) => {
+    const preview =
+      issue.line.length > 100
+        ? `${issue.line.slice(0, 97)}...`
+        : issue.line;
+    if (issue.reason === "missing_hinge") {
+      return `Criterion ${issue.id} (score ${issue.score}/5): previous line was single-clause with no second half. Missing hinge half naming the observed cost or foil (not prescription). Failed line: "${preview}"`;
+    }
+    if (issue.reason === "subject_verb_agreement") {
+      return `Criterion ${issue.id} (score ${issue.score}/5): ${issue.detail}. Fix agreement so singular subjects take a singular verb form. Failed line: "${preview}"`;
+    }
+    return `Criterion ${issue.id} (score ${issue.score}/5): ${issue.detail}. Failed line: "${preview}"`;
+  });
+
+  return [
+    `RETRY (targeted criteria ${ids.join(", ")} only):`,
+    "Rewrite only the listed ids. Observe what fell short — do not invent new critiques.",
+    "Scores below 5 require both halves with a hinge (but/though/while/yet, semicolon, or comma-plus-conjunction).",
+    "Score 5 may stay single affirming clause when the narrative names no cost.",
+    "Every line must have subject-verb agreement (e.g. reversal detonates, not reversal detonate).",
+    "",
+    ...bullets,
   ].join("\n");
 }
