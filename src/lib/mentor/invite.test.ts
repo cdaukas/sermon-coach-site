@@ -64,6 +64,10 @@ describe("messageForAcceptError", () => {
       messageForAcceptError("self_invite"),
       "You can't accept your own invitation.",
     );
+    assert.equal(
+      messageForAcceptError("no_seat_capacity"),
+      "This invitation is no longer active. The mentor does not have an open seat for it.",
+    );
   });
 });
 

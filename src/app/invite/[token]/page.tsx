@@ -91,15 +91,16 @@ function InvalidInvite() {
         className="text-[28px] font-semibold leading-tight tracking-tight"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        This invitation is no longer good
+        This invitation is no longer active
       </h1>
       <p
         className="text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
       >
-        It may have been used already, or the mentor may have ended it. Ask them
-        for a fresh link. If you already have an account here, sign in and check
-        whether it went through.
+        It may have been used already, the mentor may have ended it, or the seat
+        it sat on is no longer open. Ask them for a fresh link if they still
+        want to mentor you. If you already have an account here, sign in and
+        check whether it went through.
       </p>
     </div>
   );

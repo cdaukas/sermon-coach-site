@@ -190,7 +190,8 @@ async function setPurchasedMentorSeats(
  * Recomputes quantity as the sum of item quantities across all active/trialing
  * mentor-seat subscriptions of that type for the customer (safe if they open
  * more than one Checkout Session). Does not touch Coach status or
- * comp_debrief_seats. Existing relationships and evaluations stay put.
+ * comp_debrief_seats. Excess pending of this seat type are revoked when
+ * capacity no longer covers them; active relationships stay put.
  */
 export async function applyMentorSeatSubscriptionState(
   subscription: Stripe.Subscription,

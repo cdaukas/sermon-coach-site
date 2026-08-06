@@ -21,6 +21,7 @@ import {
   ACTIVE_EVAL_IN_PROGRESS_ERROR,
   MENTORED_ALLOTMENT_EXHAUSTED_ERROR,
   MENTORED_ALREADY_IN_FLIGHT_ERROR,
+  MENTORED_NO_SEAT_CAPACITY_ERROR,
 } from "./eval-start-errors";
 import type { ReportMode, RequestEvaluationResult } from "./types";
 
@@ -196,6 +197,9 @@ export async function requestEvaluation(
     }
     if (code === "already_in_flight") {
       return { ok: false, error: MENTORED_ALREADY_IN_FLIGHT_ERROR };
+    }
+    if (code === "no_seat_capacity") {
+      return { ok: false, error: MENTORED_NO_SEAT_CAPACITY_ERROR };
     }
     if (code === "not_authenticated") {
       return {

@@ -7,6 +7,9 @@ export const MENTORED_ALLOTMENT_EXHAUSTED_ERROR =
 export const MENTORED_ALREADY_IN_FLIGHT_ERROR =
   "That sermon is already being read. Give it a minute.";
 
+export const MENTORED_NO_SEAT_CAPACITY_ERROR =
+  "This mentoring seat is no longer available. Ask your mentor if the relationship is still open.";
+
 export const EVAL_START_FAILED_BANNER =
   "Your sermon was saved, but the evaluation could not start. You can run it from this page.";
 
@@ -20,7 +23,8 @@ export type EvalErrorParam =
   | "poll"
   | "1"
   | "allotment"
-  | "in_flight";
+  | "in_flight"
+  | "capacity";
 
 export function evalErrorParamForStartFailure(error: string): EvalErrorParam {
   if (error === ACTIVE_EVAL_IN_PROGRESS_ERROR) {
@@ -31,6 +35,9 @@ export function evalErrorParamForStartFailure(error: string): EvalErrorParam {
   }
   if (error === MENTORED_ALREADY_IN_FLIGHT_ERROR) {
     return "in_flight";
+  }
+  if (error === MENTORED_NO_SEAT_CAPACITY_ERROR) {
+    return "capacity";
   }
   return "start";
 }
@@ -52,6 +59,10 @@ export function messageForEvalErrorParam(
 
   if (param === "in_flight") {
     return MENTORED_ALREADY_IN_FLIGHT_ERROR;
+  }
+
+  if (param === "capacity") {
+    return MENTORED_NO_SEAT_CAPACITY_ERROR;
   }
 
   if (param === "poll") {

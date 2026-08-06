@@ -7,6 +7,7 @@ import { AuthSubmit } from "@/components/auth/AuthForm";
 import { createClient } from "@/lib/supabase/client";
 import {
   mentorAcceptCarryPath,
+  messageForAcceptError,
   parseAcceptMentorInviteResult,
   type AcceptMentorInviteErrorCode,
 } from "@/lib/mentor/invite";
@@ -165,6 +166,12 @@ export function InviteAcceptPanel({
     if (code === "self_invite" || code === "already_mentored") {
       await clearInviteCookie();
       setAcceptErrorView(code);
+      return;
+    }
+
+    if (code === "no_seat_capacity") {
+      await clearInviteCookie();
+      setGenericError(messageForAcceptError("no_seat_capacity"));
       return;
     }
 

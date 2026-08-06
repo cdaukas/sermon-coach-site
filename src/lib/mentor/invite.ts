@@ -28,7 +28,8 @@ export type AcceptMentorInviteErrorCode =
   | "not_authenticated"
   | "invalid_or_used"
   | "self_invite"
-  | "already_mentored";
+  | "already_mentored"
+  | "no_seat_capacity";
 
 export type AcceptMentorInviteResult = {
   ok: boolean;
@@ -125,6 +126,8 @@ export function messageForAcceptError(
       return "You're already in a mentoring relationship. You can only have one mentor at a time.";
     case "not_authenticated":
       return "Sign in to accept this invitation.";
+    case "no_seat_capacity":
+      return "This invitation is no longer active. The mentor does not have an open seat for it.";
     default:
       return "Something went wrong. Please try again.";
   }
