@@ -105,7 +105,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
               <div className="min-w-0 text-[12px]">
                 {criterion.verdict_line ? (
                   <p
-                    className="evaluation-criterion-verdict max-w-[52ch] text-[1.08em] leading-snug"
+                    className="evaluation-criterion-verdict max-w-[58ch] text-[1.08em] leading-snug"
                     style={{ ...serifFont, color: "var(--sc-ink)" }}
                   >
                     {criterion.verdict_line}

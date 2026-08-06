@@ -421,7 +421,7 @@
 
   .evaluation-criterion > summary .evaluation-criterion-verdict {
     margin: 0 !important;
-    max-width: 52ch !important;
+    max-width: 58ch !important;
     font-family: var(--font-serif) !important;
     font-size: 1.08em !important;
     font-weight: 400 !important;
