@@ -56,19 +56,76 @@ function makeSupabaseMock(handlers: {
   profileById?: string | null;
   profileIdByEmail?: string | null;
   updateError?: string;
+  /** Seat counters returned when profiles row is re-read for pending revoke. */
+  seatProfile?: {
+    purchased_debrief_seats?: number;
+    purchased_evaluation_seats?: number;
+    comp_debrief_seats?: number;
+  };
 }) {
   const updates: Array<{ id: string; values: Record<string, unknown> }> = [];
+  const relationshipUpdates: Array<{
+    values: Record<string, unknown>;
+    filter?: string;
+  }> = [];
+
+  const seatRow = {
+    purchased_debrief_seats: handlers.seatProfile?.purchased_debrief_seats ?? 0,
+    purchased_evaluation_seats:
+      handlers.seatProfile?.purchased_evaluation_seats ?? 0,
+    comp_debrief_seats: handlers.seatProfile?.comp_debrief_seats ?? 0,
+  };
 
   const supabase = {
     from(table: string) {
+      if (table === "mentor_relationships") {
+        return {
+          select() {
+            return {
+              eq() {
+                return {
+                  eq() {
+                    return {
+                      in() {
+                        return {
+                          order() {
+                            return Promise.resolve({ data: [], error: null });
+                          },
+                        };
+                      },
+                    };
+                  },
+                };
+              },
+            };
+          },
+          update(values: Record<string, unknown>) {
+            return {
+              in() {
+                return {
+                  eq() {
+                    relationshipUpdates.push({ values });
+                    return Promise.resolve({ error: null });
+                  },
+                };
+              },
+            };
+          },
+        };
+      }
+
       assert.equal(table, "profiles");
       return {
-        select() {
+        select(_cols?: string) {
           return {
             eq(col: string, value: string) {
               return {
                 async maybeSingle() {
                   if (col === "id" && handlers.profileById === value) {
+                    // Seat re-read after provision uses multi-column select
+                    if (_cols && _cols.includes("purchased_debrief_seats")) {
+                      return { data: seatRow, error: null };
+                    }
                     return { data: { id: value }, error: null };
                   }
                   if (
@@ -114,7 +171,7 @@ function makeSupabaseMock(handlers: {
     },
   } as unknown as SupabaseClient;
 
-  return { supabase, updates };
+  return { supabase, updates, relationshipUpdates };
 }
 
 const activeProfileValues = {

@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { revokeExcessPendingMentorInvites } from "@/lib/billing/mentor-seat-revoke-pending";
 
 const ACTIVATION_STATUSES = new Set(["active", "trialing"]);
 
@@ -237,6 +238,14 @@ export async function applyMentorSeatSubscriptionState(
     match.profileId,
     seatType,
     quantity,
+  );
+
+  // Drop excess pending invites when capacity falls (full cancel → all pending
+  // of that seat type). Active relationships stay until a product decision.
+  await revokeExcessPendingMentorInvites(
+    deps.supabase,
+    match.profileId,
+    seatType,
   );
 
   // Optionally store stripe_customer_id without activating Coach.
