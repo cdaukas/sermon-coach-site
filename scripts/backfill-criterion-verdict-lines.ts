@@ -7,7 +7,10 @@
  * Safety:
  *   - Dry-run is the default (logs intended updates, writes nothing).
  *   - Explicit --apply is required to mutate rows.
- *   - Idempotent: skips criteria that already have a non-empty verdict_line.
+ *   - Idempotent by default: skips evaluations whose criteria already all have
+ *     a non-empty verdict_line.
+ *   - --force: re-run Haiku and overwrite existing non-empty verdict_lines
+ *     (still dry-run unless --apply is also passed).
  *   - Logs pass failures per evaluation and continues the run.
  *
  * Env:
@@ -20,6 +23,9 @@
  *   npx tsx scripts/backfill-criterion-verdict-lines.ts --dry-run
  *   npx tsx scripts/backfill-criterion-verdict-lines.ts --apply
  *   npx tsx scripts/backfill-criterion-verdict-lines.ts --apply --limit 5
+ *   npx tsx scripts/backfill-criterion-verdict-lines.ts --force
+ *   npx tsx scripts/backfill-criterion-verdict-lines.ts --apply --force
+ *   npx tsx scripts/backfill-criterion-verdict-lines.ts --apply --force --limit 5
  */
 
 import { readFileSync, existsSync } from "node:fs";
@@ -63,10 +69,15 @@ function requireEnv(name: string): string {
   return value;
 }
 
-function parseArgs(argv: string[]): { apply: boolean; limit: number | null } {
+function parseArgs(argv: string[]): {
+  apply: boolean;
+  force: boolean;
+  limit: number | null;
+} {
   const tokens = argv.slice(2);
   let sawApply = false;
   let sawDryRun = false;
+  let force = false;
   let limit: number | null = null;
 
   for (let i = 0; i < tokens.length; i++) {
@@ -77,6 +88,10 @@ function parseArgs(argv: string[]): { apply: boolean; limit: number | null } {
     }
     if (token === "--dry-run") {
       sawDryRun = true;
+      continue;
+    }
+    if (token === "--force") {
+      force = true;
       continue;
     }
     if (token === "--limit") {
@@ -91,14 +106,14 @@ function parseArgs(argv: string[]): { apply: boolean; limit: number | null } {
     }
     console.error(`Unknown argument: ${token}`);
     console.error(
-      "Usage: npx tsx scripts/backfill-criterion-verdict-lines.ts [--dry-run] [--apply] [--limit N]",
+      "Usage: npx tsx scripts/backfill-criterion-verdict-lines.ts [--dry-run] [--apply] [--force] [--limit N]",
     );
     process.exit(1);
   }
 
-  if (sawDryRun) return { apply: false, limit };
-  if (sawApply) return { apply: true, limit };
-  return { apply: false, limit };
+  // --dry-run wins over --apply if both are passed.
+  const apply = sawDryRun ? false : sawApply;
+  return { apply, force, limit };
 }
 
 function criteriaNeedVerdictLines(result: EvaluationResultStrict): boolean {
@@ -143,7 +158,7 @@ function printVerdictLines(result: EvaluationResultStrict): void {
 
 async function main(): Promise<void> {
   loadEnvLocalIfPresent();
-  const { apply, limit } = parseArgs(process.argv);
+  const { apply, force, limit } = parseArgs(process.argv);
 
   const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
   const serviceKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
@@ -158,6 +173,11 @@ async function main(): Promise<void> {
       ? "Mode: APPLY (will write verdict_line only via result JSON merge)"
       : "Mode: DRY-RUN (no writes)",
   );
+  if (force) {
+    console.log(
+      "Force: ON (re-run and overwrite existing non-empty verdict_lines)",
+    );
+  }
   if (limit != null) console.log(`Limit: ${limit} evaluation(s)`);
 
   const { data: rows, error } = await supabase
@@ -204,15 +224,18 @@ async function main(): Promise<void> {
     }
 
     const result = parsed.data as EvaluationResultStrict;
-    if (!criteriaNeedVerdictLines(result)) {
+    if (!force && !criteriaNeedVerdictLines(result)) {
       console.log(`[skip] ${row.id}: already has all eleven verdict lines`);
       skipped += 1;
       continue;
     }
 
     processed += 1;
+    const priorFilled = countFilled(result);
     console.log(
-      `[run] ${row.id} (filled ${countFilled(result)}/11)…`,
+      force && priorFilled === 11
+        ? `[run] ${row.id} (force re-run; had ${priorFilled}/11)…`
+        : `[run] ${row.id} (filled ${priorFilled}/11)…`,
     );
 
     try {
@@ -266,6 +289,7 @@ async function main(): Promise<void> {
         updated,
         failed,
         apply,
+        force,
       },
       null,
       2,
