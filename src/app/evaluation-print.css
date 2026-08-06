@@ -414,12 +414,16 @@
     min-width: 0;
   }
 
-  /* Verdict is primary; criterion name is the label underneath. */
+  /* Name ~8.5pt; verdict ~1.08em of that — between name and narrative body. */
+  .evaluation-criterion > summary > div.min-w-0 {
+    font-size: 8.5pt !important;
+  }
+
   .evaluation-criterion > summary .evaluation-criterion-verdict {
     margin: 0 !important;
     max-width: 52ch !important;
     font-family: var(--font-serif) !important;
-    font-size: 11.5pt !important;
+    font-size: 1.08em !important;
     font-weight: 400 !important;
     font-style: normal !important;
     line-height: 1.35 !important;
@@ -430,7 +434,7 @@
     flex: 1 1 auto;
     min-width: 0;
     margin: 0.3rem 0 0 !important;
-    font-size: 8.5pt !important;
+    font-size: 1em !important;
     font-weight: 400 !important;
     color: var(--sc-ink-soft) !important;
   }

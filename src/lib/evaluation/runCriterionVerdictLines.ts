@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import {
   buildEvalCostLogPayload,
   logEvalCost,
+  sumEvalUsage,
   usageFromResponse,
   type EvalUsageTotals,
 } from "./eval-cost";
@@ -13,10 +14,13 @@ import {
 import {
   buildVerdictLineSystemPrompt,
   buildVerdictLineUserMessage,
+  VERDICT_LINE_MAX_WORDS,
   VERDICT_LINE_MODEL,
   type VerdictLineCriterionInput,
 } from "./verdict-line-prompt";
 import {
+  enforceVerdictLineWordCap,
+  hasOverlongVerdictLine,
   submitCriterionVerdictLinesTool,
   validateAndMapVerdictLines,
 } from "./verdict-line-schema";
@@ -89,8 +93,13 @@ async function callHaiku(
   model: string,
   criteria: VerdictLineCriterionInput[],
   createMessage: CreateVerdictLineMessage,
+  retryNote?: string,
 ): Promise<{ model: string; usage: EvalUsageTotals; toolInput: unknown }> {
   let response: Anthropic.Messages.Message;
+
+  const userContent = retryNote
+    ? `${buildVerdictLineUserMessage(criteria)}\n\n${retryNote}`
+    : buildVerdictLineUserMessage(criteria);
 
   try {
     response = await createMessage({
@@ -102,9 +111,7 @@ async function callHaiku(
         type: "tool",
         name: submitCriterionVerdictLinesTool.name,
       },
-      messages: [
-        { role: "user", content: buildVerdictLineUserMessage(criteria) },
-      ],
+      messages: [{ role: "user", content: userContent }],
     });
   } catch {
     throw new CriterionVerdictLinesError(
@@ -123,6 +130,10 @@ async function callHaiku(
 /**
  * Batched Haiku pass: eleven lines from finished criterion narratives.
  * Call after runEvaluation; merge into result before the single complete write.
+ *
+ * Length: 12–18 words is advised in the prompt. Overlong batch → one full
+ * retry with a hard-cap reminder. Still overlong after that → clause-boundary
+ * truncate (not mid-phrase). Word count is not rejected on first parse alone.
  */
 export async function runCriterionVerdictLines(
   result: EvaluationResultStrict,
@@ -151,11 +162,16 @@ export async function runCriterionVerdictLines(
     );
   }
 
-  const call = await callHaiku(model, criteria, createMessage);
-
+  const attemptUsages: EvalUsageTotals[] = [];
+  let responseModel = model;
   let linesById: Map<number, string>;
+
+  const first = await callHaiku(model, criteria, createMessage);
+  attemptUsages.push(first.usage);
+  responseModel = first.model;
+
   try {
-    linesById = validateAndMapVerdictLines(call.toolInput);
+    linesById = validateAndMapVerdictLines(first.toolInput);
   } catch (error) {
     console.error("[verdict-lines] Schema validation failed.", error);
     throw new CriterionVerdictLinesError(
@@ -164,21 +180,53 @@ export async function runCriterionVerdictLines(
     );
   }
 
+  if (hasOverlongVerdictLine(linesById, VERDICT_LINE_MAX_WORDS)) {
+    console.warn(
+      `[verdict-lines] One or more lines exceeded ${VERDICT_LINE_MAX_WORDS} words; retrying once.`,
+    );
+    const retry = await callHaiku(
+      model,
+      criteria,
+      createMessage,
+      `RETRY: Every verdict_line must be at most ${VERDICT_LINE_MAX_WORDS} words. Shorter is better. Count words before submit.`,
+    );
+    attemptUsages.push(retry.usage);
+    responseModel = retry.model;
+
+    try {
+      linesById = validateAndMapVerdictLines(retry.toolInput);
+    } catch (error) {
+      console.error("[verdict-lines] Schema validation failed on retry.", error);
+      throw new CriterionVerdictLinesError(
+        "Verdict-line response failed validation.",
+        "schema",
+      );
+    }
+
+    if (hasOverlongVerdictLine(linesById, VERDICT_LINE_MAX_WORDS)) {
+      console.warn(
+        `[verdict-lines] Still overlong after retry; truncating to clause boundary at ${VERDICT_LINE_MAX_WORDS} words.`,
+      );
+      linesById = enforceVerdictLineWordCap(linesById, VERDICT_LINE_MAX_WORDS);
+    }
+  }
+
   const merged = mergeCriterionVerdictLines(result, linesById);
+  const billedUsage = sumEvalUsage(attemptUsages);
 
   logEvalCost(
     buildEvalCostLogPayload({
-      model: call.model,
-      usage: call.usage,
-      apiAttempts: 1,
+      model: responseModel,
+      usage: billedUsage,
+      apiAttempts: attemptUsages.length,
     }),
   );
 
   return {
     result: merged,
-    model: call.model,
-    inputTokens: call.usage.input_tokens,
-    outputTokens: call.usage.output_tokens,
+    model: responseModel,
+    inputTokens: billedUsage.input_tokens,
+    outputTokens: billedUsage.output_tokens,
   };
 }
 

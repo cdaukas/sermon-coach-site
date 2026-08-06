@@ -9,7 +9,7 @@ import {
   usesVerdictReadGrandfather,
 } from "./schema";
 import { EVALUATION_FIXTURE } from "./fixture";
-import { validateAndMapVerdictLines } from "./verdict-line-schema";
+import { validateAndMapVerdictLines, countWords, truncateVerdictLineToMaxWords, hasOverlongVerdictLine } from "./verdict-line-schema";
 import { EVALUATION_PROMPT_VERSION } from "./prompt";
 
 describe("criterion verdict_line schema gate", () => {
@@ -91,5 +91,27 @@ describe("criterion verdict_line schema gate", () => {
     const map = validateAndMapVerdictLines({ lines });
     assert.equal(map.size, 11);
     assert.equal(map.get(1), "Specific hinge line for criterion 1.");
+  });
+
+  it("truncateVerdictLineToMaxWords cuts at a clause boundary", () => {
+    const long =
+      "The two-point frame is clear and memorable, but the Moses comparison which is the argumentative heart is buried as sub-material inside point two without a named beat of its own.";
+    const truncated = truncateVerdictLineToMaxWords(long, 18);
+    assert.ok(countWords(truncated) <= 18);
+    assert.ok(truncated.endsWith("."));
+    // Prefer clause cut before ", but" when that prefix fits the cap.
+    assert.match(truncated, /clear and memorable/i);
+  });
+
+  it("hasOverlongVerdictLine detects lines over the hard ceiling", () => {
+    const ok = new Map([[1, "A clear spine holds, but transitions announce rather than create."]]);
+    assert.equal(hasOverlongVerdictLine(ok, 18), false);
+    const long = new Map([
+      [
+        1,
+        "The two-point frame is clear and memorable, but the Moses comparison which is argumentative heart is buried as sub-material inside point two without a named beat of its own today.",
+      ],
+    ]);
+    assert.equal(hasOverlongVerdictLine(long, 18), true);
   });
 });

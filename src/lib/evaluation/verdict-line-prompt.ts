@@ -5,6 +5,10 @@
 
 export const VERDICT_LINE_MODEL = "claude-haiku-4-5";
 
+/** Inclusive word-count band for a verdict sentence after normalize. */
+export const VERDICT_LINE_MIN_WORDS = 12;
+export const VERDICT_LINE_MAX_WORDS = 18;
+
 export type VerdictLineCriterionInput = {
   id: number;
   name: string;
@@ -20,7 +24,7 @@ This is summarization, not judgment. The narratives already contain the verdict.
 
 COPY CONTRACT (every line must obey all):
 
-1. One complete sentence ending with a period. Target twelve to eighteen words.
+1. One complete sentence ending with a period. Target twelve to eighteen words (eighteen is a hard ceiling).
 2. Name something specific from THIS sermon. A line that would fit any sermon is a failed line.
 3. Two-part structure with a hinge. Almost every good line pivots.
 4. The hinge carries the score (load-bearing):
@@ -32,6 +36,7 @@ COPY CONTRACT (every line must obey all):
 6. No score restated, no band adjective. The row already shows N/5. "Strong textual work" is wasted words.
 7. Present tense, about the sermon, not about the preacher. Name what the sermon did, not what "you" did.
 8. House rules: no em-dashes, no exclamation points. Use a semicolon or a comma where an em-dash wants to go.
+9. Name what the narrative *concludes*, not how it *opens*. The sentence is the takeaway a reader would keep after finishing the paragraph — not a preview or near-paraphrase of the first sentence. Do not reuse the narrative's opening clause, first hinge, or first named object-in-same-order as a free clip. Distill after the argument lands.
 
 Structure-only examples (do not copy content):
 - The servant and son distinction is exegetically grounded, and the text opens on that hinge with real care.
@@ -56,12 +61,13 @@ export function buildVerdictLineUserMessage(
       `Criterion ${c.id}: ${c.name} (score ${c.score}/5 — use the hinge grammar for this band only; never restate the number)`,
       quote,
       `Narrative: ${c.narrative.trim()}`,
+      "Write the takeaway after the narrative ends — not a restatement of how it opens.",
     ].join("\n");
   });
 
   return [
     "Write one complete verdict sentence for each of the following eleven criteria.",
-    "Return all eleven, keyed by id, in a single tool call.",
+    "Twelve to eighteen words each, hard max eighteen. Return all eleven, keyed by id, in a single tool call.",
     "",
     blocks.join("\n\n"),
   ].join("\n");

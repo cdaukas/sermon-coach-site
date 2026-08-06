@@ -102,17 +102,17 @@ export function CategoryCard({ category }: CategoryCardProps) {
               >
                 ▸
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 text-[12px]">
                 {criterion.verdict_line ? (
                   <p
-                    className="evaluation-criterion-verdict max-w-[52ch] text-base leading-snug md:text-[1.05em]"
+                    className="evaluation-criterion-verdict max-w-[52ch] text-[1.08em] leading-snug"
                     style={{ ...serifFont, color: "var(--sc-ink)" }}
                   >
                     {criterion.verdict_line}
                   </p>
                 ) : null}
                 <p
-                  className={`evaluation-criterion-name text-[12px] font-normal leading-snug ${
+                  className={`evaluation-criterion-name text-[1em] font-normal leading-snug ${
                     criterion.verdict_line ? "mt-1.5" : ""
                   }`}
                   style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
