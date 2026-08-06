@@ -11,11 +11,7 @@ import {
   AuthSubmit,
 } from "@/components/auth/AuthForm";
 import { setNewsletterOptedIn } from "@/lib/auth/newsletter-opt-in";
-import {
-  START_PATH,
-  startPathWithClaim,
-  startPathWithNext,
-} from "@/lib/auth/start";
+import { emailRedirectNextPath } from "@/lib/auth/start";
 import { buildAuthCallbackUrl } from "@/lib/billing/checkout";
 import { MENTOR_ACCEPT_PATH } from "@/lib/mentor/invite";
 import { browserSiteOrigin } from "@/lib/site-origin";
@@ -54,13 +50,11 @@ export function StartLanding({
   inviteNext = null,
 }: StartLandingProps) {
   const router = useRouter();
-  // Mirror sketch: claim → /start?claim=; mentor → /start?next=/mentor/accept?token=
-  // so emailRedirectTo carries the destination through confirmation.
-  const nextPath = inviteNext
-    ? startPathWithNext(inviteNext)
-    : claimToken
-      ? startPathWithClaim(claimToken)
-      : START_PATH;
+  // emailRedirectTo next must stay flat. Nesting inviteNext under /start?next=
+  // and then encoding again produced triple-encoded redirects and a production
+  // POST /auth/v1/signup 500. Cookie + mentorTokenFromNextPath recover the
+  // invite when next is the accept path alone.
+  const nextPath = emailRedirectNextPath({ inviteNext, claimToken });
   const isMentorInvite = Boolean(
     inviteNext?.startsWith(MENTOR_ACCEPT_PATH),
   );

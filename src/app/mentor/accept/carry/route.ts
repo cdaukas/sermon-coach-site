@@ -10,11 +10,12 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * Persist the invite token as an httpOnly cookie (same-browser fallback),
- * then send the user to /start with next= (mirrors sketch /start?claim=).
+ * then send the user to /start with next= (page URL only; mirrors sketch claim).
  * Cookie writes are not allowed in Server Components.
  *
  * Production: cookie Domain=.sermoncoach.online so apex ↔ www both see it.
- * /start signup folds next into emailRedirectTo so confirmation keeps it.
+ * StartLanding puts the *inner* accept path into emailRedirectTo flat — do not
+ * nest /start?next= again into callback next (that over-encodes and can 500).
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
