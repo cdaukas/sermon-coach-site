@@ -34,17 +34,7 @@ comment on column public.profiles.purchased_evaluation_seats is
   'Colleague (seat_type=evaluation) seats provisioned from an active Stripe seat subscription quantity. Service role / webhook writes only. No comp column for this type.';
 
 -- ---------------------------------------------------------------------------
--- 2. Operator capacity (not a grandfathered Coach grant)
--- ---------------------------------------------------------------------------
-
--- chrisd@gtn.org — operator capacity for internal mentoring / verification.
--- Distinct from the 2026-08-04 active-Coach grandfather (comp = 1).
-update public.profiles
-set comp_debrief_seats = greatest(comp_debrief_seats, 4)
-where id = '381edea4-dd32-41b4-9616-8da065e1d0d2';
-
--- ---------------------------------------------------------------------------
--- 3. Drop dead counters (never read after insert)
+-- 2. Drop dead counters (never read after insert)
 -- ---------------------------------------------------------------------------
 
 alter table public.mentor_relationships
@@ -54,7 +44,7 @@ alter table public.mentor_relationships
   drop column if exists evals_triggered_this_period;
 
 -- ---------------------------------------------------------------------------
--- 4. Shared monthly cap helper (same numbers create_mentored_evaluation enforces)
+-- 3. Shared monthly cap helper (same numbers create_mentored_evaluation enforces)
 -- ---------------------------------------------------------------------------
 
 create or replace function public.mentored_monthly_submission_limit(p_seat_type text)
@@ -77,7 +67,7 @@ comment on function public.mentored_monthly_submission_limit(text) is
   'Monthly diagnostic-row cap per relationship: 2 for debrief (Apprentice), 4 for evaluation (Colleague). Single source for enforce + display.';
 
 -- ---------------------------------------------------------------------------
--- 5. create_mentor_invite: per-type purchased + comp (comp only on debrief)
+-- 4. create_mentor_invite: per-type purchased + comp (comp only on debrief)
 -- ---------------------------------------------------------------------------
 
 create or replace function public.create_mentor_invite(
@@ -158,7 +148,7 @@ comment on function public.create_mentor_invite(text) is
   'Creates a pending mentoring invite and returns the token. Requires seat_type (debrief|evaluation). Entitlement: pending+active of that type <= purchased of that type + comp for that type (comp_debrief_seats for debrief only; evaluation has no comp). Revoked and ended never count. Comp stacks with purchased; neither is a monthly burn. Does not require a Coach subscription.';
 
 -- ---------------------------------------------------------------------------
--- 6. Mentor-facing capacity + usage (same math as enforce)
+-- 5. Mentor-facing capacity + usage (same math as enforce)
 -- ---------------------------------------------------------------------------
 
 create or replace function public.get_mentor_seat_capacity()
