@@ -103,8 +103,18 @@ export function CategoryCard({ category }: CategoryCardProps) {
                 ▸
               </span>
               <div className="min-w-0">
+                {criterion.verdict_line ? (
+                  <p
+                    className="evaluation-criterion-verdict max-w-[52ch] text-base leading-snug md:text-[1.05em]"
+                    style={{ ...serifFont, color: "var(--sc-ink)" }}
+                  >
+                    {criterion.verdict_line}
+                  </p>
+                ) : null}
                 <p
-                  className="evaluation-criterion-name text-[13px] font-normal leading-snug"
+                  className={`evaluation-criterion-name text-[12px] font-normal leading-snug ${
+                    criterion.verdict_line ? "mt-1.5" : ""
+                  }`}
                   style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
                 >
                   {criterion.name}
@@ -116,14 +126,6 @@ export function CategoryCard({ category }: CategoryCardProps) {
                     <em style={{ fontStyle: "italic" }}>{criterion.tradition_tag}</em>
                   </span>
                 </p>
-                {criterion.verdict_line ? (
-                  <p
-                    className="evaluation-criterion-verdict mt-2.5 max-w-[42ch] text-[1.05em] leading-snug"
-                    style={{ ...serifFont, color: "var(--sc-ink)" }}
-                  >
-                    {criterion.verdict_line}
-                  </p>
-                ) : null}
               </div>
               <CriterionScoreBar score={criterion.score} />
               <p

@@ -36,7 +36,7 @@ export const submitCriterionVerdictLinesTool: Tool = {
             verdict_line: {
               type: "string",
               description:
-                "Fragment, target 8–12 words (14 hard max), hinge grammar, elision only between clauses, no terminal period, no em-dash.",
+                "One complete sentence, 12–18 words, ending with a period; hinge grammar; no em-dash; no restated score.",
             },
           },
         },
@@ -56,9 +56,15 @@ export function validateAndMapVerdictLines(
     if (byId.has(item.id)) {
       throw new Error(`Duplicate verdict_line id ${item.id}`);
     }
-    const cleaned = item.verdict_line.trim().replace(/\.$/, "");
+    // Complete sentences keep a single terminal period; strip extras only at edges.
+    let cleaned = item.verdict_line.trim().replace(/\s+/g, " ");
     if (!cleaned) {
       throw new Error(`Empty verdict_line for id ${item.id}`);
+    }
+    // Normalize runaway multi-period endings; ensure prose ends with one period.
+    cleaned = cleaned.replace(/\.+$/, ".");
+    if (!cleaned.endsWith(".")) {
+      cleaned = `${cleaned}.`;
     }
     byId.set(item.id, cleaned);
   }

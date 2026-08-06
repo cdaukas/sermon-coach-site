@@ -83,13 +83,13 @@ describe("criterion verdict_line schema gate", () => {
     assert.throws(() => validateAndMapVerdictLines({ lines: full }));
   });
 
-  it("validateAndMapVerdictLines accepts full 1–11 and strips terminal periods", () => {
+  it("validateAndMapVerdictLines accepts full 1–11 and preserves terminal periods", () => {
     const lines = Array.from({ length: 11 }, (_, i) => ({
       id: i + 1,
       verdict_line: `Specific hinge line for criterion ${i + 1}.`,
     }));
     const map = validateAndMapVerdictLines({ lines });
     assert.equal(map.size, 11);
-    assert.equal(map.get(1), "Specific hinge line for criterion 1");
+    assert.equal(map.get(1), "Specific hinge line for criterion 1.");
   });
 });
