@@ -274,6 +274,7 @@ async function main(): Promise<void> {
 
       updated += 1;
       console.log(`[ok] ${row.id}: wrote ${filled}/11 lines`);
+      printVerdictLines(merged);
     } catch (err) {
       failed += 1;
       console.error(`[fail] ${row.id}:`, err);
