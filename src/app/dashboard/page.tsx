@@ -42,11 +42,21 @@ export default async function DashboardPage() {
 
   const packArrival = libraryEmpty && recentPackArrival != null;
 
+  // Neutral empty state for accounts with no free/sub/pack credits — not depleted.
+  // Mentor-only buyers land here; do not push "submit a sermon" as primary CTA.
+  const zeroCredits =
+    entitlement != null &&
+    !entitlement.subscriptionActive &&
+    entitlement.freeRemaining <= 0 &&
+    entitlement.packRemaining <= 0;
+
   const emptyKind = packArrival
     ? ("pack" as const)
     : subscriptionArrival
       ? ("subscription" as const)
-      : ("free" as const);
+      : zeroCredits
+        ? ("chooser" as const)
+        : ("free" as const);
 
   const showPurchaseBand = !libraryEmpty && recentPackArrival != null;
 
@@ -69,10 +79,12 @@ export default async function DashboardPage() {
           className="text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Your sermons
+          {libraryEmpty && emptyKind === "chooser"
+            ? "Your account"
+            : "Your sermons"}
         </h1>
       </div>
-      <NewEvaluationButton />
+      {emptyKind === "chooser" ? null : <NewEvaluationButton />}
     </div>
   );
 

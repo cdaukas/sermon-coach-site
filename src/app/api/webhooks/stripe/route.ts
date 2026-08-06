@@ -12,6 +12,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // Redeploy trigger — pick up corrected STRIPE_SECRET_KEY.
 export const runtime = "nodejs";
 
+/**
+ * Events handled:
+ * - checkout.session.completed → packs + Coach subscription + mentor-seat qty
+ * - customer.subscription.created / .updated → Coach status OR seat capacity
+ * - customer.subscription.deleted → Coach inactive OR seat capacity 0
+ * - invoice.payment_failed → Coach inactive OR seat capacity (not destroying work)
+ *
+ * Mentor seats are identified by metadata.checkout_type=mentor_seat and never
+ * write subscription_status. Comp seats are never written here.
+ */
 const SUBSCRIPTION_LIFECYCLE_EVENTS = new Set([
   "customer.subscription.created",
   "customer.subscription.updated",

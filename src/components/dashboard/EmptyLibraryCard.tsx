@@ -1,9 +1,19 @@
 import Link from "next/link";
+import {
+  buildCheckoutPath,
+  buildMentorSeatCheckoutPath,
+} from "@/lib/billing/checkout";
+import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
-export type EmptyLibraryKind = "free" | "pack" | "subscription";
+export type EmptyLibraryKind =
+  | "free"
+  | "pack"
+  | "subscription"
+  /** Zero seats + zero credits; not depleted — offers mentor seats OR Coach. */
+  | "chooser";
 
 type EmptyLibraryCardProps = {
   kind: EmptyLibraryKind;
@@ -16,6 +26,82 @@ export function EmptyLibraryCard({
   packName,
   packCredits,
 }: EmptyLibraryCardProps) {
+  if (kind === "chooser") {
+    return (
+      <div
+        className="text-center"
+        style={{
+          background: "#ffffff",
+          boxShadow: "var(--sc-shadow)",
+          borderRadius: 4,
+          padding: "46px 40px",
+        }}
+      >
+        {/* PLACEHOLDER COPY — Chris rewrites before open allowlist */}
+        <h2
+          className="m-0 font-semibold"
+          style={{ ...serifFont, fontSize: 25, color: "#1a2332" }}
+        >
+          [PLACEHOLDER] Two ways to start
+        </h2>
+        <p
+          className="mx-auto mt-3 mb-0 leading-relaxed"
+          style={{
+            ...uiFont,
+            fontSize: 14,
+            color: "#4a5568",
+            maxWidth: 440,
+          }}
+        >
+          [PLACEHOLDER] You are not out of credits. Buy seats to develop other
+          preachers, or Coach to evaluate your own sermons — either, both, or
+          neither for now.
+        </p>
+
+        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <Link
+            href={buildMentorSeatCheckoutPath("debrief")}
+            className="inline-block rounded border px-6 py-3.5 text-sm font-semibold tracking-wide no-underline transition-all"
+            style={{
+              ...uiFont,
+              background: "var(--sc-ink)",
+              color: "var(--sc-bg)",
+              borderColor: "var(--sc-ink)",
+            }}
+          >
+            [PLACEHOLDER] Mentoring seats
+          </Link>
+          <Link
+            href={buildCheckoutPath("monthly")}
+            className="inline-block rounded border px-6 py-3.5 text-sm font-semibold tracking-wide no-underline transition-all"
+            style={{
+              ...uiFont,
+              background: "transparent",
+              color: "var(--sc-ink)",
+              borderColor: "var(--sc-rule)",
+            }}
+          >
+            [PLACEHOLDER] Coach for yourself
+          </Link>
+        </div>
+
+        <p
+          className="mx-auto mt-6 mb-0 leading-relaxed"
+          style={{
+            ...uiFont,
+            fontSize: 13,
+            color: "#4a5568",
+            maxWidth: 420,
+          }}
+        >
+          [PLACEHOLDER] {mentorSeatDisplayName("debrief")} $12/mo ·{" "}
+          {mentorSeatDisplayName("evaluation")} $25/mo · Coach subscription for
+          your own evaluations
+        </p>
+      </div>
+    );
+  }
+
   let heading: string;
   let body: string;
   let ctaLabel: string;

@@ -123,6 +123,9 @@ function ActiveMenteeRow({
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
           {mentorSeatDisplayName(item.seatType)}
+          <span aria-hidden="true"> · </span>
+          {item.submissionsUsed} of {item.submissionsLimit} submissions this
+          month
           {item.acceptedAt ? (
             <>
               <span aria-hidden="true"> · </span>

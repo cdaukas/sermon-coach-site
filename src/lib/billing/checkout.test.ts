@@ -3,12 +3,14 @@ import { describe, it } from "node:test";
 import {
   buildAuthCallbackUrl,
   buildCheckoutPath,
+  buildMentorSeatCheckoutPath,
   buildPackCheckoutPath,
   COACH_STRIPE_PRICE_IDS,
   getCoachPriceId,
   getPackPriceId,
   PACK_STRIPE_PRICE_IDS,
   parseCoachCheckoutParams,
+  parseMentorSeatCheckoutParams,
   parsePackCheckoutParams,
 } from "./checkout";
 
@@ -90,5 +92,42 @@ describe("checkout params", () => {
     assert.equal(getPackPriceId("pack_2"), PACK_STRIPE_PRICE_IDS.pack_2);
     assert.equal(getPackPriceId("pack_6"), PACK_STRIPE_PRICE_IDS.pack_6);
     assert.equal(getPackPriceId("pack_12"), PACK_STRIPE_PRICE_IDS.pack_12);
+  });
+
+  it("parses mentor seat checkout params", () => {
+    assert.deepEqual(
+      parseMentorSeatCheckoutParams(new URLSearchParams("seat=debrief")),
+      { seat: "debrief", quantity: 1 },
+    );
+    assert.deepEqual(
+      parseMentorSeatCheckoutParams(
+        new URLSearchParams("seat=evaluation&quantity=3"),
+      ),
+      { seat: "evaluation", quantity: 3 },
+    );
+  });
+
+  it("rejects invalid mentor seat params", () => {
+    assert.equal(
+      parseMentorSeatCheckoutParams(new URLSearchParams("seat=apprentice")),
+      null,
+    );
+    assert.equal(
+      parseMentorSeatCheckoutParams(
+        new URLSearchParams("seat=debrief&quantity=0"),
+      ),
+      null,
+    );
+  });
+
+  it("builds mentor seat checkout path", () => {
+    assert.equal(
+      buildMentorSeatCheckoutPath("debrief"),
+      "/checkout?seat=debrief",
+    );
+    assert.equal(
+      buildMentorSeatCheckoutPath("evaluation", 2),
+      "/checkout?seat=evaluation&quantity=2",
+    );
   });
 });

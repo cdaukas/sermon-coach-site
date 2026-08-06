@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   extractSubscriptionBillingFields,
+  getMentorSeatTypeFromMetadata,
   handleInvoicePaymentFailed,
   handleSubscriptionActivationEvent,
   handleSubscriptionCheckoutCompleted,
@@ -185,6 +186,137 @@ describe("isActivatingSubscriptionStatus", () => {
   it("rejects incomplete and past_due", () => {
     assert.equal(isActivatingSubscriptionStatus("incomplete"), false);
     assert.equal(isActivatingSubscriptionStatus("past_due"), false);
+  });
+});
+
+describe("getMentorSeatTypeFromMetadata", () => {
+  it("reads debrief and evaluation seat types", () => {
+    assert.equal(
+      getMentorSeatTypeFromMetadata({
+        checkout_type: "mentor_seat",
+        seat_type: "debrief",
+      }),
+      "debrief",
+    );
+    assert.equal(
+      getMentorSeatTypeFromMetadata({
+        checkout_type: "mentor_seat",
+        seat_type: "evaluation",
+      }),
+      "evaluation",
+    );
+  });
+
+  it("ignores Coach and pack metadata", () => {
+    assert.equal(
+      getMentorSeatTypeFromMetadata({ checkout_type: "subscription" }),
+      null,
+    );
+    assert.equal(getMentorSeatTypeFromMetadata({ checkout_type: "pack" }), null);
+  });
+});
+
+describe("mentor seat subscription lifecycle", () => {
+  it("provisions purchased seats without setting Coach subscription_status", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileById: "user-mentor",
+    });
+
+    const seatSub = makeSubscription({
+      metadata: {
+        supabase_user_id: "user-mentor",
+        checkout_type: "mentor_seat",
+        seat_type: "debrief",
+      },
+      items: {
+        object: "list",
+        data: [
+          {
+            id: "si_1",
+            object: "subscription_item",
+            quantity: 2,
+            current_period_end: PERIOD_END_UNIX,
+            price: {
+              id: "price_debrief",
+              object: "price",
+              recurring: { interval: "month", interval_count: 1 },
+            },
+          },
+        ],
+        has_more: false,
+        url: "",
+      },
+    } as unknown as Partial<Stripe.Subscription>);
+
+    const stripe = {
+      subscriptions: {
+        async list() {
+          return { data: [seatSub], has_more: false };
+        },
+      },
+    } as unknown as Stripe;
+
+    const result = await handleSubscriptionActivationEvent(seatSub, {
+      supabase,
+      stripe,
+      logError: () => {},
+    });
+
+    assert.equal(result.matched, true);
+    assert.ok(
+      updates.some(
+        (u) =>
+          u.id === "user-mentor" &&
+          u.values.purchased_debrief_seats === 2 &&
+          u.values.subscription_status === undefined,
+      ),
+    );
+    assert.ok(
+      updates.some(
+        (u) =>
+          u.id === "user-mentor" && u.values.stripe_customer_id === "cus_abc",
+      ),
+    );
+  });
+
+  it("clears purchased seats when mentor seat subscription is deleted", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileById: "user-mentor",
+    });
+
+    const deletedSub = makeSubscription({
+      id: "sub_deleted",
+      status: "canceled",
+      metadata: {
+        supabase_user_id: "user-mentor",
+        checkout_type: "mentor_seat",
+        seat_type: "evaluation",
+      },
+    });
+
+    const stripe = {
+      subscriptions: {
+        async list() {
+          return { data: [deletedSub], has_more: false };
+        },
+      },
+    } as unknown as Stripe;
+
+    const result = await handleSubscriptionDeletedEvent(deletedSub, {
+      supabase,
+      stripe,
+      logError: () => {},
+    });
+
+    assert.equal(result.matched, true);
+    assert.ok(
+      updates.some(
+        (u) =>
+          u.id === "user-mentor" &&
+          u.values.purchased_evaluation_seats === 0 &&
+          u.values.subscription_status === undefined,
+      ),
+    );
   });
 });
 

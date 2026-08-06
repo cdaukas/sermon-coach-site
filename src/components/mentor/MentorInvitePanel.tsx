@@ -15,8 +15,7 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
 const SEAT_CAP_SQLSTATE = "P0001";
-const SEAT_CAP_MESSAGE =
-  "seat limit reached: a mentor may hold at most 4 seats";
+// Message matches create_mentor_invite raise text (substring match on "seat limit reached").
 
 type MentorInvitePanelProps = {
   initialDisplayName: string | null;
@@ -38,9 +37,9 @@ const SEAT_OPTIONS = [
 ] as const;
 
 function isSeatCapError(error: { code?: string; message?: string }): boolean {
+  const message = error.message ?? "";
   return (
-    error.code === SEAT_CAP_SQLSTATE &&
-    (error.message ?? "").includes(SEAT_CAP_MESSAGE)
+    error.code === SEAT_CAP_SQLSTATE && message.includes("seat limit reached")
   );
 }
 
@@ -528,13 +527,13 @@ export function MentorInvitePanel({
           }}
         >
           <p>
-            You are holding four seats, which is the limit. End a relationship
-            to free one up.
+            Every seat of that type is already assigned or invited. Revoke a
+            pending invitation or end a relationship to free one, or buy another
+            seat of that type.
           </p>
           <p>
-            If you need a fifth, that is Classroom. It is built for schools,
-            denominations, and networks that need one invoice for a term instead
-            of a personal card each month.
+            Five or more seats of either kind is Classroom territory — schools,
+            denominations, and networks that need one invoice for a term.
           </p>
         </div>
       ) : null}

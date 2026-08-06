@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { ActiveMenteesList } from "@/components/mentor/ActiveMenteesList";
 import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
 import { MentoredSubmissionsList } from "@/components/mentor/MentoredSubmissionsList";
+import { MentorSeatCapacityPanel } from "@/components/mentor/MentorSeatCapacityPanel";
 import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
+import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
 import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
@@ -37,9 +39,10 @@ export default async function MentoringPage() {
   initialDisplayName =
     typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
 
-  const [submissions, seats] = await Promise.all([
+  const [submissions, seats, capacity] = await Promise.all([
     listMentoredEvaluationsForMentor(),
     listMentorSeatsForMentor(),
+    getMentorSeatCapacity(),
   ]);
 
   return (
@@ -57,6 +60,8 @@ export default async function MentoringPage() {
       >
         Mentoring
       </h1>
+
+      {capacity ? <MentorSeatCapacityPanel capacity={capacity} /> : null}
 
       <section aria-labelledby="invite-heading">
         <h2

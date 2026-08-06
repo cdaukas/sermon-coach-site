@@ -15,6 +15,9 @@ export type ActiveMentorMentee = {
   menteeId: string;
   menteeEmail: string | null;
   acceptedAt: string | null;
+  /** Diagnostic submissions this calendar month vs seat allotment. */
+  submissionsUsed: number;
+  submissionsLimit: number;
 };
 
 export type EndMentorRelationshipResult =

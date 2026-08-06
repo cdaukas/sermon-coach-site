@@ -13,10 +13,13 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import {
   buildCheckoutPath,
+  buildMentorSeatCheckoutPath,
+  buildMentorSeatSignupPath,
   buildPackCheckoutPath,
   buildPackSignupPath,
   buildSignupPath,
   parseCoachCheckoutParams,
+  parseMentorSeatCheckoutParams,
   parsePackCheckoutParams,
 } from "@/lib/billing/checkout";
 
@@ -48,6 +51,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const checkoutParams = parseCoachCheckoutParams(searchParams);
   const packParams = parsePackCheckoutParams(searchParams);
+  const seatParams = parseMentorSeatCheckoutParams(searchParams);
   const redirectTo = searchParams.get("redirectTo") ?? "/dashboard";
   const queryKey = searchParams.get("error") ?? searchParams.get("message");
   const queryBanner = queryKey ? QUERY_MESSAGES[queryKey] : undefined;
@@ -90,9 +94,11 @@ function LoginForm() {
         ? buildCheckoutPath(checkoutParams.cadence)
         : packParams
           ? buildPackCheckoutPath(packParams.pack)
-          : redirectTo.startsWith("/")
-            ? redirectTo
-            : "/dashboard",
+          : seatParams
+            ? buildMentorSeatCheckoutPath(seatParams.seat, seatParams.quantity)
+            : redirectTo.startsWith("/")
+              ? redirectTo
+              : "/dashboard",
     );
     router.refresh();
   }
@@ -110,7 +116,12 @@ function LoginForm() {
                 ? buildSignupPath(checkoutParams.cadence)
                 : packParams
                   ? buildPackSignupPath(packParams.pack)
-                  : "/signup"
+                  : seatParams
+                    ? buildMentorSeatSignupPath(
+                        seatParams.seat,
+                        seatParams.quantity,
+                      )
+                    : "/signup"
             }
           >
             Create one

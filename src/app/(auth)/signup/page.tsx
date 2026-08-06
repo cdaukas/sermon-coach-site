@@ -22,9 +22,11 @@ import {
   buildAuthCallbackUrl,
   buildCheckoutPath,
   buildLoginPath,
+  buildMentorSeatCheckoutPath,
   buildPackCheckoutPath,
   buildPackLoginPath,
   parseCoachCheckoutParams,
+  parseMentorSeatCheckoutParams,
   parsePackCheckoutParams,
 } from "@/lib/billing/checkout";
 
@@ -50,13 +52,16 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const checkoutParams = parseCoachCheckoutParams(searchParams);
   const packParams = parsePackCheckoutParams(searchParams);
+  const seatParams = parseMentorSeatCheckoutParams(searchParams);
   const claimToken = searchParams.get("claim")?.trim() || null;
   const preservedNext = safeNextPath(searchParams.get("next"));
   const postCheckoutPath = checkoutParams
     ? buildCheckoutPath(checkoutParams.cadence)
     : packParams
       ? buildPackCheckoutPath(packParams.pack)
-      : null;
+      : seatParams
+        ? buildMentorSeatCheckoutPath(seatParams.seat, seatParams.quantity)
+        : null;
   const defaultNextPath = postCheckoutPath
     ? postCheckoutPath
     : preservedNext
@@ -79,9 +84,11 @@ function SignupForm() {
     ? buildLoginPath(checkoutParams.cadence)
     : packParams
       ? buildPackLoginPath(packParams.pack)
-      : preservedNext || claimToken
-        ? `/login?redirectTo=${encodeURIComponent(defaultNextPath)}`
-        : "/login";
+      : seatParams
+        ? `/login?redirectTo=${encodeURIComponent(postCheckoutPath!)}`
+        : preservedNext || claimToken
+          ? `/login?redirectTo=${encodeURIComponent(defaultNextPath)}`
+          : "/login";
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,9 +170,11 @@ function SignupForm() {
         ? "Check your email to confirm your account. After you verify, you'll continue to Coach checkout."
         : packParams
           ? "Check your email to confirm your account. After you verify, you'll continue to pack checkout."
-          : preservedNext
-            ? "Check your email to confirm your account. After you verify, you'll return to finish accepting the invitation."
-            : "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
+          : seatParams
+            ? "Check your email to confirm your account. After you verify, you'll continue to mentoring seat checkout."
+            : preservedNext
+              ? "Check your email to confirm your account. After you verify, you'll return to finish accepting the invitation."
+              : "Check your email to confirm your account. After you verify, you'll land right back here and we'll take you to sermon submission.",
     });
   }
 
@@ -177,7 +186,9 @@ function SignupForm() {
           ? "Create your account, then continue to Coach checkout."
           : packParams
             ? "Create your account, then continue to pack checkout."
-            : "Start building your private sermon library."
+            : seatParams
+              ? "Create your account, then continue to mentoring seat checkout."
+              : "Start building your private sermon library."
       }
       footer={
         awaitingConfirmation ? undefined : (

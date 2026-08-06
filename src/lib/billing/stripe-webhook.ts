@@ -129,6 +129,178 @@ async function deactivateProfile(
   }
 }
 
+/** Stripe metadata seat_type for mentor-seat subscriptions. */
+export type MentorSeatStripeType = "debrief" | "evaluation";
+
+/**
+ * Mentoring seat products never touch Coach subscription_status.
+ * Identified only by checkout_type=mentor_seat + seat_type on the Subscription
+ * (or Checkout Session) metadata written at session create.
+ */
+export function getMentorSeatTypeFromMetadata(
+  metadata: Stripe.Metadata | null | undefined,
+): MentorSeatStripeType | null {
+  if (!metadata || metadata.checkout_type !== "mentor_seat") {
+    return null;
+  }
+  const seatType = metadata.seat_type;
+  if (seatType === "debrief" || seatType === "evaluation") {
+    return seatType;
+  }
+  return null;
+}
+
+function subscriptionItemQuantity(
+  subscription: Stripe.Subscription,
+): number {
+  const raw = subscription.items?.data?.[0]?.quantity;
+  if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) {
+    return Math.floor(raw);
+  }
+  return 1;
+}
+
+async function setPurchasedMentorSeats(
+  supabase: SupabaseClient,
+  profileId: string,
+  seatType: MentorSeatStripeType,
+  quantity: number,
+): Promise<void> {
+  const column =
+    seatType === "debrief"
+      ? "purchased_debrief_seats"
+      : "purchased_evaluation_seats";
+
+  const safeQty = Math.max(0, Math.floor(quantity));
+  const { error } = await supabase
+    .from("profiles")
+    .update({ [column]: safeQty })
+    .eq("id", profileId);
+
+  if (error) {
+    throw new Error(
+      `Failed to set ${column} for profile ${profileId}: ${error.message}`,
+    );
+  }
+}
+
+/**
+ * Provision or clear purchased seat capacity for a mentor-seat subscription.
+ * Recomputes quantity as the sum of item quantities across all active/trialing
+ * mentor-seat subscriptions of that type for the customer (safe if they open
+ * more than one Checkout Session). Does not touch Coach status or
+ * comp_debrief_seats. Existing relationships and evaluations stay put.
+ */
+export async function applyMentorSeatSubscriptionState(
+  subscription: Stripe.Subscription,
+  deps: StripeWebhookDeps,
+  options?: { forceZero?: boolean },
+): Promise<{ matched: boolean; seatType: MentorSeatStripeType | null }> {
+  const seatType = getMentorSeatTypeFromMetadata(subscription.metadata);
+  if (!seatType) {
+    return { matched: false, seatType: null };
+  }
+
+  const customerId = getCustomerId(subscription);
+  if (!customerId) {
+    deps.logError("Mentor seat subscription missing customer ID", {
+      subscriptionId: subscription.id,
+    });
+    return { matched: false, seatType };
+  }
+
+  const match = await resolveProfileForSubscriptionCustomer(deps, {
+    customerId,
+    metadataUserId: subscription.metadata?.supabase_user_id,
+    subscriptionId: subscription.id,
+    resolveEmail: () => resolveCustomerEmail(deps.stripe, subscription),
+  });
+
+  if (!match.matched) {
+    deps.logError("Mentor seat subscription: no profile match", {
+      customerId,
+      subscriptionId: subscription.id,
+      reason: match.reason,
+      seatType,
+    });
+    return { matched: false, seatType };
+  }
+
+  const quantity = options?.forceZero
+    ? await sumActiveMentorSeatQuantity(deps.stripe, customerId, seatType, {
+        excludeSubscriptionId: subscription.id,
+      })
+    : await sumActiveMentorSeatQuantity(deps.stripe, customerId, seatType);
+
+  await setPurchasedMentorSeats(
+    deps.supabase,
+    match.profileId,
+    seatType,
+    quantity,
+  );
+
+  // Optionally store stripe_customer_id without activating Coach.
+  if (customerId) {
+    const { error } = await deps.supabase
+      .from("profiles")
+      .update({ stripe_customer_id: customerId })
+      .eq("id", match.profileId);
+    if (error) {
+      throw new Error(
+        `Failed to store stripe_customer_id for mentor seat profile ${match.profileId}: ${error.message}`,
+      );
+    }
+  }
+
+  return { matched: true, seatType };
+}
+
+async function sumActiveMentorSeatQuantity(
+  stripe: Stripe,
+  customerId: string,
+  seatType: MentorSeatStripeType,
+  options?: { excludeSubscriptionId?: string },
+): Promise<number> {
+  let total = 0;
+  let startingAfter: string | undefined;
+
+  // Paginate lightly; seat buyers are not expected to have large catalogs.
+  for (let page = 0; page < 5; page += 1) {
+    const list = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "all",
+      limit: 100,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+
+    for (const sub of list.data) {
+      if (
+        options?.excludeSubscriptionId &&
+        sub.id === options.excludeSubscriptionId
+      ) {
+        continue;
+      }
+      if (getMentorSeatTypeFromMetadata(sub.metadata) !== seatType) {
+        continue;
+      }
+      if (!isActivatingSubscriptionStatus(sub.status)) {
+        continue;
+      }
+      total += subscriptionItemQuantity(sub);
+    }
+
+    if (!list.has_more || list.data.length === 0) {
+      break;
+    }
+    startingAfter = list.data[list.data.length - 1]?.id;
+    if (!startingAfter) {
+      break;
+    }
+  }
+
+  return total;
+}
+
 type ProfileMatch =
   | { matched: true; profileId: string }
   | { matched: false; reason: string };
@@ -264,12 +436,29 @@ function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
   return subscription.id ?? null;
 }
 
-/** Activates subscription from Checkout Session via client_reference_id (Supabase user id). */
+/**
+ * Activates from Checkout Session via client_reference_id.
+ *
+ * Events handled with this helper (and lifecycle siblings):
+ * - checkout.session.completed (subscription mode)
+ * - customer.subscription.created / .updated
+ * - customer.subscription.deleted
+ * - invoice.payment_failed (Coach only; seats wait for subscription.updated)
+ *
+ * Mentor-seat sessions (metadata.checkout_type=mentor_seat) provision
+ * purchased_*_seats only — never set subscription_status.
+ */
 export async function handleSubscriptionCheckoutCompleted(
   session: Stripe.Checkout.Session,
   deps: StripeWebhookDeps,
 ): Promise<void> {
   if (session.mode !== "subscription") {
+    return;
+  }
+
+  // Mentoring seats: provision quantity; do not activate Coach.
+  if (getMentorSeatTypeFromMetadata(session.metadata)) {
+    await handleMentorSeatCheckoutCompleted(session, deps);
     return;
   }
 
@@ -318,6 +507,109 @@ export async function handleSubscriptionCheckoutCompleted(
   await activateProfile(deps.supabase, profile.id, customerId, billing);
 }
 
+async function handleMentorSeatCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+  deps: StripeWebhookDeps,
+): Promise<void> {
+  const seatType = getMentorSeatTypeFromMetadata(session.metadata);
+  if (!seatType) {
+    return;
+  }
+
+  const profileId = session.client_reference_id;
+  if (!profileId) {
+    deps.logError("Mentor seat checkout: missing client_reference_id", {
+      sessionId: session.id,
+      seatType,
+    });
+    return;
+  }
+
+  const customerId = getSessionCustomerId(session);
+  if (!customerId) {
+    deps.logError("Mentor seat checkout: missing customer id", {
+      sessionId: session.id,
+      profileId,
+      seatType,
+    });
+    return;
+  }
+
+  const { data: profile, error: profileError } = await deps.supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (profileError) {
+    throw new Error(
+      `Mentor seat profile lookup failed: ${profileError.message}`,
+    );
+  }
+
+  if (!profile) {
+    deps.logError("Mentor seat checkout: no profile for client_reference_id", {
+      sessionId: session.id,
+      profileId,
+      customerId,
+      seatType,
+    });
+    return;
+  }
+
+  let quantity = 1;
+  const subscriptionRef = session.subscription;
+  const subscriptionId =
+    typeof subscriptionRef === "string"
+      ? subscriptionRef
+      : subscriptionRef && typeof subscriptionRef === "object"
+        ? subscriptionRef.id
+        : null;
+
+  if (subscriptionId) {
+    try {
+      const subscription =
+        await deps.stripe.subscriptions.retrieve(subscriptionId);
+      // Prefer full recompute so concurrent seat subs stack.
+      quantity = await sumActiveMentorSeatQuantity(
+        deps.stripe,
+        customerId,
+        seatType,
+      );
+      if (quantity === 0 && isActivatingSubscriptionStatus(subscription.status)) {
+        quantity = subscriptionItemQuantity(subscription);
+      }
+    } catch (err) {
+      deps.logError(
+        "Mentor seat checkout: failed to retrieve subscription; defaulting quantity 1",
+        {
+          sessionId: session.id,
+          subscriptionId,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      );
+    }
+  }
+
+  await setPurchasedMentorSeats(
+    deps.supabase,
+    profile.id,
+    seatType,
+    quantity,
+  );
+
+  const { error: customerError } = await deps.supabase
+    .from("profiles")
+    .update({ stripe_customer_id: customerId })
+    .eq("id", profile.id);
+
+  if (customerError) {
+    throw new Error(
+      `Mentor seat checkout: failed to store stripe_customer_id: ${customerError.message}`,
+    );
+  }
+}
+
 async function loadBillingFieldsForCheckoutSession(
   session: Stripe.Checkout.Session,
   deps: StripeWebhookDeps,
@@ -362,13 +654,18 @@ async function loadBillingFieldsForCheckoutSession(
 
 /**
  * Maps Stripe subscription status at the boundary:
- * active/trialing → activateProfile ("active");
- * every other status → deactivateProfile ("inactive").
+ * - Mentor seats: purchased_*_seats to quantity or 0
+ * - Coach: active/trialing → activateProfile; else deactivateProfile
  */
 export async function handleSubscriptionActivationEvent(
   subscription: Stripe.Subscription,
   deps: StripeWebhookDeps,
 ): Promise<{ matched: boolean }> {
+  if (getMentorSeatTypeFromMetadata(subscription.metadata)) {
+    const result = await applyMentorSeatSubscriptionState(subscription, deps);
+    return { matched: result.matched };
+  }
+
   const customerId = getCustomerId(subscription);
   if (!customerId) {
     deps.logError("Stripe subscription missing customer ID", {
@@ -408,11 +705,18 @@ export async function handleSubscriptionActivationEvent(
   return { matched: true };
 }
 
-/** customer.subscription.deleted → inactive. */
+/** customer.subscription.deleted → Coach inactive, or seat capacity 0. */
 export async function handleSubscriptionDeletedEvent(
   subscription: Stripe.Subscription,
   deps: StripeWebhookDeps,
 ): Promise<{ matched: boolean }> {
+  if (getMentorSeatTypeFromMetadata(subscription.metadata)) {
+    const result = await applyMentorSeatSubscriptionState(subscription, deps, {
+      forceZero: true,
+    });
+    return { matched: result.matched };
+  }
+
   const customerId = getCustomerId(subscription);
   if (!customerId) {
     deps.logError("Stripe subscription.deleted missing customer ID", {
@@ -470,10 +774,11 @@ export async function handleInvoicePaymentFailed(
   }
 
   let metadataUserId: string | null = null;
+  let retrievedSubscription: Stripe.Subscription | null = null;
   try {
-    const subscription =
+    retrievedSubscription =
       await deps.stripe.subscriptions.retrieve(subscriptionId);
-    metadataUserId = subscription.metadata?.supabase_user_id ?? null;
+    metadataUserId = retrievedSubscription.metadata?.supabase_user_id ?? null;
   } catch (err) {
     deps.logError(
       "invoice.payment_failed: could not retrieve subscription for metadata match; continuing with customer id / email",
@@ -483,6 +788,18 @@ export async function handleInvoicePaymentFailed(
         error: err instanceof Error ? err.message : String(err),
       },
     );
+  }
+
+  // Seat products: do not deactivate Coach. subscription.updated clears capacity.
+  if (
+    retrievedSubscription &&
+    getMentorSeatTypeFromMetadata(retrievedSubscription.metadata)
+  ) {
+    const result = await applyMentorSeatSubscriptionState(
+      retrievedSubscription,
+      deps,
+    );
+    return { matched: result.matched };
   }
 
   const match = await resolveProfileForSubscriptionCustomer(deps, {

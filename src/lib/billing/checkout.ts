@@ -12,6 +12,16 @@ export const PACK_STRIPE_PRICE_IDS = {
 } as const;
 
 /**
+ * Mentoring seat monthly prices (Apprentice $12 / Colleague $25).
+ * Prefer env IDs after creating Products in Stripe Dashboard; fallbacks are
+ * placeholders and must be replaced before live checkout works.
+ */
+export const MENTOR_SEAT_STRIPE_PRICE_IDS = {
+  debrief: "price_mentor_debrief_placeholder",
+  evaluation: "price_mentor_evaluation_placeholder",
+} as const;
+
+/**
  * Retired Coach Payment Links (rollback reference only — do not wire back without review):
  *   monthly: https://buy.stripe.com/3cI28k09A8CidcUgAl04800
  *   annual:  https://buy.stripe.com/4gMcMY8G6bOuc8Q1Fr04801
@@ -19,6 +29,7 @@ export const PACK_STRIPE_PRICE_IDS = {
 
 export type CoachCadence = keyof typeof COACH_STRIPE_PRICE_IDS;
 export type PackSku = keyof typeof PACK_STRIPE_PRICE_IDS;
+export type MentorSeatSku = keyof typeof MENTOR_SEAT_STRIPE_PRICE_IDS;
 
 export type CoachCheckoutParams = {
   plan: "coach";
@@ -27,6 +38,11 @@ export type CoachCheckoutParams = {
 
 export type PackCheckoutParams = {
   pack: PackSku;
+};
+
+export type MentorSeatCheckoutParams = {
+  seat: MentorSeatSku;
+  quantity: number;
 };
 
 type SearchParamReader = {
@@ -62,6 +78,27 @@ export function parsePackCheckoutParams(
   return { pack };
 }
 
+export function parseMentorSeatCheckoutParams(
+  searchParams: SearchParamReader,
+): MentorSeatCheckoutParams | null {
+  const seat = searchParams.get("seat");
+  if (seat !== "debrief" && seat !== "evaluation") {
+    return null;
+  }
+
+  const rawQuantity = searchParams.get("quantity");
+  let quantity = 1;
+  if (rawQuantity != null && rawQuantity !== "") {
+    const parsed = Number.parseInt(rawQuantity, 10);
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 20) {
+      return null;
+    }
+    quantity = parsed;
+  }
+
+  return { seat, quantity };
+}
+
 export function buildCheckoutPath(cadence: CoachCadence): string {
   return `/checkout?plan=coach&cadence=${cadence}`;
 }
@@ -86,6 +123,22 @@ export function buildPackLoginPath(pack: PackSku): string {
   return `/login?pack=${pack}`;
 }
 
+export function buildMentorSeatCheckoutPath(
+  seat: MentorSeatSku,
+  quantity = 1,
+): string {
+  const q = quantity === 1 ? "" : `&quantity=${quantity}`;
+  return `/checkout?seat=${seat}${q}`;
+}
+
+export function buildMentorSeatSignupPath(
+  seat: MentorSeatSku,
+  quantity = 1,
+): string {
+  const q = quantity === 1 ? "" : `&quantity=${quantity}`;
+  return `/signup?seat=${seat}${q}`;
+}
+
 export function getCoachPriceId(cadence: CoachCadence): string {
   const fromEnv =
     cadence === "monthly"
@@ -102,6 +155,14 @@ export function getPackPriceId(pack: PackSku): string {
         ? process.env.STRIPE_PRICE_PACK_6
         : process.env.STRIPE_PRICE_PACK_12;
   return fromEnv ?? PACK_STRIPE_PRICE_IDS[pack];
+}
+
+export function getMentorSeatPriceId(seat: MentorSeatSku): string {
+  const fromEnv =
+    seat === "debrief"
+      ? process.env.STRIPE_PRICE_MENTOR_DEBRIEF
+      : process.env.STRIPE_PRICE_MENTOR_EVALUATION;
+  return fromEnv ?? MENTOR_SEAT_STRIPE_PRICE_IDS[seat];
 }
 
 export function buildAuthCallbackUrl(

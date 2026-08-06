@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mentoredMonthlySubmissionLimit } from "@/lib/mentor/allotment";
+import { countMentoredSubmissionsThisMonth } from "@/lib/mentor/submission-usage";
 import type {
   ActiveMentorMentee,
   MentorSeatType,
@@ -59,6 +61,7 @@ async function resolveMenteeEmails(
  * Pending and active seats for the signed-in mentor.
  * Uses mentor SELECT under RLS; no list RPC.
  * Active mentee emails come from auth admin (auth.users is not client-readable).
+ * Submission used counts share the create_mentored_evaluation filter.
  * Server-only — do not import from client components.
  */
 export async function listMentorSeatsForMentor(): Promise<{
@@ -81,7 +84,9 @@ export async function listMentorSeatsForMentor(): Promise<{
   const rows = (data ?? []) as RelationshipRow[];
   const pending: PendingMentorInvite[] = [];
   const activeCandidates: Array<
-    Omit<ActiveMentorMentee, "menteeEmail"> & { menteeId: string }
+    Omit<ActiveMentorMentee, "menteeEmail" | "submissionsUsed" | "submissionsLimit"> & {
+      menteeId: string;
+    }
   > = [];
 
   for (const row of rows) {
@@ -120,14 +125,22 @@ export async function listMentorSeatsForMentor(): Promise<{
     }
   }
 
-  const emails = await resolveMenteeEmails(
-    activeCandidates.map((row) => row.menteeId),
-  );
+  const [emails, submissionCounts] = await Promise.all([
+    resolveMenteeEmails(activeCandidates.map((row) => row.menteeId)),
+    countMentoredSubmissionsThisMonth(
+      activeCandidates.map((row) => row.relationshipId),
+    ),
+  ]);
 
-  const active: ActiveMentorMentee[] = activeCandidates.map((row) => ({
-    ...row,
-    menteeEmail: emails.get(row.menteeId) ?? null,
-  }));
+  const active: ActiveMentorMentee[] = activeCandidates.map((row) => {
+    const used = submissionCounts.get(row.relationshipId) ?? 0;
+    return {
+      ...row,
+      menteeEmail: emails.get(row.menteeId) ?? null,
+      submissionsUsed: used,
+      submissionsLimit: mentoredMonthlySubmissionLimit(row.seatType),
+    };
+  });
 
   return { pending, active };
 }

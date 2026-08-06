@@ -1,10 +1,13 @@
 import { createStripeCheckoutSession } from "@/lib/billing/create-checkout-session";
 import {
+  buildMentorSeatSignupPath,
   buildPackSignupPath,
   buildSignupPath,
   getCoachPriceId,
+  getMentorSeatPriceId,
   getPackPriceId,
   parseCoachCheckoutParams,
+  parseMentorSeatCheckoutParams,
   parsePackCheckoutParams,
 } from "@/lib/billing/checkout";
 import { getOrCreateStripeCustomer } from "@/lib/billing/stripe-customer";
@@ -17,8 +20,9 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const coachParams = parseCoachCheckoutParams(requestUrl.searchParams);
   const packParams = parsePackCheckoutParams(requestUrl.searchParams);
+  const seatParams = parseMentorSeatCheckoutParams(requestUrl.searchParams);
 
-  if (!coachParams && !packParams) {
+  if (!coachParams && !packParams && !seatParams) {
     return NextResponse.redirect(new URL("/pricing.html", requestUrl.origin));
   }
 
@@ -30,7 +34,9 @@ export async function GET(request: Request) {
   if (!user) {
     const signupPath = coachParams
       ? buildSignupPath(coachParams.cadence)
-      : buildPackSignupPath(packParams!.pack);
+      : packParams
+        ? buildPackSignupPath(packParams.pack)
+        : buildMentorSeatSignupPath(seatParams!.seat, seatParams!.quantity);
     return NextResponse.redirect(new URL(signupPath, requestUrl.origin));
   }
 
@@ -65,14 +71,25 @@ export async function GET(request: Request) {
             successUrl: `${origin}/dashboard`,
             cancelUrl: `${origin}/dashboard`,
           }
-        : {
-            type: "pack",
-            priceId: getPackPriceId(packParams!.pack),
-            userId: user.id,
-            customerId,
-            successUrl: `${origin}/dashboard`,
-            cancelUrl: `${origin}/dashboard`,
-          },
+        : packParams
+          ? {
+              type: "pack",
+              priceId: getPackPriceId(packParams.pack),
+              userId: user.id,
+              customerId,
+              successUrl: `${origin}/dashboard`,
+              cancelUrl: `${origin}/dashboard`,
+            }
+          : {
+              type: "mentor_seat",
+              seatType: seatParams!.seat,
+              priceId: getMentorSeatPriceId(seatParams!.seat),
+              quantity: seatParams!.quantity,
+              userId: user.id,
+              customerId,
+              successUrl: `${origin}/dashboard/mentoring`,
+              cancelUrl: `${origin}/dashboard/mentoring`,
+            },
     );
 
     if (!session.url) {
