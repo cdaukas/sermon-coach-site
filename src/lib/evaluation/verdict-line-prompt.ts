@@ -37,12 +37,18 @@ COPY CONTRACT (every line must obey all):
 7. Present tense, about the sermon, not about the preacher. Name what the sermon did, not what "you" did.
 8. House rules: no em-dashes, no exclamation points. Use a semicolon or a comma where an em-dash wants to go.
 9. Name what the narrative *concludes*, not how it *opens*. The sentence is the takeaway a reader would keep after finishing the paragraph — not a preview or near-paraphrase of the first sentence. Do not reuse the narrative's opening clause, first hinge, or first named object-in-same-order as a free clip. Distill after the argument lands.
+10. Concession names what the sermon did or did not do — never what the preacher should do next. Prescription (fixes, moves earlier, "must stay audible," "earns its place when…") belongs in the growth edge / coaching narrative, not in verdict_line. Test: if the second half contains "must," "should," "would," or an imperative aimed at the preacher, rewrite it as an observed cost or shortfall already present in the narrative.
 
 Structure-only examples (do not copy content):
 - The servant and son distinction is exegetically grounded, and the text opens on that hinge with real care.
 - Propitiation is handled with care, but the therapon claim outruns the word the sermon actually quotes.
 - The gospel drives the argument rather than arriving as an add-on after the main climb is done.
 - A clear spine holds the room, but the transitions announce movement instead of creating it.
+
+Failed concession shapes (do not write these):
+- …but the word study earns its place when tied back to the sermon's main claim. (prescription)
+- …but the drift problem must stay audible inside the identity material. (must / instruction)
+- …but one concrete drift-scenario moves earlier to deepen the arc. (imperative rewrite of the sermon)
 
 When an anchored_quote is provided, prefer its specific nouns when they sharpen the sentence. The verdict must still work from the narrative alone.
 

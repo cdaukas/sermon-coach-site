@@ -132,8 +132,13 @@ async function callHaiku(
  * Call after runEvaluation; merge into result before the single complete write.
  *
  * Length: 12–18 words is advised in the prompt. Overlong batch → one full
- * retry with a hard-cap reminder. Still overlong after that → clause-boundary
- * truncate (not mid-phrase). Word count is not rejected on first parse alone.
+ * retry with a hard-cap reminder. Then always clause-boundary cap before merge
+ * (no-op when already ≤ max). Word count is not rejected on first parse alone.
+ *
+ * Path (always):
+ *   tool → validateAndMap → [optional retry if hasOverlong] →
+ *   enforceVerdictLineWordCap → mergeCriterionVerdictLines
+ * Job path and backfill both call this function; there is no bypass merge.
  */
 export async function runCriterionVerdictLines(
   result: EvaluationResultStrict,
@@ -202,14 +207,16 @@ export async function runCriterionVerdictLines(
         "schema",
       );
     }
-
-    if (hasOverlongVerdictLine(linesById, VERDICT_LINE_MAX_WORDS)) {
-      console.warn(
-        `[verdict-lines] Still overlong after retry; truncating to clause boundary at ${VERDICT_LINE_MAX_WORDS} words.`,
-      );
-      linesById = enforceVerdictLineWordCap(linesById, VERDICT_LINE_MAX_WORDS);
-    }
   }
+
+  // Hard gate: always cap before merge so overlong lines never reach storage,
+  // even when retry fails to shorten. Truncate is a no-op under the ceiling.
+  if (hasOverlongVerdictLine(linesById, VERDICT_LINE_MAX_WORDS)) {
+    console.warn(
+      `[verdict-lines] Cap still exceeded; truncating to clause boundary at ${VERDICT_LINE_MAX_WORDS} words.`,
+    );
+  }
+  linesById = enforceVerdictLineWordCap(linesById, VERDICT_LINE_MAX_WORDS);
 
   const merged = mergeCriterionVerdictLines(result, linesById);
   const billedUsage = sumEvalUsage(attemptUsages);
