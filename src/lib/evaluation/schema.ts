@@ -165,23 +165,75 @@ export const anchoredQuoteStrictSchema = z.object({
   approximate_location: z.string(),
 });
 
-export const evaluationCriterionStrictSchema = z
-  .object({
-    id: z.number().int().min(1).max(11),
-    name: criterionNameSchema,
-    category: z.number().int().min(1).max(4),
-    tradition_tag: z.string(),
-    score: z.number().int().min(1).max(5),
-    narrative: z.string(),
-    anchored_quote: anchoredQuoteStrictSchema.nullable().optional(),
-  })
-  .transform((criterion) => ({
-    ...criterion,
-    is_double_weighted: isDoubleWeightedCriterion(criterion.id),
-  }));
+/**
+ * Read path: field may be absent on pre-pass rows.
+ * Write path (pass live): key required; value string or null on pass failure.
+ */
+export type VerdictLineSchemaMode = "optional" | "required";
+
+const criterionBaseFields = {
+  id: z.number().int().min(1).max(11),
+  name: criterionNameSchema,
+  category: z.number().int().min(1).max(4),
+  tradition_tag: z.string(),
+  score: z.number().int().min(1).max(5),
+  narrative: z.string(),
+  anchored_quote: anchoredQuoteStrictSchema.nullable().optional(),
+} as const;
+
+export type EvaluationCriterionStrict = {
+  id: number;
+  name: (typeof CANONICAL_CRITERION_NAMES)[number];
+  category: number;
+  tradition_tag: string;
+  score: number;
+  narrative: string;
+  anchored_quote?: { text: string; approximate_location: string } | null;
+  /** Absent on pre-pass rows; string or null once the pass has run. */
+  verdict_line?: string | null;
+  is_double_weighted: boolean;
+};
+
+function makeEvaluationCriterionStrictSchema(mode: VerdictLineSchemaMode) {
+  if (mode === "required") {
+    return z
+      .object({
+        ...criterionBaseFields,
+        verdict_line: z.string().nullable(),
+      })
+      .transform(
+        (criterion): EvaluationCriterionStrict => ({
+          ...criterion,
+          is_double_weighted: isDoubleWeightedCriterion(criterion.id),
+        }),
+      );
+  }
+
+  return z
+    .object({
+      ...criterionBaseFields,
+      verdict_line: z.string().nullable().optional(),
+    })
+    .transform(
+      (criterion): EvaluationCriterionStrict => ({
+        ...criterion,
+        is_double_weighted: isDoubleWeightedCriterion(criterion.id),
+      }),
+    );
+}
+
+/** Model tool output + pre-pass merge — field optional so scoring output validates. */
+export const evaluationCriterionStrictSchema =
+  makeEvaluationCriterionStrictSchema("optional");
+
+/** Final write / modern read once the pass is live. */
+export const evaluationCriterionStrictWriteSchema =
+  makeEvaluationCriterionStrictSchema("required");
+
+type CriterionStrict = EvaluationCriterionStrict;
 
 function refineCategoryCriteria(
-  criteria: z.infer<typeof evaluationCriterionStrictSchema>[],
+  criteria: CriterionStrict[],
   categoryNumber: number,
   ctx: z.RefinementCtx,
   pathPrefix: (string | number)[],
@@ -296,6 +348,72 @@ export const evaluationCategoriesStrictSchema = z.tuple([
   category4StrictSchema,
 ]);
 
+const category1StrictWriteSchema = z
+  .object({
+    id: z.literal("text_and_theology"),
+    name: z.string(),
+    number: z.literal(1),
+    criteria: z.tuple([
+      evaluationCriterionStrictWriteSchema,
+      evaluationCriterionStrictWriteSchema,
+      evaluationCriterionStrictWriteSchema,
+    ]),
+  })
+  .superRefine((cat, ctx) =>
+    refineCategoryCriteria(cat.criteria as CriterionStrict[], 1, ctx, []),
+  );
+
+const category2StrictWriteSchema = z
+  .object({
+    id: z.literal("structure_and_craft"),
+    name: z.string(),
+    number: z.literal(2),
+    criteria: z.tuple([
+      evaluationCriterionStrictWriteSchema,
+      evaluationCriterionStrictWriteSchema,
+      evaluationCriterionStrictWriteSchema,
+    ]),
+  })
+  .superRefine((cat, ctx) =>
+    refineCategoryCriteria(cat.criteria as CriterionStrict[], 2, ctx, []),
+  );
+
+const category3StrictWriteSchema = z
+  .object({
+    id: z.literal("application_and_audience"),
+    name: z.string(),
+    number: z.literal(3),
+    criteria: z.tuple([
+      evaluationCriterionStrictWriteSchema,
+      evaluationCriterionStrictWriteSchema,
+      evaluationCriterionStrictWriteSchema,
+    ]),
+  })
+  .superRefine((cat, ctx) =>
+    refineCategoryCriteria(cat.criteria as CriterionStrict[], 3, ctx, []),
+  );
+
+const category4StrictWriteSchema = z
+  .object({
+    id: z.literal("ecclesial_and_spiritual"),
+    name: z.string(),
+    number: z.literal(4),
+    criteria: z.tuple([
+      evaluationCriterionStrictWriteSchema,
+      evaluationCriterionStrictWriteSchema,
+    ]),
+  })
+  .superRefine((cat, ctx) =>
+    refineCategoryCriteria(cat.criteria as CriterionStrict[], 4, ctx, []),
+  );
+
+const evaluationCategoriesStrictWriteSchema = z.tuple([
+  category1StrictWriteSchema,
+  category2StrictWriteSchema,
+  category3StrictWriteSchema,
+  category4StrictWriteSchema,
+]);
+
 export const heatmapRegisterStrictSchema = z.enum([
   "humor",
   "diagnostic",
@@ -358,12 +476,15 @@ function makeEvaluationResultStrictObjectSchema(
   verdictSchema:
     | typeof evaluationVerdictPersistSchema
     | typeof evaluationVerdictReadGrandfatherSchema,
+  categoriesSchema:
+    | typeof evaluationCategoriesStrictSchema
+    | typeof evaluationCategoriesStrictWriteSchema,
 ) {
   return z.object({
     meta: evaluationMetaStrictSchema,
     scoring: evaluationScoringStrictSchema,
     verdict: verdictSchema,
-    categories: evaluationCategoriesStrictSchema,
+    categories: categoriesSchema,
     heat_map: evaluationHeatMapStrictSchema.nullable(),
     whats_working: z.array(whatsWorkingCardStrictSchema).min(3).max(5),
     top_priorities: z.array(topPriorityStrictSchema).length(3),
@@ -371,11 +492,26 @@ function makeEvaluationResultStrictObjectSchema(
   });
 }
 
+/** Model tool output / pre-pass: verdict caps strict, verdict_line optional. */
 const evaluationResultStrictPersistObjectSchema =
-  makeEvaluationResultStrictObjectSchema(evaluationVerdictPersistSchema);
+  makeEvaluationResultStrictObjectSchema(
+    evaluationVerdictPersistSchema,
+    evaluationCategoriesStrictSchema,
+  );
 
+/** Final write once pass is live: verdict_line key required on every criterion. */
+const evaluationResultStrictWriteObjectSchema =
+  makeEvaluationResultStrictObjectSchema(
+    evaluationVerdictPersistSchema,
+    evaluationCategoriesStrictWriteSchema,
+  );
+
+/** Dashboard read for prompt_version < v2.3: grandfathered verdict + optional line. */
 const evaluationResultStrictReadObjectSchema =
-  makeEvaluationResultStrictObjectSchema(evaluationVerdictReadGrandfatherSchema);
+  makeEvaluationResultStrictObjectSchema(
+    evaluationVerdictReadGrandfatherSchema,
+    evaluationCategoriesStrictSchema,
+  );
 
 export type EvaluationResultStrict = z.infer<
   typeof evaluationResultStrictPersistObjectSchema
@@ -453,10 +589,23 @@ export const evaluationResultStrictBaseSchema =
     refineEvaluationResultStructure,
   );
 
-/** Write path + read for prompt_version >= v2.3. */
+/**
+ * Model output + pre-pass read path: verdict word-caps strict, verdict_line optional
+ * (absent or null on pre-deploy rows; UI treats as today's row).
+ */
 export const evaluationResultStrictSchema = evaluationResultStrictBaseSchema.superRefine(
   refineScoringMatchesCategories,
 );
+
+/**
+ * Final evaluation JSON after the verdict_line pass (processEvaluation write path).
+ * Every criterion must carry the verdict_line key (string or null). Not used for dashboard
+ * read of pre-pass rows — parseEvaluationResult always tolerates a missing key.
+ */
+export const evaluationResultStrictWriteSchema =
+  evaluationResultStrictWriteObjectSchema
+    .superRefine(refineEvaluationResultStructure)
+    .superRefine(refineScoringMatchesCategories);
 
 /** Dashboard read for prompt_version < v2.3 (e.g. v2, v2.1, v2.2, fixture-*). */
 export const evaluationResultStrictReadSchema =
@@ -804,6 +953,25 @@ export function usesVerdictReadGrandfather(
   return !promptVersionAtLeast(promptVersion, VERDICT_STRICT_CAPS_FROM);
 }
 
+/**
+ * Select dashboard read schema from prompt_version for verdict word-caps only.
+ * verdict_line is optional on every read path (field presence, not version).
+ *
+ * - < v2.3 / fixture-*: grandfather verdict caps + optional verdict_line
+ * - >= v2.3: strict verdict caps + optional verdict_line
+ *
+ * Write-after-pass (required keys) uses evaluationResultStrictWriteSchema in
+ * processEvaluation — not this function.
+ */
+export function evaluationResultSchemaForPromptVersion(
+  promptVersion: string | null | undefined,
+) {
+  if (usesVerdictReadGrandfather(promptVersion)) {
+    return evaluationResultStrictReadSchema;
+  }
+  return evaluationResultStrictSchema;
+}
+
 export type ParseEvaluationResultOptions = {
   promptVersion?: string | null;
 };
@@ -812,11 +980,9 @@ export function parseEvaluationResult(
   value: unknown,
   options: ParseEvaluationResultOptions = {},
 ): EvaluationResultStrict | null {
-  const schema = usesVerdictReadGrandfather(options.promptVersion)
-    ? evaluationResultStrictReadSchema
-    : evaluationResultStrictSchema;
+  const schema = evaluationResultSchemaForPromptVersion(options.promptVersion);
   const strict = schema.safeParse(value);
-  if (strict.success) return strict.data;
+  if (strict.success) return strict.data as EvaluationResultStrict;
 
   const v2 = evaluationResultSchema.safeParse(value);
   if (v2.success) return null;
@@ -825,4 +991,32 @@ export function parseEvaluationResult(
     return null;
   }
   return null;
+}
+
+/** Apply per-id verdict lines onto a full result (null for any missing id). */
+export function mergeCriterionVerdictLines(
+  result: EvaluationResultStrict,
+  linesById: ReadonlyMap<number, string | null>,
+): EvaluationResultStrict {
+  return {
+    ...result,
+    categories: result.categories.map((category) => ({
+      ...category,
+      criteria: category.criteria.map((criterion) => ({
+        ...criterion,
+        verdict_line: linesById.has(criterion.id)
+          ? (linesById.get(criterion.id) ?? null)
+          : (criterion.verdict_line ?? null),
+      })),
+    })),
+  } as EvaluationResultStrict;
+}
+
+/** Every criterion gets verdict_line: null (pass failure / short array). */
+export function clearCriterionVerdictLines(
+  result: EvaluationResultStrict,
+): EvaluationResultStrict {
+  const nulls = new Map<number, string | null>();
+  for (let id = 1; id <= 11; id++) nulls.set(id, null);
+  return mergeCriterionVerdictLines(result, nulls);
 }

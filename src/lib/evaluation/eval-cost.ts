@@ -23,6 +23,13 @@ export const MODEL_RATES_USD_PER_MTOK: Record<string, ModelRatesUsdPerMtok> = {
     cache_write: 3.75,
     cache_read: 0.3,
   },
+  // Criterion verdict_line summarization pass (runCriterionVerdictLines).
+  "claude-haiku-4-5": {
+    input: 1,
+    output: 5,
+    cache_write: 1.25,
+    cache_read: 0.1,
+  },
 };
 
 export type EvalUsageTotals = {
@@ -60,11 +67,28 @@ export function sumEvalUsage(totals: EvalUsageTotals[]): EvalUsageTotals {
   );
 }
 
+/**
+ * Resolve rates for a model id.
+ * Anthropic response.model often appends a dated snapshot
+ * (e.g. claude-haiku-4-5-20251001) while rates are keyed without the date.
+ */
+export function ratesForModel(model: string): ModelRatesUsdPerMtok | undefined {
+  const exact = MODEL_RATES_USD_PER_MTOK[model];
+  if (exact) return exact;
+
+  // Strip trailing -YYYYMMDD snapshot ids returned by the API.
+  const withoutDate = model.replace(/-\d{8}$/, "");
+  if (withoutDate !== model) {
+    return MODEL_RATES_USD_PER_MTOK[withoutDate];
+  }
+  return undefined;
+}
+
 export function computeEvalCostUsd(
   model: string,
   usage: EvalUsageTotals,
 ): number | null {
-  const rates = MODEL_RATES_USD_PER_MTOK[model];
+  const rates = ratesForModel(model);
   if (!rates) {
     return null;
   }
