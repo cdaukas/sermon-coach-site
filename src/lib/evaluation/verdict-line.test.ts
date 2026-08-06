@@ -16,6 +16,8 @@ import {
   truncateVerdictLineToMaxWords,
   hasOverlongVerdictLine,
   enforceVerdictLineWordCap,
+  endsOnIncompleteGrammaticalTail,
+  terminalContentWord,
   submitCriterionVerdictLinesTool,
 } from "./verdict-line-schema";
 import {
@@ -33,6 +35,17 @@ const LINE_28 =
   "The servant and son distinction is exegetically grounded in therapone's nobility, but the word study earns its place when tied back to the sermon's main claim in full.";
 const LINE_30 =
   "The two-point frame is clear and memorable, but the Moses comparison which is the argumentative heart is buried as sub-material inside point two without a named beat of its own.";
+
+/** Overlong line whose 18-word hard cut ends on dangling "than" (clause prefix too short for min-8). */
+const LINE_DANGLING_THAN =
+  "The verdict is vivid, but the offense of guilt precedes the comfort less clearly than grace would require of this room.";
+
+/**
+ * No complete ≥8-word prefix under the 18-word cap (all 8..18 terminals
+ * are incomplete tails), but the full line itself ends complete.
+ */
+const LINE_FORCE_REJECT =
+  "and or but of to with for from than more less of to with for from than more less of to with for grounded claims.";
 
 const SHORT_OK =
   "Propitiation is handled with care, but the claim outruns the quoted word.";
@@ -156,10 +169,47 @@ describe("criterion verdict_line schema gate", () => {
 
   it("truncateVerdictLineToMaxWords cuts at a clause boundary", () => {
     const truncated = truncateVerdictLineToMaxWords(LINE_30, 18);
-    assert.ok(countWords(truncated) <= 18);
-    assert.ok(truncated.endsWith("."));
+    assert.ok(truncated !== null);
+    assert.ok(countWords(truncated!) <= 18);
+    assert.ok(truncated!.endsWith("."));
     // Prefer clause cut before ", but" when that prefix fits the cap.
-    assert.match(truncated, /clear and memorable/i);
+    assert.match(truncated!, /clear and memorable/i);
+  });
+
+  it("endsOnIncompleteGrammaticalTail flags dangling than/but/of/to/with", () => {
+    for (const dangling of [
+      "The offense precedes the comfort less clearly than.",
+      "The distinction is grounded, but.",
+      "The claim outruns the word of.",
+      "The spine holds the room to.",
+      "The text opens on identity with.",
+    ]) {
+      assert.equal(
+        endsOnIncompleteGrammaticalTail(dangling),
+        true,
+        `expected incomplete: ${dangling}`,
+      );
+    }
+    assert.equal(
+      endsOnIncompleteGrammaticalTail(SHORT_OK),
+      false,
+    );
+    assert.equal(terminalContentWord("… less clearly than."), "than");
+  });
+
+  it("truncate rejects a hard cut ending on dangling than (no broken than.)", () => {
+    assert.ok(countWords(LINE_DANGLING_THAN) > VERDICT_LINE_MAX_WORDS);
+    const truncated = truncateVerdictLineToMaxWords(LINE_DANGLING_THAN, 18);
+    // May shorten via walk-back, but never end on "than"
+    if (truncated !== null) {
+      assert.notEqual(terminalContentWord(truncated), "than");
+      assert.equal(endsOnIncompleteGrammaticalTail(truncated), false);
+      assert.ok(countWords(truncated) <= 18);
+    }
+  });
+
+  it("truncate returns null when every under-cap candidate is incomplete", () => {
+    assert.equal(truncateVerdictLineToMaxWords(LINE_FORCE_REJECT, 18), null);
   });
 
   it("hasOverlongVerdictLine is true for 28- and 30-word observed lines", () => {
@@ -176,26 +226,41 @@ describe("criterion verdict_line schema gate", () => {
     );
   });
 
-  it("enforceVerdictLineWordCap caps every overlong line to ≤18 at clause boundary", () => {
+  it("enforceVerdictLineWordCap caps clean overlong lines and keeps broken-truncate rejects", () => {
     const map = new Map([
       [2, LINE_28],
       [10, LINE_30],
       [1, SHORT_OK],
+      [3, LINE_FORCE_REJECT],
     ]);
-    const capped = enforceVerdictLineWordCap(map, VERDICT_LINE_MAX_WORDS);
-    for (const line of capped.values()) {
-      assert.ok(countWords(line) <= VERDICT_LINE_MAX_WORDS);
-      assert.ok(line.endsWith("."));
-    }
+    const { lines: capped, rejectedBrokenTruncate } = enforceVerdictLineWordCap(
+      map,
+      VERDICT_LINE_MAX_WORDS,
+    );
+
+    assert.ok(countWords(capped.get(2)!) <= VERDICT_LINE_MAX_WORDS);
+    assert.ok(countWords(capped.get(10)!) <= VERDICT_LINE_MAX_WORDS);
     assert.equal(capped.get(1), normalizePeriod(SHORT_OK));
     assert.match(capped.get(10) ?? "", /clear and memorable/i);
+
+    // Force-reject line stays overlong rather than shipping dangling tail
+    assert.equal(capped.get(3), normalizePeriod(LINE_FORCE_REJECT));
+    assert.ok(countWords(capped.get(3)!) > VERDICT_LINE_MAX_WORDS);
+    assert.equal(rejectedBrokenTruncate.length, 1);
+    assert.equal(rejectedBrokenTruncate[0]?.id, 3);
   });
 
-  it("copy contract forbids prescription in the concession half", () => {
+  it("copy contract requires hinge below 5 and forbids prescription", () => {
     const prompt = buildVerdictLineSystemPrompt();
     assert.match(prompt, /must.*should.*would/i);
     assert.match(prompt, /never what the preacher should do next/i);
-    assert.match(prompt, /Failed concession shapes/i);
+    assert.match(prompt, /Failed shapes/i);
+    assert.match(prompt, /single-clause line.*failed line on any score below 5/i);
+    assert.match(prompt, /Do not drop the concession half/i);
+    assert.match(
+      prompt,
+      /Greek is asserted rather than shown/i,
+    );
   });
 });
 
@@ -264,6 +329,32 @@ describe("runCriterionVerdictLines length gate", () => {
     assert.ok(c10?.verdict_line);
     assert.notEqual(c2?.verdict_line, normalizePeriod(LINE_28));
     assert.notEqual(c10?.verdict_line, normalizePeriod(LINE_30));
+  });
+
+  it("keeps uncapped attempt when truncate would dangle rather than ship broken", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+
+    let createCalls = 0;
+    const batch = elevenLines({ 3: LINE_FORCE_REJECT });
+
+    const createMessage: CreateVerdictLineMessage = async () => {
+      createCalls += 1;
+      return messageWithVerdictLines(batch, "claude-haiku-test", {
+        input_tokens: 15,
+        output_tokens: 18,
+      });
+    };
+
+    const base = clearCriterionVerdictLines(EVALUATION_FIXTURE as never);
+    const { result } = await runCriterionVerdictLines(base, { createMessage });
+
+    assert.ok(createCalls >= 1);
+    const c3 = result.categories
+      .flatMap((cat) => cat.criteria)
+      .find((c) => c.id === 3);
+    assert.equal(c3?.verdict_line, normalizePeriod(LINE_FORCE_REJECT));
+    assert.ok(countWords(c3!.verdict_line!) > VERDICT_LINE_MAX_WORDS);
+    assert.equal(endsOnIncompleteGrammaticalTail(c3!.verdict_line!), false);
   });
 
   it("enforces the word cap even when the first pass only is under the ceil path", async () => {

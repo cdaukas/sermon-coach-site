@@ -132,8 +132,10 @@ async function callHaiku(
  * Call after runEvaluation; merge into result before the single complete write.
  *
  * Length: 12–18 words is advised in the prompt. Overlong batch → one full
- * retry with a hard-cap reminder. Then always clause-boundary cap before merge
- * (no-op when already ≤ max). Word count is not rejected on first parse alone.
+ * retry with a hard-cap reminder. Then clause-boundary cap before merge
+ * (no-op when already ≤ max). Incomplete truncates (dangling "than"/"but"/
+ * prepositions) are rejected: keep the uncapped attempt and log the overshoot.
+ * Word count is not rejected on first parse alone.
  *
  * Path (always):
  *   tool → validateAndMap → [optional retry if hasOverlong] →
@@ -209,14 +211,22 @@ export async function runCriterionVerdictLines(
     }
   }
 
-  // Hard gate: always cap before merge so overlong lines never reach storage,
-  // even when retry fails to shorten. Truncate is a no-op under the ceiling.
+  // Prefer clause-boundary cap before merge. Truncate is a no-op under the
+  // ceiling. If every candidate ends incomplete (dangling comparative /
+  // conjunction / preposition), keep the uncapped attempt rather than ship
+  // a sentence that does not parse.
   if (hasOverlongVerdictLine(linesById, VERDICT_LINE_MAX_WORDS)) {
     console.warn(
       `[verdict-lines] Cap still exceeded; truncating to clause boundary at ${VERDICT_LINE_MAX_WORDS} words.`,
     );
   }
-  linesById = enforceVerdictLineWordCap(linesById, VERDICT_LINE_MAX_WORDS);
+  const capped = enforceVerdictLineWordCap(linesById, VERDICT_LINE_MAX_WORDS);
+  linesById = capped.lines;
+  for (const rejected of capped.rejectedBrokenTruncate) {
+    console.warn(
+      `[verdict-lines] Cap exceeded (reject-broken-truncate): criterion ${rejected.id} kept at ${rejected.wordCount} words (last word "${rejected.lastWord}") rather than shipping an incomplete sentence. Preview: ${rejected.attemptPreview}`,
+    );
+  }
 
   const merged = mergeCriterionVerdictLines(result, linesById);
   const billedUsage = sumEvalUsage(attemptUsages);

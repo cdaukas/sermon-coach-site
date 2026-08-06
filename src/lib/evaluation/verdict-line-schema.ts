@@ -66,16 +66,169 @@ export function normalizeVerdictLine(raw: string): string {
 }
 
 /**
+ * Words that leave a truncated sentence incomplete — they require a following
+ * object, complement, or clause. Shipping these dangling is worse than a long line.
+ */
+const INCOMPLETE_TERMINAL_WORDS = new Set([
+  // Coordinating / subordinating conjunctions
+  "and",
+  "but",
+  "or",
+  "nor",
+  "yet",
+  "so",
+  "because",
+  "while",
+  "although",
+  "though",
+  "if",
+  "unless",
+  "until",
+  "when",
+  "where",
+  "whereas",
+  "whether",
+  "since",
+  "as",
+  "than",
+  // Prepositions
+  "of",
+  "to",
+  "with",
+  "in",
+  "on",
+  "at",
+  "by",
+  "for",
+  "from",
+  "into",
+  "about",
+  "against",
+  "between",
+  "among",
+  "through",
+  "during",
+  "without",
+  "within",
+  "across",
+  "behind",
+  "beyond",
+  "under",
+  "over",
+  "after",
+  "before",
+  "around",
+  "near",
+  "upon",
+  "toward",
+  "towards",
+  "via",
+  "per",
+  "vs",
+  "versus",
+  // Comparatives / degree (need an object or complement)
+  "more",
+  "less",
+  "most",
+  "least",
+  "rather",
+  "quite",
+  "too",
+  "very",
+  "much",
+  "such",
+  // Determiners / articles
+  "a",
+  "an",
+  "the",
+  "its",
+  "their",
+  "his",
+  "her",
+  "our",
+  "my",
+  "your",
+  "this",
+  "that",
+  "these",
+  "those",
+  "each",
+  "every",
+  "any",
+  "some",
+  "no",
+  // Incomplete verb forms needing complement
+  "is",
+  "are",
+  "was",
+  "were",
+  "be",
+  "been",
+  "being",
+  "has",
+  "have",
+  "had",
+  "do",
+  "does",
+  "did",
+  "will",
+  "would",
+  "shall",
+  "should",
+  "can",
+  "could",
+  "may",
+  "might",
+  "must",
+  // Relative / interrogative lead-ins
+  "which",
+  "who",
+  "whom",
+  "whose",
+  "what",
+  "how",
+  "not",
+]);
+
+/** Last content word before the terminal period (lowercased, stripped of trailing punct). */
+export function terminalContentWord(text: string): string {
+  const normalized = normalizeVerdictLine(text);
+  const withoutPeriod = normalized.replace(/\.+$/, "").trim();
+  if (!withoutPeriod) return "";
+  const words = withoutPeriod.split(/\s+/).filter(Boolean);
+  const last = words[words.length - 1] ?? "";
+  return last.replace(/[^a-zA-Z'-]+$/g, "").toLowerCase();
+}
+
+/**
+ * True when a truncated (or model) line ends on a word that needs a following
+ * object — conjunction, preposition, comparative, determiner, incomplete verb, etc.
+ */
+export function endsOnIncompleteGrammaticalTail(text: string): boolean {
+  const last = terminalContentWord(text);
+  if (!last) return true;
+  return INCOMPLETE_TERMINAL_WORDS.has(last);
+}
+
+/**
  * Cut an overlong sentence at the last clause boundary that still ≤ maxWords.
  * Prefer ; : — , then word boundary. Always keeps a final period.
+ *
+ * Returns null when no complete sentence can be formed within the cap (e.g.
+ * every candidate ends on "than", "but", "of", "to", "with"). Callers must
+ * fall back to the uncapped attempt rather than ship a broken sentence.
  */
 export function truncateVerdictLineToMaxWords(
   text: string,
   maxWords: number = VERDICT_LINE_MAX_WORDS,
-): string {
+): string | null {
   const normalized = normalizeVerdictLine(text);
   if (!normalized) return normalized;
-  if (countWords(normalized) <= maxWords) return normalized;
+  if (countWords(normalized) <= maxWords) {
+    // Already under cap — still reject incomplete tails (shouldn't happen on model output often).
+    if (endsOnIncompleteGrammaticalTail(normalized)) return null;
+    return normalized;
+  }
 
   const withoutPeriod = normalized.replace(/\.+$/, "");
   const words = withoutPeriod.split(/\s+/);
@@ -92,13 +245,24 @@ export function truncateVerdictLineToMaxWords(
     if (lastClause >= 0) {
       const before = slice.slice(0, lastClause).trim();
       if (countWords(before) >= 8) {
-        return normalizeVerdictLine(before);
+        const candidate = normalizeVerdictLine(before);
+        if (!endsOnIncompleteGrammaticalTail(candidate)) {
+          return candidate;
+        }
       }
     }
   }
 
-  // No usable clause mark — hard word cap, no mid-token cut.
-  return normalizeVerdictLine(words.slice(0, maxWords).join(" "));
+  // No usable clause mark — hard word cap at longest complete (non-dangling) prefix.
+  for (let end = maxWords; end >= Math.min(8, maxWords); end--) {
+    const candidate = normalizeVerdictLine(words.slice(0, end).join(" "));
+    if (!endsOnIncompleteGrammaticalTail(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Every candidate dangles (e.g. ends on "than") — refuse rather than break.
+  return null;
 }
 
 export function hasOverlongVerdictLine(
@@ -111,16 +275,53 @@ export function hasOverlongVerdictLine(
   return false;
 }
 
-/** Cap every overlong line at a clause boundary (post-retry fallthrough). */
+export type EnforceVerdictLineWordCapResult = {
+  lines: Map<number, string>;
+  /** Lines kept overlong because every safe truncate ended incomplete. */
+  rejectedBrokenTruncate: Array<{
+    id: number;
+    wordCount: number;
+    lastWord: string;
+    attemptPreview: string;
+  }>;
+};
+
+/**
+ * Cap every overlong line at a clause boundary (post-retry fallthrough).
+ * When truncation would end mid-grammatical-tail, keep the uncapped attempt
+ * and record it for logging — never ship "…less clearly than."
+ */
 export function enforceVerdictLineWordCap(
   linesById: ReadonlyMap<number, string>,
   maxWords: number = VERDICT_LINE_MAX_WORDS,
-): Map<number, string> {
+): EnforceVerdictLineWordCapResult {
   const out = new Map<number, string>();
+  const rejectedBrokenTruncate: EnforceVerdictLineWordCapResult["rejectedBrokenTruncate"] =
+    [];
+
   for (const [id, line] of linesById) {
-    out.set(id, truncateVerdictLineToMaxWords(line, maxWords));
+    if (countWords(line) <= maxWords) {
+      out.set(id, line);
+      continue;
+    }
+
+    const truncated = truncateVerdictLineToMaxWords(line, maxWords);
+    if (truncated !== null && countWords(truncated) <= maxWords) {
+      out.set(id, truncated);
+      continue;
+    }
+
+    // Incomplete truncate or no candidate — keep uncapped attempt.
+    rejectedBrokenTruncate.push({
+      id,
+      wordCount: countWords(line),
+      lastWord: terminalContentWord(line),
+      attemptPreview: line.length > 120 ? `${line.slice(0, 117)}...` : line,
+    });
+    out.set(id, line);
   }
-  return out;
+
+  return { lines: out, rejectedBrokenTruncate };
 }
 
 /** Validate count, unique ids, full 1–11 coverage. Returns Map id → line or throws. */
