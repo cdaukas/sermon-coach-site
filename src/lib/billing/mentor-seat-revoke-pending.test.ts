@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { revokeExcessPendingMentorInvites } from "./mentor-seat-revoke-pending";
+import {
+  revokeExcessPendingForMentor,
+  revokeExcessPendingMentorInvites,
+} from "./mentor-seat-revoke-pending";
 
 type Row = {
   id: string;
@@ -162,5 +165,55 @@ describe("revokeExcessPendingMentorInvites", () => {
 
     await revokeExcessPendingMentorInvites(supabase, "mentor-1", "debrief");
     assert.equal(updates.length, 0);
+  });
+
+  it("uses purchasedSeats override instead of profile re-read", async () => {
+    const { supabase, updates } = makeMentorSupabase({
+      profile: {
+        // Stale high purchase that would incorrectly keep all pending.
+        purchased_debrief_seats: 10,
+        purchased_evaluation_seats: 0,
+        comp_debrief_seats: 0,
+      },
+      rows: [
+        {
+          id: "p1",
+          status: "pending",
+          created_at: "2026-08-01T00:00:00Z",
+        },
+      ],
+    });
+
+    await revokeExcessPendingMentorInvites(supabase, "mentor-1", "debrief", {
+      purchasedSeats: 0,
+    });
+
+    assert.equal(updates.length, 1);
+    assert.deepEqual(updates[0].ids, ["p1"]);
+  });
+
+  it("recomputes both seat types for a mentor", async () => {
+    const { supabase, updates } = makeMentorSupabase({
+      profile: {
+        purchased_debrief_seats: 0,
+        purchased_evaluation_seats: 0,
+        comp_debrief_seats: 0,
+      },
+      rows: [
+        {
+          id: "p-deb",
+          status: "pending",
+          created_at: "2026-08-01T00:00:00Z",
+        },
+      ],
+    });
+
+    await revokeExcessPendingForMentor(supabase, "mentor-1", {
+      written: { seatType: "debrief", purchasedSeats: 0 },
+    });
+
+    // Both types run; debrief has a pending row to revoke.
+    assert.ok(updates.length >= 1);
+    assert.ok(updates.some((u) => u.ids.includes("p-deb")));
   });
 });
