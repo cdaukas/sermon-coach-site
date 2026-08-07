@@ -222,10 +222,13 @@ export async function listRecentCompleteEvaluations(
 ): Promise<RecentCompleteEvaluationItem[]> {
   const supabase = await createClient();
 
+  // Diagnostics only. Debrief rows (mentoring stopgap / Coach debriefs) carry
+  // scores but are not the owner's preaching arc — structural via report_mode.
   let query = supabase
     .from("sermon_evaluations")
     .select("id, completed_at, created_at, sermon_version_id, score_band")
     .eq("status", "complete")
+    .eq("report_mode", "diagnostic")
     .not("result", "is", null)
     .not("completed_at", "is", null)
     .order("completed_at", { ascending: false });
@@ -305,6 +308,7 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
       "id, completed_at, created_at, sermon_version_id, overall_score, prompt_version",
     )
     .eq("status", "complete")
+    .eq("report_mode", "diagnostic")
     .not("result", "is", null)
     .not("completed_at", "is", null)
     .not("overall_score", "is", null);

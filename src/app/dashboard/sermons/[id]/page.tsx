@@ -11,6 +11,7 @@ import {
   sermonHasActiveEvaluation,
 } from "@/lib/evaluation/queries";
 import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
+import { isMentoringDebriefAllowed } from "@/lib/mentor/uiAccess";
 import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
 /** Long-running Claude evaluation (see STEP_6_PLAN §B). */
@@ -70,6 +71,9 @@ export default async function SermonDetailPage({
     notFound();
   }
 
+  const mentoringDebriefAllowed = user
+    ? isMentoringDebriefAllowed(user.id)
+    : false;
   const { latest_version: version } = sermon;
   const completeEvaluations = evaluations.filter(
     (evaluation) => evaluation.status === "complete",
@@ -118,6 +122,7 @@ export default async function SermonDetailPage({
         entitlement={entitlement}
         hasActiveEvaluation={hasActiveEvaluation}
         isMentoredMentee={isMentoredMentee}
+        mentoringDebriefAllowed={mentoringDebriefAllowed}
       />
 
       <SermonDetailManuscript content={version.content} />

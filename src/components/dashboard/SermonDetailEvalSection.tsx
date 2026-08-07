@@ -14,6 +14,7 @@ type SermonDetailEvalSectionProps = {
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
   isMentoredMentee?: boolean;
+  mentoringDebriefAllowed?: boolean;
 };
 
 export function SermonDetailEvalSection({
@@ -22,6 +23,7 @@ export function SermonDetailEvalSection({
   entitlement,
   hasActiveEvaluation,
   isMentoredMentee = false,
+  mentoringDebriefAllowed = false,
 }: SermonDetailEvalSectionProps) {
   const defaultMode = useMemo(
     () => getDefaultEvaluationCardTab(completeEvaluations),
@@ -37,6 +39,7 @@ export function SermonDetailEvalSection({
         selectedMode={selectedMode}
         onModeChange={setSelectedMode}
         isMentoredMentee={isMentoredMentee}
+        mentoringDebriefAllowed={mentoringDebriefAllowed}
       />
 
       <SermonDetailEvaluationActions
@@ -46,6 +49,7 @@ export function SermonDetailEvalSection({
         entitlement={entitlement}
         hasActiveEvaluation={hasActiveEvaluation}
         isMentoredMentee={isMentoredMentee}
+        mentoringDebriefAllowed={mentoringDebriefAllowed}
       />
     </>
   );

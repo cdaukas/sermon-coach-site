@@ -24,9 +24,13 @@ import {
   MENTORED_NO_SEAT_CAPACITY_ERROR,
 } from "./eval-start-errors";
 import type { ReportMode, RequestEvaluationResult } from "./types";
+import { isMentoringDebriefAllowed } from "@/lib/mentor/uiAccess";
 
 const MENTORED_GENERIC_FAILURE =
   "Something went wrong. Please try again.";
+
+const DEBRIEF_NOT_ALLOWED =
+  "The Mentoring Debrief is not available for this account.";
 
 type CreateMentoredEvaluationRpcResult = {
   ok?: boolean;
@@ -209,6 +213,12 @@ export async function requestEvaluation(
     }
 
     return { ok: false, error: MENTORED_GENERIC_FAILURE };
+  }
+
+  // Stopgap only: ordinary debrief reuses the Coach credit path.
+  // MENTORING_DEBRIEF_ALLOWLIST is independent of the mentoring UI/seat allowlist.
+  if (reportMode === "debrief" && !isMentoringDebriefAllowed(user.id)) {
+    return { ok: false, error: DEBRIEF_NOT_ALLOWED };
   }
 
   const eligibility = await checkEvaluationEligibility(user.id);

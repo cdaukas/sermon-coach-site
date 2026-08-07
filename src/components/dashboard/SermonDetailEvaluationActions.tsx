@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { EvaluateButton } from "@/components/evaluation/EvaluateButton";
 import { EvaluationCreditLine } from "@/components/evaluation/EvaluationCreditLine";
 import type { ReportMode } from "@/lib/evaluation/context";
@@ -20,6 +20,8 @@ type SermonDetailEvaluationActionsProps = {
   entitlement: EvaluationEntitlement | null;
   hasActiveEvaluation: boolean;
   isMentoredMentee?: boolean;
+  /** MENTORING_DEBRIEF_ALLOWLIST only — independent of the mentoring rail. */
+  mentoringDebriefAllowed?: boolean;
 };
 
 export function SermonDetailEvaluationActions({
@@ -29,6 +31,7 @@ export function SermonDetailEvaluationActions({
   entitlement,
   hasActiveEvaluation,
   isMentoredMentee = false,
+  mentoringDebriefAllowed = false,
 }: SermonDetailEvaluationActionsProps) {
   const grouped = useMemo(
     () => groupCompleteEvaluationsByMode(completeEvaluations),
@@ -37,16 +40,13 @@ export function SermonDetailEvaluationActions({
   const [rerunPromptMode, setRerunPromptMode] =
     useState<ReportMode | null>(null);
   const pendingRunRef = useRef<(() => void) | null>(null);
+  const pendingModeRef = useRef<ReportMode | null>(null);
 
-  useEffect(() => {
-    setRerunPromptMode(null);
-    pendingRunRef.current = null;
-  }, [reportMode]);
-
-  function handleRunClick(run: () => void) {
-    if (grouped[reportMode].latest) {
-      setRerunPromptMode(reportMode);
+  function handleRunClick(mode: ReportMode, run: () => void) {
+    if (grouped[mode].latest) {
+      setRerunPromptMode(mode);
       pendingRunRef.current = run;
+      pendingModeRef.current = mode;
       return;
     }
 
@@ -56,16 +56,27 @@ export function SermonDetailEvaluationActions({
   function handleConfirmRerun() {
     pendingRunRef.current?.();
     pendingRunRef.current = null;
+    pendingModeRef.current = null;
     setRerunPromptMode(null);
   }
 
   function handleCancelRerun() {
     pendingRunRef.current = null;
+    pendingModeRef.current = null;
     setRerunPromptMode(null);
   }
 
-  const showRerunPrompt = rerunPromptMode === reportMode;
-  const runButtonLabel = `Run ${modeDisplayName(reportMode)}`;
+  const showRerunPrompt = rerunPromptMode != null;
+  const rerunModeLabel = rerunPromptMode
+    ? modeDisplayName(rerunPromptMode)
+    : "";
+  const showDebriefAction = mentoringDebriefAllowed && !isMentoredMentee;
+  // When both actions are shown, the diagnostic button always runs Evaluation
+  // and the second runs Debrief — independent of the result tabs.
+  const evaluationMode: ReportMode = showDebriefAction
+    ? "diagnostic"
+    : reportMode;
+  const evaluationLabel = `Run ${modeDisplayName(evaluationMode)}`;
 
   return (
     <div className="mt-8 flex max-w-xl flex-col items-start gap-4">
@@ -75,8 +86,8 @@ export function SermonDetailEvaluationActions({
             className="text-[13px] leading-relaxed"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            You&apos;ve already run {modeDisplayName(reportMode)} on
-            this sermon. Run it again?
+            You&apos;ve already run {rerunModeLabel} on this sermon. Run it
+            again?
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-4">
             <button
@@ -104,18 +115,33 @@ export function SermonDetailEvaluationActions({
       ) : null}
 
       <div className="w-full">
-        <EvaluateButton
-          sermonId={sermonId}
-          entitlement={entitlement}
-          hasActiveEvaluation={hasActiveEvaluation}
-          reportMode={reportMode}
-          embedded
-          hideCreditLine
-          buttonLabel={runButtonLabel}
-          onRunClick={handleRunClick}
-          disabled={showRerunPrompt}
-          isMentoredMentee={isMentoredMentee}
-        />
+        <div className="flex flex-wrap items-start gap-3">
+          <EvaluateButton
+            sermonId={sermonId}
+            entitlement={entitlement}
+            hasActiveEvaluation={hasActiveEvaluation}
+            reportMode={evaluationMode}
+            embedded
+            hideCreditLine
+            buttonLabel={evaluationLabel}
+            onRunClick={(run) => handleRunClick(evaluationMode, run)}
+            disabled={showRerunPrompt}
+            isMentoredMentee={isMentoredMentee}
+          />
+          {showDebriefAction ? (
+            <EvaluateButton
+              sermonId={sermonId}
+              entitlement={entitlement}
+              hasActiveEvaluation={hasActiveEvaluation}
+              reportMode="debrief"
+              embedded
+              hideCreditLine
+              buttonLabel="Run The Mentoring Debrief"
+              onRunClick={(run) => handleRunClick("debrief", run)}
+              disabled={showRerunPrompt}
+            />
+          ) : null}
+        </div>
         {!isMentoredMentee ? (
           <EvaluationCreditLine entitlement={entitlement} />
         ) : null}

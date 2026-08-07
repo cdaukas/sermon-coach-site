@@ -28,6 +28,8 @@ type SermonEvaluationCardsProps = {
   selectedMode: ReportMode;
   onModeChange: (mode: ReportMode) => void;
   isMentoredMentee?: boolean;
+  /** When false, debrief tab only appears if a debrief result already exists. */
+  mentoringDebriefAllowed?: boolean;
 };
 
 function formatEvaluationDate(iso: string): string {
@@ -243,11 +245,21 @@ export function SermonEvaluationCards({
   selectedMode,
   onModeChange,
   isMentoredMentee = false,
+  mentoringDebriefAllowed = false,
 }: SermonEvaluationCardsProps) {
   const grouped = useMemo(
     () => groupCompleteEvaluationsByMode(completeEvaluations),
     [completeEvaluations],
   );
+
+  const visibleTabs = useMemo(() => {
+    if (isMentoredMentee || mentoringDebriefAllowed) {
+      return CARD_TABS;
+    }
+    const hasDebrief =
+      grouped.debrief.latest != null || grouped.debrief.older.length > 0;
+    return hasDebrief ? CARD_TABS : CARD_TABS.filter((t) => t.value === "diagnostic");
+  }, [grouped, isMentoredMentee, mentoringDebriefAllowed]);
 
   if (isMentoredMentee) {
     const modesWithResults = CARD_TABS.filter((tab) => {
@@ -291,6 +303,19 @@ export function SermonEvaluationCards({
     );
   }
 
+  if (visibleTabs.length === 1) {
+    const only = visibleTabs[0];
+    return (
+      <div className="mb-6">
+        <ModeEvaluationPanel
+          sermonId={sermonId}
+          mode={only.value}
+          group={grouped[only.value]}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="mb-6">
       <div
@@ -299,7 +324,7 @@ export function SermonEvaluationCards({
         role="tablist"
         aria-label="Evaluation mode"
       >
-        {CARD_TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const selected = selectedMode === tab.value;
 
           return (
@@ -323,7 +348,7 @@ export function SermonEvaluationCards({
         })}
       </div>
 
-      {CARD_TABS.map((tab) => (
+      {visibleTabs.map((tab) => (
         <div
           key={tab.value}
           role="tabpanel"

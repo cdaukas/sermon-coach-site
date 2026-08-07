@@ -197,10 +197,23 @@ export default async function EvaluationPage({
       ) : null}
 
       {evaluation.report_mode === "debrief" ? (
-        <CoachingReportView
-          data={toCoachingReportPresentation({ evaluation, sermon })}
-          showPrintActions={!pdfCapture}
-        />
+        <>
+          {evaluation.result ? (
+            <div className="mb-12">
+              <EvaluationDashboard
+                result={evaluation.result}
+                sermonTitle={sermon.title}
+                scriptureReference={scriptureReference}
+                showPrintActions={!pdfCapture}
+                howItPreaches={evaluation.how_it_preaches}
+              />
+            </div>
+          ) : null}
+          <CoachingReportView
+            data={toCoachingReportPresentation({ evaluation, sermon })}
+            showPrintActions={!pdfCapture && !evaluation.result}
+          />
+        </>
       ) : (
         <EvaluationDashboard
           result={evaluation.result!}

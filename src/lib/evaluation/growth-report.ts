@@ -238,6 +238,14 @@ export async function loadGrowthReportData(
     return null;
   }
 
+  // Debrief mode is mentoring/coaching of other preachers, not the owner's arc.
+  if (
+    baselineRow.evaluation.report_mode === "debrief" ||
+    currentRow.evaluation.report_mode === "debrief"
+  ) {
+    return null;
+  }
+
   return enrichGrowthReportData(
     orderGrowthReportSnapshotsByDate(
       toSnapshot(baselineRow),
