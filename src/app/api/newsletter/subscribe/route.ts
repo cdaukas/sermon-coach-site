@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  isHeavyDottedGmail,
   isValidNewsletterEmail,
   normalizeNewsletterEmail,
   parseNewsletterSource,
@@ -11,6 +12,12 @@ export const runtime = "nodejs";
 type SubscribeBody = {
   email?: unknown;
   source?: unknown;
+};
+
+const INVALID_EMAIL_BODY = {
+  ok: false as const,
+  error: "invalid_email" as const,
+  message: "Please enter a valid email address",
 };
 
 export async function POST(request: Request) {
@@ -27,10 +34,13 @@ export async function POST(request: Request) {
 
   const rawEmail = typeof body.email === "string" ? body.email : "";
   if (!isValidNewsletterEmail(rawEmail)) {
-    return NextResponse.json(
-      { ok: false, error: "invalid_email" },
-      { status: 400 },
-    );
+    return NextResponse.json(INVALID_EMAIL_BODY, { status: 400 });
+  }
+
+  // Bot guard: 4+ dots in Gmail local part (pre-normalization). Same generic
+  // response as invalid email — do not reveal the rule.
+  if (isHeavyDottedGmail(rawEmail)) {
+    return NextResponse.json(INVALID_EMAIL_BODY, { status: 400 });
   }
 
   const email = normalizeNewsletterEmail(rawEmail);
