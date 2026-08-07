@@ -32,20 +32,60 @@ const BACK_LABEL_LIBRARY = "Back to library";
 
 type EvaluationPageProps = {
   params: Promise<{ id: string; evaluationId: string }>;
-  searchParams: Promise<{ pdf?: string; for?: string; variant?: string; preacher?: string }>;
+  searchParams: Promise<{
+    pdf?: string;
+    for?: string;
+    variant?: string;
+    preacher?: string;
+    /** Owner stopgap debrief: omit or "evaluation" for scores; "debrief" for coaching. */
+    view?: string;
+  }>;
 };
+
+function evaluationPath(sermonId: string, evaluationId: string): string {
+  return `/dashboard/sermons/${sermonId}/evaluations/${evaluationId}`;
+}
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: EvaluationPageProps): Promise<Metadata> {
   const { id, evaluationId } = await params;
+  const { view } = await searchParams;
   const data = await getEvaluation(evaluationId, id);
 
-  if (!data?.evaluation.result) {
+  if (!data?.evaluation.result && !data?.evaluation.coaching_narrative) {
     return { title: "Evaluation" };
   }
 
-  return { title: `${data.evaluation.result.meta.sermon_title} — Evaluation` };
+  const titleBase =
+    data.evaluation.result?.meta.sermon_title ?? data.sermon.title;
+  if (
+    data.evaluation.report_mode === "debrief" &&
+    view === "debrief"
+  ) {
+    return { title: `${titleBase} — Mentoring Debrief` };
+  }
+
+  return { title: `${titleBase} — Evaluation` };
+}
+
+function ArtifactSwitchLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="inline-block text-[13px] font-medium no-underline hover:underline"
+      style={{ ...uiFont, color: "var(--sc-accent)" }}
+    >
+      {children}
+    </Link>
+  );
 }
 
 export default async function EvaluationPage({
@@ -53,8 +93,13 @@ export default async function EvaluationPage({
   searchParams,
 }: EvaluationPageProps) {
   const { id: sermonId, evaluationId } = await params;
-  const { pdf, for: preparedForParam, variant: variantParam, preacher: preacherParam } =
-    await searchParams;
+  const {
+    pdf,
+    for: preparedForParam,
+    variant: variantParam,
+    preacher: preacherParam,
+    view: viewParam,
+  } = await searchParams;
   const pdfCapture = pdf === "1";
   const preparedFor = preparedForParam?.trim() ?? "";
   const showCover = pdfCapture && preparedFor.length > 0;
@@ -72,15 +117,28 @@ export default async function EvaluationPage({
   const backLabel =
     resolvedVia === "owner" ? BACK_LABEL_LIBRARY : BACK_LABEL_MENTOR;
 
+  const isDebriefMode = evaluation.report_mode === "debrief";
+  const hasScoredResult = evaluation.result != null;
+  const hasCoachingNarrative = evaluation.coaching_narrative != null;
+  // One row with both payloads (owner stopgap). Mentored debrief rows have
+  // narrative only and stay on a single coaching view.
+  const hasSplitViews = isDebriefMode && hasScoredResult && hasCoachingNarrative;
+  const showCoachingView =
+    isDebriefMode && (!hasSplitViews || viewParam === "debrief");
+  const showScoresView = !isDebriefMode || (hasSplitViews && !showCoachingView);
+
+  const basePath = evaluationPath(sermonId, evaluationId);
+  const evaluationViewHref = basePath;
+  const debriefViewHref = `${basePath}?view=debrief`;
+
   const siblingEvaluations =
-    resolvedVia === "owner" && !pdfCapture
+    resolvedVia === "owner" && !pdfCapture && showScoresView
       ? await listEvaluationsForSermon(sermonId)
       : [];
 
+  // Scores view of a stopgap debrief should match an ordinary diagnostic page.
   const showOwnerReportActions =
-    resolvedVia === "owner" &&
-    !pdfCapture &&
-    evaluation.report_mode !== "debrief";
+    resolvedVia === "owner" && !pdfCapture && showScoresView;
 
   let entitlement = null;
   let hasActiveEvaluation = false;
@@ -105,11 +163,8 @@ export default async function EvaluationPage({
     }
   }
 
-  const debriefReady =
-    evaluation.report_mode === "debrief" &&
-    evaluation.coaching_narrative != null;
-  const diagnosticReady =
-    evaluation.report_mode !== "debrief" && evaluation.result != null;
+  const debriefReady = isDebriefMode && hasCoachingNarrative;
+  const diagnosticReady = !isDebriefMode && hasScoredResult;
 
   if (evaluation.status !== "complete" || (!debriefReady && !diagnosticReady)) {
     return (
@@ -132,6 +187,11 @@ export default async function EvaluationPage({
         />
       </main>
     );
+  }
+
+  // Defensive: split view requested but scores missing — fall through to coaching.
+  if (showScoresView && !hasScoredResult) {
+    notFound();
   }
 
   const evaluatedAt = evaluation.completed_at ?? evaluation.created_at;
@@ -184,6 +244,17 @@ export default async function EvaluationPage({
           >
             {`← ${backLabel}`}
           </Link>
+          {hasSplitViews ? (
+            showCoachingView ? (
+              <ArtifactSwitchLink href={evaluationViewHref}>
+                ← The Evaluation
+              </ArtifactSwitchLink>
+            ) : (
+              <ArtifactSwitchLink href={debriefViewHref}>
+                The Mentoring Debrief →
+              </ArtifactSwitchLink>
+            )
+          ) : null}
         </div>
       ) : null}
 
@@ -196,24 +267,11 @@ export default async function EvaluationPage({
         />
       ) : null}
 
-      {evaluation.report_mode === "debrief" ? (
-        <>
-          {evaluation.result ? (
-            <div className="mb-12">
-              <EvaluationDashboard
-                result={evaluation.result}
-                sermonTitle={sermon.title}
-                scriptureReference={scriptureReference}
-                showPrintActions={!pdfCapture}
-                howItPreaches={evaluation.how_it_preaches}
-              />
-            </div>
-          ) : null}
-          <CoachingReportView
-            data={toCoachingReportPresentation({ evaluation, sermon })}
-            showPrintActions={!pdfCapture && !evaluation.result}
-          />
-        </>
+      {showCoachingView ? (
+        <CoachingReportView
+          data={toCoachingReportPresentation({ evaluation, sermon })}
+          showPrintActions={!pdfCapture}
+        />
       ) : (
         <EvaluationDashboard
           result={evaluation.result!}
@@ -224,9 +282,7 @@ export default async function EvaluationPage({
         />
       )}
 
-      {!pdfCapture &&
-      resolvedVia === "owner" &&
-      evaluation.report_mode !== "debrief" ? (
+      {!pdfCapture && resolvedVia === "owner" && showScoresView ? (
         <EarlierEvaluations
           sermonId={sermonId}
           currentEvaluationId={evaluationId}
