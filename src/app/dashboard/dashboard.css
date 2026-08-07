@@ -124,15 +124,21 @@
   border: none;
 }
 
-.dashboard-rail-lock-marker {
-  margin-left: auto;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Non-allowlisted Mentoring: present but not interactive (matches Free badge tone). */
+.dashboard-rail-link--muted {
   color: #9aa1ac;
-  background: none;
-  border: none;
+  pointer-events: none;
+  cursor: default;
+  user-select: none;
+}
+
+.dashboard-rail-link--muted:hover,
+.dashboard-rail-link--muted:focus,
+.dashboard-rail-link--muted:focus-visible {
+  color: #9aa1ac;
+  background: transparent;
+  outline: none;
+  box-shadow: none;
 }
 
 /* Mentoring seats discovery (/dashboard/develop) */

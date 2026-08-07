@@ -56,19 +56,111 @@ function makeSupabaseMock(handlers: {
   profileById?: string | null;
   profileIdByEmail?: string | null;
   updateError?: string;
+  /** Seat counters returned when profiles row is re-read for pending revoke. */
+  seatProfile?: {
+    purchased_debrief_seats?: number;
+    purchased_evaluation_seats?: number;
+    comp_debrief_seats?: number;
+  };
+  /** Mentor relationships returned for excess-pending revoke. */
+  mentorRelationships?: Array<{
+    id: string;
+    status: string;
+    created_at: string;
+    seat_type?: string;
+  }>;
 }) {
   const updates: Array<{ id: string; values: Record<string, unknown> }> = [];
+  const relationshipUpdates: Array<{
+    ids: string[];
+    values: Record<string, unknown>;
+  }> = [];
+
+  // Mutable seat row so writes are visible on the next capacity re-read.
+  const seatRow = {
+    purchased_debrief_seats: handlers.seatProfile?.purchased_debrief_seats ?? 0,
+    purchased_evaluation_seats:
+      handlers.seatProfile?.purchased_evaluation_seats ?? 0,
+    comp_debrief_seats: handlers.seatProfile?.comp_debrief_seats ?? 0,
+  };
+
+  let relationshipFilterSeatType: string | null = null;
 
   const supabase = {
     from(table: string) {
+      if (table === "mentor_relationships") {
+        return {
+          select() {
+            return {
+              eq(col: string, value: string) {
+                if (col === "seat_type") {
+                  relationshipFilterSeatType = value;
+                }
+                return {
+                  eq(col2: string, value2: string) {
+                    if (col2 === "seat_type") {
+                      relationshipFilterSeatType = value2;
+                    }
+                    return {
+                      in() {
+                        return {
+                          order() {
+                            const seatType = relationshipFilterSeatType;
+                            relationshipFilterSeatType = null;
+                            const data = (handlers.mentorRelationships ?? [])
+                              .filter(
+                                (r) =>
+                                  !seatType ||
+                                  !r.seat_type ||
+                                  r.seat_type === seatType,
+                              )
+                              .map(({ id, status, created_at }) => ({
+                                id,
+                                status,
+                                created_at,
+                              }));
+                            return Promise.resolve({ data, error: null });
+                          },
+                        };
+                      },
+                    };
+                  },
+                };
+              },
+            };
+          },
+          update(values: Record<string, unknown>) {
+            return {
+              in(_col: string, ids: string[]) {
+                return {
+                  eq() {
+                    relationshipUpdates.push({ ids, values });
+                    return Promise.resolve({ error: null });
+                  },
+                };
+              },
+            };
+          },
+        };
+      }
+
       assert.equal(table, "profiles");
       return {
-        select() {
+        select(_cols?: string) {
           return {
             eq(col: string, value: string) {
               return {
                 async maybeSingle() {
                   if (col === "id" && handlers.profileById === value) {
+                    // Seat re-read after provision uses multi-column select
+                    // or just-written path reads comp only.
+                    if (
+                      _cols &&
+                      (_cols.includes("purchased_debrief_seats") ||
+                        _cols.includes("comp_debrief_seats"))
+                    ) {
+                      return { data: { ...seatRow }, error: null };
+                    }
                     return { data: { id: value }, error: null };
                   }
                   if (
@@ -94,6 +186,13 @@ function makeSupabaseMock(handlers: {
           return {
             eq(_col: string, id: string) {
               updates.push({ id, values });
+              if (typeof values.purchased_debrief_seats === "number") {
+                seatRow.purchased_debrief_seats = values.purchased_debrief_seats;
+              }
+              if (typeof values.purchased_evaluation_seats === "number") {
+                seatRow.purchased_evaluation_seats =
+                  values.purchased_evaluation_seats;
+              }
               if (handlers.updateError) {
                 return Promise.resolve({
                   error: { message: handlers.updateError },
@@ -114,7 +213,7 @@ function makeSupabaseMock(handlers: {
     },
   } as unknown as SupabaseClient;
 
-  return { supabase, updates };
+  return { supabase, updates, relationshipUpdates };
 }
 
 const activeProfileValues = {
@@ -315,6 +414,86 @@ describe("mentor seat subscription lifecycle", () => {
           u.id === "user-mentor" &&
           u.values.purchased_evaluation_seats === 0 &&
           u.values.subscription_status === undefined,
+      ),
+    );
+  });
+
+  it("revokes excess pending invites when mentor seat subscription is deleted", async () => {
+    const { supabase, updates, relationshipUpdates } = makeSupabaseMock({
+      profileById: "user-mentor",
+      seatProfile: {
+        purchased_debrief_seats: 3,
+        purchased_evaluation_seats: 1,
+        comp_debrief_seats: 0,
+      },
+      mentorRelationships: [
+        {
+          id: "active-1",
+          status: "active",
+          created_at: "2026-07-01T00:00:00Z",
+          seat_type: "debrief",
+        },
+        {
+          id: "active-2",
+          status: "active",
+          created_at: "2026-07-02T00:00:00Z",
+          seat_type: "debrief",
+        },
+        {
+          id: "pending-open",
+          status: "pending",
+          created_at: "2026-08-01T00:00:00Z",
+          seat_type: "debrief",
+        },
+      ],
+    });
+
+    const deletedSub = makeSubscription({
+      id: "sub_debrief_cancelled",
+      status: "canceled",
+      metadata: {
+        supabase_user_id: "user-mentor",
+        checkout_type: "mentor_seat",
+        seat_type: "debrief",
+      },
+    });
+
+    const stripe = {
+      subscriptions: {
+        async list() {
+          // Deleted sub is excluded via forceZero; no other active seat subs.
+          return { data: [deletedSub], has_more: false };
+        },
+      },
+    } as unknown as Stripe;
+
+    const result = await handleSubscriptionDeletedEvent(deletedSub, {
+      supabase,
+      stripe,
+      logError: () => {},
+    });
+
+    assert.equal(result.matched, true);
+    assert.ok(
+      updates.some(
+        (u) =>
+          u.id === "user-mentor" && u.values.purchased_debrief_seats === 0,
+      ),
+    );
+    // Capacity 0 + 2 actives → all pending of debrief are revoked.
+    assert.ok(
+      relationshipUpdates.some(
+        (u) =>
+          u.values.status === "revoked" &&
+          typeof u.values.ended_at === "string" &&
+          u.ids.includes("pending-open"),
+      ),
+      `expected pending revoke, got ${JSON.stringify(relationshipUpdates)}`,
+    );
+    // Active ids must not be in a revoke batch.
+    assert.ok(
+      relationshipUpdates.every(
+        (u) => !u.ids.includes("active-1") && !u.ids.includes("active-2"),
       ),
     );
   });

@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { revokeExcessPendingForMentor } from "@/lib/billing/mentor-seat-revoke-pending";
 
 const ACTIVATION_STATUSES = new Set(["active", "trialing"]);
 
@@ -160,6 +161,11 @@ function subscriptionItemQuantity(
   return 1;
 }
 
+/**
+ * Write purchased seat counters and always re-sync pending invites to capacity.
+ * Every quantity/cancel path must go through here so revoke cannot be skipped
+ * (including customer.subscription.deleted → forceZero).
+ */
 async function setPurchasedMentorSeats(
   supabase: SupabaseClient,
   profileId: string,
@@ -182,6 +188,13 @@ async function setPurchasedMentorSeats(
       `Failed to set ${column} for profile ${profileId}: ${error.message}`,
     );
   }
+
+  // Capacity drop can come from qty write, cancel, payment failure, etc.
+  // Recompute both seat types; pass known purchased so we do not re-read a
+  // stale counter for the type we just wrote.
+  await revokeExcessPendingForMentor(supabase, profileId, {
+    written: { seatType, purchasedSeats: safeQty },
+  });
 }
 
 /**
@@ -189,7 +202,8 @@ async function setPurchasedMentorSeats(
  * Recomputes quantity as the sum of item quantities across all active/trialing
  * mentor-seat subscriptions of that type for the customer (safe if they open
  * more than one Checkout Session). Does not touch Coach status or
- * comp_debrief_seats. Existing relationships and evaluations stay put.
+ * comp_debrief_seats. Excess pending of this seat type are revoked when
+ * capacity no longer covers them; active relationships stay put.
  */
 export async function applyMentorSeatSubscriptionState(
   subscription: Stripe.Subscription,
@@ -232,6 +246,7 @@ export async function applyMentorSeatSubscriptionState(
       })
     : await sumActiveMentorSeatQuantity(deps.stripe, customerId, seatType);
 
+  // Writes purchased_* and revokes excess pending for this mentor (both types).
   await setPurchasedMentorSeats(
     deps.supabase,
     match.profileId,
@@ -705,12 +720,13 @@ export async function handleSubscriptionActivationEvent(
   return { matched: true };
 }
 
-/** customer.subscription.deleted → Coach inactive, or seat capacity 0. */
+/** customer.subscription.deleted → Coach inactive, or seat capacity 0 + pending revoke. */
 export async function handleSubscriptionDeletedEvent(
   subscription: Stripe.Subscription,
   deps: StripeWebhookDeps,
 ): Promise<{ matched: boolean }> {
   if (getMentorSeatTypeFromMetadata(subscription.metadata)) {
+    // Goes through setPurchasedMentorSeats → revokeExcessPendingForMentor.
     const result = await applyMentorSeatSubscriptionState(subscription, deps, {
       forceZero: true,
     });

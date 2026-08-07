@@ -61,8 +61,41 @@ type DashboardRailProps = {
   mentoringUiAllowed: boolean;
 };
 
+function NavItemBadges({ item }: { item: NavItem }) {
+  return (
+    <>
+      {item.freeTag ? (
+        <span className="dashboard-rail-free-tag" aria-hidden="true">
+          Free
+        </span>
+      ) : null}
+      {item.locked ? (
+        <span className="dashboard-rail-free-tag" aria-hidden="true">
+          Coming soon
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
   const active = item.isActive(pathname);
+
+  if (item.locked) {
+    return (
+      <span
+        className="dashboard-rail-link dashboard-rail-link--muted"
+        style={uiFont}
+        aria-label={`${item.label} (coming soon)`}
+      >
+        <span className="dashboard-rail-label-full">{item.label}</span>
+        <span className="dashboard-rail-label-short">
+          {item.shortLabel ?? item.label}
+        </span>
+        <NavItemBadges item={item} />
+      </span>
+    );
+  }
 
   return (
     <Link
@@ -70,22 +103,13 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
       className={`dashboard-rail-link${active ? " is-active" : ""}`}
       style={uiFont}
       aria-current={active ? "page" : undefined}
-      aria-label={item.locked ? `${item.label} (locked)` : item.label}
+      aria-label={item.label}
     >
       <span className="dashboard-rail-label-full">{item.label}</span>
       <span className="dashboard-rail-label-short">
         {item.shortLabel ?? item.label}
       </span>
-      {item.freeTag ? (
-        <span className="dashboard-rail-free-tag" aria-hidden="true">
-          Free
-        </span>
-      ) : null}
-      {item.locked ? (
-        <span className="dashboard-rail-lock-marker" aria-hidden="true">
-          Lock
-        </span>
-      ) : null}
+      <NavItemBadges item={item} />
     </Link>
   );
 }
@@ -97,9 +121,7 @@ export function DashboardRail({
   const pathname = usePathname();
 
   const coachingItem: NavItem = {
-    href: mentoringUiAllowed
-      ? "/dashboard/mentoring"
-      : "/dashboard/develop",
+    href: "/dashboard/mentoring",
     label: "Mentoring",
     shortLabel: "Mentoring",
     locked: !mentoringUiAllowed,
