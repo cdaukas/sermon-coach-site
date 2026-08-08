@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import {
-  formatEvaluationElapsed,
-  useEvaluationPolling,
-} from "@/components/evaluation/useEvaluationPolling";
+import { EvaluationPollingStatus } from "@/components/evaluation/EvaluationPollingStatus";
+import { useEvaluationPolling } from "@/components/evaluation/useEvaluationPolling";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -157,29 +155,17 @@ export function IncompleteEvaluationPoller({
   }
 
   return (
-    <div role="status" aria-live="polite">
+    <div>
       <h1
         className="mb-3 text-[25px] font-semibold leading-tight tracking-[-0.01em]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
         {sermonTitle}
       </h1>
-      <p
-        className="mb-2 text-[13px] font-semibold"
-        style={{ ...uiFont, color: "var(--sc-ink)" }}
-      >
-        Evaluation in progress…
-        {polling || elapsed > 0
-          ? ` ${formatEvaluationElapsed(elapsed)}`
-          : null}
-      </p>
-      <p
-        className="mb-6 max-w-[420px] text-[14px] leading-relaxed"
-        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-      >
-        This usually takes a few minutes. You can close this tab and get back to
-        your week.
-      </p>
+      <EvaluationPollingStatus
+        elapsed={polling || elapsed > 0 ? elapsed : 0}
+        className="mb-6"
+      />
       <Link
         href={backHref}
         className="inline-block text-[13px] font-medium no-underline hover:underline"

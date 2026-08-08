@@ -314,11 +314,7 @@ export function SermonForm({
 
   const formDisabled = saving || polling || youtubeFetching;
   const primaryDisabled = formDisabled || !mayRunEvaluation;
-  const primaryLabel = polling
-    ? "Evaluating…"
-    : saving
-      ? "Saving…"
-      : "Run The Evaluation";
+  const primaryLabel = saving ? "Saving…" : "Run The Evaluation";
 
   return (
     <AuthForm onSubmit={handleSubmit}>
@@ -609,38 +605,40 @@ export function SermonForm({
           />
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-5">
-          <button
-            type="submit"
-            disabled={primaryDisabled}
-            className="rounded border-0 text-[14px] font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
-            style={{
-              ...uiFont,
-              padding: "13px 26px",
-              background: "#1a2332",
-              color: "#faf8f3",
-              borderRadius: 4,
-            }}
-          >
-            {primaryLabel}
-          </button>
+        {!polling ? (
+          <div className="flex flex-wrap items-center gap-5">
+            <button
+              type="submit"
+              disabled={primaryDisabled}
+              className="rounded border-0 text-[14px] font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+              style={{
+                ...uiFont,
+                padding: "13px 26px",
+                background: "#1a2332",
+                color: "#faf8f3",
+                borderRadius: 4,
+              }}
+            >
+              {primaryLabel}
+            </button>
 
-          <button
-            type="button"
-            disabled={formDisabled}
-            onClick={() => void handleSaveWithoutRunning()}
-            className="border-0 bg-transparent p-0 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-            style={{ ...uiFont, color: "#4a5568" }}
-            onMouseEnter={(event) => {
-              event.currentTarget.style.color = "#1a2332";
-            }}
-            onMouseLeave={(event) => {
-              event.currentTarget.style.color = "#4a5568";
-            }}
-          >
-            Save without running
-          </button>
-        </div>
+            <button
+              type="button"
+              disabled={formDisabled}
+              onClick={() => void handleSaveWithoutRunning()}
+              className="border-0 bg-transparent p-0 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ ...uiFont, color: "#4a5568" }}
+              onMouseEnter={(event) => {
+                event.currentTarget.style.color = "#1a2332";
+              }}
+              onMouseLeave={(event) => {
+                event.currentTarget.style.color = "#4a5568";
+              }}
+            >
+              Save without running
+            </button>
+          </div>
+        ) : null}
         <p
           className="mt-3 text-[13px] leading-relaxed"
           style={{ ...uiFont, color: "#4a5568" }}

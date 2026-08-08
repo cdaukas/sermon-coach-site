@@ -115,21 +115,23 @@ export function EvaluateButton({
     <div className={rootClassName}>
       {polling ? <EvaluationPollingStatus elapsed={elapsed} /> : null}
 
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={busy || hasActiveEvaluation || disabled}
-        className="w-auto rounded border-0 text-[13px] font-semibold transition-opacity disabled:opacity-60"
-        style={{
-          ...uiFont,
-          padding: "13px 26px",
-          background: "#1a2332",
-          color: "#faf8f3",
-          borderRadius: 4,
-        }}
-      >
-        {pending ? "Starting…" : polling ? "Evaluating…" : buttonLabel}
-      </button>
+      {!polling ? (
+        <button
+          type="button"
+          onClick={handleClick}
+          disabled={busy || hasActiveEvaluation || disabled}
+          className="w-auto rounded border-0 text-[13px] font-semibold transition-opacity disabled:opacity-60"
+          style={{
+            ...uiFont,
+            padding: "13px 26px",
+            background: "#1a2332",
+            color: "#faf8f3",
+            borderRadius: 4,
+          }}
+        >
+          {pending ? "Starting…" : buttonLabel}
+        </button>
+      ) : null}
 
       {showCoachCreditLines &&
       entitlement?.creditSource === "free" &&
