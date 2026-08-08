@@ -42,29 +42,31 @@ export function EvaluationPollingStatus({
 
   return (
     <div
-      className={`rounded border px-5 py-5 ${className}`.trim()}
+      className={`rounded border-l-[3px] border px-6 py-6 ${className}`.trim()}
       style={{
-        background: "var(--sc-accent-pale)",
+        background: "var(--sc-panel)",
         borderColor: "var(--sc-rule)",
+        borderLeftColor: "var(--sc-accent)",
+        boxShadow: "var(--sc-shadow-lift)",
       }}
       role="status"
       aria-live="polite"
     >
       <p
-        className="text-[14px] font-semibold leading-snug"
-        style={{ ...uiFont, color: "var(--sc-ink)" }}
+        className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
         {stageLabel}
       </p>
       <p
-        className="mt-1.5 text-[13px] leading-snug"
+        className="mt-1.5 text-[12px] leading-snug"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
         {timeEstimate}
       </p>
 
       <div
-        className="mt-5 border-t pt-4"
+        className="mt-5 border-t pt-5"
         style={{
           borderColor: "var(--sc-rule)",
           opacity: visible ? 1 : 0,
@@ -73,13 +75,13 @@ export function EvaluationPollingStatus({
         }}
       >
         <h3
-          className="text-[18px] font-normal leading-snug tracking-[-0.01em]"
+          className="text-[22px] font-normal leading-snug tracking-[-0.01em]"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
           {slide.title}
         </h3>
         <p
-          className="mt-2 max-w-[38rem] text-[14px] leading-relaxed"
+          className="mt-2.5 max-w-[38rem] text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
           {slide.body}
