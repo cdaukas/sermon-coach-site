@@ -30,7 +30,7 @@ export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
         className="mb-7 text-base italic"
         style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
       >
-        In order — highest leverage first
+        In order: highest leverage first
       </p>
 
       <div className="divide-y" style={{ borderColor: "rgba(250,248,243,0.15)" }}>

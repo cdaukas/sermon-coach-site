@@ -156,7 +156,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
           <strong style={{ color: "var(--sc-ink)" }}>Why some criteria count twice.</strong>{" "}
           Three of the eleven criteria carry double weight in the composite score: Fallen Condition
           Focus, Gospel Clarity, and Application. These are the load-bearing tests of whether a
-          sermon actually preaches the gospel to real people — not just whether it handles the text
+          sermon actually preaches the gospel to real people, not just whether it handles the text
           well, but whether it brings that text to bear on human fallenness, makes the good news
           unmistakable, and lands it in the hearer&apos;s actual life. A sermon can score
           respectably everywhere else and still miss the point if these three are weak, so the math

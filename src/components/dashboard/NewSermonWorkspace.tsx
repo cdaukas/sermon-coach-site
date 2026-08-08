@@ -34,17 +34,6 @@ export function NewSermonWorkspace({
         >
           New evaluation
         </h1>
-        <p
-          className="mt-3 text-base leading-relaxed"
-          style={{
-            ...serifFont,
-            color: "var(--sc-ink-soft)",
-            fontStyle: "italic",
-          }}
-        >
-          Paste your manuscript or transcript. Formatting doesn&apos;t matter. We
-          work from the words.
-        </p>
       </div>
 
       {!isMentoredMentee ? (
