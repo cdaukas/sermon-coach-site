@@ -1,10 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
-  formatEvaluationElapsed,
-} from "@/components/evaluation/useEvaluationPolling";
+  stageLabelForElapsed,
+  slideIndexForElapsed,
+  timeEstimateForElapsed,
+  WAIT_SLIDES,
+} from "@/components/evaluation/waitStateContent";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
+const serifFont = { fontFamily: "var(--font-serif)" };
 
 type EvaluationPollingStatusProps = {
   elapsed: number;
@@ -15,9 +20,29 @@ export function EvaluationPollingStatus({
   elapsed,
   className = "mb-4",
 }: EvaluationPollingStatusProps) {
+  const stageLabel = stageLabelForElapsed(elapsed);
+  const timeEstimate = timeEstimateForElapsed(elapsed);
+  const slideIndex = slideIndexForElapsed(elapsed);
+  const [displayIndex, setDisplayIndex] = useState(slideIndex);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (slideIndex === displayIndex) return;
+
+    setVisible(false);
+    const swap = window.setTimeout(() => {
+      setDisplayIndex(slideIndex);
+      setVisible(true);
+    }, 180);
+
+    return () => window.clearTimeout(swap);
+  }, [slideIndex, displayIndex]);
+
+  const slide = WAIT_SLIDES[displayIndex] ?? WAIT_SLIDES[0];
+
   return (
     <div
-      className={`rounded border px-5 py-4 ${className}`.trim()}
+      className={`rounded border px-5 py-5 ${className}`.trim()}
       style={{
         background: "var(--sc-accent-pale)",
         borderColor: "var(--sc-rule)",
@@ -26,24 +51,40 @@ export function EvaluationPollingStatus({
       aria-live="polite"
     >
       <p
-        className="text-[13px] font-semibold"
+        className="text-[14px] font-semibold leading-snug"
         style={{ ...uiFont, color: "var(--sc-ink)" }}
       >
-        Evaluating your sermon…
+        {stageLabel}
       </p>
       <p
-        className="mt-1 text-[13px]"
+        className="mt-1.5 text-[13px] leading-snug"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        This usually takes 2 to 4 minutes. You can close this tab and come back
-        to it from your dashboard.
+        {timeEstimate}
       </p>
-      <p
-        className="mt-2 text-[12px]"
-        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+
+      <div
+        className="mt-5 border-t pt-4"
+        style={{
+          borderColor: "var(--sc-rule)",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(3px)",
+          transition: "opacity 180ms ease, transform 180ms ease",
+        }}
       >
-        Elapsed: {formatEvaluationElapsed(elapsed)}
-      </p>
+        <h3
+          className="text-[18px] font-normal leading-snug tracking-[-0.01em]"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          {slide.title}
+        </h3>
+        <p
+          className="mt-2 max-w-[38rem] text-[14px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          {slide.body}
+        </p>
+      </div>
     </div>
   );
 }
