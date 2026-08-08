@@ -320,6 +320,35 @@ export function SermonForm({
     <AuthForm onSubmit={handleSubmit}>
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
 
+      <AuthField
+        id="sermon-title"
+        label="Title"
+        inputProps={{
+          name: "title",
+          type: "text",
+          autoComplete: "off",
+          required: true,
+          value: title,
+          onChange: (event) => setTitle(event.target.value),
+          disabled: formDisabled,
+          placeholder: "e.g. The God Who Hears",
+        }}
+      />
+
+      <AuthField
+        id="sermon-primary-passage"
+        label="Primary passage (recommended)"
+        inputProps={{
+          name: "primary-passage",
+          type: "text",
+          autoComplete: "off",
+          value: primaryPassage,
+          onChange: (event) => setPrimaryPassage(event.target.value),
+          disabled: formDisabled,
+          placeholder: "e.g. Hebrews 12:5-17",
+        }}
+      />
+
       <p
         className="-mt-1 mb-1 text-base leading-relaxed"
         style={{
@@ -463,35 +492,6 @@ export function SermonForm({
           onActiveTabChange={setTranscriptHelpTab}
         />
       </div>
-
-      <AuthField
-        id="sermon-title"
-        label="Title"
-        inputProps={{
-          name: "title",
-          type: "text",
-          autoComplete: "off",
-          required: true,
-          value: title,
-          onChange: (event) => setTitle(event.target.value),
-          disabled: formDisabled,
-          placeholder: "e.g. The God Who Hears",
-        }}
-      />
-
-      <AuthField
-        id="sermon-primary-passage"
-        label="Primary passage (recommended)"
-        inputProps={{
-          name: "primary-passage",
-          type: "text",
-          autoComplete: "off",
-          value: primaryPassage,
-          onChange: (event) => setPrimaryPassage(event.target.value),
-          disabled: formDisabled,
-          placeholder: "e.g. Hebrews 12:5-17",
-        }}
-      />
 
       <details className="group">
         <summary
