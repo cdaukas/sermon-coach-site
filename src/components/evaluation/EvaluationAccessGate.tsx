@@ -65,7 +65,7 @@ export function EvaluationCreditNotice({
       style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
     >
       {notices.join(" · ")}
-      {entitlement.creditSource === "free" ? " — save a sermon, then run your evaluation." : null}
+      {entitlement.creditSource === "free" ? ", then save a sermon and run your evaluation." : null}
     </p>
   );
 }

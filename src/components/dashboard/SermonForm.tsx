@@ -25,7 +25,7 @@ import {
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
-const WORDS_PER_MINUTE = 140;
+const WORDS_PER_MINUTE = 100;
 
 const contextTextareaClassName =
   "w-full resize-y rounded border px-3 py-2.5 text-[15px] leading-relaxed outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20";
@@ -324,6 +324,19 @@ export function SermonForm({
     <AuthForm onSubmit={handleSubmit}>
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
 
+      <p
+        className="-mt-1 mb-1 text-base leading-relaxed"
+        style={{
+          ...serifFont,
+          color: "var(--sc-ink-soft)",
+          fontStyle: "italic",
+        }}
+      >
+        {inputMethod === "youtube"
+          ? "Paste a YouTube link and fetch the captions. Formatting doesn't matter. We work from the words."
+          : "Paste your manuscript or transcript. Formatting doesn't matter. We work from the words."}
+      </p>
+
       <div className="flex flex-col items-start gap-2">
         <div
           className="flex w-full gap-[26px]"
@@ -400,8 +413,8 @@ export function SermonForm({
               className="text-[13px] leading-relaxed"
               style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
             >
-              {wordCount.toLocaleString()} words, about a {sermonMinutes}-minute
-              sermon
+              {wordCount.toLocaleString()} words, roughly {sermonMinutes} minutes
+              at a measured pace
             </p>
           ) : null}
         </div>
@@ -628,6 +641,20 @@ export function SermonForm({
             Save without running
           </button>
         </div>
+        <p
+          className="mt-3 text-[13px] leading-relaxed"
+          style={{ ...uiFont, color: "#4a5568" }}
+        >
+          <a
+            href="/sermon-evaluation-hebrews-12.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline-offset-2 transition-colors hover:underline"
+            style={{ color: "var(--sc-accent)" }}
+          >
+            See a sample evaluation
+          </a>
+        </p>
       </div>
     </AuthForm>
   );
