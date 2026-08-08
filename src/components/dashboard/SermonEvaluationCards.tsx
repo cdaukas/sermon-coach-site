@@ -50,7 +50,7 @@ function EvaluationScoreSummary({
   evaluation: SermonEvaluationListItem;
   large?: boolean;
 }) {
-  const { bandLabel, tierLabel } = parseEvaluationCardLabels(
+  const { bandLabel } = parseEvaluationCardLabels(
     evaluation.score_band,
     evaluation.overall_score,
   );
@@ -77,17 +77,6 @@ function EvaluationScoreSummary({
       <div
         className={`flex flex-wrap items-baseline gap-x-4 gap-y-1 ${large ? "mt-4" : "mt-2"}`}
       >
-        {tierLabel ? (
-          <p
-            className={large ? "text-[15px] font-medium" : "text-[13px] font-medium"}
-            style={{
-              ...uiFont,
-              color: large ? "rgba(250,248,243,0.85)" : "var(--sc-ink-soft)",
-            }}
-          >
-            {tierLabel}
-          </p>
-        ) : null}
         {scoreDisplay ? (
           <p
             className={

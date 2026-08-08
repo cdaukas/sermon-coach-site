@@ -616,7 +616,7 @@ export type EvaluationScoringStrict = z.infer<typeof evaluationScoringStrictSche
 export type ScoreBand = z.infer<typeof scoreBandSchema>;
 export type ScoreLetter = z.infer<typeof scoreLetterSchema>;
 
-/** Tier label from weighted /55 score (display only; same thresholds as letter grades). */
+/** Tier index from weighted /55 score (internal; same thresholds as bands). Not shown in UI. */
 export type ScoreTier = 1 | 2 | 3 | 4 | 5;
 
 /** Letter grade from weighted /55 score (methodology appendix only). */
@@ -628,7 +628,10 @@ export function deriveLetterFromWeighted(weighted: number): ScoreLetter {
   return "F";
 }
 
-/** Band tier from weighted /55 score — 5 is best, aligned with criterion sliders. */
+/**
+ * Internal tier index 1–5 (aligned with criterion sliders). Kept for any
+ * non-display callers; display surfaces must not render this as a rank label.
+ */
 export function deriveTierFromWeighted(weighted: number): ScoreTier {
   if (weighted >= 47) return 5;
   if (weighted >= 39) return 4;
@@ -637,25 +640,32 @@ export function deriveTierFromWeighted(weighted: number): ScoreTier {
   return 1;
 }
 
+/** Persist band name only — no tier rank suffix on new rows. */
 export function formatScoreBandStrict(scoring: EvaluationScoringStrict): string {
-  return `${scoring.band} · Tier ${deriveTierFromWeighted(scoring.composite_weighted)}`;
+  return scoring.band;
 }
 
-/** Display stored score_band rows, including legacy "C · Faithful" strings. */
+/**
+ * Display stored score_band rows. Historical rows may still include
+ * "· Tier N" or legacy "C · Faithful"; strip tier and letter on read.
+ * Do not re-append tier ranks.
+ */
 export function formatStoredScoreBand(
   scoreBand: string | null,
-  overallScore: number | null,
+  _overallScore: number | null,
 ): string {
   if (!scoreBand) return "View";
-  if (scoreBand.includes("Tier ")) return scoreBand;
 
-  const parts = scoreBand.split("·").map((part) => part.trim());
-  if (parts.length === 2 && overallScore != null) {
-    const [, band] = parts;
-    return `${band} · Tier ${deriveTierFromWeighted(overallScore)}`;
+  let display = scoreBand.replace(/\s*·\s*Tier\s*\d+\s*/gi, "").trim();
+  display = display.replace(/\s*·\s*$/, "").trim();
+
+  // Legacy "C · Faithful" → band name only
+  const letterBand = display.match(/^[A-F]\s*·\s*(.+)$/i);
+  if (letterBand?.[1]) {
+    return letterBand[1].trim();
   }
 
-  return scoreBand;
+  return display || "View";
 }
 
 export function diagnosticGap(
@@ -906,13 +916,9 @@ export const evaluationResultSchema = z.object({
 export type EvaluationResult = z.infer<typeof evaluationResultSchema>;
 export type EvaluationScoring = z.infer<typeof evaluationScoringSchema>;
 
-/** Legacy rows that still include scoring.letter. */
+/** Legacy rows that still include scoring.letter. Band name only — no tier. */
 export function formatScoreBand(scoring: EvaluationScoring): string {
-  const tier =
-    scoring.composite_weighted != null
-      ? deriveTierFromWeighted(scoring.composite_weighted)
-      : ({ A: 5, B: 4, C: 3, D: 2, F: 1 } as const)[scoring.letter];
-  return `${scoring.band} · Tier ${tier}`;
+  return scoring.band;
 }
 
 function isLegacyShape(value: unknown): boolean {

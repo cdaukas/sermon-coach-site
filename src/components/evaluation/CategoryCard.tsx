@@ -1,9 +1,5 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
-import {
-  CATEGORY_MAX_POINTS,
-  categoryAverage,
-  categorySubtotal,
-} from "@/lib/evaluation/schema";
+import { categoryAverage } from "@/lib/evaluation/schema";
 import {
   criterionScoreColor,
   criterionScoreFillPercent,
@@ -53,10 +49,8 @@ function CriterionScoreBar({ score }: { score: number }) {
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
-  const subtotal = categorySubtotal(category.criteria);
-  const max = CATEGORY_MAX_POINTS[category.number] ?? subtotal;
   const average = categoryAverage(category.criteria);
-  const averageLabel = `Average ${average} / 5 · ${subtotal}/${max}`;
+  const averageLabel = `Average ${average} / 5`;
 
   return (
     <section
