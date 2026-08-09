@@ -1,16 +1,20 @@
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * Persist Friday-post opt-in for the signed-in user via SECURITY DEFINER RPC.
- * No-op if RPC fails — never block signup.
+ * Persist Friday-post and Tuesday-nudge opt-ins for the signed-in user
+ * via SECURITY DEFINER RPC. No-op if RPC fails — never block signup.
  */
-export async function setNewsletterOptedIn(optedIn: boolean): Promise<void> {
+export async function setEmailPreferencesAtSignup(
+  newsletterOptedIn: boolean,
+  tuesdayNudgeOptedIn: boolean,
+): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.rpc("set_newsletter_opted_in", {
-    p_opted_in: optedIn,
+  const { error } = await supabase.rpc("set_email_preferences", {
+    p_newsletter: newsletterOptedIn,
+    p_tuesday_nudge: tuesdayNudgeOptedIn,
   });
 
   if (error) {
-    console.error("set_newsletter_opted_in failed:", error.message);
+    console.error("set_email_preferences failed:", error.message);
   }
 }
