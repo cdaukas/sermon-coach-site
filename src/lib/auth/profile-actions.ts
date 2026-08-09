@@ -54,8 +54,9 @@ export async function saveProfileDetails(
   return { ok: true };
 }
 
-export async function saveNewsletterPreference(
-  optedIn: boolean,
+export async function saveEmailPreferences(
+  newsletterOptedIn: boolean,
+  tuesdayNudgeOptedIn: boolean,
 ): Promise<ProfileActionResult> {
   const supabase = await createClient();
   const {
@@ -66,14 +67,15 @@ export async function saveNewsletterPreference(
     return { ok: false, error: "You must be signed in." };
   }
 
-  const { error } = await supabase.rpc("set_newsletter_opted_in", {
-    p_opted_in: optedIn,
+  const { error } = await supabase.rpc("set_email_preferences", {
+    p_newsletter: newsletterOptedIn,
+    p_tuesday_nudge: tuesdayNudgeOptedIn,
   });
 
   if (error) {
     return {
       ok: false,
-      error: "Could not update the weekly post preference. Please try again.",
+      error: "Could not update email preferences. Please try again.",
     };
   }
 

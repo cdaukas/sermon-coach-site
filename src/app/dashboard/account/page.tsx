@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AccountDetailsForm } from "@/components/dashboard/AccountDetailsForm";
-import { AccountNewsletterForm } from "@/components/dashboard/AccountNewsletterForm";
+import { AccountEmailPreferencesForm } from "@/components/dashboard/AccountEmailPreferencesForm";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -26,17 +26,21 @@ export default async function AccountPage() {
   let displayName = "";
   let churchName = "";
   let newsletterOptedIn = false;
+  let tuesdayNudgeOptedIn = false;
 
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("display_name, church_name, newsletter_opted_in")
+      .select(
+        "display_name, church_name, newsletter_opted_in, tuesday_nudge_opted_in",
+      )
       .eq("id", user.id)
       .maybeSingle();
 
     displayName = asTrimmedString(profile?.display_name);
     churchName = asTrimmedString(profile?.church_name);
     newsletterOptedIn = profile?.newsletter_opted_in === true;
+    tuesdayNudgeOptedIn = profile?.tuesday_nudge_opted_in === true;
   }
 
   return (
@@ -70,17 +74,18 @@ export default async function AccountPage() {
         />
       </section>
 
-      <section className="mb-12 max-w-xl" aria-labelledby="account-email-heading">
+      <section className="mb-12 max-w-xl" aria-labelledby="account-emails-heading">
         <h2
-          id="account-email-heading"
+          id="account-emails-heading"
           className="mb-5 text-[22px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Email
+          Emails
         </h2>
-        <AccountNewsletterForm
+        <AccountEmailPreferencesForm
           email={email || "No email on this account"}
-          initialOptedIn={newsletterOptedIn}
+          initialNewsletterOptedIn={newsletterOptedIn}
+          initialTuesdayNudgeOptedIn={tuesdayNudgeOptedIn}
         />
       </section>
 
