@@ -57,6 +57,9 @@ function formatContextBlock(context?: SermonContext): string {
   }
 
   const lines: string[] = ["CONTEXT:"];
+  if (context.church) {
+    lines.push(`Church: ${context.church}`);
+  }
   if (context.occasion) {
     lines.push(`Occasion: ${context.occasion}`);
   }

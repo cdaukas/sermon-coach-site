@@ -11,12 +11,14 @@ describe("sermon context", () => {
   it("normalizes whitespace and omits empty fields", () => {
     assert.deepEqual(
       normalizeSermonContext({
+        church: "  First Baptist  ",
         occasion: "  Sunday morning  ",
         audience: "",
         series: "   ",
         other: "Guest preacher",
       }),
       {
+        church: "First Baptist",
         occasion: "Sunday morning",
         other: "Guest preacher",
       },
@@ -35,10 +37,12 @@ describe("sermon context", () => {
 
   it("builds preamble with only provided fields", () => {
     const preamble = buildContextPreamble({
+      church: "Grace Chapel",
       occasion: "Funeral homily",
       series: "Week 3 of Romans",
     });
 
+    assert.match(preamble, /- Church: Grace Chapel/);
     assert.match(preamble, /- Occasion: Funeral homily/);
     assert.match(preamble, /- Series: Week 3 of Romans/);
     assert.doesNotMatch(preamble, /Audience \/ setting:/);
