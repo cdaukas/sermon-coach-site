@@ -79,13 +79,6 @@ export function AccountEmailPreferencesForm({
         <AuthMessage variant={banner.variant}>{banner.text}</AuthMessage>
       ) : null}
 
-      <p
-        className="text-[15px] leading-relaxed"
-        style={{ ...uiFont, color: "var(--sc-ink)" }}
-      >
-        {email}
-      </p>
-
       <label
         className="flex cursor-pointer items-start gap-3 text-[14px] leading-relaxed"
         style={{
@@ -149,6 +142,13 @@ export function AccountEmailPreferencesForm({
           </span>
         </span>
       </label>
+
+      <p
+        className="text-[13px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
+        Sent to {email}
+      </p>
     </div>
   );
 }

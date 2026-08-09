@@ -90,7 +90,7 @@ export function AuthSubmit({
     <button
       type="submit"
       disabled={disabled}
-      className={`w-full rounded border px-7 py-3.5 text-sm font-semibold tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-60 ${className}`.trim()}
+      className={`rounded border px-7 py-3.5 text-sm font-semibold tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-60 ${className || "w-full"}`.trim()}
       style={{
         ...uiFont,
         background: isPrimary ? "var(--sc-ink)" : "var(--sc-panel)",

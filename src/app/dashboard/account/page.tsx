@@ -88,7 +88,7 @@ export default async function AccountPage() {
             initialNewsletterOptedIn={newsletterOptedIn}
             initialTuesdayNudgeOptedIn={tuesdayNudgeOptedIn}
           />
-          <p className="mt-8">
+          <p className="mt-10">
             <Link
               href="/reset-password"
               className="text-[13px] no-underline hover:underline"

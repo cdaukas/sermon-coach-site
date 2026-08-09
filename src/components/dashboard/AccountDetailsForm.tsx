@@ -80,7 +80,7 @@ export function AccountDetailsForm({
         These prefill your evaluations so you are not retyping them each week.
       </p>
 
-      <AuthSubmit disabled={saving}>
+      <AuthSubmit disabled={saving} className="w-auto self-start">
         {saving ? "Saving…" : "Save"}
       </AuthSubmit>
     </AuthForm>
