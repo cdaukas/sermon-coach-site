@@ -49,6 +49,12 @@ const PRIMARY_ITEMS: NavItem[] = [
 
 const ACCOUNT_ITEMS: NavItem[] = [
   {
+    href: "/dashboard/account",
+    label: "Account",
+    shortLabel: "Account",
+    isActive: (pathname) => pathname.startsWith("/dashboard/account"),
+  },
+  {
     href: "/dashboard/buy",
     label: "Plan and credits",
     shortLabel: "Plan",

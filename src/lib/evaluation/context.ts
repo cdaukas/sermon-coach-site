@@ -3,6 +3,7 @@ import type { ReportMode } from "./types";
 export type { ReportMode } from "./types";
 
 export type SermonContext = {
+  church?: string;
   occasion?: string;
   audience?: string;
   series?: string;
@@ -10,6 +11,7 @@ export type SermonContext = {
 };
 
 export type SermonContextInput = {
+  church?: string;
   occasion?: string;
   audience?: string;
   series?: string;
@@ -51,11 +53,15 @@ export function normalizeSermonContext(
 
   const context: SermonContext = {};
 
+  const church = trimField(input.church);
   const occasion = trimField(input.occasion);
   const audience = trimField(input.audience);
   const series = trimField(input.series);
   const other = trimField(input.other);
 
+  if (church) {
+    context.church = church;
+  }
   if (occasion) {
     context.occasion = occasion;
   }
@@ -75,6 +81,9 @@ export function normalizeSermonContext(
 export function buildContextPreamble(context: SermonContext): string {
   const lines: string[] = ["PREACHING CONTEXT (provided by the preacher):"];
 
+  if (context.church) {
+    lines.push(`- Church: ${context.church}`);
+  }
   if (context.occasion) {
     lines.push(`- Occasion: ${context.occasion}`);
   }

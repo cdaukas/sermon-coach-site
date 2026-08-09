@@ -71,6 +71,8 @@ type InputMethod = "paste" | "youtube";
 type SermonFormProps = {
   entitlement: EvaluationEntitlement | null;
   isMentoredMentee?: boolean;
+  /** Prefill only. Edits on the form never write back to profiles. */
+  churchName?: string | null;
 };
 
 function countWords(text: string): number {
@@ -95,6 +97,7 @@ function estimateSermonMinutes(wordCount: number): number {
 export function SermonForm({
   entitlement,
   isMentoredMentee = false,
+  churchName = null,
 }: SermonFormProps) {
   const router = useRouter();
   const savedSermonIdRef = useRef<string | null>(null);
@@ -102,6 +105,9 @@ export function SermonForm({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [primaryPassage, setPrimaryPassage] = useState("");
+  const [church, setChurch] = useState(
+    typeof churchName === "string" ? churchName.trim() : "",
+  );
   const [occasion, setOccasion] = useState("");
   const [audience, setAudience] = useState("");
   const [series, setSeries] = useState("");
@@ -202,6 +208,7 @@ export function SermonForm({
 
   function buildContext() {
     return normalizeSermonContext({
+      church,
       occasion,
       audience,
       series,
@@ -526,6 +533,20 @@ export function SermonForm({
         </summary>
 
         <div className="mt-4 flex flex-col gap-5">
+          <AuthField
+            id="sermon-context-church"
+            label="Where did you preach this?"
+            inputProps={{
+              name: "context-church",
+              type: "text",
+              autoComplete: "off",
+              value: church,
+              onChange: (event) => setChurch(event.target.value),
+              disabled: formDisabled,
+              placeholder: "Home pulpit, guest church, chapel, conference room.",
+            }}
+          />
+
           <AuthField
             id="sermon-context-occasion"
             label="What's the occasion?"

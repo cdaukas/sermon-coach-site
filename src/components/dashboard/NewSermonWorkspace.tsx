@@ -10,11 +10,13 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
   isMentoredMentee?: boolean;
+  churchName?: string | null;
 };
 
 export function NewSermonWorkspace({
   entitlement,
   isMentoredMentee = false,
+  churchName = null,
 }: NewSermonWorkspaceProps) {
   const canEvaluate = entitlement?.canEvaluate ?? true;
   const showForm = isMentoredMentee || canEvaluate;
@@ -44,6 +46,7 @@ export function NewSermonWorkspace({
         <SermonForm
           entitlement={entitlement}
           isMentoredMentee={isMentoredMentee}
+          churchName={churchName}
         />
       ) : null}
     </>

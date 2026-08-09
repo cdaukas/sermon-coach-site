@@ -23,6 +23,18 @@ export default async function NewSermonPage() {
     ? await viewerHasActiveMentorRelationship(user.id)
     : false;
 
+  let churchName: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("church_name")
+      .eq("id", user.id)
+      .maybeSingle();
+    const raw = profile?.church_name;
+    churchName =
+      typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
+  }
+
   return (
     <main
       className="rounded px-8 py-10"
@@ -43,6 +55,7 @@ export default async function NewSermonPage() {
       <NewSermonWorkspace
         entitlement={entitlement}
         isMentoredMentee={isMentoredMentee}
+        churchName={churchName}
       />
     </main>
   );
