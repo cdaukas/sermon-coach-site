@@ -97,6 +97,14 @@
   color: #9aa1ac;
 }
 
+/* Matches .dashboard-rail-actions / rail edge: 1px #d4cfc1 */
+.dashboard-rail-divider {
+  margin: 12px 22px 8px;
+  height: 0;
+  border: none;
+  border-top: 1px solid #d4cfc1;
+}
+
 .dashboard-rail-link {
   display: flex;
   align-items: center;
@@ -738,6 +746,10 @@
   }
 
   .dashboard-rail-group-label {
+    display: none;
+  }
+
+  .dashboard-rail-divider {
     display: none;
   }
 
