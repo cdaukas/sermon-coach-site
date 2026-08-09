@@ -156,6 +156,11 @@ export function DashboardRail({
           Coaching
         </p>
         <NavLink item={coachingItem} pathname={pathname} />
+        <div
+          className="dashboard-rail-divider"
+          role="presentation"
+          aria-hidden="true"
+        />
         {ACCOUNT_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}

@@ -60,81 +60,45 @@ export default async function AccountPage() {
         </h1>
       </div>
 
-      <section className="mb-12 max-w-xl" aria-labelledby="account-details-heading">
-        <h2
-          id="account-details-heading"
-          className="mb-5 text-[22px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          Your details
-        </h2>
-        <AccountDetailsForm
-          initialDisplayName={displayName}
-          initialChurchName={churchName}
-        />
-      </section>
+      <div className="mb-12 grid max-w-4xl gap-12 md:grid-cols-2 md:items-start md:gap-x-14 md:gap-y-0">
+        <section aria-labelledby="account-details-heading">
+          <h2
+            id="account-details-heading"
+            className="mb-5 text-[22px] font-semibold leading-tight tracking-tight"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            Your details
+          </h2>
+          <AccountDetailsForm
+            initialDisplayName={displayName}
+            initialChurchName={churchName}
+          />
+        </section>
 
-      <section className="mb-12 max-w-xl" aria-labelledby="account-emails-heading">
-        <h2
-          id="account-emails-heading"
-          className="mb-5 text-[22px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          Emails
-        </h2>
-        <AccountEmailPreferencesForm
-          email={email || "No email on this account"}
-          initialNewsletterOptedIn={newsletterOptedIn}
-          initialTuesdayNudgeOptedIn={tuesdayNudgeOptedIn}
-        />
-      </section>
-
-      <section
-        className="mb-12 max-w-xl"
-        aria-labelledby="account-plan-password-heading"
-      >
-        <h2
-          id="account-plan-password-heading"
-          className="mb-5 text-[22px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          Billing and password
-        </h2>
-        <ul className="m-0 list-none p-0">
-          <li>
-            <Link
-              href="/dashboard/buy"
-              className="flex w-full items-center justify-between gap-4 py-4 text-[15px] leading-snug no-underline transition-colors hover:bg-[var(--sc-bg)]"
-              style={{ ...uiFont, color: "var(--sc-ink)" }}
-            >
-              <span>Billing</span>
-              <span
-                className="shrink-0 text-[13px]"
-                style={{ color: "var(--sc-ink-soft)" }}
-                aria-hidden
-              >
-                →
-              </span>
-            </Link>
-          </li>
-          <li>
+        <section aria-labelledby="account-emails-heading">
+          <h2
+            id="account-emails-heading"
+            className="mb-5 text-[22px] font-semibold leading-tight tracking-tight"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            Emails
+          </h2>
+          <AccountEmailPreferencesForm
+            email={email || "No email on this account"}
+            initialNewsletterOptedIn={newsletterOptedIn}
+            initialTuesdayNudgeOptedIn={tuesdayNudgeOptedIn}
+          />
+          <p className="mt-8">
             <Link
               href="/reset-password"
-              className="flex w-full items-center justify-between gap-4 py-4 text-[15px] leading-snug no-underline transition-colors hover:bg-[var(--sc-bg)]"
-              style={{ ...uiFont, color: "var(--sc-ink)" }}
+              className="text-[13px] no-underline hover:underline"
+              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
             >
-              <span>Change your password</span>
-              <span
-                className="shrink-0 text-[13px]"
-                style={{ color: "var(--sc-ink-soft)" }}
-                aria-hidden
-              >
-                →
-              </span>
+              Change your password
             </Link>
-          </li>
-        </ul>
-      </section>
+          </p>
+        </section>
+      </div>
     </main>
   );
 }
