@@ -8,7 +8,7 @@ import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Plan and credits",
+  title: "Billing",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -58,7 +58,7 @@ export default async function BuyPage() {
           className="text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Plan and credits
+          Billing
         </h1>
       </div>
 
