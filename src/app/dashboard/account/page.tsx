@@ -89,31 +89,48 @@ export default async function AccountPage() {
         />
       </section>
 
-      <section className="max-w-xl" aria-labelledby="account-plan-password-heading">
+      <section
+        className="mb-12 max-w-xl"
+        aria-labelledby="account-plan-password-heading"
+      >
         <h2
           id="account-plan-password-heading"
           className="mb-5 text-[22px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Plan and password
+          Billing and password
         </h2>
-        <ul className="m-0 flex list-none flex-col gap-3 p-0">
+        <ul className="m-0 list-none p-0">
           <li>
             <Link
               href="/dashboard/buy"
-              className="text-[15px] font-medium no-underline hover:underline"
-              style={{ ...uiFont, color: "var(--sc-accent)" }}
+              className="flex w-full items-center justify-between gap-4 py-4 text-[15px] leading-snug no-underline transition-colors hover:bg-[var(--sc-bg)]"
+              style={{ ...uiFont, color: "var(--sc-ink)" }}
             >
-              Plan and credits
+              <span>Billing</span>
+              <span
+                className="shrink-0 text-[13px]"
+                style={{ color: "var(--sc-ink-soft)" }}
+                aria-hidden
+              >
+                →
+              </span>
             </Link>
           </li>
           <li>
             <Link
               href="/reset-password"
-              className="text-[15px] font-medium no-underline hover:underline"
-              style={{ ...uiFont, color: "var(--sc-accent)" }}
+              className="flex w-full items-center justify-between gap-4 py-4 text-[15px] leading-snug no-underline transition-colors hover:bg-[var(--sc-bg)]"
+              style={{ ...uiFont, color: "var(--sc-ink)" }}
             >
-              Change your password
+              <span>Change your password</span>
+              <span
+                className="shrink-0 text-[13px]"
+                style={{ color: "var(--sc-ink-soft)" }}
+                aria-hidden
+              >
+                →
+              </span>
             </Link>
           </li>
         </ul>

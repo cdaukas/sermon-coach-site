@@ -20,12 +20,12 @@ export function formatCreditChipLabel(
   entitlement: EvaluationEntitlement | null,
 ): string {
   if (!entitlement) {
-    return "Plan and credits";
+    return "Billing";
   }
 
   const total = totalAvailableCredits(entitlement);
   if (total <= 0) {
-    return "Plan and credits";
+    return "Billing";
   }
 
   return total === 1 ? "1 credit" : `${total} credits`;

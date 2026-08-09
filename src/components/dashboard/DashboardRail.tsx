@@ -56,8 +56,8 @@ const ACCOUNT_ITEMS: NavItem[] = [
   },
   {
     href: "/dashboard/buy",
-    label: "Plan and credits",
-    shortLabel: "Plan",
+    label: "Billing",
+    shortLabel: "Billing",
     isActive: (pathname) => pathname.startsWith("/dashboard/buy"),
   },
 ];
@@ -156,9 +156,6 @@ export function DashboardRail({
           Coaching
         </p>
         <NavLink item={coachingItem} pathname={pathname} />
-        <p className="dashboard-rail-group-label" style={uiFont}>
-          Account
-        </p>
         {ACCOUNT_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
