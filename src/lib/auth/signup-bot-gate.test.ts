@@ -1,18 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { assertSignupBotAllowed } from "./signup-bot-guard";
+import { checkSignupBotGate } from "./signup-bot-gate";
 
-describe("assertSignupBotAllowed", () => {
-  it("allows a normal email with empty honeypot", async () => {
-    const result = await assertSignupBotAllowed("pastor@church.org", "");
+describe("checkSignupBotGate", () => {
+  it("allows a normal email with empty honeypot", () => {
+    const result = checkSignupBotGate("pastor@church.org", "");
     assert.deepEqual(result, { ok: true });
   });
 
-  it("rejects heavy-dotted Gmail with the generic invalid_email message", async () => {
-    const result = await assertSignupBotAllowed(
-      "a.b.c.d.e@gmail.com",
-      "",
-    );
+  it("rejects heavy-dotted Gmail with the generic invalid_email message", () => {
+    const result = checkSignupBotGate("a.b.c.d.e@gmail.com", "");
     assert.equal(result.ok, false);
     if (!result.ok) {
       assert.equal(result.error, "invalid_email");
@@ -20,8 +17,8 @@ describe("assertSignupBotAllowed", () => {
     }
   });
 
-  it("rejects a filled honeypot without revealing the rule", async () => {
-    const result = await assertSignupBotAllowed(
+  it("rejects a filled honeypot without revealing the rule", () => {
+    const result = checkSignupBotGate(
       "pastor@church.org",
       "https://spam.example",
     );
