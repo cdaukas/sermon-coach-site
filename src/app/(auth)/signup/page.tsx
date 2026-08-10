@@ -10,10 +10,12 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import { SignupHoneypotField } from "@/components/auth/SignupHoneypotField";
 import {
   EmailExistsMessage,
   isDuplicateSignupError,
 } from "@/lib/auth/signup-errors";
+import { assertSignupBotAllowed } from "@/lib/auth/signup-bot-guard";
 import { setEmailPreferencesAtSignup } from "@/lib/auth/newsletter-opt-in";
 import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
 import { browserSiteOrigin } from "@/lib/site-origin";
@@ -77,6 +79,7 @@ function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [websiteHoneypot, setWebsiteHoneypot] = useState("");
   const [newsletterOptedIn, setNewsletterOptedInState] = useState(false);
   const [tuesdayNudgeOptedIn, setTuesdayNudgeOptedInState] = useState(false);
   const [banner, setBanner] = useState<{
@@ -124,6 +127,16 @@ function SignupForm() {
     const emailRedirectTo = postCheckoutPath
       ? buildAuthCallbackUrl(siteOrigin, postCheckoutPath)
       : buildAuthCallbackUrl(siteOrigin, defaultNextPath);
+
+    const botGate = await assertSignupBotAllowed(
+      trimmedEmail,
+      websiteHoneypot,
+    );
+    if (!botGate.ok) {
+      setLoading(false);
+      setBanner({ variant: "error", text: botGate.message });
+      return;
+    }
 
     const { data: available, error: checkError } = await supabase.rpc(
       "email_available",
@@ -236,7 +249,12 @@ function SignupForm() {
           </p>
         </div>
       ) : (
-        <AuthForm onSubmit={handleSubmit}>
+        <AuthForm onSubmit={handleSubmit} className="relative">
+          <SignupHoneypotField
+            id="signup-website"
+            value={websiteHoneypot}
+            onChange={setWebsiteHoneypot}
+          />
           <AuthField
             id="email"
             label="Email"
