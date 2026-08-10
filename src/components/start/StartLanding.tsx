@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthMessage } from "@/components/auth/AuthMessage";
@@ -10,6 +10,12 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import { SignupHoneypotField } from "@/components/auth/SignupHoneypotField";
+import { assertSignupBotAllowed } from "@/lib/auth/signup-bot-guard";
+import {
+  EmailExistsMessage,
+  isDuplicateSignupError,
+} from "@/lib/auth/signup-errors";
 import { setEmailPreferencesAtSignup } from "@/lib/auth/newsletter-opt-in";
 import { emailRedirectNextPath } from "@/lib/auth/start";
 import { buildAuthCallbackUrl } from "@/lib/billing/checkout";
@@ -68,11 +74,12 @@ export function StartLanding({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [websiteHoneypot, setWebsiteHoneypot] = useState("");
   const [newsletterOptedIn, setNewsletterOptedInState] = useState(false);
   const [tuesdayNudgeOptedIn, setTuesdayNudgeOptedInState] = useState(false);
   const [banner, setBanner] = useState<{
     variant: "error" | "success";
-    text: string;
+    text: ReactNode;
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
@@ -100,11 +107,35 @@ export function StartLanding({
 
     setLoading(true);
     const supabase = createClient();
+    const trimmedEmail = email.trim();
     const siteOrigin = browserSiteOrigin();
     const emailRedirectTo = buildAuthCallbackUrl(siteOrigin, nextPath);
 
+    const botGate = await assertSignupBotAllowed(
+      trimmedEmail,
+      websiteHoneypot,
+    );
+    if (!botGate.ok) {
+      setLoading(false);
+      setBanner({ variant: "error", text: botGate.message });
+      return;
+    }
+
+    const { data: available, error: checkError } = await supabase.rpc(
+      "email_available",
+      { p_email: trimmedEmail },
+    );
+    if (!checkError && available === false) {
+      setLoading(false);
+      setBanner({
+        variant: "error",
+        text: <EmailExistsMessage loginHref={loginHref} />,
+      });
+      return;
+    }
+
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email: trimmedEmail,
       password,
       options: {
         emailRedirectTo,
@@ -117,7 +148,14 @@ export function StartLanding({
     setLoading(false);
 
     if (error) {
-      setBanner({ variant: "error", text: friendlySignupError(error.message) });
+      setBanner({
+        variant: "error",
+        text: isDuplicateSignupError(error.message) ? (
+          <EmailExistsMessage loginHref={loginHref} />
+        ) : (
+          friendlySignupError(error.message)
+        ),
+      });
       return;
     }
 
@@ -225,7 +263,12 @@ export function StartLanding({
               </p>
             </div>
           ) : (
-            <AuthForm onSubmit={handleSubmit}>
+            <AuthForm onSubmit={handleSubmit} className="relative">
+              <SignupHoneypotField
+                id="start-website"
+                value={websiteHoneypot}
+                onChange={setWebsiteHoneypot}
+              />
               <AuthField
                 id="start-email"
                 label="Email"
