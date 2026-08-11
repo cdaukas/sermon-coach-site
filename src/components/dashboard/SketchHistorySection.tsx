@@ -78,6 +78,7 @@ export function SketchHistorySection({
           }}
           read={selected.read_output}
           status={statusMapFromRow(selected)}
+          isSignedIn
           onStartAnother={() => {
             router.push("/dashboard/sketch");
           }}

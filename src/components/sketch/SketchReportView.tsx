@@ -79,6 +79,8 @@ type SketchReportViewProps = {
   read: string;
   status: SketchStatusMap;
   onStartAnother: () => void;
+  /** Destination for the eval CTA: /dashboard/sermons/new when true, /start when false. */
+  isSignedIn: boolean;
   /** Optional block after the read prose (e.g. public save CTA). */
   afterRead?: ReactNode;
 };
@@ -328,6 +330,7 @@ export function SketchReportView({
   read,
   status,
   onStartAnother,
+  isSignedIn,
   afterRead,
 }: SketchReportViewProps) {
   const hasStatus = SKETCH_FIELDS.some((f) => status[f]);
@@ -336,6 +339,7 @@ export function SketchReportView({
     intake.big_idea.trim().length > 90
       ? `${intake.big_idea.trim().slice(0, 87)}…`
       : intake.big_idea.trim();
+  const evaluationHref = isSignedIn ? "/dashboard/sermons/new" : "/start";
 
   return (
     <article className="mx-auto max-w-[720px]">
@@ -471,39 +475,47 @@ export function SketchReportView({
         className="mt-12 border-t pt-6"
         style={{ ...uiFont, borderColor: "var(--sc-rule)" }}
       >
-        <Link
-          href="/start"
-          className="mb-6 inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline transition-opacity hover:opacity-90"
-          style={{
-            background: "var(--sc-ink)",
-            borderColor: "var(--sc-ink)",
-            color: "var(--sc-bg)",
-          }}
-        >
-          Ready for the full evaluation? Run it on your finished outline,
-          manuscript, or transcript.
-        </Link>
         <p
-          className="mb-6 text-[13px] leading-relaxed"
+          className="mb-4 text-[13px] leading-relaxed"
+          style={{ color: "var(--sc-ink-soft)" }}
+        >
+          When the sermon is written, run the finished manuscript or transcript
+          through the full evaluation.
+        </p>
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <Link
+            href={evaluationHref}
+            className="inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline transition-opacity hover:opacity-90"
+            style={{
+              background: "var(--sc-ink)",
+              borderColor: "var(--sc-ink)",
+              color: "var(--sc-bg)",
+            }}
+          >
+            Run the full evaluation
+          </Link>
+          <button
+            type="button"
+            onClick={onStartAnother}
+            className="rounded border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[var(--sc-ink)]"
+            style={{
+              ...uiFont,
+              background: "var(--sc-panel)",
+              borderColor: "var(--sc-rule)",
+              color: "var(--sc-ink)",
+              cursor: "pointer",
+            }}
+          >
+            Start another Sketch
+          </button>
+        </div>
+        <p
+          className="text-[13px] leading-relaxed"
           style={{ color: "var(--sc-ink-soft)" }}
         >
           The Sermon Coach · The Sketch · a reflection on your sermon in
           progress, not a graded evaluation.
         </p>
-        <button
-          type="button"
-          onClick={onStartAnother}
-          className="rounded border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[var(--sc-ink)]"
-          style={{
-            ...uiFont,
-            background: "var(--sc-panel)",
-            borderColor: "var(--sc-rule)",
-            color: "var(--sc-ink)",
-            cursor: "pointer",
-          }}
-        >
-          Start another Sketch
-        </button>
       </footer>
     </article>
   );
