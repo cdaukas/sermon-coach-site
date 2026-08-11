@@ -12,7 +12,7 @@ import {
   type SketchStatusMap,
 } from "@/lib/sketch/types";
 
-export const SKETCH_PROMPT_VERSION = "v2.10";
+export const SKETCH_PROMPT_VERSION = "v2.11";
 const MODEL = "claude-opus-4-8";
 
 const SYSTEM_PROMPT = readFileSync(
@@ -44,14 +44,40 @@ const STATUSES = new Set<SketchStatus>(["solid", "thin", "seam"]);
 
 type Mode = "find" | "press";
 
+export type StatusDemotionRule =
+  | "seam_hub"
+  | "seam_disagrees_with"
+  | "press_area";
+
+/** Server-only demotion audit trail — never returned to the client. */
+export type StatusDemotion = {
+  area: SketchField;
+  original: SketchStatus | null;
+  derived: SketchStatus;
+  rule: StatusDemotionRule;
+};
+
 /** Telemetry columns written to readiness_reads on the authed path only. */
 export type SketchTelemetry = Partial<
   Record<`status_${SketchField}`, SketchStatus> & {
     mode: Mode;
     seam_hub: SketchField;
     seam_spokes: string[];
+    /** Press mode only — no DB column; stripped before persist/client. */
+    press_area: SketchField;
   }
->;
+> & {
+  /** Log only — stripped before readiness_reads / sketch_claims insert and client JSON. */
+  status_demotions?: StatusDemotion[];
+};
+
+/** Fields safe to spread into readiness_reads / sketch_claims / client save. */
+export function telemetryForPersist(
+  telemetry: SketchTelemetry,
+): Omit<SketchTelemetry, "status_demotions" | "press_area"> {
+  const { status_demotions: _d, press_area: _p, ...rest } = telemetry;
+  return rest;
+}
 
 export type SketchGenerateInput = {
   primary_passage?: string | null;
@@ -127,7 +153,7 @@ function splitRead(raw: string): {
     return { read, telemetry: {}, status: {} };
   }
 
-  const telemetry = normalize(parsed);
+  const telemetry = deriveStatuses(normalize(parsed));
   return { read, telemetry, status: statusFromTelemetry(telemetry) };
 }
 
@@ -167,12 +193,98 @@ function normalize(input: unknown): SketchTelemetry {
     }
   }
 
+  // Press hub: the one thinnest load-bearing area named in THE ONE THING TO PRESS.
+  // No DB column — parse for status derivation only.
+  const press = (t.press ?? null) as Record<string, unknown> | null;
+  if (press) {
+    const area = String(press.area ?? "").toLowerCase();
+    if (isField(area)) out.press_area = area;
+  }
+
   // A hub with no spokes is not a seam. Do not record a half-claim -- and do not
   // send mode=find to the DB without one, because the CHECK constraint will reject
   // the whole row and cost us the intake as well as the telemetry.
   if (out.mode === "find" && (!out.seam_hub || !out.seam_spokes)) {
     console.warn("mode=find with no valid seam; dropping mode to keep the row");
     delete out.mode;
+  }
+
+  // Press mode carries no seam. Drop stray hub/spokes so CHECK stays coherent.
+  if (out.mode === "press") {
+    delete out.seam_hub;
+    delete out.seam_spokes;
+  }
+
+  // Find mode carries no press area.
+  if (out.mode === "find") {
+    delete out.press_area;
+  }
+
+  return out;
+}
+
+/**
+ * Enforce hub/spoke and press-area arithmetic on status fields after normalize.
+ * Logs demotions for readiness_reads audit (status_demotions never client-facing).
+ */
+export function deriveStatuses(telemetry: SketchTelemetry): SketchTelemetry {
+  const out: SketchTelemetry = { ...telemetry };
+  const demotions: StatusDemotion[] = [];
+
+  const hub = out.seam_hub;
+  if (hub) {
+    const key = `status_${hub}` as const;
+    const original = out[key] ?? null;
+    if (original !== "seam") {
+      demotions.push({
+        area: hub,
+        original,
+        derived: "seam",
+        rule: "seam_hub",
+      });
+      out[key] = "seam";
+    }
+  }
+
+  for (const spoke of out.seam_spokes ?? []) {
+    if (!isField(spoke)) continue;
+    const key = `status_${spoke}` as const;
+    const original = out[key] ?? null;
+    if (original === "solid") {
+      demotions.push({
+        area: spoke,
+        original: "solid",
+        derived: "thin",
+        rule: "seam_disagrees_with",
+      });
+      out[key] = "thin";
+    }
+  }
+
+  // Press mode: the area named as the thing to press cannot stay solid.
+  // Same rule as seam for find — the press section is part of the read.
+  const pressArea = out.press_area;
+  if (out.mode === "press" && pressArea) {
+    const key = `status_${pressArea}` as const;
+    const original = out[key] ?? null;
+    if (original === "solid") {
+      demotions.push({
+        area: pressArea,
+        original: "solid",
+        derived: "thin",
+        rule: "press_area",
+      });
+      out[key] = "thin";
+    }
+  }
+
+  if (demotions.length > 0) {
+    out.status_demotions = demotions;
+    for (const d of demotions) {
+      console.info("sketch status demotion", d);
+    }
+  } else {
+    delete out.status_demotions;
   }
 
   return out;

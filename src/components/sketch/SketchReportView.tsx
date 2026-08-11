@@ -167,11 +167,16 @@ function parseAreaComment(line: string): SketchField | "invalid" | null {
 }
 
 function isSectionHeadingLine(line: string): string | null {
-  const heading = line.match(/^\*\*(.+?)\*\*$/);
+  // Full-line **TITLE** — optional trailing (n) / (n of 6) for model counts.
+  const heading = line
+    .trim()
+    .match(/^\*\*(.+?)\*\*(?:\s*\([^)]*\))?\s*$/);
   if (!heading) return null;
   const raw = heading[1].replace(/\s*—\s*.*$/, "").trim();
+  // Strip trailing count inside the bold segment: WHAT'S SOLID (3)
+  const withoutCount = raw.replace(/\s*\(\d+(?:\s*of\s*\d+)?\)\s*$/i, "").trim();
   const sectionKey = Object.keys(SECTION_TITLES).find((k) =>
-    raw.toUpperCase().startsWith(k),
+    withoutCount.toUpperCase().startsWith(k),
   );
   return sectionKey ?? null;
 }
@@ -389,11 +394,14 @@ function renderProseBlocks(markdown: string, solidParagraphCount: number): React
       continue;
     }
 
-    const heading = line.match(/^\*\*(.+?)\*\*$/);
+    const heading = line.match(/^\*\*(.+?)\*\*(?:\s*\([^)]*\))?\s*$/);
     if (heading) {
       const raw = heading[1].replace(/\s*—\s*.*$/, "").trim();
+      const withoutCount = raw
+        .replace(/\s*\(\d+(?:\s*of\s*\d+)?\)\s*$/i, "")
+        .trim();
       const sectionKey = Object.keys(SECTION_TITLES).find((k) =>
-        raw.toUpperCase().startsWith(k),
+        withoutCount.toUpperCase().startsWith(k),
       );
 
       if (sectionKey) {

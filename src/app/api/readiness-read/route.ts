@@ -19,6 +19,7 @@ import { NextResponse } from "next/server";
 import {
   generateSketchRead,
   SKETCH_PROMPT_VERSION,
+  telemetryForPersist,
 } from "@/lib/sketch/generate";
 import {
   AUTHED_SKETCH_DAILY_LIMIT_MESSAGE,
@@ -123,6 +124,12 @@ export async function POST(request: Request) {
   // respond first and write in the background. Left inline here because it is
   // correct on every Next version and the failure mode is identical.
   try {
+    if (telemetry.status_demotions?.length) {
+      console.info(
+        "readiness_reads status_demotions",
+        telemetry.status_demotions,
+      );
+    }
     const { error } = await supabase.from("readiness_reads").insert({
       user_id: user.id,
       sermon_id: null,
@@ -130,7 +137,7 @@ export async function POST(request: Request) {
       ...answers,
       read_output: read,
       prompt_version: SKETCH_PROMPT_VERSION,
-      ...telemetry,
+      ...telemetryForPersist(telemetry),
     });
     if (error) console.error("readiness_reads insert failed", error);
   } catch (err) {
