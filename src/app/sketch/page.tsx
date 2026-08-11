@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PublicSketchWorkspace } from "@/components/sketch/PublicSketchWorkspace";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "The Sketch",
@@ -10,8 +11,14 @@ export const metadata: Metadata = {
 /**
  * Public Sketch — no auth, no dashboard chrome.
  * Logged-in visitors are not redirected; the page works either way.
+ * Auth is read only to route the eval CTA (signed in → new sermon).
  */
-export default function PublicSketchPage() {
+export default async function PublicSketchPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div
       className="flex min-h-full flex-col"
@@ -26,7 +33,7 @@ export default function PublicSketchPage() {
             boxShadow: "var(--sc-shadow-lift)",
           }}
         >
-          <PublicSketchWorkspace />
+          <PublicSketchWorkspace isSignedIn={user != null} />
         </main>
       </div>
     </div>

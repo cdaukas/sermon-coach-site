@@ -81,6 +81,7 @@ export function SketchWorkspace() {
         intake={phase.intake}
         read={phase.read}
         status={phase.status}
+        isSignedIn
         onStartAnother={() => {
           setError(null);
           setPhase({ kind: "intake" });

@@ -202,7 +202,11 @@ function SaveReadCta({
   );
 }
 
-export function PublicSketchWorkspace() {
+export function PublicSketchWorkspace({
+  isSignedIn = false,
+}: {
+  isSignedIn?: boolean;
+}) {
   const [phase, setPhase] = useState<Phase>({ kind: "intake" });
   const [error, setError] = useState<string | null>(null);
 
@@ -277,6 +281,7 @@ export function PublicSketchWorkspace() {
         intake={phase.intake}
         read={phase.read}
         status={phase.status}
+        isSignedIn={isSignedIn}
         onStartAnother={() => {
           setError(null);
           setPhase({ kind: "intake" });

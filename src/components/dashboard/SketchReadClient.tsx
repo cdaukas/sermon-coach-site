@@ -26,6 +26,7 @@ export function SketchReadClient({ sketch }: SketchReadClientProps) {
       }}
       read={sketch.read_output}
       status={statusMapFromRow(sketch)}
+      isSignedIn
       onStartAnother={() => {
         router.push("/dashboard/sketch");
       }}
