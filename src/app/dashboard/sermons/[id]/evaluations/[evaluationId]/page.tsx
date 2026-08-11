@@ -13,6 +13,7 @@ import { IncompleteEvaluationPoller } from "@/components/evaluation/IncompleteEv
 import { EarlierEvaluations } from "@/components/evaluation/EarlierEvaluations";
 import { ReportEvaluationRerun } from "@/components/evaluation/ReportEvaluationRerun";
 import { ReportManuscriptDisclosure } from "@/components/evaluation/ReportManuscriptDisclosure";
+import { TuesdayNudgeOffer } from "@/components/evaluation/TuesdayNudgeOffer";
 import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
 import {
   getEvaluation,
@@ -143,23 +144,58 @@ export default async function EvaluationPage({
   let entitlement = null;
   let hasActiveEvaluation = false;
   let isMentoredMentee = false;
+  /** Screen-only: owner + not opted in + never acted on the offer. */
+  let tuesdayNudgeOffer: { newsletterOptedIn: boolean } | null = null;
 
-  if (showOwnerReportActions) {
+  if (resolvedVia === "owner" && !pdfCapture) {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (user) {
-      const [nextEntitlement, nextHasActive, nextIsMentored] =
-        await Promise.all([
-          getEvaluationEntitlement(user.id),
-          sermonHasActiveEvaluation(sermonId),
-          viewerHasActiveMentorRelationship(user.id),
-        ]);
-      entitlement = nextEntitlement;
-      hasActiveEvaluation = nextHasActive;
-      isMentoredMentee = nextIsMentored;
+      const profilePromise = supabase
+        .from("profiles")
+        .select(
+          "newsletter_opted_in, tuesday_nudge_opted_in, tuesday_nudge_offer_seen_at",
+        )
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (showOwnerReportActions) {
+        const [nextEntitlement, nextHasActive, nextIsMentored, profileResult] =
+          await Promise.all([
+            getEvaluationEntitlement(user.id),
+            sermonHasActiveEvaluation(sermonId),
+            viewerHasActiveMentorRelationship(user.id),
+            profilePromise,
+          ]);
+        entitlement = nextEntitlement;
+        hasActiveEvaluation = nextHasActive;
+        isMentoredMentee = nextIsMentored;
+
+        const profile = profileResult.data;
+        if (
+          profile &&
+          profile.tuesday_nudge_opted_in !== true &&
+          profile.tuesday_nudge_offer_seen_at == null
+        ) {
+          tuesdayNudgeOffer = {
+            newsletterOptedIn: profile.newsletter_opted_in === true,
+          };
+        }
+      } else {
+        const { data: profile } = await profilePromise;
+        if (
+          profile &&
+          profile.tuesday_nudge_opted_in !== true &&
+          profile.tuesday_nudge_offer_seen_at == null
+        ) {
+          tuesdayNudgeOffer = {
+            newsletterOptedIn: profile.newsletter_opted_in === true,
+          };
+        }
+      }
     }
   }
 
@@ -281,6 +317,12 @@ export default async function EvaluationPage({
           howItPreaches={evaluation.how_it_preaches}
         />
       )}
+
+      {tuesdayNudgeOffer ? (
+        <TuesdayNudgeOffer
+          newsletterOptedIn={tuesdayNudgeOffer.newsletterOptedIn}
+        />
+      ) : null}
 
       {!pdfCapture && resolvedVia === "owner" && showScoresView ? (
         <EarlierEvaluations

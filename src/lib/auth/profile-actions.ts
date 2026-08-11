@@ -82,3 +82,25 @@ export async function saveEmailPreferences(
   revalidatePath("/dashboard/account");
   return { ok: true };
 }
+
+export async function markTuesdayNudgeOfferSeen(): Promise<ProfileActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "You must be signed in." };
+  }
+
+  const { error } = await supabase.rpc("set_tuesday_nudge_offer_seen");
+
+  if (error) {
+    return {
+      ok: false,
+      error: "Could not update the offer. Please try again.",
+    };
+  }
+
+  return { ok: true };
+}
