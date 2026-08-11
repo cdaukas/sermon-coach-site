@@ -58,8 +58,11 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
 
   return (
     <section
-      className="screen-only mt-12 border-t pt-8"
-      style={{ borderColor: "var(--sc-rule)" }}
+      className="screen-only mt-12 px-6 py-6 md:px-9"
+      style={{
+        background: "var(--sc-panel)",
+        boxShadow: "var(--sc-shadow)",
+      }}
       data-tuesday-nudge-offer="1"
       aria-label="Tuesday nudge offer"
     >
@@ -104,11 +107,12 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
           type="button"
           disabled={pending}
           onClick={() => void complete(checked)}
-          className="cursor-pointer rounded border-0 px-4 py-2 text-[13px] font-semibold disabled:cursor-wait disabled:opacity-70"
+          className="cursor-pointer rounded border px-4 py-2 text-[13px] font-semibold disabled:cursor-wait disabled:opacity-70"
           style={{
             ...uiFont,
-            background: "var(--sc-accent)",
-            color: "#fff",
+            background: "var(--sc-bg)",
+            borderColor: "var(--sc-rule)",
+            color: "var(--sc-ink)",
           }}
         >
           {pending ? "Saving…" : "Confirm"}
@@ -117,7 +121,7 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
           type="button"
           disabled={pending}
           onClick={() => void complete(false)}
-          className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-medium underline-offset-2 hover:underline disabled:cursor-wait disabled:opacity-70 disabled:no-underline"
+          className="cursor-pointer border-0 bg-transparent px-2 py-2 text-[13px] font-medium underline-offset-2 hover:underline disabled:cursor-wait disabled:opacity-70 disabled:no-underline"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
           Not now
