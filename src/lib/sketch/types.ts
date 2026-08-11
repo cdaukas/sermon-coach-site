@@ -42,7 +42,7 @@ export type SketchApiResponse = {
 /** Display labels for the AT A GLANCE table — alias only; keys stay internal. */
 export const SKETCH_AREA_LABELS: Record<SketchField, string> = {
   ache: "The ache it speaks to",
-  big_idea: "The one idea they carry to Tuesday",
+  big_idea: "The one idea they carry to Monday",
   gospel_turn: "Where advice becomes good news",
   points: "Each point grounded in the passage",
   one_person: "The change you're preaching toward",

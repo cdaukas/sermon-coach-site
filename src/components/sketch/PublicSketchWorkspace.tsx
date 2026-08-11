@@ -26,7 +26,7 @@ const PUBLIC_HEADER: SketchIntakeHeaderCopy = {
   eyebrow: "THE SKETCH",
   heading: "Alignment check on your sermon outline.",
   subhead:
-    "Answer six questions about the passage and the people you're preaching to. You'll get back an honest read on where the sermon is solid and where it's still thin, before you write a word.",
+    "Answer six questions about your sermon outline. Get an honest read on where it is solid and where it is still thin, before you write a word.",
   note: "No account needed.",
 };
 

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "The Sketch",
   description:
-    "Answer six questions about the passage and the people you're preaching to. Get an honest read on where the sermon is solid and where it's still thin, before you write a word. No account needed.",
+    "Answer six questions about your sermon outline. Get an honest read on where it is solid and where it is still thin, before you write a word. No account needed.",
 };
 
 /**

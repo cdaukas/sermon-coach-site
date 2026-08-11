@@ -472,16 +472,9 @@ export function SketchReportView({
       {afterRead ? <div className="mt-10">{afterRead}</div> : null}
 
       <footer
-        className="mt-12 border-t pt-6"
+        className="mt-12 border-t pt-8"
         style={{ ...uiFont, borderColor: "var(--sc-rule)" }}
       >
-        <p
-          className="mb-4 text-[13px] leading-relaxed"
-          style={{ color: "var(--sc-ink-soft)" }}
-        >
-          When the sermon is written, run the finished manuscript or transcript
-          through the full evaluation.
-        </p>
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <Link
             href={evaluationHref}
