@@ -6,6 +6,7 @@ import {
   SKETCH_AREA_LABELS,
   SKETCH_FIELDS,
   SKETCH_STATUS_LABELS,
+  type SketchField,
   type SketchIntake,
   type SketchStatus,
   type SketchStatusMap,
@@ -152,7 +153,177 @@ function Body({ children }: { children: ReactNode }) {
   );
 }
 
-function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
+const AREA_COMMENT_RE = /^<!--\s*area:([a-z_]+)\s*-->$/i;
+
+function isSketchFieldKey(value: string): value is SketchField {
+  return (SKETCH_FIELDS as readonly string[]).includes(value);
+}
+
+function parseAreaComment(line: string): SketchField | "invalid" | null {
+  const m = line.trim().match(AREA_COMMENT_RE);
+  if (!m) return null;
+  const key = m[1].toLowerCase();
+  return isSketchFieldKey(key) ? key : "invalid";
+}
+
+function isSectionHeadingLine(line: string): string | null {
+  // Full-line **TITLE** — optional trailing (n) / (n of 6) for model counts.
+  const heading = line
+    .trim()
+    .match(/^\*\*(.+?)\*\*(?:\s*\([^)]*\))?\s*$/);
+  if (!heading) return null;
+  const raw = heading[1].replace(/\s*—\s*.*$/, "").trim();
+  // Strip trailing count inside the bold segment: WHAT'S SOLID (3)
+  const withoutCount = raw.replace(/\s*\(\d+(?:\s*of\s*\d+)?\)\s*$/i, "").trim();
+  const sectionKey = Object.keys(SECTION_TITLES).find((k) =>
+    withoutCount.toUpperCase().startsWith(k),
+  );
+  return sectionKey ?? null;
+}
+
+/**
+ * Filter What's solid: keep only solid-status paragraphs with a valid
+ * <!--area:key--> marker. Strip markers from rendered prose. Header count
+ * is the number of paragraphs that survive.
+ */
+function prepareReadForDisplay(
+  markdown: string,
+  status: SketchStatusMap,
+): { read: string; solidParagraphCount: number } {
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+  const out: string[] = [];
+  let solidParagraphCount = 0;
+  let i = 0;
+
+  while (i < lines.length) {
+    const trimmed = lines[i].trim();
+    const sectionKey = isSectionHeadingLine(trimmed);
+
+    if (sectionKey === "WHAT'S SOLID") {
+      // Collect through the end of this section (exclusive of next section).
+      i += 1;
+      type SolidPara = {
+        area: SketchField | null;
+        text: string;
+        rawPreview: string;
+      };
+      const collected: SolidPara[] = [];
+
+      while (i < lines.length) {
+        const line = lines[i].trim();
+        if (!line) {
+          i += 1;
+          continue;
+        }
+        if (isSectionHeadingLine(line)) break;
+        if (
+          line.startsWith("This is a pre-read") ||
+          line.startsWith("If the outline is what you'll preach from")
+        ) {
+          break;
+        }
+        // Skip pure CLOSING LINE heading if it appears (should not, but safe).
+        const h = line.match(/^\*\*(.+?)\*\*$/);
+        if (h && h[1].replace(/\s*—\s*.*$/, "").trim().toUpperCase().startsWith("CLOSING LINE")) {
+          i += 1;
+          continue;
+        }
+
+        const area = parseAreaComment(line);
+        if (area === null) {
+          // Orphan prose without a marker — drop as unparseable paragraph.
+          const paraLines: string[] = [line];
+          i += 1;
+          while (i < lines.length) {
+            const next = lines[i].trim();
+            if (!next) break;
+            if (parseAreaComment(next) !== null) break;
+            if (isSectionHeadingLine(next)) break;
+            if (
+              next.startsWith("This is a pre-read") ||
+              next.startsWith("If the outline is what you'll preach from")
+            ) {
+              break;
+            }
+            paraLines.push(next);
+            i += 1;
+          }
+          const text = paraLines.join(" ").trim();
+          collected.push({
+            area: null,
+            text,
+            rawPreview: text.slice(0, 40),
+          });
+          continue;
+        }
+
+        // Valid or invalid <!--area:…--> line — consume marker, gather body.
+        i += 1;
+        while (i < lines.length && !lines[i].trim()) i += 1;
+        const body: string[] = [];
+        while (i < lines.length) {
+          const next = lines[i].trim();
+          if (!next) break;
+          if (parseAreaComment(next) !== null) break;
+          if (isSectionHeadingLine(next)) break;
+          if (
+            next.startsWith("This is a pre-read") ||
+            next.startsWith("If the outline is what you'll preach from")
+          ) {
+            break;
+          }
+          body.push(next);
+          i += 1;
+        }
+        const text = body.join(" ").trim();
+        const preview = (text || line).slice(0, 40);
+        if (area === "invalid") {
+          collected.push({ area: null, text, rawPreview: preview });
+        } else {
+          collected.push({ area, text, rawPreview: preview });
+        }
+      }
+
+      const kept: string[] = [];
+      for (const para of collected) {
+        if (!para.area) {
+          console.warn(
+            "What's solid paragraph dropped (missing or unparseable area comment)",
+            para.rawPreview,
+          );
+          continue;
+        }
+        if (status[para.area] !== "solid") {
+          continue;
+        }
+        if (!para.text) continue;
+        kept.push(para.text);
+      }
+
+      solidParagraphCount = kept.length;
+      if (kept.length > 0) {
+        // Count-free heading — rendered count comes from SectionTitle muted.
+        out.push("**WHAT'S SOLID**");
+        out.push("");
+        for (const text of kept) {
+          out.push(text);
+          out.push("");
+        }
+      }
+      continue;
+    }
+
+    out.push(lines[i]);
+    i += 1;
+  }
+
+  return {
+    read: out.join("\n").replace(/\n{3,}/g, "\n\n").trim(),
+    solidParagraphCount,
+  };
+}
+
+function renderProseBlocks(markdown: string, solidParagraphCount: number): ReactNode {
   const lines = markdown.replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
   let i = 0;
@@ -223,11 +394,14 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
       continue;
     }
 
-    const heading = line.match(/^\*\*(.+?)\*\*$/);
+    const heading = line.match(/^\*\*(.+?)\*\*(?:\s*\([^)]*\))?\s*$/);
     if (heading) {
       const raw = heading[1].replace(/\s*—\s*.*$/, "").trim();
+      const withoutCount = raw
+        .replace(/\s*\(\d+(?:\s*of\s*\d+)?\)\s*$/i, "")
+        .trim();
       const sectionKey = Object.keys(SECTION_TITLES).find((k) =>
-        raw.toUpperCase().startsWith(k),
+        withoutCount.toUpperCase().startsWith(k),
       );
 
       if (sectionKey) {
@@ -237,10 +411,15 @@ function renderProseBlocks(markdown: string, solidCount: number): ReactNode {
         ) {
           const muted =
             sectionKey === "WHAT'S SOLID"
-              ? solidCount > 0
-                ? `${solidCount} of 6`
+              ? solidParagraphCount > 0
+                ? `${solidParagraphCount} of 6`
                 : undefined
               : "before Sunday";
+          // What's solid with zero paragraphs is stripped in prepareReadForDisplay.
+          if (sectionKey === "WHAT'S SOLID" && solidParagraphCount === 0) {
+            i += 1;
+            continue;
+          }
           blocks.push(
             <SectionTitle
               key={key++}
@@ -334,7 +513,10 @@ export function SketchReportView({
   afterRead,
 }: SketchReportViewProps) {
   const hasStatus = SKETCH_FIELDS.some((f) => status[f]);
-  const solidCount = SKETCH_FIELDS.filter((f) => status[f] === "solid").length;
+  const { read: displayRead, solidParagraphCount } = prepareReadForDisplay(
+    read,
+    status,
+  );
   const workingIdea =
     intake.big_idea.trim().length > 90
       ? `${intake.big_idea.trim().slice(0, 87)}…`
@@ -467,7 +649,7 @@ export function SketchReportView({
         </section>
       ) : null}
 
-      <section>{renderProseBlocks(read, solidCount)}</section>
+      <section>{renderProseBlocks(displayRead, solidParagraphCount)}</section>
 
       {afterRead ? <div className="mt-10">{afterRead}</div> : null}
 
