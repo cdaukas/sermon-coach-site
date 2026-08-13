@@ -80,7 +80,7 @@ type SketchReportViewProps = {
   read: string;
   status: SketchStatusMap;
   onStartAnother: () => void;
-  /** Destination for the eval CTA: /dashboard/sermons/new when true, /start when false. */
+  /** When true, show the primary eval CTA to /dashboard/sermons/new. When false, hide it. */
   isSignedIn: boolean;
   /** Optional block after the read prose (e.g. public save CTA). */
   afterRead?: ReactNode;
@@ -521,7 +521,7 @@ export function SketchReportView({
     intake.big_idea.trim().length > 90
       ? `${intake.big_idea.trim().slice(0, 87)}…`
       : intake.big_idea.trim();
-  const evaluationHref = isSignedIn ? "/dashboard/sermons/new" : "/start";
+  const evaluationHref = "/dashboard/sermons/new";
 
   return (
     <article className="mx-auto max-w-[720px]">
@@ -658,17 +658,19 @@ export function SketchReportView({
         style={{ ...uiFont, borderColor: "var(--sc-rule)" }}
       >
         <div className="mb-6 flex flex-wrap items-center gap-3">
-          <Link
-            href={evaluationHref}
-            className="inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline transition-opacity hover:opacity-90"
-            style={{
-              background: "var(--sc-ink)",
-              borderColor: "var(--sc-ink)",
-              color: "var(--sc-bg)",
-            }}
-          >
-            Run the full evaluation
-          </Link>
+          {isSignedIn ? (
+            <Link
+              href={evaluationHref}
+              className="inline-block rounded border px-5 py-3 text-[14px] font-semibold tracking-wide no-underline transition-opacity hover:opacity-90"
+              style={{
+                background: "var(--sc-ink)",
+                borderColor: "var(--sc-ink)",
+                color: "var(--sc-bg)",
+              }}
+            >
+              Run the full evaluation
+            </Link>
+          ) : null}
           <button
             type="button"
             onClick={onStartAnother}
