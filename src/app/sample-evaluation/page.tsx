@@ -53,7 +53,6 @@ export default async function PublicSampleEvaluationPage() {
             &trade;
           </Link>
 
-          {/* COPY_PLACEHOLDER: sample page header — replace before index card swap */}
           <p
             className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em]"
             style={{ ...uiFont, color: "var(--sc-accent)" }}
@@ -64,8 +63,7 @@ export default async function PublicSampleEvaluationPage() {
             className="max-w-[54ch] text-[15px] leading-relaxed"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            [COPY PLACEHOLDER] A full evaluation of a real sermon. Band, scores,
-            and criterion reads come from a stored Sermon Coach report.
+            A real evaluation of a real sermon, on Hebrews 3:1-6. Eleven criteria, each one traced to a named source. The band, the scores, and every criterion read below come straight from a stored Sermon Coach report.
           </p>
           <div className="mt-5">
             <Link
