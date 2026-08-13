@@ -79,7 +79,7 @@ const QUESTIONS: Array<{
 const DEFAULT_HEADER: SketchIntakeHeaderCopy = {
   eyebrow: "The Sketch",
   heading: "Alignment check on your sermon outline.",
-  subhead: "No score, no credit. A read on your sermon before you build it.",
+  subhead: "No score, no credit. A read on your sermon outline before you build it.",
 };
 
 export function SketchIntakeForm({
