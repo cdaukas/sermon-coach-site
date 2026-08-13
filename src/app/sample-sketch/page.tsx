@@ -47,7 +47,6 @@ export default async function PublicSampleSketchPage() {
             &trade;
           </Link>
 
-          {/* COPY_PLACEHOLDER: sample page header — replace before index card swap */}
           <p
             className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em]"
             style={{ ...uiFont, color: "var(--sc-accent)" }}
@@ -58,8 +57,7 @@ export default async function PublicSampleSketchPage() {
             className="max-w-[54ch] text-[15px] leading-relaxed"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            [COPY PLACEHOLDER] A Sketch read of a real outline. Statuses and the
-            prose read come from a stored Sermon Coach Sketch.
+            A Sketch read of a real outline, on Hebrews 3:1-6, before the sermon was written. Six answers in, one read out. The Sketch checks whether what you already believe about the passage holds together. It is not independent exegesis, and the six answers it read are printed below so you can see exactly what it worked from.
           </p>
           <div className="mt-5">
             <Link
