@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
       },
       // Orphaned post-payment page from pre-Checkout migration; keep file on disk.
       { source: "/welcome", destination: "/dashboard", statusCode: 301 },
+      { source: "/welcome.html", destination: "/dashboard", statusCode: 301 },
     ];
   },
   async rewrites() {
