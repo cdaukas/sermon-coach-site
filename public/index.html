@@ -515,9 +515,11 @@
   }
 
   /* ---------- SAMPLES ---------- */
+  /* Two cards: fixed max track width, centered — not auto-fit 1fr banners. */
   .samples {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 340px));
+    justify-content: center;
     gap: 20px;
     margin-top: 40px;
   }
@@ -756,6 +758,9 @@
     section.block.section--dark { padding: 64px 20px; }
     .felt-pain-band { padding: 44px 20px; }
     .feature-grid { grid-template-columns: 1fr; }
+    .samples {
+      grid-template-columns: minmax(0, 340px);
+    }
     .testimonials {
       grid-template-columns: 1fr;
     }
