@@ -17,6 +17,11 @@ type EvaluationDashboardProps = {
   scriptureReference?: string | null;
   showPrintActions?: boolean;
   howItPreaches?: HowItPreaches | null;
+  /**
+   * Optional public-sample override for the report h1.
+   * When absent or blank, the dashboard keeps using result.meta.sermon_title.
+   */
+  headlineTitle?: string | null;
 };
 
 export function EvaluationDashboard({
@@ -25,11 +30,14 @@ export function EvaluationDashboard({
   scriptureReference,
   showPrintActions = true,
   howItPreaches = null,
+  headlineTitle = null,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const showHeatMap = meta.audio_available && result.heat_map !== null;
   const displayScriptureReference =
     scriptureReference?.trim() || meta.scripture_reference;
+  const displayHeadline =
+    headlineTitle?.trim() || meta.sermon_title;
 
   return (
     <article className="evaluation-report">
@@ -43,7 +51,7 @@ export function EvaluationDashboard({
         className="evaluation-report-title mb-2 text-[36px] font-normal leading-tight tracking-tight md:text-[44px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        {meta.sermon_title}
+        {displayHeadline}
       </h1>
       <p
         className="evaluation-report-scripture mb-6 text-lg italic"
