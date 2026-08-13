@@ -665,7 +665,7 @@ export function SermonForm({
           style={{ ...uiFont, color: "#4a5568" }}
         >
           <a
-            href="/sermon-evaluation-hebrews-12.html"
+            href="/sample-evaluation"
             target="_blank"
             rel="noopener noreferrer"
             className="underline-offset-2 transition-colors hover:underline"

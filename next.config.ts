@@ -28,6 +28,32 @@ const nextConfig: NextConfig = {
       // Orphaned post-payment page from pre-Checkout migration; keep file on disk.
       { source: "/welcome", destination: "/dashboard", statusCode: 301 },
       { source: "/welcome.html", destination: "/dashboard", statusCode: 301 },
+      // Retired static sample HTML → live DB-backed samples.
+      {
+        source: "/sermon-evaluation-hebrews-10.html",
+        destination: "/sample-evaluation",
+        statusCode: 301,
+      },
+      {
+        source: "/sermon-evaluation-hebrews-12.html",
+        destination: "/sample-evaluation",
+        statusCode: 301,
+      },
+      {
+        source: "/sermon-evaluation-2-corinthians-11.html",
+        destination: "/sample-evaluation",
+        statusCode: 301,
+      },
+      {
+        source: "/sermon-sketch-hebrews-3.html",
+        destination: "/sample-sketch",
+        statusCode: 301,
+      },
+      {
+        source: "/sermon-debrief-hebrews-3.html",
+        destination: "/sample-evaluation",
+        statusCode: 301,
+      },
     ];
   },
   async rewrites() {
