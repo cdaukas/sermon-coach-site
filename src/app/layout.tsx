@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: {
     default: "The Sermon Coach",
-    template: "%s — The Sermon Coach",
+    template: "%s · The Sermon Coach",
   },
   description:
     "Structured sermon evaluation for pastors — substantive feedback drawn from trusted preaching resources.",
