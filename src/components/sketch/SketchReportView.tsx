@@ -76,7 +76,13 @@ const SECTION_TITLES: Record<string, string> = {
 };
 
 type SketchReportViewProps = {
-  intake: SketchIntake;
+  /**
+   * outline_form is optional. When absent, the Preaching header cell is omitted
+   * (public sample has no stored outline_form and must not fabricate one).
+   */
+  intake: Omit<SketchIntake, "outline_form"> & {
+    outline_form?: SketchIntake["outline_form"] | null;
+  };
   read: string;
   status: SketchStatusMap;
   onStartAnother: () => void;
@@ -522,6 +528,8 @@ export function SketchReportView({
       ? `${intake.big_idea.trim().slice(0, 87)}…`
       : intake.big_idea.trim();
   const evaluationHref = "/dashboard/sermons/new";
+  const showOutlineForm =
+    intake.outline_form === "outline" || intake.outline_form === "manuscript";
 
   return (
     <article className="mx-auto max-w-[720px]">
@@ -547,7 +555,11 @@ export function SketchReportView({
       </header>
 
       <dl
-        className="mb-4 grid gap-3 border-y py-4 text-[13px] sm:grid-cols-3"
+        className={
+          showOutlineForm
+            ? "mb-4 grid gap-3 border-y py-4 text-[13px] sm:grid-cols-3"
+            : "mb-4 grid gap-3 border-y py-4 text-[13px] sm:grid-cols-2"
+        }
         style={{
           ...uiFont,
           color: "var(--sc-ink-mid)",
@@ -572,19 +584,21 @@ export function SketchReportView({
           </dt>
           <dd>{workingIdea || "Not given"}</dd>
         </div>
-        <div>
-          <dt
-            className="mb-1 text-[11px] font-semibold tracking-[0.14em] uppercase"
-            style={{ color: "var(--sc-gold)" }}
-          >
-            Preaching
-          </dt>
-          <dd>
-            {intake.outline_form === "outline"
-              ? "From the outline"
-              : "Toward a manuscript"}
-          </dd>
-        </div>
+        {showOutlineForm ? (
+          <div>
+            <dt
+              className="mb-1 text-[11px] font-semibold tracking-[0.14em] uppercase"
+              style={{ color: "var(--sc-gold)" }}
+            >
+              Preaching
+            </dt>
+            <dd>
+              {intake.outline_form === "outline"
+                ? "From the outline"
+                : "Toward a manuscript"}
+            </dd>
+          </div>
+        ) : null}
       </dl>
 
       <p
