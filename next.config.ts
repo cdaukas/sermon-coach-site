@@ -25,6 +25,8 @@ const nextConfig: NextConfig = {
         destination: "/how-its-scored.html",
         statusCode: 301,
       },
+      // Orphaned post-payment page from pre-Checkout migration; keep file on disk.
+      { source: "/welcome", destination: "/dashboard", statusCode: 301 },
     ];
   },
   async rewrites() {
@@ -33,10 +35,6 @@ const nextConfig: NextConfig = {
         {
           source: "/",
           destination: "/index.html",
-        },
-        {
-          source: "/welcome",
-          destination: "/welcome.html",
         },
         {
           source: "/blog",
