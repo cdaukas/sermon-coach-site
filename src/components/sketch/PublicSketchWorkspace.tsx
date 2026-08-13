@@ -167,7 +167,7 @@ function SaveReadCta({
         className="mb-3 text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        Want to keep this read? Nothing is stored until you ask.
+        Nothing here is stored until you ask.
       </p>
       {ui.kind === "error" ? (
         <p
@@ -196,8 +196,14 @@ function SaveReadCta({
           cursor: ui.kind === "saving" ? "wait" : "pointer",
         }}
       >
-        Create a free account to keep this read
+        Create a free account
       </button>
+      <p
+        className="mt-3 text-[15px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
+        Keeps this read, and your first full evaluation is free. No card.
+      </p>
     </div>
   );
 }
