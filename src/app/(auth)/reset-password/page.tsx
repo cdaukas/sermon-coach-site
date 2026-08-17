@@ -9,7 +9,9 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import { AuthCaptcha, useAuthCaptcha } from "@/components/auth/AuthCaptcha";
 import { createClient } from "@/lib/supabase/client";
+import { withCaptchaToken } from "@/lib/auth/captcha";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -19,6 +21,7 @@ export default function ResetPasswordPage() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const captcha = useAuthCaptcha();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +41,9 @@ export default function ResetPasswordPage() {
       typeof window !== "undefined" ? window.location.origin : "";
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${redirectBase}/auth/callback?next=/update-password`,
+      ...withCaptchaToken({}, captcha.token),
     });
+    captcha.reset();
     setLoading(false);
 
     if (error) {
@@ -94,7 +99,12 @@ export default function ResetPasswordPage() {
               onChange: (e) => setEmail(e.target.value),
             }}
           />
-          <AuthSubmit disabled={loading}>
+          <AuthCaptcha
+            siteKey={captcha.siteKey}
+            widgetRef={captcha.widgetRef}
+            onToken={captcha.setToken}
+          />
+          <AuthSubmit disabled={loading || !captcha.ready}>
             {loading ? "Sending…" : "Send reset link"}
           </AuthSubmit>
         </AuthForm>

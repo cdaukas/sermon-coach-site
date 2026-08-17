@@ -10,7 +10,9 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import { AuthCaptcha, useAuthCaptcha } from "@/components/auth/AuthCaptcha";
 import { createClient } from "@/lib/supabase/client";
+import { withCaptchaToken } from "@/lib/auth/captcha";
 import {
   buildCheckoutPath,
   buildMentorSeatCheckoutPath,
@@ -63,6 +65,7 @@ function LoginForm() {
     text: string;
   } | null>(queryBanner ?? null);
   const [loading, setLoading] = useState(false);
+  const captcha = useAuthCaptcha();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,7 +84,9 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
+      options: withCaptchaToken({}, captcha.token),
     });
+    captcha.reset();
     setLoading(false);
 
     if (error) {
@@ -163,7 +168,12 @@ function LoginForm() {
         <div className="-mt-1 text-right">
           <AuthLink href="/reset-password">Forgot password?</AuthLink>
         </div>
-        <AuthSubmit disabled={loading}>
+        <AuthCaptcha
+          siteKey={captcha.siteKey}
+          widgetRef={captcha.widgetRef}
+          onToken={captcha.setToken}
+        />
+        <AuthSubmit disabled={loading || !captcha.ready}>
           {loading ? "Signing in…" : "Sign in"}
         </AuthSubmit>
       </AuthForm>

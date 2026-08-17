@@ -11,10 +11,12 @@ import {
   AuthSubmit,
 } from "@/components/auth/AuthForm";
 import { SignupHoneypotField } from "@/components/auth/SignupHoneypotField";
+import { AuthCaptcha, useAuthCaptcha } from "@/components/auth/AuthCaptcha";
 import {
   EmailExistsMessage,
   isDuplicateSignupError,
 } from "@/lib/auth/signup-errors";
+import { withCaptchaToken } from "@/lib/auth/captcha";
 import { assertSignupBotAllowed } from "@/lib/auth/signup-bot-guard";
 import { setEmailPreferencesAtSignup } from "@/lib/auth/newsletter-opt-in";
 import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
@@ -88,6 +90,7 @@ function SignupForm() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const captcha = useAuthCaptcha();
 
   const loginHref = checkoutParams
     ? buildLoginPath(checkoutParams.cadence)
@@ -154,14 +157,18 @@ function SignupForm() {
     const { data, error } = await supabase.auth.signUp({
       email: trimmedEmail,
       password,
-      options: {
-        emailRedirectTo,
-        data: {
-          newsletter_opted_in: newsletterOptedIn,
-          tuesday_nudge_opted_in: tuesdayNudgeOptedIn,
+      options: withCaptchaToken(
+        {
+          emailRedirectTo,
+          data: {
+            newsletter_opted_in: newsletterOptedIn,
+            tuesday_nudge_opted_in: tuesdayNudgeOptedIn,
+          },
         },
-      },
+        captcha.token,
+      ),
     });
+    captcha.reset();
     setLoading(false);
 
     if (error) {
@@ -327,7 +334,12 @@ function SignupForm() {
               </span>
             </span>
           </label>
-          <AuthSubmit disabled={loading}>
+          <AuthCaptcha
+            siteKey={captcha.siteKey}
+            widgetRef={captcha.widgetRef}
+            onToken={captcha.setToken}
+          />
+          <AuthSubmit disabled={loading || !captcha.ready}>
             {loading ? "Creating account…" : "Create account"}
           </AuthSubmit>
         </AuthForm>
