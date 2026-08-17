@@ -39,6 +39,8 @@ export async function createStripeCheckoutSession(
       line_items: [{ price: params.priceId, quantity: 1 }],
       customer: params.customerId,
       client_reference_id: params.userId,
+      // Mutually exclusive with `discounts` on the same session.
+      allow_promotion_codes: true,
       subscription_data: {
         metadata: {
           supabase_user_id: params.userId,
