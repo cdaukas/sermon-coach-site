@@ -1,0 +1,20 @@
+# The Sermon Coach — sermoncoach.com
+
+User-agent: *
+Allow: /
+
+# Authenticated and transactional areas. No public value, no reason to crawl.
+Disallow: /dashboard
+Disallow: /login
+Disallow: /signup
+Disallow: /reset-password
+Disallow: /update-password
+Disallow: /invite/
+Disallow: /mentor/
+Disallow: /unsubscribe
+Disallow: /api/
+
+# Scratch and template artifacts
+Disallow: /blog/_template.html
+
+Sitemap: https://sermoncoach.com/sitemap.xml
