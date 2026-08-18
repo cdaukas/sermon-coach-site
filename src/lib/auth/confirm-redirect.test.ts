@@ -25,22 +25,31 @@ describe("safeRedirectPath", () => {
 describe("unwrapAuthCallbackNext", () => {
   it("extracts inner next from www callback emailRedirectTo", () => {
     const raw =
-      "https://www.sermoncoach.online/auth/callback?next=%2Fstart%3Fclaim%3Dabc-123";
+      "https://www.sermoncoach.com/auth/callback?next=%2Fstart%3Fclaim%3Dabc-123";
     assert.equal(unwrapAuthCallbackNext(raw), "/start?claim=abc-123");
   });
 
   it("extracts inner next from apex host", () => {
     const raw =
-      "https://sermoncoach.online/auth/callback?next=%2Fcheckout%3Fplan%3Dcoach%26cadence%3Dmonthly";
+      "https://sermoncoach.com/auth/callback?next=%2Fcheckout%3Fplan%3Dcoach%26cadence%3Dmonthly";
     assert.equal(
       unwrapAuthCallbackNext(raw),
       "/checkout?plan=coach&cadence=monthly",
     );
   });
 
+  it("still unwraps in-flight .online confirm links", () => {
+    assert.equal(
+      unwrapAuthCallbackNext(
+        "https://www.sermoncoach.online/auth/callback?next=%2Fstart%3Fclaim%3Dabc-123",
+      ),
+      "/start?claim=abc-123",
+    );
+  });
+
   it("falls back to pathname+search when inner next is absent", () => {
     assert.equal(
-      unwrapAuthCallbackNext("https://www.sermoncoach.online/start?claim=abc"),
+      unwrapAuthCallbackNext("https://www.sermoncoach.com/start?claim=abc"),
       "/start?claim=abc",
     );
   });
@@ -64,7 +73,7 @@ describe("resolveConfirmNextPath", () => {
   it("unwraps then applies safeRedirectPath", () => {
     assert.equal(
       resolveConfirmNextPath(
-        "https://www.sermoncoach.online/auth/callback?next=%2Fstart%3Fclaim%3Dtok",
+        "https://www.sermoncoach.com/auth/callback?next=%2Fstart%3Fclaim%3Dtok",
       ),
       "/start?claim=tok",
     );

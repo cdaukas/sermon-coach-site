@@ -1,5 +1,8 @@
 /** Hosts allowed when unwrapping emailRedirectTo from the confirm link. */
 const ALLOWED_REDIRECT_HOSTS = new Set([
+  "sermoncoach.com",
+  "www.sermoncoach.com",
+  // In-flight confirm emails issued before the Site URL move.
   "www.sermoncoach.online",
   "sermoncoach.online",
 ]);

@@ -351,7 +351,7 @@ export default async function EvaluationPage({
           aria-hidden="true"
           data-date={footerDate}
         >
-          The Sermon Coach · sermoncoach.online · {footerDate}
+          The Sermon Coach · sermoncoach.com · {footerDate}
         </footer>
       ) : null}
     </main>

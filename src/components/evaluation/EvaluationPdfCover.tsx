@@ -116,7 +116,7 @@ export function EvaluationPdfCover({
         <aside className="evaluation-pdf-cover-cta">
           <p className="evaluation-pdf-cover-cta-lead">Run yours (free)</p>
           <p className="evaluation-pdf-cover-cta-url">
-            <a href="https://sermoncoach.online">sermoncoach.online</a>
+            <a href="https://sermoncoach.com">sermoncoach.com</a>
           </p>
         </aside>
       </div>

@@ -14,7 +14,7 @@ describe("invite email template", () => {
     assert.match(html, /See the invitation/);
     assert.match(
       html,
-      /https:\/\/www\.sermoncoach\.online\/invite\/e4f36c55-385a-461a-9a51-ad635f6e657c/,
+      /https:\/\/sermoncoach\.com\/invite\/e4f36c55-385a-461a-9a51-ad635f6e657c/,
     );
     assert.match(html, /A seat on The Sermon Coach, on them\./);
     assert.doesNotMatch(html, /Unsubscribe/);

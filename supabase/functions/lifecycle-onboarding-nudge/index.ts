@@ -18,7 +18,7 @@ function buildOnboardingNudgeHtml(): string {
     "<p>You created your account a few days ago, but I don't see a sermon from you yet. No pressure, I know the week gets away from all of us.</p>",
     "<p>Whenever you're ready, it's one step: paste a manuscript or transcript into your dashboard and save. Could be this Sunday's message, or one you preached years ago and always wondered about. The evaluation comes back in a few minutes.</p>",
     "<p>If something got in the way, a question, a file that wouldn't paste, anything, just hit reply and tell me. I read every one.</p>",
-    "<p><a href=\"https://www.sermoncoach.online/dashboard/sermons/new\">Submit your first sermon →</a></p>",
+    "<p><a href=\"https://sermoncoach.com/dashboard/sermons/new\">Submit your first sermon →</a></p>",
     "<p>— Chris</p>",
   ].join("\n");
 }

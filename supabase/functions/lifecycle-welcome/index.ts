@@ -2,7 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const RESEND_FROM = "Chris Daukas <chris@sermoncoach.online>";
 const RESEND_REPLY_TO = "chris@sermoncoach.online";
-const DEFAULT_SITE_URL = "https://sermoncoach.online";
+const DEFAULT_SITE_URL = "https://sermoncoach.com";
 
 type DbWebhookUpdatePayload = {
   type: "UPDATE";
