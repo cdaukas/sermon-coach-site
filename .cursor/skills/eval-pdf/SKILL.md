@@ -54,6 +54,8 @@ When Supabase CAPTCHA is enabled, login shows a Turnstile widget (usually invisi
 
 **This is expected.** Complete the challenge in the headed browser window, finish sign-in, then wait for the script to save cookies. There is no programmatic bypass — the script intentionally uses a real browser session.
 
+If you see Cloudflare **Troubleshoot / error 600010**, that is Turnstile rejecting an automated browser (Chrome for Testing), not a bad site key. The cookie script launches real Google Chrome for this reason. Close that window, re-run `pdf:auth-cookies`, and sign in in the Google Chrome window that opens.
+
 If the script times out waiting for `/dashboard`:
 
 1. Check the headed window for a Turnstile checkbox or "Verify you are human" interstitial.
