@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
  * then send the user to /start with next= (page URL only; mirrors sketch claim).
  * Cookie writes are not allowed in Server Components.
  *
- * Production: cookie Domain=.sermoncoach.online so apex ↔ www both see it.
+ * Production: cookie Domain=.sermoncoach.com so apex ↔ www both see it.
  * StartLanding puts the *inner* accept path into emailRedirectTo flat — do not
  * nest /start?next= again into callback next (that over-encodes and can 500).
  */

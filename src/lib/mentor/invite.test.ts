@@ -97,10 +97,10 @@ describe("parseAcceptMentorInviteResult", () => {
 
 describe("mentorInviteCookieOptions", () => {
   it("sets parent domain on production hosts", () => {
-    const opts = mentorInviteCookieOptions(3600, "sermoncoach.online");
-    assert.equal(opts.domain, ".sermoncoach.online");
-    const www = mentorInviteCookieOptions(3600, "www.sermoncoach.online");
-    assert.equal(www.domain, ".sermoncoach.online");
+    const opts = mentorInviteCookieOptions(3600, "sermoncoach.com");
+    assert.equal(opts.domain, ".sermoncoach.com");
+    const www = mentorInviteCookieOptions(3600, "www.sermoncoach.com");
+    assert.equal(www.domain, ".sermoncoach.com");
   });
 
   it("omits domain on localhost", () => {

@@ -50,8 +50,8 @@ export function mentorInviteCookieOptions(
     domain?: string;
   } = { ...COOKIE_OPTIONS, maxAge };
 
-  // Scope to parent domain so apex-set cookies are visible on www (Site URL)
-  // and vice versa. Omit on localhost — Domain must match the request host.
+  // Scope to parent domain so apex-set cookies are visible on www and vice
+  // versa. Omit on localhost — Domain must match the request host.
   if (hostname && isSermonCoachProductionHost(hostname)) {
     options.domain = SITE_COOKIE_PARENT_DOMAIN;
   }
