@@ -11,6 +11,7 @@
  *   npm run pdf:auth-cookies
  */
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer, { type Cookie, type CookieParam } from "puppeteer";
@@ -57,24 +58,48 @@ async function main(): Promise<void> {
   const dashboardUrl = `${baseUrl}/dashboard`;
 
   console.log(`Opening ${dashboardUrl}`);
-  console.log("Sign in if prompted. This script saves cookies once you reach the dashboard.");
+  console.log(
+    "Sign in if prompted (Google Chrome window — not Chrome for Testing). Cookies save once you leave /login.",
+  );
 
   const browser = await puppeteer.launch({
+    channel: "chrome",
     headless: false,
     defaultViewport: null,
+    // waitForFunction is 5 minutes; Puppeteer's default protocolTimeout is 180s.
+    protocolTimeout: 6 * 60_000,
+    // Chrome for Testing sets navigator.webdriver; Turnstile then fails with 600010.
+    ignoreDefaultArgs: ["--enable-automation"],
+    args: [
+      "--disable-blink-features=AutomationControlled",
+      "--window-position=80,80",
+      "--window-size=1100,800",
+    ],
+    userDataDir: path.join(os.tmpdir(), "sermon-coach-pdf-auth-chrome"),
   });
 
   try {
     const page = await browser.newPage();
     await page.goto(dashboardUrl, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    console.log(`Now at ${page.url()}`);
 
+    // /login is the unauthenticated landing. After sign-in, middleware may send
+    // settled users to /dashboard or attribution-gated users to /start.
     await page.waitForFunction(
       () => {
         const { pathname } = window.location;
-        return pathname.startsWith("/dashboard") && pathname !== "/dashboard/login";
+        const onAuthForm =
+          pathname === "/login" ||
+          pathname.startsWith("/login/") ||
+          pathname === "/signup" ||
+          pathname.startsWith("/signup/") ||
+          pathname === "/reset-password" ||
+          pathname.startsWith("/reset-password");
+        return !onAuthForm;
       },
       { timeout: 5 * 60_000 },
     );
+    console.log(`Signed in — landed on ${page.url()}`);
 
     const cookies = await page.cookies(baseUrl);
     const authCookies = cookies.filter(isAuthCookie);
