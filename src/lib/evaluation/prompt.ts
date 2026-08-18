@@ -38,25 +38,41 @@ export function loadRewriteRegisterMarkdown(): string {
 
 const STRUCTURAL_CONTRACT = `## STRUCTURAL CONTRACT (NON-NEGOTIABLE)
 
-1. Score exactly 11 criteria in a 3+3+3+2 layout across the four canonical categories (Text & Theology, Structure & Craft, Application & Audience Connection, Ecclesial & Spiritual). Use the canonical criterion names from the rubric. Each criterion object: \`id\` (1–11), \`name\` (enum), \`category\` (1–4), \`tradition_tag\`, \`score\` (1–5), \`narrative\` (2–4 sentences of diagnostic critique with at least one direct sermon quote, then the mandatory PER-CRITERION CLOSE sentence from item 7), optional \`anchored_quote\`. Criterion 1 may add three extra sentences of melodic-line observation (not scored) between the passage-fidelity critique and the close. Do not submit category subtotals — the app computes them.
+0. **NO EM-DASHES IN GENERATED PROSE.** Do not use the em-dash character (U+2014) or the en-dash (U+2013) in any field you write. Recast with a comma, a period, or a semicolon. Do not substitute a hyphen or an unspaced double-hyphen. Quoted sermon text is the only exception: \`anchored_quote.text\`, \`rewrites[].original\`, and a quotation wrapping the preacher's own words inside \`narrative\` or \`rationale\`. Forbidden in: \`melodic_line_and_big_idea.book\` / \`passage\` / \`melodic_line\`, \`verdict.affirmation\`, \`verdict.improvement\`, criterion \`narrative\` outside those quotes, \`whats_working\` headlines and explanations, \`top_priorities\` headlines / principle_tag / rationale / practical_step, rewrite analysis / rewrite / moment_label, heat_map beat_label and notes. Verdict headlines (\`verdict_line\`) are produced later and must also stay dash-free.
 
-2. Split \`verdict\` into two JSON strings — \`affirmation\` and \`improvement\` (never one combined block). HARD LIMITS (count words before submit; over-limit responses are rejected): \`verdict.affirmation\` ≤60 words (target ~50–60; ONE named strength only; slightly elevated altitude; no quotation marks; no criterion-level detail). \`verdict.improvement\` ≤32 words (target ~25–30; headline pointer with one qualifying clause — not an explanation; no quotation marks). \`top_priorities[0]\` must match \`verdict.improvement\` in substance.
+1. Score exactly 11 criteria in a 3+3+3+2 layout across the four canonical categories (Text & Theology, Structure & Craft, Application & Audience Connection, Ecclesial & Spiritual). Use the canonical criterion names from the rubric. Each criterion object: \`id\` (1–11), \`name\` (enum), \`category\` (1–4), \`tradition_tag\`, \`score\` (1–5), \`narrative\` (2–4 sentences of diagnostic critique with at least one direct sermon quote, then the mandatory PER-CRITERION CLOSE sentence from item 7), optional \`anchored_quote\`. For criterion 1, write the scored work first (passage-fidelity critique plus the close). Then, unless \`reading_source\` is \`withheld\`, start a new paragraph of two or three sentences: observation plus question. Never embed that observation mid-paragraph or before the close. Do not submit category subtotals; the app computes them.
 
-3. Category dashboards are diagnostic-first. Do not add other prescriptive growth footers in per-criterion narratives beyond the mandatory PER-CRITERION CLOSE sentence in item 7 (required for every score, including 4 and 5). Do not include \`growth_opportunities\` or any per-category growth array — that field is not in the schema. Ranked, this-week prescriptive work goes in \`top_priorities\` only (length exactly 3; each item needs \`rank\`, \`headline\`, \`principle_tag\`, \`rationale\`, \`practical_step\`).
+2. Split \`verdict\` into two JSON strings, \`affirmation\` and \`improvement\` (never one combined block). HARD LIMITS (count words before submit; over-limit responses are rejected): \`verdict.affirmation\` ≤60 words (target ~50–60; ONE named strength only; slightly elevated altitude; no quotation marks; no criterion-level detail). \`verdict.improvement\` ≤32 words (target ~25–30; headline pointer with one qualifying clause, not an explanation; no quotation marks). \`top_priorities[0]\` must match \`verdict.improvement\` in substance.
 
-4. Set \`meta.audio_available\` from whether audio/video of the preached sermon was supplied. When \`audio_available\` is true, populate \`heat_map\` with full beat-by-beat data (\`beats\` with \`time_range\`, \`beat_label\`, \`register\`, \`text_supports\`, \`notes\`; optional \`total_minutes\`). When false (manuscript-only), set \`heat_map\` to \`null\` — no stub object, no manuscript-inferred timeline rows. Criterion #8 still scores in the rubric; its \`narrative\` carries delivery diagnostics in prose.
+3. Category dashboards are diagnostic-first. Do not add other prescriptive growth footers in per-criterion narratives beyond the mandatory PER-CRITERION CLOSE sentence in item 7 (required for every score, including 4 and 5). Do not include \`growth_opportunities\` or any per-category growth array; that field is not in the schema. Ranked, this-week prescriptive work goes in \`top_priorities\` only (length exactly 3; each item needs \`rank\`, \`headline\`, \`principle_tag\`, \`rationale\`, \`practical_step\`).
+
+4. Set \`meta.audio_available\` from whether audio/video of the preached sermon was supplied. When \`audio_available\` is true, populate \`heat_map\` with full beat-by-beat data (\`beats\` with \`time_range\`, \`beat_label\`, \`register\`, \`text_supports\`, \`notes\`; optional \`total_minutes\`). When false (manuscript-only), set \`heat_map\` to \`null\`: no stub object, no manuscript-inferred timeline rows. Criterion #8 still scores in the rubric; its \`narrative\` carries delivery diagnostics in prose.
 
 5. Lock section titles: "Where It's Strong", "Where You Can Grow", "What Improvement Looks Like". No alternatives or editorial garnish. JSON field names (\`whats_working\`, \`top_priorities\`, \`rewrites\`) describe content; titles are render-layer only.
 
-6. Return JSON matching \`submit_sermon_evaluation\` exactly. Top-level keys (all required): \`meta\`, \`scoring\`, \`verdict\`, \`categories\`, \`heat_map\`, \`whats_working\` (3–5 cards), \`top_priorities\` (exactly 3), \`rewrites\` (1–2), \`melodic_line_and_big_idea\`. \`meta\` includes \`audio_available\`. \`scoring\` includes \`composite_simple\`, \`composite_weighted\`, \`band\`, \`raw_total\`, \`raw_max\` (55) — no letter grade, no \`diagnostic_gap\`. \`categories\` is four items (3+3+3+2 criteria); each has \`id\`, \`name\`, \`number\`, \`criteria\` only. \`verdict\` is \`{ affirmation, improvement }\`. \`melodic_line_and_big_idea\` is the non-scored three-line block (book, passage, melodic_line, reading_source). Do not include \`fcf\`, \`growth_opportunities_detailed\`, \`methodology_note\`, or per-category \`growth_opportunities\`.
+6. Return JSON matching \`submit_sermon_evaluation\` exactly. Top-level keys (all required): \`meta\`, \`scoring\`, \`verdict\`, \`categories\`, \`heat_map\`, \`whats_working\` (3–5 cards), \`top_priorities\` (exactly 3), \`rewrites\` (1–2), \`melodic_line_and_big_idea\`. \`meta\` includes \`audio_available\`. \`scoring\` includes \`composite_simple\`, \`composite_weighted\`, \`band\`, \`raw_total\`, \`raw_max\` (55); no letter grade, no \`diagnostic_gap\`. \`categories\` is four items (3+3+3+2 criteria); each has \`id\`, \`name\`, \`number\`, \`criteria\` only. \`verdict\` is \`{ affirmation, improvement }\`. \`melodic_line_and_big_idea\` is the non-scored three-line block (book, passage, melodic_line, reading_source). Do not include \`fcf\`, \`growth_opportunities_detailed\`, \`methodology_note\`, or per-category \`growth_opportunities\`.
 
-7. **PER-CRITERION CLOSE** (append inside \`narrative\` for every criterion): End each criterion's narrative with ONE forward-looking sentence, scaled to its score.
+7. **PER-CRITERION CLOSE** (append inside \`narrative\` for every criterion): End the scored portion of each criterion's narrative with ONE forward-looking sentence, scaled to its score.
 
 - Scores 1 to 4 (climb note): Append one sentence naming what the next band up would concretely require IN THIS SERMON. Format: "To reach a [next score], [specific, sermon-anchored change]." Scale it with the score: a 1 to 2 or 2 to 3 note may name a foundational fix; a 3 to 4 note names a smaller, sharper move; a 4 to 5 note names the final increment to genuine excellence, the most refined and specific move of all, never a generic "tighten it up." A 4 is already strong, so its note must read as the last polish on good work, not as a correction. Example (3 to 4): "To reach a 4, ground the application in one concrete situation your congregation actually faces this week rather than the general call to trust." Example (4 to 5): "To reach a 5, carry the Monday-morning image from your conclusion back into the second point so the application arc is felt earlier, not only at the end."
 
 - Score 5 (hold note): Do not invent a weakness and do not imagine a sixth band. Append one sentence naming what the preacher should keep doing to hold this strength in future sermons. Format: "To hold this, [specific, sermon-anchored practice]." Phrase it as preservation, not correction. Example: "To hold this, keep letting the text set your structure the way the three movements here grew straight out of the passage's own logic."
 
-Rules for both notes: (a) ONE sentence, woven into the existing \`narrative\` field. Do NOT create a separate field, callout, or "Practical Step" box (that formatting belongs to Top 3 Priorities only). (b) The note POINTS tactically; it does not prescribe deeply. \`top_priorities\` remains the place for ranked, this-week prescriptive steps. If a criterion also appears in \`top_priorities\`, the note stays a one-line tactical pointer and must NOT duplicate the Priority's full prescription (different altitude). (c) Anchor it to a specific, namable change or practice in THIS sermon, not generic homiletics advice. (d) No em-dashes, sentence case, no quotation marks (the \`anchored_quote\` field carries any quoted sermon text).
+Rules for both notes: (a) ONE sentence, woven into the existing \`narrative\` field. Do NOT create a separate field, callout, or "Practical Step" box (that formatting belongs to Top 3 Priorities only). (b) The note POINTS tactically; it does not prescribe deeply. \`top_priorities\` remains the place for ranked, this-week prescriptive steps. If a criterion also appears in \`top_priorities\`, the note stays a one-line tactical pointer and must NOT duplicate the Priority's full prescription (different altitude). (c) Anchor it to a specific, namable change or practice in THIS sermon, not generic homiletics advice. (d) No em-dashes, sentence case, no quotation marks (the \`anchored_quote\` field carries any quoted sermon text). For criterion 1 only, the melodic-line paragraph comes AFTER this close, not before it.
+
+8. **\`tradition_tag\` is locked.** Copy the exact string for that criterion id. Author or org, then a middle dot, then the work. Never put the criterion name in the work slot. Criterion 4 is Chapell's book, not "Fallen Condition Focus".
+
+- 1: Simeon Trust · Expositional Preaching
+- 2: Chapell · Christ-Centered Preaching
+- 3: Piper · The Supremacy of God in Preaching
+- 4: Chapell · Christ-Centered Preaching
+- 5: Robinson · Biblical Preaching
+- 6: Simeon Trust · Workshop practice
+- 7: Keller · Preaching
+- 8: Piper · Expository Exultation
+- 9: Keller · Preaching
+- 10: 9Marks · Preach
+- 11: Piper · Expository Exultation
 
 Schema validation will reject responses that violate this contract. Call \`submit_sermon_evaluation\` once with the complete object.`;
 
@@ -83,16 +99,16 @@ Three levels, kept distinct:
 
 **Name the reading before you comment on it.** Every other criterion may assert. The melodic-line observation states its premise first. That is workshop conversation, not a machine grading a contested exegetical position.
 
-**Criterion 1 narrative. Observation plus question, never a verdict.** After the passage-fidelity critique, and before the per-criterion close, add exactly three sentences. Show this book's line; do not define "melodic line." Naming the line concretely teaches the concept. Definitions belong in How It's Scored, not in per-evaluation prose. Do not use in-tune / out-of-tune / partly-in-tune language. Do not let this observation change the score. No em-dashes.
+**Criterion 1 narrative. Two paragraphs.** First paragraph: passage-fidelity critique, then the per-criterion close ("To reach a 5, ..." or "To hold this, ..."). Second paragraph: two or three sentences, observation plus question, never a verdict. Put a paragraph break between them. Do not embed the observation mid-paragraph or before the close. Show this book's line; do not define "melodic line." Naming the line concretely teaches the concept. Definitions belong in How It's Scored, not in per-evaluation prose. Do not use in-tune / out-of-tune / partly-in-tune language. Do not let this observation change the score. No em-dashes.
 
 1. Name the melody this read is working from, as this book actually sings it.
 2. Name where this sermon sits relative to it, as observation.
 3. Ask whether any difference was deliberate. Give the preacher a dignified answer either way.
 
-Model:
+Model (second paragraph only; the close already happened above it):
 "Philippians keeps returning to partnership in the gospel that holds under pressure, with Christ as both the pattern and the prize. Your sermon on 4:10-13 reads the passage as a lesson in learned contentment and does not lean on that larger argument. Was that a choice, this week standing on its own, or did the book recede without you meaning it to?"
 
-The per-criterion close still belongs to the scored work (passage fidelity), not to this observation.
+The per-criterion close belongs to the scored work (passage fidelity), not to this observation. The observation is the last thing in criterion 1's narrative.
 
 **What is worth noticing when it is present (observation only — never a scoring trigger):**
 1. Wrong book's tune. James read through Romans. Proverbs preached on a Pauline indicative-then-imperative frame. Ecclesiastes resolved by Philippians.
@@ -111,9 +127,9 @@ The per-criterion close still belongs to the scored work (passage fidelity), not
 **\`melodic_line_and_big_idea\` (required JSON object, not scored, no verdict):**
 - \`book\`: the book, named. Short. "Philippians." Not an argument and not a score.
 - \`passage\`: one sentence. The theme / big idea of *this passage*.
-- \`melodic_line\`: one sentence. The unifying theme of the book as this report reads it. If the preacher named a working line, that line is the premise — restate it, do not replace it. If withheld, say that this read will not invent one.
+- \`melodic_line\`: one sentence. The unifying theme of the book as this report reads it. If the preacher named a working line, that line is the premise; restate it, do not replace it. If withheld, say that this read will not invent one.
 - \`reading_source\`: \`preacher\` when working from a line the preacher named; \`derived\` when this read supplies the book's argument; \`withheld\` when you will not invent one.
-No \`fit\`. No in-tune / out-of-tune label. The JSON block is descriptive. The observation-and-question lives in criterion 1's narrative.`;
+No \`fit\`. No in-tune / out-of-tune label. The JSON block is descriptive. No em-dashes in any of these strings. The observation-and-question lives in criterion 1's closing paragraph, after the close sentence.`;
 
 export function buildSystemPrompt(): string {
   const rubric = loadRubricMarkdown();

@@ -15,6 +15,32 @@ export const CANONICAL_CRITERION_NAMES = [
   "Expository exultation",
 ] as const;
 
+/**
+ * Locked `tradition_tag` values: author or org, middle dot, work.
+ * The work is never the criterion name. Criterion 4's work is
+ * Christ-Centered Preaching, not Fallen Condition Focus.
+ */
+export const CANONICAL_TRADITION_TAGS: Record<number, string> = {
+  1: "Simeon Trust · Expositional Preaching",
+  2: "Chapell · Christ-Centered Preaching",
+  3: "Piper · The Supremacy of God in Preaching",
+  4: "Chapell · Christ-Centered Preaching",
+  5: "Robinson · Biblical Preaching",
+  6: "Simeon Trust · Workshop practice",
+  7: "Keller · Preaching",
+  8: "Piper · Expository Exultation",
+  9: "Keller · Preaching",
+  10: "9Marks · Preach",
+  11: "Piper · Expository Exultation",
+};
+
+export function traditionTagForCriterion(
+  id: number,
+  fallback?: string,
+): string {
+  return CANONICAL_TRADITION_TAGS[id] ?? fallback ?? "";
+}
+
 const heatMapRegisterEnum = [
   "humor",
   "diagnostic",
@@ -55,7 +81,11 @@ const criterionSchema = {
     id: { type: "integer" as const, minimum: 1, maximum: 11 },
     name: { type: "string" as const, enum: [...CANONICAL_CRITERION_NAMES] },
     category: { type: "integer" as const, minimum: 1, maximum: 4 },
-    tradition_tag: { type: "string" as const },
+    tradition_tag: {
+      type: "string" as const,
+      description:
+        "Locked source attribution: author or org, space, middle dot, space, work title. Use the exact string from the tradition_tag table. Never put the criterion name in the work slot.",
+    },
     score: { type: "integer" as const, minimum: 1, maximum: 5 },
     narrative: { type: "string" as const },
     anchored_quote: anchoredQuoteSchema,

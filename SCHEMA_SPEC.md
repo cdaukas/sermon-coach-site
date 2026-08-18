@@ -109,9 +109,9 @@ Each criterion object:
 - `id`: 1–11
 - `name`: enum from canonical list above
 - `category`: 1 | 2 | 3 | 4
-- `tradition_tag`: string (e.g., "Simeon Trust", "Chapell")
+- `tradition_tag`: locked string by criterion id, `Author · Work` (e.g., "Chapell · Christ-Centered Preaching"). Never the criterion name in the work slot. Criterion 4 is Chapell's book, not "Fallen Condition Focus".
 - `score`: integer 1–5
-- `narrative`: string (2–4 sentences, must include at least one direct sermon quote)
+- `narrative`: string (2–4 sentences of scored critique, must include at least one direct sermon quote). Criterion 1 is two paragraphs: scored work plus the close, then a blank line, then two or three sentences of melodic-line observation plus question (omit that second paragraph when `reading_source` is `withheld`).
 - `anchored_quote`: object `{ text, approximate_location }` or `null` — optional on model output; present when the model attaches a short sermon extract for that criterion (fill rate is incomplete; quotes are not required)
 - `verdict_line`: string or `null` — one complete sentence summarizing what happened on this criterion in this sermon (12–18 words, narrative register, ends with a period). Produced by a separate Haiku summarization pass after scoring (not by the evaluation prompt). On write after that pass: key required, value may be null if the pass failed. On read: key may be absent or null (pre-pass rows render as today). Gated by field presence, not `prompt_version` — this pass is not a scoring change. Never restates the score or band.
 - `is_double_weighted`: boolean (true for #3, #4, #7; false otherwise) — derive in schema, don't trust the model

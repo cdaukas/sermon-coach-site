@@ -6,6 +6,7 @@ import {
   evaluationReportCopy,
   type OutputLanguage,
 } from "@/lib/evaluation/output-language";
+import { traditionTagForCriterion } from "@/lib/evaluation/tool-schema";
 import {
   criterionScoreColor,
   criterionScoreFillPercent,
@@ -137,7 +138,12 @@ export function CategoryCard({
                     style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
                   >
                     {" · "}
-                    <em style={{ fontStyle: "italic" }}>{criterion.tradition_tag}</em>
+                    <em style={{ fontStyle: "italic" }}>
+                      {traditionTagForCriterion(
+                        criterion.id,
+                        criterion.tradition_tag,
+                      )}
+                    </em>
                   </span>
                 </p>
               </div>
@@ -156,12 +162,19 @@ export function CategoryCard({
                 background: "var(--sc-accent-pale)",
               }}
             >
-              <p
-                className="mb-3 text-[15px] leading-relaxed"
-                style={{ ...serifFont, color: "var(--sc-ink)" }}
-              >
-                {criterion.narrative}
-              </p>
+              {criterion.narrative
+                .split(/\n\s*\n/)
+                .map((part) => part.trim())
+                .filter((part) => part.length > 0)
+                .map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="mb-3 text-[15px] leading-relaxed"
+                    style={{ ...serifFont, color: "var(--sc-ink)" }}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
               {criterion.anchored_quote ? (
                 <blockquote
                   className="mt-4 border-l-2 pl-4 text-[15px] italic leading-relaxed"

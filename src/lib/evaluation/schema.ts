@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { VERDICT_STRICT_CAPS_FROM } from "./prompt";
-import { CANONICAL_CRITERION_NAMES } from "./tool-schema";
+import {
+  CANONICAL_CRITERION_NAMES,
+  traditionTagForCriterion,
+} from "./tool-schema";
 import { normalizeLegacyEvaluationResult } from "./schema-legacy";
 
 // ---------------------------------------------------------------------------
@@ -219,6 +222,10 @@ function makeEvaluationCriterionStrictSchema(mode: VerdictLineSchemaMode) {
       .transform(
         (criterion): EvaluationCriterionStrict => ({
           ...criterion,
+          tradition_tag: traditionTagForCriterion(
+            criterion.id,
+            criterion.tradition_tag,
+          ),
           is_double_weighted: isDoubleWeightedCriterion(criterion.id),
         }),
       );
@@ -232,6 +239,10 @@ function makeEvaluationCriterionStrictSchema(mode: VerdictLineSchemaMode) {
     .transform(
       (criterion): EvaluationCriterionStrict => ({
         ...criterion,
+        tradition_tag: traditionTagForCriterion(
+          criterion.id,
+          criterion.tradition_tag,
+        ),
         is_double_weighted: isDoubleWeightedCriterion(criterion.id),
       }),
     );

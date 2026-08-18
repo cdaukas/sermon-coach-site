@@ -214,6 +214,30 @@ describe("criterion verdict_line schema gate", () => {
     assert.equal(failsSentenceParse(line), true);
   });
 
+  it("flags em-dashes and en-dashes for quality retry", () => {
+    const em =
+      "The two big ideas split the force—the closing line is the more preachable.";
+    const en =
+      "The two big ideas split the force–the closing line is the more preachable.";
+    const doubled =
+      "The two big ideas split the force--the closing line is the more preachable.";
+    for (const line of [em, en, doubled]) {
+      const issues = detectSentenceParseIssues(line);
+      assert.ok(
+        issues.some((i) => i.reason === "em_dash"),
+        `expected em_dash issue: ${line}`,
+      );
+      assert.equal(failsSentenceParse(line), true);
+    }
+
+    const quality = collectVerdictLineQualityIssues(
+      new Map([[2, em]]),
+      new Map([[2, 3]]),
+    );
+    assert.ok(quality.some((issue) => issue.reason === "em_dash"));
+    assert.equal(quality.find((issue) => issue.reason === "em_dash")?.id, 2);
+  });
+
   it("hasOverlongVerdictLine is true for 28- and 30-word observed lines", () => {
     assert.equal(countWords(LINE_28), 28);
     assert.equal(countWords(LINE_30), 30);
@@ -256,6 +280,8 @@ describe("criterion verdict_line schema gate", () => {
     assert.doesNotMatch(prompt, /scores 1–4 never drop the second half/i);
     assert.match(prompt, /subject and verb must agree/i);
     assert.match(prompt, /Greek is asserted rather than shown/i);
+    assert.match(prompt, /em-dash/);
+    assert.match(prompt, /Recast with a comma, a period, or a semicolon/);
   });
 });
 

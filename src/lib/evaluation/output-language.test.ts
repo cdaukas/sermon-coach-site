@@ -64,5 +64,9 @@ describe("Spanish display maps", () => {
       SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
       /canonical English enum/,
     );
+    assert.match(
+      SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
+      /No em-dashes \(U\+2014\)/,
+    );
   });
 });

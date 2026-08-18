@@ -9,7 +9,10 @@ import { CategoryCard } from "./CategoryCard";
 import { HeadlineLockup } from "./HeadlineLockup";
 import { HeatMapSection } from "./HeatMapSection";
 import { HowItPreachesSection } from "./HowItPreachesSection";
-import { MelodicLineSection } from "./MelodicLineSection";
+import {
+  MelodicLineSection,
+  type MelodicTreatmentView,
+} from "./MelodicLineSection";
 import { MethodologySection } from "./MethodologySection";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
@@ -29,6 +32,9 @@ type EvaluationDashboardProps = {
    */
   headlineTitle?: string | null;
   outputLanguage?: OutputLanguage;
+  /** Quiet lead-in treatments for the descriptive melodic-line block. */
+  melodicTreatment?: MelodicTreatmentView;
+  melodicSwitcherHrefs?: Record<MelodicTreatmentView, string>;
 };
 
 export function EvaluationDashboard({
@@ -39,6 +45,8 @@ export function EvaluationDashboard({
   howItPreaches = null,
   headlineTitle = null,
   outputLanguage = "en",
+  melodicTreatment = 1,
+  melodicSwitcherHrefs,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const copy = evaluationReportCopy(outputLanguage);
@@ -113,6 +121,8 @@ export function EvaluationDashboard({
         <MelodicLineSection
           block={result.melodic_line_and_big_idea}
           outputLanguage={outputLanguage}
+          treatment={melodicTreatment}
+          switcherHrefs={melodicSwitcherHrefs}
         />
       ) : null}
 

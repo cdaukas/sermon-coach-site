@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
+import {
+  melodicTreatmentHref,
+  parseMelodicTreatment,
+} from "@/components/evaluation/MelodicLineSection";
 import { getPublicSampleEvaluation } from "@/lib/evaluation/public-sample";
 import "@/app/evaluation-print.css";
 
@@ -25,7 +29,12 @@ export const dynamic = "force-dynamic";
  * Unauthenticated sample evaluation page.
  * Resolves the single is_public_sample row server-side. No evaluation id in the URL.
  */
-export default async function PublicSampleEvaluationPage() {
+export default async function PublicSampleEvaluationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ml?: string }>;
+}) {
+  const { ml } = await searchParams;
   const sample = await getPublicSampleEvaluation();
 
   if (!sample) {
@@ -96,6 +105,13 @@ export default async function PublicSampleEvaluationPage() {
             howItPreaches={sample.howItPreaches}
             showPrintActions={false}
             headlineTitle={sample.sermonTitle}
+            melodicTreatment={parseMelodicTreatment(ml)}
+            melodicSwitcherHrefs={{
+              1: melodicTreatmentHref("/sample-evaluation", {}, 1),
+              2: melodicTreatmentHref("/sample-evaluation", {}, 2),
+              3: melodicTreatmentHref("/sample-evaluation", {}, 3),
+              all: melodicTreatmentHref("/sample-evaluation", {}, "all"),
+            }}
           />
         </main>
 

@@ -72,6 +72,10 @@ describe("sermon context", () => {
     );
     assert.match(preamble, /MELODIC LINE OVERRIDE/);
     assert.match(preamble, /reading_source` to `preacher/);
+    assert.match(
+      preamble,
+      /observation paragraph at the end of criterion 1's narrative, after the/,
+    );
     assert.doesNotMatch(preamble, /Additional notes:/);
   });
 

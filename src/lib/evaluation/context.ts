@@ -133,7 +133,8 @@ export function buildContextPreamble(context: SermonContext): string {
       "",
       "MELODIC LINE OVERRIDE: The preacher named a working melodic line for this book.",
       "Use THAT line as the premise for `melodic_line_and_big_idea` and for the",
-      "observation in criterion 1's narrative. Do not score against it. Name it as",
+      "observation paragraph at the end of criterion 1's narrative, after the",
+      "per-criterion close. Do not score against it. Name it as",
       "the preacher's reading before you comment. Set `reading_source` to `preacher`.",
     );
   }

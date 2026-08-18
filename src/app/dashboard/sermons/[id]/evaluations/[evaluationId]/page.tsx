@@ -4,6 +4,10 @@ import { notFound } from "next/navigation";
 import { CoachingReportView } from "@/components/evaluation/CoachingReportView";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
 import {
+  melodicTreatmentHref,
+  parseMelodicTreatment,
+} from "@/components/evaluation/MelodicLineSection";
+import {
   EvaluationPdfCover,
   type EvaluationPdfCoverVariant,
 } from "@/components/evaluation/EvaluationPdfCover";
@@ -40,6 +44,8 @@ type EvaluationPageProps = {
     preacher?: string;
     /** Owner stopgap debrief: omit or "evaluation" for scores; "debrief" for coaching. */
     view?: string;
+    /** Temporary: compare quiet melodic-line block treatments (1 | 2 | 3 | all). */
+    ml?: string;
   }>;
 };
 
@@ -100,6 +106,7 @@ export default async function EvaluationPage({
     variant: variantParam,
     preacher: preacherParam,
     view: viewParam,
+    ml: mlParam,
   } = await searchParams;
   const pdfCapture = pdf === "1";
   const preparedFor = preparedForParam?.trim() ?? "";
@@ -316,6 +323,17 @@ export default async function EvaluationPage({
           showPrintActions={!pdfCapture}
           howItPreaches={evaluation.how_it_preaches}
           outputLanguage={evaluation.output_language}
+          melodicTreatment={parseMelodicTreatment(mlParam)}
+          melodicSwitcherHrefs={
+            pdfCapture
+              ? undefined
+              : {
+                  1: melodicTreatmentHref(basePath, { view: viewParam }, 1),
+                  2: melodicTreatmentHref(basePath, { view: viewParam }, 2),
+                  3: melodicTreatmentHref(basePath, { view: viewParam }, 3),
+                  all: melodicTreatmentHref(basePath, { view: viewParam }, "all"),
+                }
+          }
         />
       )}
 

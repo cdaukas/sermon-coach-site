@@ -424,27 +424,27 @@ Display the full bands table in the Methodology appendix at the end of the dashb
 
 ## Category 1 — Text & Theology *(max 15 points)*
 
-**1. Textual fidelity & exegesis** *(Simeon Trust)*
+**1. Textual fidelity & exegesis** *(Simeon Trust, Expositional Preaching)*
 Does the sermon actually say what the text says? Does it honor the genre, context, grammar, and intended sense of the passage — or does it use the text as a launchpad for the preacher's own agenda? Scope: whether the sermon's claims are anchored in the passage. Wrestling with the *hard* parts of the text is scored separately under #6 (Hard things handled) — keep that distinction clean.
 
-The book's unifying theme (Simeon Trust's **melodic line**) is named as context in the display block and in this criterion's narrative, as observation plus question. It is not scored here and must not move this band. Name the reading before you comment on it. The single dominant idea of *this passage* is scored under 5 (Robinson's big idea).
+The book's unifying theme (Simeon Trust's **melodic line**) is named as context in the display block and in this criterion's closing paragraph, as observation plus question. It is not scored here and must not move this band. Name the reading before you comment on it. The single dominant idea of *this passage* is scored under 5 (Robinson's big idea).
 
-Three sentences. Show the book's line; do not define the term. No em-dashes. Observation plus question, never a verdict. Model: "Philippians keeps returning to partnership in the gospel that holds under pressure, with Christ as both the pattern and the prize. Your sermon on 4:10-13 reads the passage as a lesson in learned contentment and does not lean on that larger argument. Was that a choice, this week standing on its own, or did the book recede without you meaning it to?"
+Two paragraphs. First: passage-fidelity critique, then the per-criterion close ("To reach a 5, ..." or "To hold this, ..."). Second: two or three sentences, observation plus question, never a verdict. Never embed the observation mid-paragraph or before the close. Show the book's line; do not define the term. No em-dashes. Model for the second paragraph: "Philippians keeps returning to partnership in the gospel that holds under pressure, with Christ as both the pattern and the prize. Your sermon on 4:10-13 reads the passage as a lesson in learned contentment and does not lean on that larger argument. Was that a choice, this week standing on its own, or did the book recede without you meaning it to?"
 
 **2. Christ-centered / redemptive arc** *(Chapell, Christ-Centered Preaching)*
 Does the sermon land in the gospel — the person and work of Christ as the answer to the text's Fallen Condition Focus — or does it stop at moralism, advice, or principles for better living?
 
-**3. Gospel clarity** *(Desiring God / Piper)*
+**3. Gospel clarity** *(Piper, The Supremacy of God in Preaching)*
 Is the good news made unmistakable? Could a non-Christian in the room walk out knowing what the gospel is and why it matters, not just what they're supposed to do better?
 
 ---
 
 ## Category 2 — Structure & Craft *(max 15 points)*
 
-**4. Fallen Condition Focus** *(Chapell)*
+**4. Fallen Condition Focus** *(Chapell, Christ-Centered Preaching)*
 Is there a clear, specific human condition the text addresses — and does the sermon stay anchored to it throughout? The FCF should be one sentence in present tense, specific to this text, not generic fallenness. Drift from the FCF is the most common structural failure.
 
-**5. Structure** *(Robinson)*
+**5. Structure** *(Robinson, Biblical Preaching)*
 A single composite criterion with three sub-questions. Score 1–5 overall; the narrative should address all three.
 - *Big idea.* One main thing, or many? Does the sermon have a single dominant idea, the one this passage itself yields, that every section serves? Or is it a string of true-but-unconnected observations? Robinson's term is the big idea; Simeon Trust would call it the theme of the passage. It is **not** the melodic line, which belongs to the book and is named as context, not scored.
 - *Structural fit.* Does the sermon's shape rise out of the passage, or is it imposed on the passage from outside? Three points pulled cleanly from a three-part text is structural fit; three points pulled from the preacher's prior framework and then mapped onto the text is not.
@@ -452,7 +452,7 @@ A single composite criterion with three sub-questions. Score 1–5 overall; the 
 
 A 5 on this criterion requires strength in all three. A weakness in any one of them caps the score at 3, no matter how strong the other two are — the structure isn't doing its full job.
 
-**6. Hard things handled** *(Sermon-coach, drawing on Simeon Trust workshop practice)*
+**6. Hard things handled** *(Simeon Trust, Workshop practice)*
 Does the sermon wrestle with the genuinely difficult parts of the passage — the verses that resist easy resolution, the moves that don't fit neat homiletical packaging, the texts that disturb before they comfort — or does it skip them, defuse them too quickly, or paper them over with theological correctness?
 
 This criterion exists because Reformed congregations especially can absorb hard exegesis; what they cannot absorb is a preacher who has *avoided* the hard thing while looking like he addressed it. Common failure modes: hedging the disturbing text into immediate comfort; quoting the difficult verse without preaching it; using a footnote-level interpretive move to neutralize the text's rhetorical force; reaching for the resurrection too fast.
@@ -463,23 +463,23 @@ A 5 here means the preacher let the hard thing be hard, named what makes it hard
 
 ## Category 3 — Application & Audience Connection *(max 15 points)*
 
-**7. Application to present audience** *(Keller)*
+**7. Application to present audience** *(Keller, Preaching)*
 Does this land in the present moment, in this room, with these people — or is it a lecture about ancient Israel that never crosses the bridge into the listener's actual life? This is the highest-stakes category in Chris's rubric. A sermon can be exegetically faithful and homiletically irrelevant; that combination is the failure this criterion exists to catch. Keller's three-audiences framework (believers, doubters, seekers present simultaneously) is the diagnostic lens — does the sermon address only the in-group, or all three?
 
-**8. Emotional arc and dynamics**
+**8. Emotional arc and dynamics** *(Piper, Expository Exultation)*
 Is the emotional shape of the sermon — lament, joy, warning, comfort, conviction, awe — designed into the manuscript itself? Does the text engineer its own dynamics: escalation and restraint, the turn from weight to hope, the short line that lands after a long stretch, the pause built by a paragraph break rather than left to chance? This criterion scores the emotional architecture on the page — where the sermon presses in and where it releases. A manuscript can fully succeed here. A 5 means the emotional arc is deliberately built, paced, and varied, so the text itself carries the congregation through real movement rather than holding one flat register from open to close. The failure mode — one emotional gear the whole way, all teaching or all intensity, with no engineered rise and fall — is visible on the page and named here. When audio or video is available, the Heat Map subsection assesses whether *delivery* matched this designed arc; without audio, this criterion scores the design alone, to a full 5.
 
-**9. Pastoral specificity** *(Keller)*
+**9. Pastoral specificity** *(Keller, Preaching)*
 Does the application address actual people in actual situations? "We all struggle with idolatry" is generic. "If you're the dad who can't stop checking work email at the dinner table, this text is naming what's happening" is specific. Generic application is sermon-shaped wallpaper.
 
 ---
 
 ## Category 4 — Ecclesial & Spiritual *(max 10 points)*
 
-**10. Ecclesial faithfulness** *(9Marks)*
+**10. Ecclesial faithfulness** *(9Marks, Preach)*
 Does this sermon strengthen the church's understanding of itself as the people of God under the Word? Expositional preaching is the first mark of a healthy church in the 9Marks framework — does this sermon function as such?
 
-**11. Expository exultation** *(Piper)*
+**11. Expository exultation** *(Piper, Expository Exultation)*
 Is there evidence the preacher has been affected by what he's preaching, not just informing about it? "Expository exultation" is Piper's phrase for preaching that combines rigorous explanation with worshipful affection. A sermon that explains without exulting is a lecture; a sermon that exults without explaining is a pep talk.
 
 ---
