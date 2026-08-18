@@ -10,7 +10,9 @@ import {
   AuthLink,
   AuthSubmit,
 } from "@/components/auth/AuthForm";
+import { AuthCaptcha, useAuthCaptcha } from "@/components/auth/AuthCaptcha";
 import { SignupHoneypotField } from "@/components/auth/SignupHoneypotField";
+import { withCaptchaToken } from "@/lib/auth/captcha";
 import { assertSignupBotAllowed } from "@/lib/auth/signup-bot-guard";
 import {
   EmailExistsMessage,
@@ -83,6 +85,7 @@ export function StartLanding({
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const captcha = useAuthCaptcha();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -137,14 +140,18 @@ export function StartLanding({
     const { data, error } = await supabase.auth.signUp({
       email: trimmedEmail,
       password,
-      options: {
-        emailRedirectTo,
-        data: {
-          newsletter_opted_in: newsletterOptedIn,
-          tuesday_nudge_opted_in: tuesdayNudgeOptedIn,
+      options: withCaptchaToken(
+        {
+          emailRedirectTo,
+          data: {
+            newsletter_opted_in: newsletterOptedIn,
+            tuesday_nudge_opted_in: tuesdayNudgeOptedIn,
+          },
         },
-      },
+        captcha.token,
+      ),
     });
+    captcha.reset();
     setLoading(false);
 
     if (error) {
@@ -341,7 +348,12 @@ export function StartLanding({
                   </span>
                 </span>
               </label>
-              <AuthSubmit disabled={loading}>
+              <AuthCaptcha
+                siteKey={captcha.siteKey}
+                widgetRef={captcha.widgetRef}
+                onToken={captcha.setToken}
+              />
+              <AuthSubmit disabled={loading || !captcha.ready}>
                 {loading ? "Creating account…" : "Create free account"}
               </AuthSubmit>
             </AuthForm>

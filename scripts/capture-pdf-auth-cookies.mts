@@ -4,6 +4,9 @@
  *
  * Prerequisites: `npm run dev` running.
  *
+ * When Supabase CAPTCHA is on, complete the Turnstile challenge in the headed
+ * browser if login prompts for it (see .cursor/skills/eval-pdf/SKILL.md).
+ *
  * Usage:
  *   npm run pdf:auth-cookies
  */
