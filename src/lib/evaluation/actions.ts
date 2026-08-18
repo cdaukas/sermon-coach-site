@@ -99,6 +99,7 @@ export async function requestEvaluation(
     .from("sermons")
     .select("id, title, primary_passage")
     .eq("id", sermonId)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (sermonError) {
