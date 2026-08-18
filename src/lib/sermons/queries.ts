@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
   DashboardSermonRow,
+  DeletedSermonRow,
   SermonListItem,
   SermonWithLatestVersion,
 } from "./types";
@@ -11,6 +12,7 @@ export async function listSermons(): Promise<SermonListItem[]> {
   const { data, error } = await supabase
     .from("sermons")
     .select("id, title, created_at, updated_at")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -29,7 +31,8 @@ export async function listDashboardSermons(): Promise<DashboardSermonRow[]> {
 
   const { data: sermons, error: sermonsError } = await supabase
     .from("sermons")
-    .select("id, title, primary_passage, created_at")
+    .select("id, title, primary_passage, created_at, excluded_from_growth")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (sermonsError) {
@@ -109,6 +112,7 @@ export async function listDashboardSermons(): Promise<DashboardSermonRow[]> {
       title: sermon.title,
       primary_passage: sermon.primary_passage,
       created_at: sermon.created_at,
+      excluded_from_growth: sermon.excluded_from_growth === true,
       completeEvaluationCount: complete.length,
       latestEvaluation: latest
         ? {
@@ -130,6 +134,7 @@ export async function getSermonWithLatestVersion(
     .from("sermons")
     .select("*")
     .eq("id", id)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (sermonError) {
@@ -153,4 +158,30 @@ export async function getSermonWithLatestVersion(
   }
 
   return { ...sermon, latest_version: version };
+}
+
+/**
+ * Owner-visible soft-deleted sermons. Relies on sermons_select_own still
+ * returning rows with deleted_at set; do not hide those in RLS.
+ */
+export async function listDeletedSermons(): Promise<DeletedSermonRow[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("sermons")
+    .select("id, title, deleted_at")
+    .not("deleted_at", "is", null)
+    .order("deleted_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? [])
+    .filter((row): row is DeletedSermonRow => typeof row.deleted_at === "string")
+    .map((row) => ({
+      id: row.id,
+      title: row.title,
+      deleted_at: row.deleted_at,
+    }));
 }

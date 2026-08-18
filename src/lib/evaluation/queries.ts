@@ -102,6 +102,20 @@ export async function getEvaluationStatus(
     return null;
   }
 
+  const { data: sermon, error: sermonError } = await supabase
+    .from("sermons")
+    .select("id, deleted_at")
+    .eq("id", version.sermon_id)
+    .maybeSingle();
+
+  if (sermonError) {
+    throw new Error(sermonError.message);
+  }
+
+  if (!sermon || sermon.deleted_at) {
+    return null;
+  }
+
   const status = row.status as EvaluationStatus;
   const debriefReady =
     row.report_mode === "debrief" && row.coaching_narrative != null;
@@ -175,7 +189,7 @@ export async function getEvaluationById(
   if (version) {
     const { data, error: sermonError } = await supabase
       .from("sermons")
-      .select("id, title, primary_passage")
+      .select("id, title, primary_passage, deleted_at")
       .eq("id", version.sermon_id)
       .maybeSingle();
 
@@ -183,7 +197,17 @@ export async function getEvaluationById(
       throw new Error(sermonError.message);
     }
 
-    sermon = data;
+    if (data?.deleted_at) {
+      return null;
+    }
+
+    sermon = data
+      ? {
+          id: data.id,
+          title: data.title,
+          primary_passage: data.primary_passage,
+        }
+      : null;
     if (sermon) {
       manuscriptContent =
         typeof version.content === "string" ? version.content : null;
@@ -266,7 +290,9 @@ export async function listRecentCompleteEvaluations(
   const { data: sermons, error: sermonsError } = await supabase
     .from("sermons")
     .select("id, title, primary_passage")
-    .in("id", sermonIds);
+    .in("id", sermonIds)
+    .is("deleted_at", null)
+    .eq("excluded_from_growth", false);
 
   if (sermonsError) {
     throw new Error(sermonsError.message);
@@ -340,7 +366,9 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
   const { data: sermons, error: sermonsError } = await supabase
     .from("sermons")
     .select("id, title")
-    .in("id", sermonIds);
+    .in("id", sermonIds)
+    .is("deleted_at", null)
+    .eq("excluded_from_growth", false);
 
   if (sermonsError) {
     throw new Error(sermonsError.message);
@@ -380,10 +408,58 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
   return items;
 }
 
+/**
+ * True when every listed sermon is live and counted in Growth Report math.
+ * Used by loadGrowthReportData; not a substitute for getEvaluationById.
+ */
+export async function sermonsEligibleForGrowth(
+  sermonIds: string[],
+): Promise<boolean> {
+  const uniqueIds = [...new Set(sermonIds)];
+  if (uniqueIds.length === 0) {
+    return false;
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sermons")
+    .select("id")
+    .in("id", uniqueIds)
+    .is("deleted_at", null)
+    .eq("excluded_from_growth", false);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).length === uniqueIds.length;
+}
+
+async function sermonIsLive(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  sermonId: string,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("sermons")
+    .select("id, deleted_at")
+    .eq("id", sermonId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data != null && data.deleted_at == null;
+}
+
 export async function listEvaluationsForSermon(
   sermonId: string,
 ): Promise<SermonEvaluationListItem[]> {
   const supabase = await createClient();
+
+  if (!(await sermonIsLive(supabase, sermonId))) {
+    return [];
+  }
 
   const { data: versions, error: versionsError } = await supabase
     .from("sermon_versions")
@@ -428,6 +504,10 @@ export async function sermonHasActiveEvaluation(
   sermonId: string,
 ): Promise<boolean> {
   const supabase = await createClient();
+
+  if (!(await sermonIsLive(supabase, sermonId))) {
+    return false;
+  }
 
   const { data: versions, error: versionsError } = await supabase
     .from("sermon_versions")

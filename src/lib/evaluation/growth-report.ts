@@ -1,4 +1,4 @@
-import { getEvaluationById } from "./queries";
+import { getEvaluationById, sermonsEligibleForGrowth } from "./queries";
 import { formatDisplayScoreBare } from "./display-score";
 import { orderGrowthReportSnapshotsByDate } from "./growth-report-ordering";
 import type {
@@ -243,6 +243,14 @@ export async function loadGrowthReportData(
     baselineRow.evaluation.report_mode === "debrief" ||
     currentRow.evaluation.report_mode === "debrief"
   ) {
+    return null;
+  }
+
+  const pairEligible = await sermonsEligibleForGrowth([
+    baselineRow.sermon.id,
+    currentRow.sermon.id,
+  ]);
+  if (!pairEligible) {
     return null;
   }
 

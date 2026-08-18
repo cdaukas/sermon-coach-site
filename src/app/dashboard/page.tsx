@@ -1,14 +1,17 @@
+import { DashboardLibrary } from "@/components/dashboard/DashboardLibrary";
 import { EmptyLibraryCard } from "@/components/dashboard/EmptyLibraryCard";
 import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import { PurchaseArrivalBand } from "@/components/dashboard/PurchaseArrivalBand";
-import { SermonList } from "@/components/dashboard/SermonList";
 import {
   getMostRecentPackGrant,
   isWithinMinutes,
   packSourceDisplayName,
 } from "@/lib/billing/pack-credits";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
-import { listDashboardSermons } from "@/lib/sermons/queries";
+import {
+  listDashboardSermons,
+  listDeletedSermons,
+} from "@/lib/sermons/queries";
 import { createClient } from "@/lib/supabase/server";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -22,8 +25,9 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermons, entitlement, recentGrant] = await Promise.all([
+  const [sermons, deleted, entitlement, recentGrant] = await Promise.all([
     listDashboardSermons(),
+    listDeletedSermons(),
     user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
     getMostRecentPackGrant(),
   ]);
@@ -114,9 +118,9 @@ export default async function DashboardPage() {
               : undefined
           }
         />
-      ) : (
-        <SermonList sermons={sermons} />
-      )}
+      ) : null}
+
+      <DashboardLibrary sermons={sermons} deleted={deleted} />
     </div>
   );
 }
