@@ -2,10 +2,12 @@
 /**
  * Verify profiles billing lock (PATCH) and consume_evaluation_credit RPC.
  *
+ * Does not call signInWithPassword — that breaks when Supabase CAPTCHA is on.
+ * Supply a user JWT from a browser session instead (DevTools → Application →
+ * localStorage sb-*-auth-token, or Network tab after login).
+ *
  *   set -a && source .env.local && set +a
- *   # optional: source .env.patch-test.local for secrets
- *   export PATCH_TEST_ACCESS_TOKEN='eyJ...'   # user JWT (preferred)
- *   # OR: PATCH_TEST_EMAIL + PATCH_TEST_PASSWORD
+ *   export PATCH_TEST_ACCESS_TOKEN='eyJ...'   # required
  *   export RUN_CONSUME_SMOKE=1                 # fresh throwaway only
  *   node scripts/verify-profiles-billing-lock.mts
  */
@@ -29,8 +31,6 @@ loadEnvFile(".env.local");
 loadEnvFile(".env.patch-test.local");
 
 const accessToken = process.env.PATCH_TEST_ACCESS_TOKEN;
-const email = process.env.PATCH_TEST_EMAIL;
-const password = process.env.PATCH_TEST_PASSWORD;
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -43,6 +43,7 @@ function requireEnv(name: string): string {
 
 const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
 const supabaseAnonKey = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
 
 const billingPatches: Record<string, Record<string, unknown>> = {
   subscription_status: { subscription_status: "active" },
@@ -76,38 +77,35 @@ async function patchWithRawHttp(
 }
 
 async function resolveSession(): Promise<{ userId: string; jwt: string }> {
-  if (accessToken) {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${accessToken}` } },
-    });
-    const { data, error } = await supabase.auth.getUser(accessToken);
-    if (error || !data.user) {
-      console.error("PATCH_TEST_ACCESS_TOKEN invalid:", error?.message ?? "no user");
-      process.exit(1);
-    }
-    return { userId: data.user.id, jwt: accessToken };
-  }
-
-  if (!email || !password) {
+  if (!accessToken) {
     console.error(
-      "Set PATCH_TEST_ACCESS_TOKEN (user JWT) or PATCH_TEST_EMAIL + PATCH_TEST_PASSWORD in .env.patch-test.local",
+      "Set PATCH_TEST_ACCESS_TOKEN (user JWT from a browser session after login).\n" +
+        "Password sign-in was removed: it fails when Supabase CAPTCHA is enabled.",
     );
     process.exit(1);
   }
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error || !data.session) {
-    console.error("Sign-in failed:", error?.message ?? "no session");
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  });
+  const { data, error } = await supabase.auth.getUser(accessToken);
+  if (error || !data.user) {
+    console.error("PATCH_TEST_ACCESS_TOKEN invalid:", error?.message ?? "no user");
     process.exit(1);
   }
-  return { userId: data.user!.id, jwt: data.session.access_token };
+  return { userId: data.user.id, jwt: accessToken };
+}
+
+function createAdminClient() {
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 async function main() {
-  const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
+  const admin = createAdminClient();
 
-  const { error: rpcProbe } = await supabaseAnon.rpc("consume_evaluation_credit", {
+  const { error: rpcProbe } = await admin.rpc("consume_evaluation_credit", {
     p_user_id: "00000000-0000-0000-0000-000000000000",
   });
   console.log("Migration probe (consume_evaluation_credit exists):");
@@ -155,8 +153,8 @@ async function main() {
 
   if (process.env.RUN_CONSUME_SMOKE === "1") {
     const freeBefore = before?.free_evaluations_remaining ?? 0;
-    console.log("\n=== consume_evaluation_credit RPC ===");
-    const { error: rpcError } = await supabase.rpc("consume_evaluation_credit", {
+    console.log("\n=== consume_evaluation_credit RPC (service role) ===");
+    const { error: rpcError } = await admin.rpc("consume_evaluation_credit", {
       p_user_id: userId,
     });
     if (rpcError) {
@@ -164,7 +162,7 @@ async function main() {
       process.exit(1);
     }
 
-    const { data: consumed } = await supabase
+    const { data: consumed } = await admin
       .from("profiles")
       .select(
         "subscription_status, free_evaluations_remaining, evaluations_used_this_period, last_evaluation_at",
