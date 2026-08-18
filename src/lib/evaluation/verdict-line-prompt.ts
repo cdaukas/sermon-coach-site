@@ -3,6 +3,11 @@
  * Never scores. Never sees the evaluation prompt or rubric.
  */
 
+import {
+  SPANISH_VERDICT_LINE_OUTPUT_INSTRUCTIONS,
+  type OutputLanguage,
+} from "./output-language";
+
 export const VERDICT_LINE_MODEL = "claude-haiku-4-5";
 
 /** Inclusive word-count band for a verdict sentence after normalize. */
@@ -60,6 +65,7 @@ Return exactly one sentence per criterion id supplied, via the tool.`;
 
 export function buildVerdictLineUserMessage(
   criteria: VerdictLineCriterionInput[],
+  outputLanguage: OutputLanguage = "en",
 ): string {
   const blocks = criteria.map((c) => {
     const quote =
@@ -83,13 +89,20 @@ export function buildVerdictLineUserMessage(
     count === 11
       ? "Return all eleven, keyed by id, in a single tool call."
       : `Return exactly these ${count} ids in a single tool call (other ids will be ignored).`;
+  const languageLine =
+    outputLanguage === "es"
+      ? SPANISH_VERDICT_LINE_OUTPUT_INSTRUCTIONS
+      : null;
 
   return [
     `Write one complete verdict sentence for ${countPhrase}.`,
     `Twelve to eighteen words each, hard max eighteen. ${returnPhrase}`,
+    languageLine,
     "",
     blocks.join("\n\n"),
-  ].join("\n");
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
 }
 
 /** Build a quality-retry note naming what each invalid line fell short of. */

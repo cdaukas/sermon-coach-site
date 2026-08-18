@@ -46,6 +46,17 @@ describe("slideIndexForElapsed", () => {
     assert.equal(slideIndexForElapsed(150), 8);
     assert.equal(slideIndexForElapsed(999), 8);
   });
+
+  it("teaches the book-level melodic line on slide 3", () => {
+    assert.equal(WAIT_SLIDES[2]?.title, "The tune the whole book is singing");
+    assert.match(
+      WAIT_SLIDES[2]?.body ?? "",
+      /theme that holds an entire book together/,
+    );
+    assert.doesNotMatch(WAIT_SLIDES[2]?.body ?? "", /Every passage has one/);
+    assert.doesNotMatch(WAIT_SLIDES[2]?.body ?? "", /checks both/);
+    assert.match(WAIT_SLIDES[2]?.body ?? "", /does not score it/);
+  });
 });
 
 describe("timeEstimateForElapsed", () => {

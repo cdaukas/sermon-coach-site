@@ -48,3 +48,6 @@ next-env.d.ts
 # supabase cli
 supabase/.temp/
 tmp/
+
+.tmp-verify/
+sh-thd-*

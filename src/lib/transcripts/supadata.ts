@@ -98,6 +98,8 @@ export async function fetchYoutubeTranscriptFromSupadata(
 
   // mode=native: captions only (1 credit). Supadata defaults to auto, which
   // falls back to AI transcription (2 credits/min) — never omit or change this.
+  // Omit `lang` so the API returns the first available caption language
+  // instead of preferring English.
   const params = new URLSearchParams({
     url,
     text: "true",

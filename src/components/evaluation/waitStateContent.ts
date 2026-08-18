@@ -31,8 +31,8 @@ export const WAIT_SLIDES: readonly WaitSlide[] = [
     body: "Chapell asks what burden the passage addresses in the listener before it offers any relief. This read looks for that burden by name, not for a general problem loosely attached to the text.",
   },
   {
-    title: "The tune the passage is singing",
-    body: "Simeon Trust calls it the melodic line. Every passage has one, and a sermon can be true in every sentence while singing a different tune than the text it opened.",
+    title: "The tune the whole book is singing",
+    body: "Simeon Trust calls it the melodic line: the theme that holds an entire book together. A sermon can be accurate verse by verse and still sit apart from the book it lives in. This read names that tune so you can hear it. It does not score it.",
   },
   {
     title: "Where the weight sits",

@@ -28,6 +28,7 @@ import {
   validateAndMapVerdictLinesPartial,
   type VerdictLineQualityIssue,
 } from "./verdict-line-schema";
+import type { OutputLanguage } from "./output-language";
 
 export type RunCriterionVerdictLinesSuccess = {
   result: EvaluationResultStrict;
@@ -53,6 +54,7 @@ export type CreateVerdictLineMessage = (
 export type RunCriterionVerdictLinesOptions = {
   createMessage?: CreateVerdictLineMessage;
   model?: string;
+  outputLanguage?: OutputLanguage;
 };
 
 function flattenCriteria(
@@ -103,13 +105,14 @@ async function callHaiku(
   model: string,
   criteria: VerdictLineCriterionInput[],
   createMessage: CreateVerdictLineMessage,
+  outputLanguage: OutputLanguage,
   retryNote?: string,
 ): Promise<{ model: string; usage: EvalUsageTotals; toolInput: unknown }> {
   let response: Anthropic.Messages.Message;
 
   const userContent = retryNote
-    ? `${buildVerdictLineUserMessage(criteria)}\n\n${retryNote}`
-    : buildVerdictLineUserMessage(criteria);
+    ? `${buildVerdictLineUserMessage(criteria, outputLanguage)}\n\n${retryNote}`
+    : buildVerdictLineUserMessage(criteria, outputLanguage);
 
   try {
     response = await createMessage({
@@ -219,6 +222,7 @@ export async function runCriterionVerdictLines(
   }
 
   const model = options?.model ?? VERDICT_LINE_MODEL;
+  const outputLanguage = options?.outputLanguage ?? "en";
   const client = new Anthropic({ apiKey });
   const createMessage =
     options?.createMessage ??
@@ -237,7 +241,7 @@ export async function runCriterionVerdictLines(
   let responseModel = model;
   let linesById: Map<number, string>;
 
-  const first = await callHaiku(model, criteria, createMessage);
+  const first = await callHaiku(model, criteria, createMessage, outputLanguage);
   attemptUsages.push(first.usage);
   responseModel = first.model;
 
@@ -259,6 +263,7 @@ export async function runCriterionVerdictLines(
       model,
       criteria,
       createMessage,
+      outputLanguage,
       `RETRY: Every verdict_line must be at most ${VERDICT_LINE_MAX_WORDS} words. Shorter is better. Count words before submit.`,
     );
     attemptUsages.push(retry.usage);
@@ -292,6 +297,7 @@ export async function runCriterionVerdictLines(
       model,
       repairCriteria,
       createMessage,
+      outputLanguage,
       buildVerdictLineQualityRetryNote(qualityIssues),
     );
     attemptUsages.push(qualityRetry.usage);

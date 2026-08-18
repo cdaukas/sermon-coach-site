@@ -81,15 +81,15 @@ function messageWithVerdictLines(
 
 describe("criterion verdict_line schema gate", () => {
   it("does not bump prompt version for a non-scoring pass", () => {
-    assert.equal(EVALUATION_PROMPT_VERSION, "v3.4");
+    assert.equal(EVALUATION_PROMPT_VERSION, "v3.5");
   });
 
   it("read path tolerates missing verdict_line on any prompt version", () => {
     const fixture = structuredClone(EVALUATION_FIXTURE);
     assert.equal(evaluationResultStrictSchema.safeParse(fixture).success, true);
-    assert.equal(usesVerdictReadGrandfather("v3.4"), false);
+    assert.equal(usesVerdictReadGrandfather("v3.5"), false);
     assert.equal(
-      evaluationResultSchemaForPromptVersion("v3.4").safeParse(fixture).success,
+      evaluationResultSchemaForPromptVersion("v3.5").safeParse(fixture).success,
       true,
     );
     assert.equal(

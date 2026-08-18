@@ -1,10 +1,15 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import {
+  displayHeatMapRegister,
+  displayTextSupportLabel,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
+import {
   beatBackgroundColor,
   beatHasMismatch,
   parseBeatTimeRangeSeconds,
   serifFont,
-  textSupportLabel,
   textSupportTone,
   uiFont,
 } from "./shared";
@@ -12,9 +17,15 @@ import {
 type HeatMapSectionProps = {
   heatMap: NonNullable<EvaluationResultStrict["heat_map"]>;
   fallbackTotalMinutes: number;
+  outputLanguage?: OutputLanguage;
 };
 
-export function HeatMapSection({ heatMap, fallbackTotalMinutes }: HeatMapSectionProps) {
+export function HeatMapSection({
+  heatMap,
+  fallbackTotalMinutes,
+  outputLanguage = "en",
+}: HeatMapSectionProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   const beatDurations = heatMap.beats.map((beat) => parseBeatTimeRangeSeconds(beat.time_range));
   const totalSeconds = Math.max(
     beatDurations.reduce((sum, d) => sum + d, 0),
@@ -35,7 +46,7 @@ export function HeatMapSection({ heatMap, fallbackTotalMinutes }: HeatMapSection
         className="mb-5 text-[22px] font-normal"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Heat Map · Emotional Beats
+        {copy.heatMap}
       </h2>
 
       <div className="mb-3 flex h-[60px] overflow-hidden rounded">
@@ -76,7 +87,7 @@ export function HeatMapSection({ heatMap, fallbackTotalMinutes }: HeatMapSection
         <table className="w-full min-w-[640px] border-collapse text-[12px]">
           <thead>
             <tr style={{ ...uiFont, color: "var(--sc-ink)" }}>
-              {["Time", "Beat", "Register", "Text supports?", "Notes"].map((col) => (
+              {copy.heatMapColumns.map((col) => (
                 <th
                   key={col}
                   className="border-b px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.06em]"
@@ -114,7 +125,7 @@ export function HeatMapSection({ heatMap, fallbackTotalMinutes }: HeatMapSection
                     className="border-b px-3 py-2.5 align-top capitalize"
                     style={{ borderColor: "var(--sc-rule)" }}
                   >
-                    {row.register}
+                    {displayHeatMapRegister(row.register, outputLanguage)}
                   </td>
                   <td
                     className="border-b px-3 py-2.5 align-top font-medium"
@@ -124,7 +135,7 @@ export function HeatMapSection({ heatMap, fallbackTotalMinutes }: HeatMapSection
                         tone === "partial" ? "var(--sc-amber)" : "var(--sc-green)",
                     }}
                   >
-                    {textSupportLabel(row.text_supports)}
+                    {displayTextSupportLabel(row.text_supports, outputLanguage)}
                   </td>
                   <td
                     className="border-b px-3 py-2.5 align-top"

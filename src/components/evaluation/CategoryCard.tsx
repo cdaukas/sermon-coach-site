@@ -1,6 +1,12 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { categoryAverage } from "@/lib/evaluation/schema";
 import {
+  displayCategoryName,
+  displayCriterionName,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
+import {
   criterionScoreColor,
   criterionScoreFillPercent,
   serifFont,
@@ -9,6 +15,7 @@ import {
 
 type CategoryCardProps = {
   category: EvaluationResultStrict["categories"][number];
+  outputLanguage?: OutputLanguage;
 };
 
 const SCORE_BAR_VIEWBOX_WIDTH = 220;
@@ -48,9 +55,18 @@ function CriterionScoreBar({ score }: { score: number }) {
   );
 }
 
-export function CategoryCard({ category }: CategoryCardProps) {
+export function CategoryCard({
+  category,
+  outputLanguage = "en",
+}: CategoryCardProps) {
   const average = categoryAverage(category.criteria);
-  const averageLabel = `Average ${average} / 5`;
+  const copy = evaluationReportCopy(outputLanguage);
+  const averageLabel = copy.average(String(average));
+  const categoryName = displayCategoryName(
+    category.id,
+    category.name,
+    outputLanguage,
+  );
 
   return (
     <section
@@ -69,7 +85,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
       >
         <h2 className="text-2xl font-normal" style={serifFont}>
           <span style={{ color: "var(--sc-accent-soft)" }}>{category.number} ·</span>{" "}
-          {category.name}
+          {categoryName}
         </h2>
         <p
           className="text-[11px] tracking-[0.08em] uppercase"
@@ -111,7 +127,11 @@ export function CategoryCard({ category }: CategoryCardProps) {
                   }`}
                   style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
                 >
-                  {criterion.name}
+                  {displayCriterionName(
+                    criterion.id,
+                    criterion.name,
+                    outputLanguage,
+                  )}
                   <span
                     className="text-[11px] font-normal tracking-normal"
                     style={{ ...uiFont, color: "var(--sc-ink-soft)" }}

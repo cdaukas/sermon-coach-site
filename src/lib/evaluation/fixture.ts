@@ -92,7 +92,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 5,
           name: "Structure",
           category: 2,
-          tradition_tag: "Simeon Trust",
+          tradition_tag: "Robinson",
           score: 4,
           narrative:
             "Each movement has a clear headline and the catalog of trials feels inevitable once the rhetorical game is named.",
@@ -255,6 +255,14 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
         "Is there a voice filled with swagger? And harder: whose voice are you when people hear your week?",
     },
   ],
+  melodic_line_and_big_idea: {
+    book: "2 Corinthians",
+    passage:
+      "Paul's fool's speech puts the hardship catalog in service of the letter's weakness-and-power argument, not as a résumé of suffering.",
+    melodic_line:
+      "Apostolic ministry authenticated by weakness, because Christ's power is made perfect there rather than in swagger.",
+    reading_source: "derived",
+  },
 };
 
 export const EVALUATION_FIXTURE_PROMPT_VERSION = "fixture-v3";

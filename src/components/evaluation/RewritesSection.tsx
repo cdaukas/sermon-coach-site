@@ -1,15 +1,21 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
+import { evaluationReportCopy, type OutputLanguage } from "@/lib/evaluation/output-language";
 import { SectionTitle } from "./SectionTitle";
 import { serifFont, uiFont } from "./shared";
 
 type RewritesSectionProps = {
   rewrites: EvaluationResultStrict["rewrites"];
+  outputLanguage?: OutputLanguage;
 };
 
-export function RewritesSection({ rewrites }: RewritesSectionProps) {
+export function RewritesSection({
+  rewrites,
+  outputLanguage = "en",
+}: RewritesSectionProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   return (
     <section className="mb-7">
-      <SectionTitle>What Improvement Looks Like</SectionTitle>
+      <SectionTitle>{copy.whatImprovementLooksLike}</SectionTitle>
       <div className="space-y-4">
         {rewrites.map((rewrite, index) => (
           <details
@@ -43,7 +49,7 @@ export function RewritesSection({ rewrites }: RewritesSectionProps) {
                     className="mt-2 text-[10px] font-semibold uppercase tracking-[0.12em]"
                     style={{ ...uiFont, color: "var(--sc-amber)" }}
                   >
-                    Suggested rewrite · Moment {index + 1}
+                    {copy.suggestedRewrite(index + 1)}
                   </p>
                 </div>
               </div>
@@ -59,7 +65,7 @@ export function RewritesSection({ rewrites }: RewritesSectionProps) {
                 className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
                 style={{ ...uiFont, color: "var(--sc-accent)" }}
               >
-                Why this works
+                {copy.whyThisWorks}
               </p>
               <p
                 className="mb-5 text-[14px] leading-relaxed"
@@ -79,7 +85,7 @@ export function RewritesSection({ rewrites }: RewritesSectionProps) {
                     className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
                     style={{ ...uiFont, color: "var(--sc-red)" }}
                   >
-                    Original
+                    {copy.original}
                   </p>
                   <p
                     className="text-[14px] italic leading-relaxed"
@@ -99,7 +105,7 @@ export function RewritesSection({ rewrites }: RewritesSectionProps) {
                     className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
                     style={{ ...uiFont, color: "var(--sc-green)" }}
                   >
-                    Improved
+                    {copy.improved}
                   </p>
                   <p
                     className="text-[14px] italic leading-relaxed"

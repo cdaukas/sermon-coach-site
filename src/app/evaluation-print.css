@@ -352,6 +352,19 @@
     page-break-inside: avoid;
   }
 
+  .evaluation-melodic-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem !important;
+    box-shadow: none !important;
+  }
+
+  .evaluation-melodic-block > div {
+    box-shadow: none !important;
+    border: 1px solid var(--sc-rule);
+    border-top: 3px solid var(--sc-accent);
+  }
+
   /*
    * Category cards are tall; keep break-inside auto so the first category can
    * fill the lower half of page 1. Criteria blocks stay avoid (below).

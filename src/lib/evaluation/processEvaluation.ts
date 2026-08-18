@@ -12,6 +12,7 @@ import { formatScoreBandStrict } from "./schema";
 import { recordEvaluationComplete } from "./quota";
 import { runEvaluation, EvaluationRunError } from "./runEvaluation";
 import { normalizeReportMode } from "./context";
+import { parseOutputLanguage } from "./output-language";
 
 export type ProcessEvaluationInput = {
   evaluationId: string;
@@ -202,7 +203,7 @@ export async function processEvaluationJob(
   try {
     const { data: evaluationRow, error: fetchError } = await supabase
       .from("sermon_evaluations")
-      .select("report_mode")
+      .select("report_mode, output_language")
       .eq("id", evaluationId)
       .single();
 
@@ -211,6 +212,7 @@ export async function processEvaluationJob(
     }
 
     const reportMode = normalizeReportMode(evaluationRow.report_mode);
+    const outputLanguage = parseOutputLanguage(evaluationRow.output_language);
 
     const { result: scoredResult, model, inputTokens, outputTokens } =
       await runEvaluation({
@@ -218,6 +220,7 @@ export async function processEvaluationJob(
         manuscript,
         context,
         primaryPassage: primaryPassage?.trim() || undefined,
+        outputLanguage,
       });
 
     let result = scoredResult;
@@ -240,13 +243,16 @@ export async function processEvaluationJob(
 
     const logContext = { evaluationId, userId };
     const [verdictPass, hip] = await Promise.all([
-      runCriterionVerdictLinesBestEffort(result, logContext),
+      runCriterionVerdictLinesBestEffort(result, logContext, {
+        outputLanguage,
+      }),
       runHowItPreachesBestEffort(
         {
           manuscript,
           sermonTitle,
           primaryPassage,
           context,
+          outputLanguage,
         },
         logContext,
       ),

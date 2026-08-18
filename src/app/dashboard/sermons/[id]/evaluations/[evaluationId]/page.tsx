@@ -315,6 +315,7 @@ export default async function EvaluationPage({
           scriptureReference={scriptureReference}
           showPrintActions={!pdfCapture}
           howItPreaches={evaluation.how_it_preaches}
+          outputLanguage={evaluation.output_language}
         />
       )}
 

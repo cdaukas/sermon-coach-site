@@ -1,8 +1,9 @@
 # SCHEMA_SPEC.md
 
 Production schema specification for sermon-coach evaluations.
-Canonical source: `/mnt/skills/user/sermon-coach/SKILL.md` (chat-side).
-Derived artifact: `rubric.md` (in this repo, at `src/lib/evaluation/rubric.md`).
+Canonical source: `.claude/skills/sermon-coach/SKILL.md` (in-repo). Keep
+`~/.claude/skills/user/sermon-coach/SKILL.md` identical. Derived artifact:
+`rubric.md` (in this repo, at `src/lib/evaluation/rubric.md`).
 This file: the structural constraints `tool-schema.ts` must enforce.
 
 If SKILL.md and this file disagree, SKILL.md wins. Update this file to match,
@@ -16,13 +17,13 @@ then update tool-schema.ts.
 - Criterion names are canonical. Enum-lock them in Zod for v1 strict mode.
 
 ### Category 1 — Text & Theology (max 15 points)
-1. Textual fidelity & exegesis *(Simeon Trust)*
+1. Textual fidelity & exegesis *(Simeon Trust)* — passage fidelity only. Melodic line is named as context, not scored.
 2. Christ-centered / redemptive arc *(Chapell)*
 3. Gospel clarity *(Piper)* — **double-weighted**
 
 ### Category 2 — Structure & Craft (max 15 points)
 4. Fallen Condition Focus *(Chapell)* — **double-weighted**
-5. Structure *(Simeon Trust, Robinson)*
+5. Structure *(Robinson)* — big idea (passage-level), structural fit, memorability
 6. Hard things handled *(Simeon Trust workshop practice)*
 
 ### Category 3 — Application & Audience Connection (max 15 points)
@@ -134,6 +135,19 @@ NO per-criterion `growth_opportunity` field. NO per-category `growth_opportuniti
     - `notes`: string (one-line assessment)
 
 The heat map subsection is **omitted entirely** from rendered output when null. Criterion #8 still scores as a slider in the rubric — its narrative carries the diagnostic work in prose.
+
+---
+
+## Melodic line and big idea (not scored)
+
+`melodic_line_and_big_idea` is a non-scored three-line block rendered under the headline lockup, above the category dashboards. Required on v3.5+ model output. Optional/absent on older stored rows. Descriptive only: no traffic light, no band, no fit verdict.
+
+- `book`: string — the book, named. Short. Not an argument and not a score.
+- `passage`: string — one sentence. This passage's big idea / theme.
+- `melodic_line`: string — one sentence. The unifying theme of the book as this report reads it.
+- `reading_source`: `"preacher" | "derived" | "withheld"`
+
+Simeon Trust's melodic line is book-level context and coaching. Robinson's big idea is passage-level (criterion 5). The block makes that distinction visible. It does not change totals, bands, or weighting, and it must not move criterion 1.
 
 ---
 

@@ -1,8 +1,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildContextPreamble, type SermonContext } from "./context";
+import {
+  SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
+  type OutputLanguage,
+} from "./output-language";
+import { deriveBookFromPassage } from "./scripture-book";
 
-export const EVALUATION_PROMPT_VERSION = "v3.4";
+export const EVALUATION_PROMPT_VERSION = "v3.5";
 
 /** Rows below this prompt_version use read-grandfather verdict caps (no 60/32 on dashboard parse). */
 export const VERDICT_STRICT_CAPS_FROM = "v2.3";
@@ -33,7 +38,7 @@ export function loadRewriteRegisterMarkdown(): string {
 
 const STRUCTURAL_CONTRACT = `## STRUCTURAL CONTRACT (NON-NEGOTIABLE)
 
-1. Score exactly 11 criteria in a 3+3+3+2 layout across the four canonical categories (Text & Theology, Structure & Craft, Application & Audience Connection, Ecclesial & Spiritual). Use the canonical criterion names from the rubric. Each criterion object: \`id\` (1–11), \`name\` (enum), \`category\` (1–4), \`tradition_tag\`, \`score\` (1–5), \`narrative\` (2–4 sentences of diagnostic critique with at least one direct sermon quote, then the mandatory PER-CRITERION CLOSE sentence from item 7), optional \`anchored_quote\`. Do not submit category subtotals — the app computes them.
+1. Score exactly 11 criteria in a 3+3+3+2 layout across the four canonical categories (Text & Theology, Structure & Craft, Application & Audience Connection, Ecclesial & Spiritual). Use the canonical criterion names from the rubric. Each criterion object: \`id\` (1–11), \`name\` (enum), \`category\` (1–4), \`tradition_tag\`, \`score\` (1–5), \`narrative\` (2–4 sentences of diagnostic critique with at least one direct sermon quote, then the mandatory PER-CRITERION CLOSE sentence from item 7), optional \`anchored_quote\`. Criterion 1 may add three extra sentences of melodic-line observation (not scored) between the passage-fidelity critique and the close. Do not submit category subtotals — the app computes them.
 
 2. Split \`verdict\` into two JSON strings — \`affirmation\` and \`improvement\` (never one combined block). HARD LIMITS (count words before submit; over-limit responses are rejected): \`verdict.affirmation\` ≤60 words (target ~50–60; ONE named strength only; slightly elevated altitude; no quotation marks; no criterion-level detail). \`verdict.improvement\` ≤32 words (target ~25–30; headline pointer with one qualifying clause — not an explanation; no quotation marks). \`top_priorities[0]\` must match \`verdict.improvement\` in substance.
 
@@ -43,7 +48,7 @@ const STRUCTURAL_CONTRACT = `## STRUCTURAL CONTRACT (NON-NEGOTIABLE)
 
 5. Lock section titles: "Where It's Strong", "Where You Can Grow", "What Improvement Looks Like". No alternatives or editorial garnish. JSON field names (\`whats_working\`, \`top_priorities\`, \`rewrites\`) describe content; titles are render-layer only.
 
-6. Return JSON matching \`submit_sermon_evaluation\` exactly. Top-level keys (all required): \`meta\`, \`scoring\`, \`verdict\`, \`categories\`, \`heat_map\`, \`whats_working\` (3–5 cards), \`top_priorities\` (exactly 3), \`rewrites\` (1–2). \`meta\` includes \`audio_available\`. \`scoring\` includes \`composite_simple\`, \`composite_weighted\`, \`band\`, \`raw_total\`, \`raw_max\` (55) — no letter grade, no \`diagnostic_gap\`. \`categories\` is four items (3+3+3+2 criteria); each has \`id\`, \`name\`, \`number\`, \`criteria\` only. \`verdict\` is \`{ affirmation, improvement }\`. Do not include \`fcf\`, \`growth_opportunities_detailed\`, \`methodology_note\`, or per-category \`growth_opportunities\`.
+6. Return JSON matching \`submit_sermon_evaluation\` exactly. Top-level keys (all required): \`meta\`, \`scoring\`, \`verdict\`, \`categories\`, \`heat_map\`, \`whats_working\` (3–5 cards), \`top_priorities\` (exactly 3), \`rewrites\` (1–2), \`melodic_line_and_big_idea\`. \`meta\` includes \`audio_available\`. \`scoring\` includes \`composite_simple\`, \`composite_weighted\`, \`band\`, \`raw_total\`, \`raw_max\` (55) — no letter grade, no \`diagnostic_gap\`. \`categories\` is four items (3+3+3+2 criteria); each has \`id\`, \`name\`, \`number\`, \`criteria\` only. \`verdict\` is \`{ affirmation, improvement }\`. \`melodic_line_and_big_idea\` is the non-scored three-line block (book, passage, melodic_line, reading_source). Do not include \`fcf\`, \`growth_opportunities_detailed\`, \`methodology_note\`, or per-category \`growth_opportunities\`.
 
 7. **PER-CRITERION CLOSE** (append inside \`narrative\` for every criterion): End each criterion's narrative with ONE forward-looking sentence, scaled to its score.
 
@@ -63,6 +68,53 @@ const SCORING_CALIBRATION = `## SCORING CALIBRATION (TOP OF SCALE — APPLY WHEN
 
 const SCORING_STRENGTH_GATE = `**REQUIRED per-criterion strength gate (procedural — run while scoring, not part of JSON):** Before you assign each criterion's \`score\`, complete this gate for that criterion alone. Work through criteria **1 through 11 in order**; do not batch-assign scores. In your reasoning only (never in the submitted JSON), answer exactly: **"Is there notable, genuine strength in the sermon text for this criterion — strength striking enough that this criterion stands out, not merely functions? — [cite the specific textual evidence that makes it striking, OR state 'no notable strength']"** Baseline competence alone (a clear outline, a workable transition, generic clarity) is **not** notable strength — that is adequate work. Then apply the rule that follows from your answer: (a) If you cited **notable** strength (this criterion **stands out** in the sermon, not merely does its job) and your only reservation is that it **could be even better**, the score is **at minimum 4** — you may not assign 3. (b) If that notable strength is **among the best examples of that homiletical move you would expect to see** (a preacher could study it as a model), the score is **5**. (c) If you stated **no notable strength** (present and competent but not striking — including work that functions without standing out), the score is **3 or below**, per the rubric definitions for 1–3. **Compression check:** If your gate answer cites **notable** strength but you were about to assign 3, stop — that contradiction is a scoring error; resolve it to **4** (or **5** if (b) applies) before you lock the score. Do not paste the gate question or answer into \`narrative\`; do not add any new JSON field for the gate. The submitted \`narrative\` is the published critique only and must match the locked score.`;
 
+const MELODIC_LINE_CONTRACT = `## MELODIC LINE AND BIG IDEA (DESCRIPTIVE — NOT SCORED)
+
+Simeon Trust's **melodic line** is the theme that holds an **entire book** together. It is a context discipline. It is not a scored sub-question, not a cap, and not a band. It must not raise or lower criterion 1 or any other criterion.
+
+Haddon Robinson's **big idea** is the single dominant idea **this passage** yields. It is scored under criterion 5. Do not call the passage's big idea a melodic line.
+
+Three levels, kept distinct:
+- Whole book → melodic line (named in the display block and in criterion 1's narrative; not scored)
+- This passage → big idea / theme of the passage (criterion 5)
+- Whole Bible → Christ-centered / redemptive arc (criterion 2)
+
+**Criterion 1 scores passage fidelity only.** Does the sermon say what the text says? Genre, context, grammar, intended sense of the passage. Wrestling with the hard parts of the text is scored under 6. The book's tune is not part of the 1–5.
+
+**Name the reading before you comment on it.** Every other criterion may assert. The melodic-line observation states its premise first. That is workshop conversation, not a machine grading a contested exegetical position.
+
+**Criterion 1 narrative. Observation plus question, never a verdict.** After the passage-fidelity critique, and before the per-criterion close, add exactly three sentences. Show this book's line; do not define "melodic line." Naming the line concretely teaches the concept. Definitions belong in How It's Scored, not in per-evaluation prose. Do not use in-tune / out-of-tune / partly-in-tune language. Do not let this observation change the score. No em-dashes.
+
+1. Name the melody this read is working from, as this book actually sings it.
+2. Name where this sermon sits relative to it, as observation.
+3. Ask whether any difference was deliberate. Give the preacher a dignified answer either way.
+
+Model:
+"Philippians keeps returning to partnership in the gospel that holds under pressure, with Christ as both the pattern and the prize. Your sermon on 4:10-13 reads the passage as a lesson in learned contentment and does not lean on that larger argument. Was that a choice, this week standing on its own, or did the book recede without you meaning it to?"
+
+The per-criterion close still belongs to the scored work (passage fidelity), not to this observation.
+
+**What is worth noticing when it is present (observation only — never a scoring trigger):**
+1. Wrong book's tune. James read through Romans. Proverbs preached on a Pauline indicative-then-imperative frame. Ecclesiastes resolved by Philippians.
+2. Series theme substituted for the book's argument. In conversation with "Living Sent, week 4" and apart from Acts.
+3. Melodic line flattened to a moral. Jonah as obey God. Judges as leadership lessons. Nehemiah as how to build.
+4. The canon shortcut. Jumping from the passage to Christ without passing through the book's own argument. The destination is right and the route is not.
+5. Melodic line applied so hard the passage disappears. Every sermon in the series lands on the same sentence.
+6. Announced but not governing. The preacher states the line in the introduction, then preaches a sermon the statement had no effect on.
+
+**Guardrails:**
+- Contested books (Ecclesiastes, Song of Songs, Revelation, James, 1 Samuel, Judges): name the reading the sermon appears to hold, or the preacher's own line if given. Do not grade the sermon against a house view.
+- Poetry and wisdom: a single psalm sits in the Psalter, which has shape rather than a single argument. Use the Psalter's shape and the psalm's genre. Do not invent a line. Same for individual proverbs, where the frame is chapters 1–9 and the fear of the Lord.
+- Occasional sermons (funerals, weddings, topical sermons still sitting on a text in a book): the observation still belongs, but a funeral homily on Psalm 23 is not failing when it does not preach the shape of Book I. Ask; do not scold.
+- Never invent a melodic line to have something to say. If you cannot state the book's argument in a sentence you would defend, say so, set \`reading_source\` to \`withheld\`, and skip the observation. Silence beats a confident sentence about 1 Samuel.
+
+**\`melodic_line_and_big_idea\` (required JSON object, not scored, no verdict):**
+- \`book\`: the book, named. Short. "Philippians." Not an argument and not a score.
+- \`passage\`: one sentence. The theme / big idea of *this passage*.
+- \`melodic_line\`: one sentence. The unifying theme of the book as this report reads it. If the preacher named a working line, that line is the premise — restate it, do not replace it. If withheld, say that this read will not invent one.
+- \`reading_source\`: \`preacher\` when working from a line the preacher named; \`derived\` when this read supplies the book's argument; \`withheld\` when you will not invent one.
+No \`fit\`. No in-tune / out-of-tune label. The JSON block is descriptive. The observation-and-question lives in criterion 1's narrative.`;
+
 export function buildSystemPrompt(): string {
   const rubric = loadRubricMarkdown();
   const rewriteRegister = loadRewriteRegisterMarkdown();
@@ -80,6 +132,10 @@ ${SCORING_STRENGTH_GATE}
 
 ---
 
+${MELODIC_LINE_CONTRACT}
+
+---
+
 ${STRUCTURAL_CONTRACT}`;
 }
 
@@ -88,6 +144,7 @@ export type EvaluationUserMessageInput = {
   manuscript: string;
   context?: SermonContext;
   primaryPassage?: string;
+  outputLanguage?: OutputLanguage;
 };
 
 export function buildUserMessage({
@@ -95,14 +152,25 @@ export function buildUserMessage({
   manuscript,
   context,
   primaryPassage,
+  outputLanguage = "en",
 }: EvaluationUserMessageInput): string {
   const contextBlock = context ? `${buildContextPreamble(context)}\n\n---\n\n` : "";
+  const derivedBook = deriveBookFromPassage(primaryPassage);
   const primaryPassageBlock = primaryPassage
     ? `**Primary passage (provided by the preacher):** ${primaryPassage}\n\n`
     : "";
+  const derivedBookBlock = derivedBook
+    ? `**Derived book (from the primary passage, not from any series title):** ${derivedBook}\nUse this book for Simeon Trust's melodic line (the descriptive block and criterion 1's narrative observation). It does not affect criterion 1's score. A series title is not a substitute for the book's argument.\n\n`
+    : primaryPassage
+      ? "**Derived book:** could not be parsed from the primary passage. Derive the book from the manuscript's Scripture reference if it is unambiguous. If it is not, do not invent a book.\n\n"
+      : "";
   const metaInstructions = primaryPassage
     ? "Use the preacher-provided primary passage above for `meta.scripture_reference`. Infer preacher name, length (~150 wpm from word count), and `submission_mode` (`manuscript` or `transcript`) from the manuscript for `meta` when not stated explicitly."
     : "Infer preacher name, passage, length (~150 wpm from word count), and `submission_mode` (`manuscript` or `transcript`) from the manuscript for `meta` when not stated explicitly.";
+  const languageBlock =
+    outputLanguage === "es"
+      ? `${SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS}\n\n---\n\n`
+      : "";
 
   return `Evaluate this sermon manuscript.
 
@@ -112,7 +180,7 @@ ${metaInstructions} Set \`meta.audio_available\` to \`false\` when only a manusc
 
 ---
 
-${primaryPassageBlock}${contextBlock}## Manuscript
+${languageBlock}${primaryPassageBlock}${derivedBookBlock}${contextBlock}## Manuscript
 
 ${manuscript}`;
 }

@@ -2,17 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  DELETE_IN_PROGRESS_MESSAGE,
+  DELETE_PUBLIC_SAMPLE_MESSAGE,
+} from "./messages";
 import type {
   CreateSermonInput,
   CreateSermonResult,
   SermonWriteResult,
 } from "./types";
-
-export const DELETE_IN_PROGRESS_MESSAGE =
-  "This sermon has an evaluation in progress. You can delete it once that finishes.";
-
-export const DELETE_PUBLIC_SAMPLE_MESSAGE =
-  "This sermon is used as the public sample evaluation. It cannot be deleted.";
 
 function normalizePrimaryPassage(value: string | undefined): string | null {
   const trimmed = value?.trim();

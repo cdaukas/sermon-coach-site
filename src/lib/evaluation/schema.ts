@@ -99,6 +99,21 @@ export const evaluationScoringStrictSchema = z.object({
   raw_max: z.literal(55),
 });
 
+export const melodicLineReadingSourceSchema = z.enum([
+  "preacher",
+  "derived",
+  "withheld",
+]);
+
+export const melodicLineAndBigIdeaSchema = z.object({
+  book: z.string().min(1),
+  passage: z.string().min(1),
+  melodic_line: z.string().min(1),
+  reading_source: melodicLineReadingSourceSchema,
+});
+
+export type MelodicLineAndBigIdea = z.infer<typeof melodicLineAndBigIdeaSchema>;
+
 function countWords(s: string): number {
   const trimmed = s.trim();
   if (!trimmed) return 0;
@@ -489,6 +504,8 @@ function makeEvaluationResultStrictObjectSchema(
     whats_working: z.array(whatsWorkingCardStrictSchema).min(3).max(5),
     top_priorities: z.array(topPriorityStrictSchema).length(3),
     rewrites: z.array(evaluationRewriteStrictSchema).min(1).max(2),
+    // Optional on read: absent on pre-v3.5 rows. Tool schema requires it on write.
+    melodic_line_and_big_idea: melodicLineAndBigIdeaSchema.nullable().optional(),
   });
 }
 

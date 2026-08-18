@@ -1,9 +1,15 @@
 import { buildContextPreamble, type SermonContext } from "./context";
 import { HIP_MOVEMENT_NAMES } from "./hip-schema";
+import {
+  SPANISH_HIP_OUTPUT_INSTRUCTIONS,
+  type OutputLanguage,
+} from "./output-language";
 
 export const HIP_REGISTER_BLOCK = `How It Preaches is a craft read, not a second score. The scored rubric already named what is broken against the criteria. This section does the thing the rubric cannot: it reads the sermon as moving rhetoric — how it opens, carries its idea, and lands.
 
 The register is charitable but plain-spoken. Charitable does not mean gentle. Open each movement with what works before naming what does not, and never invent a flaw to fill a movement. Plain-spoken means when there is a real weakness, state it as a claim, not a suggestion.
+
+The Big Idea movement is Robinson's passage-level idea — the one this text yields — not Simeon Trust's melodic line, which belongs to the book and is named as context, not scored. Do not call the passage's idea a melodic line.
 
 Spend most of each movement on what is working; the sharpening observations are the sharper, shorter minority. This read should leave the preacher feeling seen — that someone read his sermon closely, saw what he was reaching for, and wants to help him reach it.
 
@@ -22,6 +28,7 @@ export type HowItPreachesPromptInput = {
   manuscript: string;
   context?: SermonContext;
   primaryPassage?: string | null;
+  outputLanguage?: OutputLanguage;
 };
 
 export function buildHowItPreachesUserMessage({
@@ -29,6 +36,7 @@ export function buildHowItPreachesUserMessage({
   manuscript,
   context,
   primaryPassage,
+  outputLanguage = "en",
 }: HowItPreachesPromptInput): string {
   const contextBlock = context ? `${buildContextPreamble(context)}\n\n---\n\n` : "";
   const primaryPassageBlock = primaryPassage
@@ -37,12 +45,14 @@ export function buildHowItPreachesUserMessage({
   const movementList = HIP_MOVEMENT_NAMES.map((name, i) => `${i + 1}. ${name}`).join(
     "\n",
   );
+  const languageBlock =
+    outputLanguage === "es" ? `${SPANISH_HIP_OUTPUT_INSTRUCTIONS}\n\n` : "";
 
   return `Write a How It Preaches craft read for this sermon manuscript.
 
 **Working title:** ${sermonTitle}
 
-${primaryPassageBlock}${contextBlock}## Register
+${languageBlock}${primaryPassageBlock}${contextBlock}## Register
 
 ${HIP_REGISTER_BLOCK}
 

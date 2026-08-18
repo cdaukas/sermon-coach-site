@@ -135,6 +135,7 @@ export const submitSermonEvaluationInputSchema = {
     "whats_working",
     "top_priorities",
     "rewrites",
+    "melodic_line_and_big_idea",
   ],
   properties: {
     meta: {
@@ -268,12 +269,38 @@ export const submitSermonEvaluationInputSchema = {
         },
       },
     },
+    melodic_line_and_big_idea: {
+      type: "object" as const,
+      additionalProperties: false,
+      required: ["book", "passage", "melodic_line", "reading_source"],
+      properties: {
+        book: {
+          type: "string" as const,
+          description:
+            "The book, named. Short. 'Philippians.' Not an argument and not a score.",
+        },
+        passage: {
+          type: "string" as const,
+          description:
+            "One sentence: the theme / big idea of this passage. Not the book's melodic line.",
+        },
+        melodic_line: {
+          type: "string" as const,
+          description:
+            "One sentence: the unifying theme of the book as this report reads it. If the preacher named a working line, restate that line. Descriptive, not a verdict.",
+        },
+        reading_source: {
+          type: "string" as const,
+          enum: ["preacher", "derived", "withheld"],
+        },
+      },
+    },
   },
 };
 
 export const submitSermonEvaluationTool: Tool = {
   name: "submit_sermon_evaluation",
   description:
-    "Submit the complete structured sermon evaluation JSON. Use snake_case field names exactly as in the schema. Exactly 11 criteria (3+3+3+2) with canonical names. heat_map is null when meta.audio_available is false. Category subtotals are not submitted.",
+    "Submit the complete structured sermon evaluation JSON. Use snake_case field names exactly as in the schema. Exactly 11 criteria (3+3+3+2) with canonical names. heat_map is null when meta.audio_available is false. Include melodic_line_and_big_idea (not scored). Category subtotals are not submitted.",
   input_schema: submitSermonEvaluationInputSchema,
 };

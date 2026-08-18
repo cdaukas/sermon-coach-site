@@ -1,13 +1,3 @@
-<!--
-GENERATED FROM SKILL.md — DO NOT EDIT DIRECTLY
-rubric.md is the derived production artifact. Canonical skill copy in
-this repo: `.claude/skills/sermon-coach/SKILL.md`. Keep the Claude Code
-copy at `~/.claude/skills/user/sermon-coach/SKILL.md` identical.
-To update: edit the repo SKILL.md, paste here, commit with
-message "sync rubric from SKILL.md @ [date]".
-See SYNC.md for the full rule.
--->
-
 ---
 name: sermon-coach
 description: Evaluate an existing sermon for substantive effectiveness using a rubric drawn from Bryan Chapell (Fallen Condition Focus, redemptive arc), the Simeon Trust workshop method (textual fidelity, melodic line), Desiring God / Piper (gospel clarity, expository exultation), and 9Marks (ecclesial faithfulness). Always use when Chris triggers `/sermon-coach`, `/evaluate-sermon`, `/preaching-feedback`, or `/heat-map`, or asks in natural language to evaluate, critique, assess, score, rate, review, or coach a sermon, or to "heat map" one. Accepts manuscript, transcript, audio/video with transcript, or pasted text. Do NOT use for writing sermons from scratch, exegeting a passage, or general preaching theory questions — only for evaluating an already-existing sermon.
@@ -40,7 +30,6 @@ Peer coach × pastoral mentor. Direct, collegial, preacher-to-preacher — and l
 - Where the sermon turns a biblical text into a book report on ancient events without ever crossing the bridge into the present-tense lives of the listeners, name it directly. That's one of the highest-stakes failures in this rubric.
 - **The Overall Verdict is roughly 90% affirming and 10% improvement, structured as two paragraphs (affirmation, then a paragraph break, then one single highest-leverage improvement as a headline pointer) AND kept tight: ~70-85 words total, one named strength only, NO direct quotes from the sermon.** Quotes are body work. The verdict sets the pastoral frame at a slightly elevated altitude; the body delivers the diagnostic detail. The improvement paragraph is a single short sentence (~25-30 words, ≤32 hard cap) — it points, it does not explain. Top 3 Priorities #1 does the explaining. If you find your verdict running past 95 words, stacking multiple affirmations, or pulling quotes from the manuscript, stop — it's doing the body's job. See Step 3 Part 1 for the full specification.
 - **The verdict's single improvement and Top 3 Priorities #1 must be the same point.** They are both answering the same question — *what is the single highest-leverage change for the next sermon?* — and they must agree. The verdict phrases it pastorally; Priority #1 phrases it as a practitioner instruction with a specific next step. Different tone, same substance. If they disagree, the verdict is wrong (it picked something easier to phrase rather than the actually highest-leverage change). Fix the verdict before finalizing.
-- **NEVER ASSUME THE CONGREGATION'S THEOLOGICAL TRADITION.** Do not write "a Reformed-leaning room," "a Baptist congregation," "a Wesleyan audience," or any equivalent UNLESS the preacher or the submitted context actually states it. Sermon Coach serves expository preachers of every tradition — Baptist, Wesleyan, Anglican, non-denominational, Reformed, and others — and assigning a man a theology he does not hold reads as presumption. If the tradition IS given (in the sermon, the church name, the series description, or the context the user provides), use it freely — specificity makes the feedback stronger. If it is NOT given, do not infer it. Say the thing without naming a camp: "a thoughtful room," "a doctrinally serious congregation." Do not reason backward from the preacher's sources or soteriology — plenty of Baptists quote Piper. Attributing the RUBRIC's sources by name (Chapell, Simeon Trust, Piper, 9Marks, Keller) is correct and stays. This rule is only about labeling the LISTENER's theology.
 
 ---
 
@@ -101,10 +90,11 @@ The verdict is the only place this 90/10 framing applies. The rest of the report
 1. **Composite score + verdict** (the two-paragraph affirming-then-improvement structure above)
 2. **Per-category rubric dashboards** (sliders + narrative; no per-category growth footer)
 3. **Heat Map** (under the Application & Audience Connection category) — *audio-conditional: include only when audio/video of the preached sermon is available; omit for manuscript-only evaluations*
-4. **"Where It's Strong"** section (What's Working — affirmation half of the body)
-5. **"Where You Can Grow"** section (Top 3 Priorities — the sole prescriptive section, does all the growth-opportunity work)
-6. **"What Improvement Looks Like"** section (Suggested Rewrites)
-7. **Methodology appendix** with category subtotals and composite math
+4. **"How It Preaches"** section (narrative craft read — no scores)
+5. **"Where It's Strong"** section (What's Working — affirmation half of the body)
+6. **"Where You Can Grow"** section (Top 3 Priorities — the sole prescriptive section, does all the growth-opportunity work)
+7. **"What Improvement Looks Like"** section (Suggested Rewrites)
+8. **Methodology appendix** with category subtotals and composite math
 
 Do NOT put category subtotals at the top of the markdown summary. They live in the methodology appendix at the end, mirroring the HTML artifact.
 
@@ -132,11 +122,13 @@ When audio is available, walk through the sermon's major emotional beats in orde
 
 Row count is a judgment call — include every distinct emotional beat in the sermon, not regular time intervals. A 40-minute sermon might warrant 12–16 rows; a 25-minute sermon might warrant 8–10. Skip transitional teaching that doesn't shift register.
 
-**"Where It's Strong" section (What's Working).** A short standalone section after the four category dashboards (and after the Heat Map panel when audio is available; after the How It Preaches craft-read panel when present — omit when `how_it_preaches` is null). Title it **"Where It's Strong"** — that's the entire section title; do not append trailing slogans like "they're real" or "these are working" or any similar editorial garnish. The cards do the affirming on their own evidence; the title just frames them. Name 3–4 specific strengths, each grounded in a direct sermon quote where applicable. This is the affirmation half of the report's body work, separated from per-category critique so the strengths get their own visual real estate.
+**"How It Preaches" section.** A standalone narrative craft read — no scores, no sliders. Title it **"How It Preaches"** — locked. Place it after the four category dashboards and the Heat Map (when included), immediately before **"Where It's Strong."** Five fixed movements in this fixed order: **THE OPEN**, **THE BIG IDEA**, **THE STRUCTURAL LOGIC**, **THE ILLUSTRATIONS**, **THE LANDING**. Each movement is a tight paragraph of 2–4 sentences, written in second person to the preacher, anchored to this sermon (quote or name specifics — never generic homiletics advice). Posture is charitable: name what works before what doesn't; never manufacture a flaw to fill a movement. Render open by default — this is a read, not a reference; do not collapse the movements (unlike criterion rows, rewrites, and methodology). Close the section with a single italic footer line: *A craft read, not a grade. Your scored evaluation above is unchanged.*
+
+**"Where It's Strong" section (What's Working).** A short standalone section after "How It Preaches." Title it **"Where It's Strong"** — that's the entire section title; do not append trailing slogans like "they're real" or "these are working" or any similar editorial garnish. The cards do the affirming on their own evidence; the title just frames them. Name 3–4 specific strengths, each grounded in a direct sermon quote where applicable. This is the affirmation half of the report's body work, separated from per-category critique so the strengths get their own visual real estate.
 
 **"Where You Can Grow" section (Top 3 Priorities).** Title the section **"Where You Can Grow"** — locked. This is the sole prescriptive section in the report — it does the work that older versions of this skill split across "category-level growth opportunities" and "Where It Can Get Better." Three ranked priorities, each with: a numbered label ("01 / 02 / 03"), a serif headline naming the homiletical principle at stake, a homiletical principle tag (e.g., "Chapell · Fallen Condition Focus"), 2–3 sentences of rationale grounded in a direct sermon quote where helpful, and a "Practical Step" callout with a concrete action Chris can take this week. Priority #1 must match the improvement named in the verdict — same substance, different tone (the verdict phrases it pastorally; Priority #1 phrases it as a practitioner instruction).
 
-**"What Improvement Looks Like" section (Suggested Rewrites).** Title the section **"What Improvement Looks Like"** — locked. Pick the 1–2 weakest moments in the sermon (quote them directly) and rewrite each as long as the fix requires, typically 2 to 6 sentences showing what stronger looks like in this preacher's own voice, drawn from his diction, sentence length, and habits of transition in the manuscript above — not a generic homiletics example.
+**"What Improvement Looks Like" section (Suggested Rewrites).** Title the section **"What Improvement Looks Like"** — locked. Pick the 1–2 weakest moments in the sermon (quote them directly) and rewrite each in 3–6 sentences showing what stronger looks like in Chris's voice — not a generic homiletics example.
 
 In the HTML artifact, each rewrite is rendered as a **collapsible expandable row** matching the pattern used for criterion rows in the category cards: chevron (▸ rotating to ▾ when open), a serif headline naming the rewrite (e.g., "Rewrite 1 · The Paton quote, trimmed for the minute-33 spot"), and a small amber tag underneath naming the homiletical move (e.g., "Illustration discipline · Trim ~150 → ~70 words"). The original/improved blocks and the "Why this works" note live inside the expanded detail. The collapsed state lets the reader scan the report without scrolling past two full rewrites every time. In the markdown summary, render rewrites inline as before — the dropdown pattern is HTML-only.
 
@@ -164,21 +156,23 @@ After the markdown summary, build a single self-contained HTML artifact that vis
 
 2. **Headline score lockup** — a single white card with two halves. Left half: a small dark-navy gradient panel containing (top) the **band label** alone — without the letter — rendered in italic serif at 52px in soft gold (e.g., "*Faithful*") as the primary visual element, (middle) the composite score (e.g., "37/55") in 20px white sans-serif as a quiet secondary line beneath the descriptor, (then) a hairline divider, (bottom) a small mono label reading "Composite · See methodology at end". The descriptor is intentionally the dominant element — it carries the pastoral meaning the reader needs at first glance; the numeral is supporting detail. The letter grade (C) is NOT displayed at the top — it belongs in the Methodology appendix where the full grading table provides context. Right half: the two-paragraph verdict — ~70-85 words total, one named strength in the affirmation paragraph, one improvement in the second paragraph as a single short sentence (~25-30 words, ≤32 hard cap, headline pointer not explanation), **no quotation marks of any kind in the verdict** (those are body work) — with a gold left border. NO simple-vs-weighted scores at the top. NO methodology explanation at the top. NO category subtotals strip at the top. The band derives from the **weighted score**, not the simple score — see the Grading Bands section in the Rubric Reference for the mapping.
 
+2b. **Melodic line and big idea** — a non-scored three-line block placed under the headline lockup, above the category dashboards. Heading names the terms once. Rows stay plain and descriptive: **The book**, **This passage**, and **Melodic line** (the unifying theme of the book as this read takes it). No traffic light, no band, no in-tune verdict. Name the reading before you comment on it. Context and coaching, not a score.
+
 3. **Four category sections** — white cards with subtle shadow. Each card has a gradient header showing category number, title, and category average (e.g., "1 · Text & Theology" with "Average 3.5 / 5 · 10.5 / 15"). Inside each card, criteria are presented as **clickable expandable rows** — each row shows: a chevron (▸ rotating to ▾ when open), the criterion name with its source citation in italic, a 10px rounded slider with circular thumb, and the score. Clicking a row reveals a cream-tinted detail panel with a gold left border containing the per-criterion narrative — a short principle tag (e.g., "Chapell · Fallen Condition Focus") followed by 3-4 sentences of analysis with at least one direct quote from the sermon.
 
-4. **Heat Map panel** — *audio-conditional. Include this panel only when audio or video of the preached sermon is available.* Omit entirely for manuscript-only evaluations; the criterion-#8 slider in the category card does the diagnostic work, and the timeline-without-audio is textual-cue speculation that adds visual weight without earning it. When audio is available, render a horizontal timeline of the sermon's emotional beats, 60px tall, with 14 possible register colors (blue lament, gold exultation, red warning, green comfort, purple awe, etc. — see CSS). Each beat is clickable; clicking reveals beat detail (timestamp, label, analysis) in a cream-tinted box below the timeline. Mismatch beats (where the delivered register and the text's emotional call don't align) get diagonal-stripe overlays.
+4. **"Where It's Strong" section (What's Working)** — section eyebrow, large serif section title ("Where It's Strong"), then a responsive grid of 3-4 white cards with a green top border. Each card has a green serif headline naming a specific strength, optionally a blockquote with a direct sermon quote, and a short paragraph of analysis. These are the moves the next sermon should keep doing.
+
+5. **Heat Map panel** — *audio-conditional. Include this panel only when audio or video of the preached sermon is available.* Omit entirely for manuscript-only evaluations; the criterion-#8 slider in the category card does the diagnostic work, and the timeline-without-audio is textual-cue speculation that adds visual weight without earning it. When audio is available, render a horizontal timeline of the sermon's emotional beats, 60px tall, with 14 possible register colors (blue lament, gold exultation, red warning, green comfort, purple awe, etc. — see CSS). Each beat is clickable; clicking reveals beat detail (timestamp, label, analysis) in a cream-tinted box below the timeline. Mismatch beats (where the delivered register and the text's emotional call don't align) get diagonal-stripe overlays.
 
    **When the Heat Map panel is included (audio available), the beat-by-beat table is required.** Render it directly below the timeline using the `.heatmap-table` class already defined in the locked CSS. Exactly five columns in this order: `Time`, `Beat`, `Register`, `Text supports?`, `Notes`. Header row gets cream-tinted background (`var(--cream-tint)`); body rows get hairline dividers (`1px solid var(--rule)`); the "Text supports?" column uses green text (`var(--green)`) for `✓ Strong` / `✓`, amber (`var(--amber)`) for `⚠ Partial`, red (`var(--red)`) for `✗ Mismatch`. Sans-serif 12px throughout — this is dense reference data, not prose. The table is the diagnostic counterpart to the timeline: the timeline shows *shape*; the table shows *substance*.
 
-5. **How It Preaches panel** — separate generation call on every evaluation; not part of the scored evaluation JSON. Omit entirely when `how_it_preaches` is null (nullable field — older evaluations render without this panel). Place immediately after the Heat Map panel (when present) or after the four category dashboards (manuscript-only), and immediately before "Where It's Strong." Eyebrow: "Beyond the rubric." Title: "How It Preaches." Subhead explains this is a craft read, not a grade. Five movements in fixed order — The Open, The Big Idea, The Structural Logic, The Illustrations, The Landing — each with uppercase sans-serif movement name, horizontal rule, and 2–4 sentences of prose with sermon quotes in `<span class="q">`. Gold top border on the body panel.
+   **"How It Preaches" section** — *Render after the four category dashboards and the Heat Map panel (when included), immediately before "Where It's Strong."* Section eyebrow: "Beyond the rubric." Large serif section title: "How It Preaches." One-line sans-serif subhead explaining the section reads how the sermon moves rather than whether it's faithful. Then a single white card with a 3px gold (`--accent`) top border. Inside the card, five movements in fixed order — The Open, The Big Idea, The Structural Logic, The Illustrations, The Landing — each with a small gold uppercase sans-serif label (with a hairline rule trailing to the right) followed by a 2–4 sentence serif paragraph in second person. Quoted sermon text inside a movement is italic in `--ink-soft` (wrap in `<span class="q">`). The movements are **not collapsible**; the section renders **open by default**. Close with a centered italic footer line: "A craft read, not a grade. Your scored evaluation above is unchanged."
 
-6. **"Where It's Strong" section (What's Working)** — section eyebrow, large serif section title ("Where It's Strong"), then a responsive grid of 3-4 white cards with a green top border. Each card has a green serif headline naming a specific strength, optionally a blockquote with a direct sermon quote, and a short paragraph of analysis. These are the moves the next sermon should keep doing.
+6. **"Where You Can Grow" panel (Top 3 Priorities)** — the sole prescriptive section in the HTML artifact (the older "Where It Can Get Better" section has been removed; all prescriptive work consolidates here). Dark navy background with cream text. Section title is "Where You Can Grow" — locked. Title and subtitle in cream and gold-soft respectively. Each priority is a row with a large light-weight gold numeral (01/02/03), a white headline, a tan rationale paragraph grounded in a sermon quote where helpful, and a gold-tinted "Practical Step" callout. Border between priorities is a hairline of low-opacity cream.
 
-7. **"Where You Can Grow" panel (Top 3 Priorities)** — the sole prescriptive section in the HTML artifact (the older "Where It Can Get Better" section has been removed; all prescriptive work consolidates here). Dark navy background with cream text. Section title is "Where You Can Grow" — locked. Title and subtitle in cream and gold-soft respectively. Each priority is a row with a large light-weight gold numeral (01/02/03), a white headline, a tan rationale paragraph grounded in a sermon quote where helpful, and a gold-tinted "Practical Step" callout. Border between priorities is a hairline of low-opacity cream.
+7. **"What Improvement Looks Like" panel (Suggested Rewrites)** — section eyebrow, large serif section title ("What Improvement Looks Like"). 1–2 rewrites, each rendered as a **collapsible expandable row** matching the criterion-row interaction pattern: chevron (▸ → ▾), a serif headline naming the rewrite, and an amber tag underneath naming the homiletical move. The original/improved blocks and the "Why this works" note live inside the expanded detail panel. The collapsed state keeps the report scannable.
 
-8. **"What Improvement Looks Like" panel (Suggested Rewrites)** — section eyebrow, large serif section title ("What Improvement Looks Like"). 1–2 rewrites, each rendered as a **collapsible expandable row** matching the criterion-row interaction pattern: chevron (▸ → ▾), a serif headline naming the rewrite, and an amber tag underneath naming the homiletical move. The original/improved blocks and the "Why this works" note live inside the expanded detail panel. The collapsed state keeps the report scannable.
-
-9. **Methodology appendix** — at the very end of the report, after "What Improvement Looks Like." White card with a 3px ink top border, rendered as a **collapsible expandable row** matching the pattern used for criterion rows and Suggested Rewrites. **Collapsed by default.** The collapsed-state header shows: chevron (▸ rotating to ▾ when open), serif headline "Methodology · Show Your Work", and a small mono tag underneath reading "Grading bands · score calculation". Clicking expands the full appendix content (both subsections below) inside the card. The whole appendix collapses and expands as a single unit — a single outer dropdown, not nested dropdowns per subsection.
+8. **Methodology appendix** — at the very end of the report, after "What Improvement Looks Like." White card with a 3px ink top border, rendered as a **collapsible expandable row** matching the pattern used for criterion rows and Suggested Rewrites. **Collapsed by default.** The collapsed-state header shows: chevron (▸ rotating to ▾ when open), serif headline "Methodology · Show Your Work", and a small mono tag underneath reading "Grading bands · score calculation". Clicking expands the full appendix content (both subsections below) inside the card. The whole appendix collapses and expands as a single unit — a single outer dropdown, not nested dropdowns per subsection.
 
    The collapsibility reflects the appendix's role: it is reference material the reader can dig into when they want to, not always-on prose. The band label + verdict at the top do the pastoral work up front; methodology earns its expansion when the reader wants to see how the score was built. This is a UI affordance — the markdown summary keeps the methodology appendix rendered inline at the end as before, since markdown has no collapse state.
 
@@ -224,6 +218,44 @@ After the markdown summary, build a single self-contained HTML artifact that vis
 
 Mismatch overlay: diagonal stripes via `repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.35) 4px, rgba(255,255,255,0.35) 8px)`.
 
+**Locked stylesheet additions.** In every artifact's `<style>` block, place the following after Heat Map / category styles and before responsive `@media` queries:
+
+```css
+  /* how it preaches */
+
+  .hip-section{margin-top:48px;}
+
+  .hip-head{margin-bottom:24px;}
+
+  .hip-sub{font-family:var(--sans);font-size:13.5px;color:var(--ink-soft);
+
+    line-height:1.6;max-width:680px;margin-top:-14px;}
+
+  .hip-body{background:var(--panel);box-shadow:var(--shadow);border-top:3px solid var(--accent);
+
+    padding:8px 36px 32px;}
+
+  .movement{padding:24px 0;border-bottom:1px solid var(--rule);}
+
+  .movement:last-child{border-bottom:none;}
+
+  .movement-name{font-family:var(--sans);font-size:11px;letter-spacing:.16em;
+
+    text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px;
+
+    display:flex;align-items:center;gap:14px;}
+
+  .movement-name::after{content:'';flex:1;height:1px;background:var(--rule);}
+
+  .movement p{font-size:16px;line-height:1.72;color:var(--ink);}
+
+  .movement p .q{font-style:italic;color:var(--ink-soft);}
+
+  .hip-foot{font-family:var(--sans);font-size:12px;color:var(--ink-soft);font-style:italic;
+
+    text-align:center;margin-top:22px;}
+```
+
 **Typography (use these exact fonts — no substitutions, no Google Fonts dependency):**
 - Body and headings (serif): `'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif`
 - All UI chrome (labels, scores, metadata, eyebrows, section titles, mono callouts): `-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
@@ -242,6 +274,72 @@ This is a system-font design — instant render, no font-loading delay, classic 
 - Responsive: criterion rows collapse to single-column on mobile (slider hides, score moves below name); priority rows stack; methodology score grid collapses to single column
 
 Responsive enough to read on a laptop or tablet.
+
+**"How It Preaches" markup template.** Emit this scaffold every run; fill the five `<p>` bodies with real craft-read prose anchored to the sermon. Quoted sermon text inside a movement uses `<span class="q">…</span>`.
+
+```html
+<!-- HOW IT PREACHES -->
+
+<div class="hip-section">
+
+  <div class="hip-head">
+
+    <div class="sec-eyebrow">Beyond the rubric</div>
+
+    <div class="sec-title">How It Preaches</div>
+
+    <p class="hip-sub">The rubric measures whether the sermon is faithful. This reads how it actually moves — the craft of the thing, start to finish. No scores here. Just an honest read of how it carries, in five movements from the open to the landing.</p>
+
+  </div>
+
+  <div class="hip-body">
+
+    <div class="movement">
+
+      <div class="movement-name">The Open</div>
+
+      <p>[craft read — wrap quoted sermon text in <span class="q">…</span>]</p>
+
+    </div>
+
+    <div class="movement">
+
+      <div class="movement-name">The Big Idea</div>
+
+      <p>[…]</p>
+
+    </div>
+
+    <div class="movement">
+
+      <div class="movement-name">The Structural Logic</div>
+
+      <p>[…]</p>
+
+    </div>
+
+    <div class="movement">
+
+      <div class="movement-name">The Illustrations</div>
+
+      <p>[…]</p>
+
+    </div>
+
+    <div class="movement">
+
+      <div class="movement-name">The Landing</div>
+
+      <p>[…]</p>
+
+    </div>
+
+  </div>
+
+  <div class="hip-foot">A craft read, not a grade. Your scored evaluation above is unchanged.</div>
+
+</div>
+```
 
 ---
 
@@ -273,8 +371,8 @@ Before you finalize, re-read your evaluation and verify:
 6. The composite score is calculated correctly: the simple composite is the raw sum of all 11 criterion scores, displayed directly as a /55 score with no normalization. Category subtotals (15 + 15 + 15 + 10 = 55) sum to the raw total. The weighted composite normalizes the double-weighted total onto the same /55 scale: weighted = round(weighted_raw × 55 / 70), where weighted_raw counts FCF, gospel clarity, and application twice (max 70).
 7. The Overall Verdict is ~70-85 words total across two paragraphs (affirmation ~50-60 words, improvement ~25-30 words with a ≤32 hard cap, as a single short sentence — a headline pointer, not an explanation). It contains NO quotation marks of any kind in the verdict — not for sermon excerpts, not for thematic framing, not for emphasis. The affirmation names ONE strength (the single strongest move in the sermon), not three or four. If the verdict is longer than 95 words, names multiple strengths, runs the improvement paragraph past 32 words, or contains any quotation marks, it's doing the body's job — rewrite it shorter and higher-altitude before finalizing.
 8. The improvement named in the verdict matches Top 3 Priorities #1 in substance. If they disagree, the verdict is wrong — rewrite it to match Priority #1.
-9. The report follows the section order in BOTH markdown and HTML: (1) composite score + verdict at top; (2) four category dashboards; (3) heat map (audio only — omit for manuscript); (4) How It Preaches craft read (separate generation on every eval; not part of scored JSON; omit when `how_it_preaches` is null); (5) "Where It's Strong"; (6) "Where You Can Grow" (sole prescriptive section); (7) "What Improvement Looks Like"; (8) Methodology appendix at the end. Category subtotals and the simple-vs-weighted breakdown live in the Methodology appendix, NOT at the top.
-10. The three section titles are locked: **"Where It's Strong"** for What's Working, **"Where You Can Grow"** for Top 3 Priorities, **"What Improvement Looks Like"** for Suggested Rewrites. No editorial garnish, no alternative phrasings.
+9. The report follows the section order in BOTH markdown and HTML: (1) composite score + verdict at top; (2) four category dashboards; (3) heat map (audio only — omit for manuscript); (4) "How It Preaches"; (5) "Where It's Strong"; (6) "Where You Can Grow" (sole prescriptive section); (7) "What Improvement Looks Like"; (8) Methodology appendix at the end. Category subtotals and the simple-vs-weighted breakdown live in the Methodology appendix, NOT at the top.
+10. The four section titles are locked: **"How It Preaches"** for the craft read, **"Where It's Strong"** for What's Working, **"Where You Can Grow"** for Top 3 Priorities, **"What Improvement Looks Like"** for Suggested Rewrites. No editorial garnish, no alternative phrasings.
 11. The HTML artifact uses the locked color palette (`#faf8f3` background, `#1a2332` ink, `#a67c2e` accent — full palette specified in Part 2) and the locked typography (Iowan Old Style serif + system-ui sans, NO Google Fonts). If you wrote `@import url('fonts.googleapis.com')` or used Cormorant Garamond, Source Serif, or JetBrains Mono, the spec was violated — rewrite using the locked palette.
 12. The headline lockup at the top displays the **band label alone** (e.g., "*Faithful*") in italic serif at **52px** in soft gold as the dominant element, with the composite score (e.g., "37/55") rendered beneath it in 20px white sans-serif as supporting detail — NOT the letter grade. The letter grade (C) appears only in the Methodology appendix at the end. The band is derived from the **weighted score**, not the simple score, and matches the Grading Bands table in the Rubric Reference: A 47–55 Exemplary, B 39–46 Strong, C 30–38 Faithful, D 22–29 Needs Improvement, F < 22 Significant Concerns. In the Methodology appendix, Grading Bands appear FIRST (what the score means), followed by the math/calculation subsection SECOND (how it was scored).
 13. **Heat Map is audio-conditional.** If audio or video of the preached sermon is available, include the Heat Map section in BOTH the markdown summary and the HTML dashboard, with the **beat-by-beat table** (five columns: Time, Beat, Register, Text supports?, Notes, color-coded green/amber/red in HTML). If only a manuscript is available, omit the Heat Map section entirely; criterion #8 stays in the rubric as a scored slider in Category 3, scoring the emotional arc as designed in the text with no cap, its narrative doing the diagnostic work in prose. Including a manuscript-inferred heat map adds visual weight without earning it.
@@ -357,7 +455,7 @@ A 5 on this criterion requires strength in all three. A weakness in any one of t
 **6. Hard things handled** *(Sermon-coach, drawing on Simeon Trust workshop practice)*
 Does the sermon wrestle with the genuinely difficult parts of the passage — the verses that resist easy resolution, the moves that don't fit neat homiletical packaging, the texts that disturb before they comfort — or does it skip them, defuse them too quickly, or paper them over with theological correctness?
 
-This criterion exists because congregations can absorb hard exegesis far better than preachers assume; what they cannot absorb is a preacher who has *avoided* the hard thing while looking like he addressed it. Common failure modes: hedging the disturbing text into immediate comfort; quoting the difficult verse without preaching it; using a footnote-level interpretive move to neutralize the text's rhetorical force; reaching for the resurrection too fast.
+This criterion exists because Reformed congregations especially can absorb hard exegesis; what they cannot absorb is a preacher who has *avoided* the hard thing while looking like he addressed it. Common failure modes: hedging the disturbing text into immediate comfort; quoting the difficult verse without preaching it; using a footnote-level interpretive move to neutralize the text's rhetorical force; reaching for the resurrection too fast.
 
 A 5 here means the preacher let the hard thing be hard, named what makes it hard for the contemporary listener, then preached through (not around) the difficulty.
 
@@ -415,7 +513,7 @@ Do not add more than two. The rubric exists to focus the feedback, not to exhaus
 
 - **Heat Map is now audio-conditional.** The Heat Map subsection (markdown) and Heat Map panel (HTML) are included only when audio or video of the preached sermon is available. Manuscript-only evaluations omit the section entirely — criterion #8 stays in the rubric as a scored slider (the v2 4/5 manuscript cap was removed in v3 — see below), and its expanded narrative does the diagnostic work in prose. The heat map was always meant to score *delivery*; on a manuscript it became textual-cue speculation dressed up as a timeline. This change preserves the rubric (11 criteria, 55 points) while letting the visual real estate earn its space only when it can do real work.
 - **"Where It Can Get Better" section removed.** Prescriptive work now consolidates into a single section — "Where You Can Grow" (Top 3 Priorities). Per-category growth footers (the "Two growth opportunities" under each category dashboard in older versions) are also removed. The category dashboards do diagnostic work only; Priorities does all prescriptive work.
-- **Section titles standardized and locked:** "What's Working" section → **"Lead with these"** (already locked in v2); "Top 3 Priorities" section → **"Where You Can Grow"** (newly locked); "Suggested Rewrites" section → **"What Improvement Looks Like"** (newly locked). The three titles form an affirmation–diagnostic–prescription rhythm.
+- **Section titles standardized and locked:** "What's Working" section → **"Where It's Strong"** (renamed from "Lead with these" in v2); "Top 3 Priorities" section → **"Where You Can Grow"** (newly locked); "Suggested Rewrites" section → **"What Improvement Looks Like"** (newly locked). The three titles form an affirmation–diagnostic–prescription rhythm.
 - **Verdict word budget tightened from 80-100 to 70-85 words**, with the improvement paragraph now targeting ~25-30 words with a ≤32 hard cap as a single short sentence (headline pointer, not explanation). Top 3 Priorities #1 does the explaining; the verdict's job is just to point. Hard cap moves from 110 words to 95.
 - **Suggested Rewrites render as collapsible dropdowns in the HTML artifact**, matching the criterion-row interaction pattern. Reduces scroll burden on dense reports without losing content. Markdown summary keeps rewrites inline.
 - **Methodology appendix is now a single collapsible dropdown in the HTML artifact, collapsed by default.** Matches the criterion-row and Suggested Rewrites interaction pattern. The appendix is reference material — the reader can dig into grading bands and score math when they want to, but the band label + verdict at the top do the pastoral work without needing the appendix open. Markdown summary keeps methodology inline at the end.

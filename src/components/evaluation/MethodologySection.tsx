@@ -2,6 +2,12 @@ import {
   formatDisplayScoreBare,
   formatDisplayScoreWithDenom,
 } from "@/lib/evaluation/display-score";
+import {
+  displayCategoryName,
+  displayScoreBand,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import {
   CATEGORY_MAX_POINTS,
@@ -45,9 +51,15 @@ const GRADING_BANDS = [
 type MethodologySectionProps = {
   scoring: EvaluationResultStrict["scoring"];
   categories: EvaluationResultStrict["categories"];
+  outputLanguage?: OutputLanguage;
 };
 
-export function MethodologySection({ scoring, categories }: MethodologySectionProps) {
+export function MethodologySection({
+  scoring,
+  categories,
+  outputLanguage = "en",
+}: MethodologySectionProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   return (
     <details
       className="evaluation-methodology group mt-14 border-t-[3px]"
@@ -73,13 +85,13 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
               className="text-[26px] font-normal leading-snug"
               style={{ ...serifFont, color: "var(--sc-ink)" }}
             >
-              Methodology · Show Your Work
+              {copy.methodologyTitle}
             </h2>
             <p
               className="mt-2 text-[10px] tracking-[0.1em] uppercase"
               style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
             >
-              Score calculation · grading bands
+              {copy.methodologySubtitle}
             </p>
           </div>
         </div>
@@ -90,7 +102,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
           className="mb-4 text-lg font-normal"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          How this sermon was scored
+          {copy.howScored}
         </h3>
         <div
           className="mb-6 rounded border px-6 py-6"
@@ -106,20 +118,35 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
             className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            Composite score (display)
+            {copy.compositeScore}
           </p>
           <p
             className="mt-4 text-[13px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
           >
-            Internal weighted score: <strong>{scoring.composite_weighted}/55</strong>
+            {outputLanguage === "es" ? (
+              copy.internalWeighted(scoring.composite_weighted)
+            ) : (
+              <>
+                Internal weighted score: <strong>{scoring.composite_weighted}/55</strong>
+              </>
+            )}
           </p>
           <p
             className="mt-2 text-[12px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
           >
-            Base-10 display converts weighted /55 ÷ 5.5 ({scoring.composite_weighted} ÷ 5.5 ={" "}
-            {formatDisplayScoreBare(scoring.composite_weighted)}).
+            {outputLanguage === "es" ? (
+              copy.displayConversion(
+                scoring.composite_weighted,
+                formatDisplayScoreBare(scoring.composite_weighted),
+              )
+            ) : (
+              <>
+                Base-10 display converts weighted /55 ÷ 5.5 ({scoring.composite_weighted} ÷ 5.5 ={" "}
+                {formatDisplayScoreBare(scoring.composite_weighted)}).
+              </>
+            )}
           </p>
         </div>
 
@@ -131,7 +158,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
               return (
                 <tr key={row.id} style={{ ...serifFont, color: "var(--sc-ink)" }}>
                   <td className="border-b py-2 pr-4" style={{ borderColor: "var(--sc-rule)" }}>
-                    {row.name}
+                    {displayCategoryName(row.id, row.name, outputLanguage)}
                   </td>
                   <td
                     className="border-b py-2 text-right font-medium"
@@ -153,36 +180,41 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
             color: "var(--sc-ink-soft)",
           }}
         >
-          <strong style={{ color: "var(--sc-ink)" }}>Why some criteria count twice.</strong>{" "}
-          Three of the eleven criteria carry double weight in the composite score: Fallen Condition
-          Focus, Gospel Clarity, and Application. These are the load-bearing tests of whether a
-          sermon actually preaches the gospel to real people, not just whether it handles the text
-          well, but whether it brings that text to bear on human fallenness, makes the good news
-          unmistakable, and lands it in the hearer&apos;s actual life. A sermon can score
-          respectably everywhere else and still miss the point if these three are weak, so the math
-          reflects what the pulpit reflects.
+          <strong style={{ color: "var(--sc-ink)" }}>{copy.whyDoubleWeightLead}</strong>{" "}
+          {copy.whyDoubleWeightBody}
         </blockquote>
 
         <h3
           className="mb-3 text-lg font-normal"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Grading Bands
+          {copy.gradingBands}
         </h3>
         <p
           className="mb-5 text-[14px] leading-relaxed"
           style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
         >
-          Display score of <strong>{formatDisplayScoreWithDenom(scoring.composite_weighted)}</strong>{" "}
-          places this sermon in <strong>{scoring.band}</strong>. Band thresholds use the internal
-          weighted /55 score ({scoring.composite_weighted}/55).
+          {outputLanguage === "es" ? (
+            copy.placesThisSermon(
+              formatDisplayScoreWithDenom(scoring.composite_weighted),
+              displayScoreBand(scoring.band, outputLanguage),
+              scoring.composite_weighted,
+            )
+          ) : (
+            <>
+              Display score of{" "}
+              <strong>{formatDisplayScoreWithDenom(scoring.composite_weighted)}</strong> places this
+              sermon in <strong>{scoring.band}</strong>. Band thresholds use the internal weighted
+              /55 score ({scoring.composite_weighted}/55).
+            </>
+          )}
         </p>
 
         <div className="-mx-2 overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-[13px]">
             <thead>
               <tr style={{ ...uiFont, color: "var(--sc-ink)" }}>
-                {["Band", "Range (/55)", "Display (/10)", "What it means"].map((col) => (
+                {copy.bandTableHeaders.map((col) => (
                   <th
                     key={col}
                     className="border-b px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.06em]"
@@ -212,8 +244,8 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
                       className="border-b px-3 py-2.5 font-semibold"
                       style={{ borderColor: "var(--sc-rule)" }}
                     >
-                      {band.band}
-                      {isCurrent ? " ← this sermon" : ""}
+                      {displayScoreBand(band.band, outputLanguage)}
+                      {isCurrent ? copy.thisSermon : ""}
                     </td>
                     <td
                       className="border-b px-3 py-2.5"
@@ -231,7 +263,7 @@ export function MethodologySection({ scoring, categories }: MethodologySectionPr
                       className="border-b px-3 py-2.5"
                       style={{ borderColor: "var(--sc-rule)" }}
                     >
-                      {band.meaning}
+                      {copy.gradingBandMeanings[band.band] ?? band.meaning}
                     </td>
                   </tr>
                 );

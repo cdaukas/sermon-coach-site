@@ -24,6 +24,7 @@ export default async function NewSermonPage() {
     : false;
 
   let churchName: string | null = null;
+  let spanishEnabled = false;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -33,6 +34,13 @@ export default async function NewSermonPage() {
     const raw = profile?.church_name;
     churchName =
       typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
+
+    const { data: spanishRow } = await supabase
+      .from("profiles")
+      .select("spanish_enabled")
+      .eq("id", user.id)
+      .maybeSingle();
+    spanishEnabled = spanishRow?.spanish_enabled === true;
   }
 
   return (
@@ -56,6 +64,7 @@ export default async function NewSermonPage() {
         entitlement={entitlement}
         isMentoredMentee={isMentoredMentee}
         churchName={churchName}
+        spanishEnabled={spanishEnabled}
       />
     </main>
   );

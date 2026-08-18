@@ -1,9 +1,15 @@
 import type { HowItPreaches } from "@/lib/evaluation/hip-schema";
+import {
+  displaySubmissionMode,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { CategoryCard } from "./CategoryCard";
 import { HeadlineLockup } from "./HeadlineLockup";
 import { HeatMapSection } from "./HeatMapSection";
 import { HowItPreachesSection } from "./HowItPreachesSection";
+import { MelodicLineSection } from "./MelodicLineSection";
 import { MethodologySection } from "./MethodologySection";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
@@ -22,6 +28,7 @@ type EvaluationDashboardProps = {
    * When absent or blank, the dashboard keeps using result.meta.sermon_title.
    */
   headlineTitle?: string | null;
+  outputLanguage?: OutputLanguage;
 };
 
 export function EvaluationDashboard({
@@ -31,8 +38,10 @@ export function EvaluationDashboard({
   showPrintActions = true,
   howItPreaches = null,
   headlineTitle = null,
+  outputLanguage = "en",
 }: EvaluationDashboardProps) {
   const { meta } = result;
+  const copy = evaluationReportCopy(outputLanguage);
   const showHeatMap = meta.audio_available && result.heat_map !== null;
   const displayScriptureReference =
     scriptureReference?.trim() || meta.scripture_reference;
@@ -45,7 +54,7 @@ export function EvaluationDashboard({
         className="evaluation-report-eyebrow mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
       >
-        Evaluation
+        {copy.eyebrow}
       </p>
       <h1
         className="evaluation-report-title mb-2 text-[36px] font-normal leading-tight tracking-tight md:text-[44px]"
@@ -65,24 +74,25 @@ export function EvaluationDashboard({
         style={{ ...uiFont, borderColor: "var(--sc-rule)", color: "var(--sc-ink-soft)" }}
       >
         <span>
-          <strong style={{ color: "var(--sc-ink)" }}>Sermon:</strong> {sermonTitle}
+          <strong style={{ color: "var(--sc-ink)" }}>{copy.sermon}:</strong> {sermonTitle}
         </span>
         {meta.preacher_name ? (
           <span>
-            <strong style={{ color: "var(--sc-ink)" }}>Preacher:</strong> {meta.preacher_name}
+            <strong style={{ color: "var(--sc-ink)" }}>{copy.preacher}:</strong> {meta.preacher_name}
           </span>
         ) : null}
         <span>
-          <strong style={{ color: "var(--sc-ink)" }}>Mode:</strong> {meta.submission_mode}
+          <strong style={{ color: "var(--sc-ink)" }}>{copy.mode}:</strong>{" "}
+          {displaySubmissionMode(meta.submission_mode, outputLanguage)}
         </span>
         {meta.church_or_context ? (
           <span>
-            <strong style={{ color: "var(--sc-ink)" }}>Context:</strong> {meta.church_or_context}
+            <strong style={{ color: "var(--sc-ink)" }}>{copy.context}:</strong> {meta.church_or_context}
           </span>
         ) : null}
         {meta.series_name ? (
           <span>
-            <strong style={{ color: "var(--sc-ink)" }}>Series:</strong> {meta.series_name}
+            <strong style={{ color: "var(--sc-ink)" }}>{copy.series}:</strong> {meta.series_name}
           </span>
         ) : null}
       </div>
@@ -93,28 +103,59 @@ export function EvaluationDashboard({
         </div>
       ) : null}
 
-      <HeadlineLockup scoring={result.scoring} verdict={result.verdict} />
+      <HeadlineLockup
+        scoring={result.scoring}
+        verdict={result.verdict}
+        outputLanguage={outputLanguage}
+      />
+
+      {result.melodic_line_and_big_idea ? (
+        <MelodicLineSection
+          block={result.melodic_line_and_big_idea}
+          outputLanguage={outputLanguage}
+        />
+      ) : null}
 
       {result.categories.map((category) => (
-        <CategoryCard key={category.id} category={category} />
+        <CategoryCard
+          key={category.id}
+          category={category}
+          outputLanguage={outputLanguage}
+        />
       ))}
 
       {showHeatMap && result.heat_map ? (
         <HeatMapSection
           heatMap={result.heat_map}
           fallbackTotalMinutes={meta.estimated_length_minutes}
+          outputLanguage={outputLanguage}
         />
       ) : null}
 
-      {howItPreaches ? <HowItPreachesSection howItPreaches={howItPreaches} /> : null}
+      {howItPreaches ? (
+        <HowItPreachesSection
+          howItPreaches={howItPreaches}
+          outputLanguage={outputLanguage}
+        />
+      ) : null}
 
-      <WorkingSection whatsWorking={result.whats_working} />
+      <WorkingSection
+        whatsWorking={result.whats_working}
+        outputLanguage={outputLanguage}
+      />
 
-      <PrioritiesSection topPriorities={result.top_priorities} />
+      <PrioritiesSection
+        topPriorities={result.top_priorities}
+        outputLanguage={outputLanguage}
+      />
 
-      <RewritesSection rewrites={result.rewrites} />
+      <RewritesSection rewrites={result.rewrites} outputLanguage={outputLanguage} />
 
-      <MethodologySection scoring={result.scoring} categories={result.categories} />
+      <MethodologySection
+        scoring={result.scoring}
+        categories={result.categories}
+        outputLanguage={outputLanguage}
+      />
     </article>
   );
 }

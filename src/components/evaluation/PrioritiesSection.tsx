@@ -1,11 +1,17 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
+import { evaluationReportCopy, type OutputLanguage } from "@/lib/evaluation/output-language";
 import { serifFont, uiFont } from "./shared";
 
 type PrioritiesSectionProps = {
   topPriorities: EvaluationResultStrict["top_priorities"];
+  outputLanguage?: OutputLanguage;
 };
 
-export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
+export function PrioritiesSection({
+  topPriorities,
+  outputLanguage = "en",
+}: PrioritiesSectionProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   return (
     <section
       className="evaluation-priorities mb-7 px-6 py-9 md:px-9"
@@ -18,19 +24,19 @@ export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
         className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
         style={{ ...uiFont, color: "var(--sc-accent-soft)" }}
       >
-        For the next sermon
+        {copy.forTheNextSermon}
       </p>
       <h2
         className="mb-2 text-[32px] font-normal"
         style={{ ...serifFont, color: "#faf8f3" }}
       >
-        Where You Can Grow
+        {copy.whereYouCanGrow}
       </h2>
       <p
         className="mb-7 text-base italic"
         style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
       >
-        In order: highest leverage first
+        {copy.inOrder}
       </p>
 
       <div className="divide-y" style={{ borderColor: "rgba(250,248,243,0.15)" }}>
@@ -76,7 +82,7 @@ export function PrioritiesSection({ topPriorities }: PrioritiesSectionProps) {
                   className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em]"
                   style={{ ...uiFont, color: "var(--sc-accent-soft)" }}
                 >
-                  Practical step
+                  {copy.practicalStep}
                 </p>
                 {priority.practical_step}
               </div>
