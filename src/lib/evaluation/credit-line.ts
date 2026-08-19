@@ -1,15 +1,18 @@
+import { evaluationReportCopy, type OutputLanguage } from "./output-language";
 import type { EvaluationEntitlement } from "./entitlement-types";
 
 export function formatEvaluationCreditLine(
   entitlement: EvaluationEntitlement | null,
+  language: OutputLanguage = "en",
 ): string | null {
   if (!entitlement?.canEvaluate) {
     return null;
   }
 
+  const copy = evaluationReportCopy(language);
   if (entitlement.creditSource === "free") {
-    return "Your first evaluation is free.";
+    return copy.firstEvaluationFree;
   }
 
-  return "This uses one credit.";
+  return copy.usesOneCredit;
 }

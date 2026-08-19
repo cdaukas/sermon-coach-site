@@ -1,41 +1,38 @@
 import {
-  EVALUATION_LEGAL_DISCLAIMER,
-  EVALUATION_PROVENANCE_LINE,
-} from "@/lib/evaluation/legal-disclaimer";
+  evaluationReportCopy,
+  formatEvaluationDate,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 
 type EvaluationPrintHeaderProps = {
   pastorName: string | null;
   sermonTitle: string;
   scriptureReference: string | null;
   evaluatedAt: string | null;
+  outputLanguage?: OutputLanguage;
 };
-
-function formatEvaluatedDate(iso: string | null): string | null {
-  if (!iso) {
-    return null;
-  }
-
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
-    new Date(iso),
-  );
-}
 
 export function EvaluationPrintHeader({
   pastorName,
   sermonTitle,
   scriptureReference,
   evaluatedAt,
+  outputLanguage = "en",
 }: EvaluationPrintHeaderProps) {
-  const evaluatedLabel = formatEvaluatedDate(evaluatedAt);
+  const copy = evaluationReportCopy(outputLanguage);
+  const evaluatedLabel = evaluatedAt
+    ? formatEvaluationDate(evaluatedAt, outputLanguage, "long")
+    : null;
   const titleLine = pastorName ? `${pastorName} · ${sermonTitle}` : sermonTitle;
+  const evaluatedLine = evaluatedLabel
+    ? `${copy.evaluatedPrefix} ${evaluatedLabel}`
+    : null;
   const metaLine =
-    scriptureReference && evaluatedLabel
-      ? `${scriptureReference} · Evaluated ${evaluatedLabel}`
+    scriptureReference && evaluatedLine
+      ? `${scriptureReference} · ${evaluatedLine}`
       : scriptureReference
         ? scriptureReference
-        : evaluatedLabel
-          ? `Evaluated ${evaluatedLabel}`
-          : null;
+        : evaluatedLine;
 
   return (
     <header className="evaluation-print-header print-only" aria-hidden="true">
@@ -47,8 +44,8 @@ export function EvaluationPrintHeader({
       </p>
       <p className="evaluation-print-title-line">{titleLine}</p>
       {metaLine ? <p className="evaluation-print-meta-line">{metaLine}</p> : null}
-      <p className="evaluation-print-provenance">{EVALUATION_PROVENANCE_LINE}</p>
-      <p className="evaluation-print-disclaimer">{EVALUATION_LEGAL_DISCLAIMER}</p>
+      <p className="evaluation-print-provenance">{copy.printProvenance}</p>
+      <p className="evaluation-print-disclaimer">{copy.printDisclaimer}</p>
     </header>
   );
 }

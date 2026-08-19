@@ -27,13 +27,11 @@ import {
   parseOutputLanguage,
   parseCriterion2Wording,
   evaluationReportCopy,
+  formatEvaluationDate,
 } from "@/lib/evaluation/output-language";
 import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
-
-const BACK_LABEL_MENTOR = "Back to mentoring";
-const BACK_HREF_LIBRARY = "/dashboard";
 
 type EvaluationPageProps = {
   params: Promise<{ id: string; evaluationId: string }>;
@@ -73,19 +71,21 @@ export async function generateMetadata({
   const data = await getEvaluation(evaluationId, id);
 
   if (!data?.evaluation.result && !data?.evaluation.coaching_narrative) {
-    return { title: "Evaluation" };
+    return { title: evaluationReportCopy("en").pageTitleEvaluation };
   }
 
   const titleBase =
     data.evaluation.result?.meta.sermon_title ?? data.sermon.title;
+  const language = parseOutputLanguage(data.evaluation.output_language);
+  const copy = evaluationReportCopy(language);
   if (
     data.evaluation.report_mode === "debrief" &&
     view === "debrief"
   ) {
-    return { title: `${titleBase} — Mentoring Debrief` };
+    return { title: `${titleBase} — ${copy.pageTitleMentoringDebrief}` };
   }
 
-  return { title: `${titleBase} — Evaluation` };
+  return { title: `${titleBase} — ${copy.pageTitleEvaluation}` };
 }
 
 function ArtifactSwitchLink({
@@ -135,9 +135,9 @@ export default async function EvaluationPage({
   const outputLanguage = parseOutputLanguage(evaluation.output_language);
   const reportCopy = evaluationReportCopy(outputLanguage);
   const backHref =
-    resolvedVia === "owner" ? BACK_HREF_LIBRARY : "/dashboard/mentoring";
+    resolvedVia === "owner" ? "/dashboard" : "/dashboard/mentoring";
   const backLabel =
-    resolvedVia === "owner" ? reportCopy.backToLibrary : BACK_LABEL_MENTOR;
+    resolvedVia === "owner" ? reportCopy.backToLibrary : reportCopy.backToMentoring;
 
   const isDebriefMode = evaluation.report_mode === "debrief";
   const hasScoredResult = evaluation.result != null;
@@ -241,6 +241,7 @@ export default async function EvaluationPage({
           backLabel={backLabel}
           initialStatus={evaluation.status}
           initialErrorMessage={evaluation.error_message}
+          outputLanguage={outputLanguage}
         />
       </main>
     );
@@ -259,9 +260,7 @@ export default async function EvaluationPage({
     sermon.primary_passage?.trim() ||
     evaluation.result?.meta.scripture_reference.trim() ||
     null;
-  const footerDate = new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-  }).format(new Date(evaluatedAt));
+  const footerDate = formatEvaluationDate(evaluatedAt, outputLanguage);
 
   const showManuscript =
     !pdfCapture &&
@@ -304,11 +303,11 @@ export default async function EvaluationPage({
           {hasSplitViews ? (
             showCoachingView ? (
               <ArtifactSwitchLink href={evaluationViewHref}>
-                ← The Evaluation
+                {`← ${reportCopy.theEvaluation}`}
               </ArtifactSwitchLink>
             ) : (
               <ArtifactSwitchLink href={debriefViewHref}>
-                The Mentoring Debrief →
+                {`${reportCopy.theMentoringDebrief} →`}
               </ArtifactSwitchLink>
             )
           ) : null}
@@ -321,6 +320,7 @@ export default async function EvaluationPage({
           sermonTitle={sermon.title}
           scriptureReference={scriptureReference}
           evaluatedAt={evaluatedAt}
+          outputLanguage={outputLanguage}
         />
       ) : null}
 
@@ -328,6 +328,7 @@ export default async function EvaluationPage({
         <CoachingReportView
           data={toCoachingReportPresentation({ evaluation, sermon })}
           showPrintActions={!pdfCapture}
+          outputLanguage={outputLanguage}
         />
       ) : (
         <EvaluationDashboard
@@ -355,6 +356,7 @@ export default async function EvaluationPage({
       {tuesdayNudgeOffer ? (
         <TuesdayNudgeOffer
           newsletterOptedIn={tuesdayNudgeOffer.newsletterOptedIn}
+          outputLanguage={outputLanguage}
         />
       ) : null}
 
@@ -363,6 +365,7 @@ export default async function EvaluationPage({
           sermonId={sermonId}
           currentEvaluationId={evaluationId}
           evaluations={siblingEvaluations}
+          outputLanguage={outputLanguage}
         />
       ) : null}
 
@@ -372,11 +375,15 @@ export default async function EvaluationPage({
           entitlement={entitlement}
           hasActiveEvaluation={hasActiveEvaluation}
           isMentoredMentee={isMentoredMentee}
+          outputLanguage={outputLanguage}
         />
       ) : null}
 
       {showManuscript ? (
-        <ReportManuscriptDisclosure content={manuscriptContent} />
+        <ReportManuscriptDisclosure
+          content={manuscriptContent}
+          outputLanguage={outputLanguage}
+        />
       ) : null}
 
       {!pdfCapture ? (

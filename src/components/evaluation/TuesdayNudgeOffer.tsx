@@ -100,14 +100,13 @@ export function TuesdayNudgeOffer({
             className="block font-medium"
             style={{ color: "var(--sc-ink)" }}
           >
-            Send me the Tuesday nudge
+            {copy.tuesdayNudgeTitle}
           </span>
           <span
             className="mt-1 block text-[13px] leading-relaxed"
             style={{ color: "var(--sc-ink-soft)" }}
           >
-            A prompt each Tuesday to look back at Sunday and start next
-            week&apos;s sketch. One email a week.
+            {copy.tuesdayNudgeBody}
           </span>
         </span>
       </label>
@@ -125,7 +124,7 @@ export function TuesdayNudgeOffer({
             color: "var(--sc-ink)",
           }}
         >
-          {pending ? "Saving…" : "Confirm"}
+          {pending ? copy.saving : copy.confirm}
         </button>
         <button
           type="button"
@@ -134,7 +133,7 @@ export function TuesdayNudgeOffer({
           className="cursor-pointer border-0 bg-transparent px-2 py-2 text-[13px] font-medium underline-offset-2 hover:underline disabled:cursor-wait disabled:opacity-70 disabled:no-underline"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          Not now
+          {copy.notNow}
         </button>
       </div>
     </section>

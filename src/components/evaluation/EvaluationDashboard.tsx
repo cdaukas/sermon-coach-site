@@ -125,13 +125,13 @@ export function EvaluationDashboard({
       {criterion2SwitcherHrefs ? (
         <nav
           className="evaluation-c2-switcher screen-only mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1"
-          aria-label="Criterion 2 wording"
+          aria-label={copy.criterion2Switcher}
         >
           <span
             className="text-[10px] font-medium uppercase tracking-[0.12em]"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            Criterion 2
+            {copy.criterion2Switcher}
           </span>
           {(
             [

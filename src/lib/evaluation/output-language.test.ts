@@ -148,6 +148,21 @@ describe("Spanish display maps", () => {
     assert.equal(copy.printSavePdf, "Imprimir / Guardar como PDF");
     assert.equal(copy.whereItsStrong, "Dónde está fuerte");
     assert.equal(copy.summary, "Resumen");
+    assert.equal(copy.runEvaluationAgain, "Volver a ejecutar The Evaluation");
+    assert.equal(copy.viewManuscript, "Ver el manuscrito");
+    assert.equal(copy.usesOneCredit, "Esto usa un crédito.");
+    assert.equal(copy.firstEvaluationFree, "Tu primera evaluación es gratis.");
+    assert.equal(copy.starting, "Iniciando…");
+    assert.equal(
+      copy.evaluationInProgress,
+      "Ya hay una evaluación en curso para este sermón.",
+    );
+    assert.equal(copy.earlierEvaluations, "Evaluaciones anteriores");
+    assert.equal(copy.criterion2Switcher, "Criterio 2");
+    assert.equal(copy.tuesdayNudgeTitle, "Envíame el aviso del martes");
+    assert.equal(copy.waitTimedOutTitle, "Esto está tardando más de lo debido");
+    assert.equal(copy.coachingReport, "Informe de coaching");
+    assert.equal(copy.backToMentoring, "Volver a la mentoría");
   });
 
   it("includes Reina-Valera 1960 in the Spanish output contract", () => {
