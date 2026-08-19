@@ -53,6 +53,9 @@ export function EvaluateButton({
 
   const { polling, elapsed, startPolling } = useEvaluationPolling({
     onFailed: handlePollFailed,
+    statusCheckFailedMessage: copy.pollStatusFailed,
+    waitFailedMessage: copy.pollWaitFailed,
+    evaluationFailedFallback: copy.evaluationFailedFallback,
   });
 
   function readStashedContext(): SermonContext | undefined {

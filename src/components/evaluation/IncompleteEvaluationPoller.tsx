@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { EvaluationPollingStatus } from "@/components/evaluation/EvaluationPollingStatus";
 import { useEvaluationPolling } from "@/components/evaluation/useEvaluationPolling";
+import {
+  displayEvaluationError,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
 /** ~5 minutes — stop polling rather than spinning forever. */
 const POLL_CEILING_MS = 5 * 60 * 1000;
+const SUPPORT_EMAIL = "chris@sermoncoach.online";
 
 type IncompleteEvaluationPollerProps = {
   evaluationId: string;
@@ -20,6 +26,7 @@ type IncompleteEvaluationPollerProps = {
   backLabel: string;
   initialStatus: string;
   initialErrorMessage: string | null;
+  outputLanguage?: OutputLanguage;
 };
 
 export function IncompleteEvaluationPoller({
@@ -30,8 +37,10 @@ export function IncompleteEvaluationPoller({
   backLabel,
   initialStatus,
   initialErrorMessage,
+  outputLanguage = "en",
 }: IncompleteEvaluationPollerProps) {
   const router = useRouter();
+  const copy = evaluationReportCopy(outputLanguage);
   const [timedOut, setTimedOut] = useState(false);
 
   const handleComplete = useCallback(() => {
@@ -46,12 +55,18 @@ export function IncompleteEvaluationPoller({
     stopPolling,
   } = useEvaluationPolling({
     onComplete: handleComplete,
+    statusCheckFailedMessage: copy.pollStatusFailed,
+    waitFailedMessage: copy.pollWaitFailed,
+    evaluationFailedFallback: copy.evaluationFailedFallback,
   });
 
   const failedMessage =
     error ??
     (initialStatus === "failed"
-      ? (initialErrorMessage ?? "We couldn't generate a valid evaluation.")
+      ? displayEvaluationError(
+          initialErrorMessage ?? copy.evaluationFailedFallback,
+          outputLanguage,
+        )
       : null);
   const shouldPoll = !failedMessage && !timedOut;
 
@@ -84,22 +99,21 @@ export function IncompleteEvaluationPoller({
           className="mb-3 text-[25px] font-semibold leading-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          This is taking longer than it should
+          {copy.waitTimedOutTitle}
         </h1>
         <p
           className="mb-6 max-w-[400px] text-[14px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          The evaluation has not come back yet. Nothing has been lost, and it may
-          still finish. Reload in a few minutes, or email{" "}
+          {copy.waitTimedOutLead}{" "}
           <a
-            href="mailto:chris@sermoncoach.online"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="underline"
             style={{ color: "var(--sc-accent)" }}
           >
-            chris@sermoncoach.online
+            {SUPPORT_EMAIL}
           </a>{" "}
-          and I will look at it.
+          {copy.waitTimedOutClose}
         </p>
         <div className="flex flex-wrap gap-3">
           <button
@@ -115,7 +129,7 @@ export function IncompleteEvaluationPoller({
               borderColor: "var(--sc-ink)",
             }}
           >
-            Reload
+            {copy.reload}
           </button>
           <Link
             href="/dashboard"
@@ -127,7 +141,7 @@ export function IncompleteEvaluationPoller({
               borderColor: "var(--sc-rule)",
             }}
           >
-            Back to your sermons
+            {copy.backToYourSermons}
           </Link>
         </div>
       </div>
@@ -141,7 +155,7 @@ export function IncompleteEvaluationPoller({
           className="mb-4 text-[15px]"
           style={{ ...uiFont, color: "var(--sc-error)" }}
         >
-          {failedMessage}
+          {displayEvaluationError(failedMessage, outputLanguage)}
         </p>
         <Link
           href={backHref}
@@ -165,6 +179,7 @@ export function IncompleteEvaluationPoller({
       <EvaluationPollingStatus
         elapsed={polling || elapsed > 0 ? elapsed : 0}
         className="mb-6"
+        outputLanguage={outputLanguage}
       />
       <Link
         href={backHref}

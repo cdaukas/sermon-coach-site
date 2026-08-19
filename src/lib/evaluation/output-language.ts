@@ -1,3 +1,9 @@
+import {
+  ACTIVE_EVAL_IN_PROGRESS_ERROR,
+  MENTORED_ALLOTMENT_EXHAUSTED_ERROR,
+  MENTORED_ALREADY_IN_FLIGHT_ERROR,
+  MENTORED_NO_SEAT_CAPACITY_ERROR,
+} from "./eval-start-errors";
 import { HIP_MOVEMENT_NAMES } from "./hip-schema";
 import {
   CANONICAL_CRITERION_NAMES,
@@ -338,6 +344,49 @@ export type EvaluationReportCopy = {
   melodicLinePreacherNote: string;
   backToLibrary: string;
   printSavePdf: string;
+  runEvaluationAgain: string;
+  viewManuscript: string;
+  firstEvaluationFree: string;
+  usesOneCredit: string;
+  starting: string;
+  evaluationInProgress: string;
+  backToMentoring: string;
+  theEvaluation: string;
+  theMentoringDebrief: string;
+  earlierEvaluations: string;
+  viewBandFallback: string;
+  criterion2Switcher: string;
+  evaluatedPrefix: string;
+  evaluated: string;
+  printProvenance: string;
+  printDisclaimer: string;
+  waitTimedOutTitle: string;
+  waitTimedOutLead: string;
+  waitTimedOutClose: string;
+  reload: string;
+  backToYourSermons: string;
+  evaluationFailedFallback: string;
+  pollStatusFailed: string;
+  pollWaitFailed: string;
+  creditsUsedThisMonth: string;
+  noCreditsRemaining: string;
+  visitBuy: string;
+  toAddCapacity: string;
+  tuesdayNudgeAria: string;
+  tuesdayNudgeTitle: string;
+  tuesdayNudgeBody: string;
+  confirm: string;
+  notNow: string;
+  saving: string;
+  coachingReport: string;
+  howToGrow: string;
+  whatItLooksLike: string;
+  thisWeek: string;
+  before: string;
+  after: string;
+  coachingNarrativeMissing: string;
+  pageTitleEvaluation: string;
+  pageTitleMentoringDebrief: string;
 };
 
 const ENGLISH_COPY: EvaluationReportCopy = {
@@ -401,6 +450,54 @@ const ENGLISH_COPY: EvaluationReportCopy = {
   melodicLinePreacherNote: "Working from the line you named.",
   backToLibrary: "Back to library",
   printSavePdf: "Print / Save as PDF",
+  runEvaluationAgain: "Run The Evaluation again",
+  viewManuscript: "View manuscript",
+  firstEvaluationFree: "Your first evaluation is free.",
+  usesOneCredit: "This uses one credit.",
+  starting: "Starting…",
+  evaluationInProgress: "An evaluation is already in progress for this sermon.",
+  backToMentoring: "Back to mentoring",
+  theEvaluation: "The Evaluation",
+  theMentoringDebrief: "The Mentoring Debrief",
+  earlierEvaluations: "Earlier evaluations",
+  viewBandFallback: "View",
+  criterion2Switcher: "Criterion 2",
+  evaluatedPrefix: "Evaluated",
+  evaluated: "Evaluated",
+  printProvenance:
+    "Evaluated against an expositional rubric drawn from Bryan Chapell, Tim Keller, John Piper, Haddon Robinson, the Simeon Trust, and 9Marks.",
+  printDisclaimer:
+    "The Sermon Coach is an independent tool. It is not affiliated with, endorsed by, or sponsored by Bryan Chapell, Tim Keller, John Piper, Haddon Robinson, the Simeon Trust, 9Marks, or any author, ministry, or organization whose published work informs its rubric. All names and works are referenced for identification and attribution only.",
+  waitTimedOutTitle: "This is taking longer than it should",
+  waitTimedOutLead:
+    "The evaluation has not come back yet. Nothing has been lost, and it may still finish. Reload in a few minutes, or email",
+  waitTimedOutClose: "and I will look at it.",
+  reload: "Reload",
+  backToYourSermons: "Back to your sermons",
+  evaluationFailedFallback: "We couldn't generate a valid evaluation.",
+  pollStatusFailed: "Could not check evaluation status.",
+  pollWaitFailed: "Something went wrong while waiting.",
+  creditsUsedThisMonth: "You've used all your credits this month.",
+  noCreditsRemaining: "No credits remaining.",
+  visitBuy: "Visit Buy",
+  toAddCapacity: "to add capacity.",
+  tuesdayNudgeAria: "Tuesday nudge offer",
+  tuesdayNudgeTitle: "Send me the Tuesday nudge",
+  tuesdayNudgeBody:
+    "A prompt each Tuesday to look back at Sunday and start next week's sketch. One email a week.",
+  confirm: "Confirm",
+  notNow: "Not now",
+  saving: "Saving…",
+  coachingReport: "Coaching report",
+  howToGrow: "How To Grow",
+  whatItLooksLike: "What It Looks Like",
+  thisWeek: "This week:",
+  before: "Before",
+  after: "After",
+  coachingNarrativeMissing:
+    "The coaching narrative is not available for this evaluation.",
+  pageTitleEvaluation: "Evaluation",
+  pageTitleMentoringDebrief: "Mentoring Debrief",
 };
 
 const SPANISH_COPY: EvaluationReportCopy = {
@@ -463,6 +560,54 @@ const SPANISH_COPY: EvaluationReportCopy = {
   melodicLinePreacherNote: "A partir de la línea que nombraste.",
   backToLibrary: "Volver a la biblioteca",
   printSavePdf: "Imprimir / Guardar como PDF",
+  runEvaluationAgain: "Volver a ejecutar The Evaluation",
+  viewManuscript: "Ver el manuscrito",
+  firstEvaluationFree: "Tu primera evaluación es gratis.",
+  usesOneCredit: "Esto usa un crédito.",
+  starting: "Iniciando…",
+  evaluationInProgress: "Ya hay una evaluación en curso para este sermón.",
+  backToMentoring: "Volver a la mentoría",
+  theEvaluation: "The Evaluation",
+  theMentoringDebrief: "El debrief de mentoría",
+  earlierEvaluations: "Evaluaciones anteriores",
+  viewBandFallback: "Ver",
+  criterion2Switcher: "Criterio 2",
+  evaluatedPrefix: "Evaluado el",
+  evaluated: "Evaluado",
+  printProvenance:
+    "Evaluado contra una rúbrica expositiva tomada de Bryan Chapell, Tim Keller, John Piper, Haddon Robinson, Simeon Trust y 9Marcas.",
+  printDisclaimer:
+    "The Sermon Coach es una herramienta independiente. No está afiliada, respaldada ni patrocinada por Bryan Chapell, Tim Keller, John Piper, Haddon Robinson, Simeon Trust, 9Marcas, ni por ningún autor, ministerio u organización cuyo trabajo publicado informa su rúbrica. Todos los nombres y obras se citan solo para identificación y atribución.",
+  waitTimedOutTitle: "Esto está tardando más de lo debido",
+  waitTimedOutLead:
+    "La evaluación aún no ha vuelto. No se ha perdido nada, y puede que todavía termine. Recarga en unos minutos, o escribe a",
+  waitTimedOutClose: "y yo lo miro.",
+  reload: "Recargar",
+  backToYourSermons: "Volver a tus sermones",
+  evaluationFailedFallback: "No pudimos generar una evaluación válida.",
+  pollStatusFailed: "No se pudo consultar el estado de la evaluación.",
+  pollWaitFailed: "Algo salió mal mientras esperábamos.",
+  creditsUsedThisMonth: "Ya usaste todos tus créditos este mes.",
+  noCreditsRemaining: "No quedan créditos.",
+  visitBuy: "Ir a Comprar",
+  toAddCapacity: "para añadir capacidad.",
+  tuesdayNudgeAria: "Oferta del aviso del martes",
+  tuesdayNudgeTitle: "Envíame el aviso del martes",
+  tuesdayNudgeBody:
+    "Un aviso cada martes para mirar atrás al domingo y empezar el bosquejo de la próxima semana. Un correo a la semana.",
+  confirm: "Confirmar",
+  notNow: "Ahora no",
+  saving: "Guardando…",
+  coachingReport: "Informe de coaching",
+  howToGrow: "Cómo crecer",
+  whatItLooksLike: "Cómo se ve",
+  thisWeek: "Esta semana:",
+  before: "Antes",
+  after: "Después",
+  coachingNarrativeMissing:
+    "El relato de coaching no está disponible para esta evaluación.",
+  pageTitleEvaluation: "Evaluación",
+  pageTitleMentoringDebrief: "Debrief de mentoría",
 };
 
 export function evaluationReportCopy(
@@ -470,3 +615,63 @@ export function evaluationReportCopy(
 ): EvaluationReportCopy {
   return language === "es" ? SPANISH_COPY : ENGLISH_COPY;
 }
+
+export function evaluationDateLocale(language: OutputLanguage): string {
+  return language === "es" ? "es-419" : "en-US";
+}
+
+export function formatEvaluationDate(
+  iso: string,
+  language: OutputLanguage,
+  dateStyle: "medium" | "long" = "medium",
+): string {
+  return new Intl.DateTimeFormat(evaluationDateLocale(language), {
+    dateStyle,
+  }).format(new Date(iso));
+}
+
+const SPANISH_EVALUATION_ERRORS: Record<string, string> = {
+  [ACTIVE_EVAL_IN_PROGRESS_ERROR]:
+    "Ya tienes una evaluación en curso. Espera a que termine antes de empezar otra.",
+  [MENTORED_ALLOTMENT_EXHAUSTED_ERROR]:
+    "Ya usaste las entregas de este mes. La próxima se abre el día primero.",
+  [MENTORED_ALREADY_IN_FLIGHT_ERROR]:
+    "Ese sermón ya se está leyendo. Dale un minuto.",
+  [MENTORED_NO_SEAT_CAPACITY_ERROR]:
+    "Este asiento de mentoría ya no está disponible. Pregúntale a tu mentor si la relación sigue abierta.",
+  "Something went wrong. Please try again.":
+    "Algo salió mal. Inténtalo de nuevo.",
+  "The Mentoring Debrief is not available for this account.":
+    "El debrief de mentoría no está disponible para esta cuenta.",
+  "You must be signed in to run an evaluation.":
+    "Debes iniciar sesión para ejecutar una evaluación.",
+  "You must be signed in.": "Debes iniciar sesión.",
+  "Sermon not found.": "No se encontró el sermón.",
+  "No manuscript version found for this sermon.":
+    "No hay una versión de manuscrito para este sermón.",
+  "An evaluation is already running for this manuscript version.":
+    "Ya hay una evaluación en curso para esta versión del manuscrito.",
+  "Failed to start evaluation.": "No se pudo iniciar la evaluación.",
+  "Failed to save evaluation.": "No se pudo guardar la evaluación.",
+  "Could not check evaluation status.":
+    "No se pudo consultar el estado de la evaluación.",
+  "We couldn't generate a valid evaluation.":
+    "No pudimos generar una evaluación válida.",
+  "Something went wrong while waiting.":
+    "Algo salió mal mientras esperábamos.",
+  "Could not update email preferences. Please try again.":
+    "No se pudieron actualizar las preferencias de correo. Inténtalo de nuevo.",
+  "Could not update the offer. Please try again.":
+    "No se pudo actualizar la oferta. Inténtalo de nuevo.",
+};
+
+export function displayEvaluationError(
+  message: string,
+  language: OutputLanguage,
+): string {
+  if (language !== "es") {
+    return message;
+  }
+  return SPANISH_EVALUATION_ERRORS[message] ?? message;
+}
+

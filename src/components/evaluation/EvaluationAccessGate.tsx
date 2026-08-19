@@ -1,19 +1,28 @@
 import Link from "next/link";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
+import {
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
 type EvaluationAccessGateProps = {
   entitlement: EvaluationEntitlement | null;
   className?: string;
+  outputLanguage?: OutputLanguage;
 };
 
 function CapacityAlert({
   className,
   message,
+  visitBuy,
+  toAddCapacity,
 }: {
   className: string;
   message: string;
+  visitBuy: string;
+  toAddCapacity: string;
 }) {
   return (
     <p
@@ -26,9 +35,9 @@ function CapacityAlert({
         className="font-medium no-underline hover:underline"
         style={{ color: "var(--sc-accent)" }}
       >
-        Visit Buy
+        {visitBuy}
       </Link>{" "}
-      to add capacity.
+      {toAddCapacity}
     </p>
   );
 }
@@ -73,7 +82,10 @@ export function EvaluationCreditNotice({
 export function EvaluationAccessGate({
   entitlement,
   className = "",
+  outputLanguage = "en",
 }: EvaluationAccessGateProps) {
+  const copy = evaluationReportCopy(outputLanguage);
+
   if (!entitlement || entitlement.canEvaluate) {
     return null;
   }
@@ -82,7 +94,9 @@ export function EvaluationAccessGate({
     return (
       <CapacityAlert
         className={className}
-        message="You've used all your credits this month."
+        message={copy.creditsUsedThisMonth}
+        visitBuy={copy.visitBuy}
+        toAddCapacity={copy.toAddCapacity}
       />
     );
   }
@@ -91,7 +105,9 @@ export function EvaluationAccessGate({
     return (
       <CapacityAlert
         className={className}
-        message="No credits remaining."
+        message={copy.noCreditsRemaining}
+        visitBuy={copy.visitBuy}
+        toAddCapacity={copy.toAddCapacity}
       />
     );
   }
