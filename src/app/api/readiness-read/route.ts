@@ -20,6 +20,11 @@ import {
   generateSketchRead,
   SKETCH_PROMPT_VERSION,
 } from "@/lib/sketch/generate";
+import {
+  AUTHED_SKETCH_DAILY_LIMIT_MESSAGE,
+  checkAuthedSketchDailyLimit,
+  recordAuthedSketchEvent,
+} from "@/lib/sketch/rate-limit";
 import { SKETCH_FIELDS, type OutlineForm } from "@/lib/sketch/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -69,6 +74,32 @@ export async function POST(request: Request) {
     outlineFormRaw === "outline" || outlineFormRaw === "manuscript"
       ? outlineFormRaw
       : null;
+
+  // --- per-user daily Opus cap (before the expensive call) -----------------
+  const limit = await checkAuthedSketchDailyLimit(user.id);
+  if (!limit.ok) {
+    return NextResponse.json(
+      {
+        error: AUTHED_SKETCH_DAILY_LIMIT_MESSAGE,
+        reason: limit.reason,
+      },
+      { status: 429 },
+    );
+  }
+
+  // Record after the check passes and before Opus so failed model calls still
+  // burn a slot (same ordering as public /api/sketch/run). Fail closed on
+  // insert failure so the daily count cannot undercount.
+  const recorded = await recordAuthedSketchEvent(user.id);
+  if (!recorded) {
+    return NextResponse.json(
+      {
+        error:
+          "Sketch is temporarily unavailable. Please try again in a moment.",
+      },
+      { status: 503 },
+    );
+  }
 
   // --- generate (shared with public /api/sketch/run) -----------------------
   const generated = await generateSketchRead({
