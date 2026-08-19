@@ -102,16 +102,26 @@ export function CategoryCard({ category }: CategoryCardProps) {
               >
                 ▸
               </span>
-              <p className="text-base font-medium" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-                {criterion.name}
-                <span
-                  className="text-[11px] font-normal tracking-normal"
-                  style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-                >
-                  {" · "}
-                  <em style={{ fontStyle: "italic" }}>{criterion.tradition_tag}</em>
-                </span>
-              </p>
+              <div className="min-w-0">
+                <p className="text-base font-medium" style={{ ...serifFont, color: "var(--sc-ink)" }}>
+                  {criterion.name}
+                  <span
+                    className="text-[11px] font-normal tracking-normal"
+                    style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                  >
+                    {" · "}
+                    <em style={{ fontStyle: "italic" }}>{criterion.tradition_tag}</em>
+                  </span>
+                </p>
+                {criterion.verdict_line ? (
+                  <p
+                    className="evaluation-criterion-verdict mt-1 text-[13px] leading-snug"
+                    style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+                  >
+                    {criterion.verdict_line}
+                  </p>
+                ) : null}
+              </div>
               <CriterionScoreBar score={criterion.score} />
               <p
                 className="text-right text-sm font-semibold md:col-start-4"

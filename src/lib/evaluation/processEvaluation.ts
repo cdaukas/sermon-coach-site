@@ -4,6 +4,9 @@ import {
   CoachingNarrativeError,
   runCoachingNarrative,
 } from "./runCoachingNarrative";
+import {
+  runCriterionVerdictLinesBestEffort,
+} from "./runCriterionVerdictLines";
 import { runHowItPreachesBestEffort } from "./runHowItPreaches";
 import { formatScoreBandStrict } from "./schema";
 import { recordEvaluationComplete } from "./quota";
@@ -85,12 +88,15 @@ async function processMentoredEvaluationJob(
   }
 
   try {
-    const { result, model, inputTokens, outputTokens } = await runEvaluation({
-      sermonTitle,
-      manuscript,
-      context,
-      primaryPassage: primaryPassage?.trim() || undefined,
-    });
+    const { result: scoredResult, model, inputTokens, outputTokens } =
+      await runEvaluation({
+        sermonTitle,
+        manuscript,
+        context,
+        primaryPassage: primaryPassage?.trim() || undefined,
+      });
+
+    let result = scoredResult;
 
     const coaching = await runCoachingNarrative({
       result,
@@ -103,17 +109,23 @@ async function processMentoredEvaluationJob(
     let billedInputTokens = inputTokens + coaching.inputTokens;
     let billedOutputTokens = outputTokens + coaching.outputTokens;
 
-    const hip = await runHowItPreachesBestEffort(
-      {
-        manuscript,
-        sermonTitle,
-        primaryPassage,
-        context,
-      },
-      { evaluationId, userId },
-    );
-    billedInputTokens += hip.inputTokens;
-    billedOutputTokens += hip.outputTokens;
+    const logContext = { evaluationId, userId };
+    const [verdictPass, hip] = await Promise.all([
+      runCriterionVerdictLinesBestEffort(result, logContext),
+      runHowItPreachesBestEffort(
+        {
+          manuscript,
+          sermonTitle,
+          primaryPassage,
+          context,
+        },
+        logContext,
+      ),
+    ]);
+
+    result = verdictPass.result;
+    billedInputTokens += verdictPass.inputTokens + hip.inputTokens;
+    billedOutputTokens += verdictPass.outputTokens + hip.outputTokens;
 
     const { data: completeData, error: completeError } = await supabase.rpc(
       "complete_mentored_evaluation",
@@ -200,13 +212,15 @@ export async function processEvaluationJob(
 
     const reportMode = normalizeReportMode(evaluationRow.report_mode);
 
-    const { result, model, inputTokens, outputTokens } = await runEvaluation({
-      sermonTitle,
-      manuscript,
-      context,
-      primaryPassage: primaryPassage?.trim() || undefined,
-    });
+    const { result: scoredResult, model, inputTokens, outputTokens } =
+      await runEvaluation({
+        sermonTitle,
+        manuscript,
+        context,
+        primaryPassage: primaryPassage?.trim() || undefined,
+      });
 
+    let result = scoredResult;
     let coachingNarrative = null;
     let billedInputTokens = inputTokens;
     let billedOutputTokens = outputTokens;
@@ -224,20 +238,24 @@ export async function processEvaluationJob(
       billedOutputTokens += coaching.outputTokens;
     }
 
-    let howItPreaches = null;
+    const logContext = { evaluationId, userId };
+    const [verdictPass, hip] = await Promise.all([
+      runCriterionVerdictLinesBestEffort(result, logContext),
+      runHowItPreachesBestEffort(
+        {
+          manuscript,
+          sermonTitle,
+          primaryPassage,
+          context,
+        },
+        logContext,
+      ),
+    ]);
 
-    const hip = await runHowItPreachesBestEffort(
-      {
-        manuscript,
-        sermonTitle,
-        primaryPassage,
-        context,
-      },
-      { evaluationId, userId },
-    );
-    howItPreaches = hip.howItPreaches;
-    billedInputTokens += hip.inputTokens;
-    billedOutputTokens += hip.outputTokens;
+    result = verdictPass.result;
+    billedInputTokens += verdictPass.inputTokens + hip.inputTokens;
+    billedOutputTokens += verdictPass.outputTokens + hip.outputTokens;
+    const howItPreaches = hip.howItPreaches;
 
     const completedAt = new Date().toISOString();
 

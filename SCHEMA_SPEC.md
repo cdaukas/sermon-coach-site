@@ -111,6 +111,8 @@ Each criterion object:
 - `tradition_tag`: string (e.g., "Simeon Trust", "Chapell")
 - `score`: integer 1–5
 - `narrative`: string (2–4 sentences, must include at least one direct sermon quote)
+- `anchored_quote`: object `{ text, approximate_location }` or `null` — optional on model output; present when the model attaches a short sermon extract for that criterion (fill rate is incomplete; quotes are not required)
+- `verdict_line`: string or `null` — one-line collapsed-row summary of what happened on this criterion in this sermon. Produced by a separate Haiku summarization pass after scoring (not by the evaluation prompt). On write after that pass: key required, value may be null if the pass failed. On read: key may be absent or null (pre-pass rows render as today). Gated by field presence, not `prompt_version` — this pass is not a scoring change. Never restates the score or band.
 - `is_double_weighted`: boolean (true for #3, #4, #7; false otherwise) — derive in schema, don't trust the model
 
 NO per-criterion `growth_opportunity` field. NO per-category `growth_opportunities` array.
