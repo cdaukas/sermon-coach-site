@@ -260,7 +260,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
     passage:
       "Paul's fool's speech puts the hardship catalog in service of the letter's weakness-and-power argument, not as a résumé of suffering.",
     melodic_line:
-      "Apostolic ministry authenticated by weakness, because Christ's power is made perfect there rather than in swagger.",
+      "2 Corinthians authenticates apostolic ministry by weakness, because Christ's power is made perfect there rather than in swagger.",
     reading_source: "derived",
   },
 };

@@ -1,5 +1,5 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
-import { evaluationReportCopy, type OutputLanguage } from "@/lib/evaluation/output-language";
+import { displayPrincipleTag, evaluationReportCopy, type OutputLanguage } from "@/lib/evaluation/output-language";
 import { serifFont, uiFont } from "./shared";
 
 type PrioritiesSectionProps = {
@@ -62,7 +62,7 @@ export function PrioritiesSection({
                 className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
                 style={{ ...uiFont, color: "var(--sc-accent-soft)" }}
               >
-                {priority.principle_tag}
+                {displayPrincipleTag(priority.principle_tag, outputLanguage)}
               </p>
               <p
                 className="mb-3.5 text-[14px] leading-relaxed"

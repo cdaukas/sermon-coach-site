@@ -403,7 +403,7 @@ Do not add more than two. The rubric exists to focus the feedback, not to exhaus
 
 - **Melodic line restored to book level (Simeon Trust).** The theme that holds a whole book together is named as context and coaching, not as a scored sub-question. Criterion 1 scores passage fidelity only. Melodic line must not raise or lower that band. Eleven criteria, 55 points, weighting unchanged.
 - **Criterion 5's first sub-question renamed from "melodic line" to "big idea" (Robinson).** The passage's single dominant idea stays in Structure; the attribution is Robinson, not Simeon Trust. Structural fit and memorability are unchanged.
-- **Display block.** A non-scored three-line block (the book, this passage, and the melodic line as this report reads it) sits under the sermon header. No traffic light, no band. Criterion 1's narrative names the reading, names where the sermon sits relative to it, and asks whether any difference was deliberate.
+- **Display block.** A non-scored two-row block (the melodic line as this report reads it, then this passage) sits under the sermon header. The melodic-line sentence always begins by naming the book. No traffic light, no band. Criterion 1's narrative names the reading, names where the sermon sits relative to it, and asks whether any difference was deliberate.
 
 ## Rubric changelog from v3 (June 2026)
 

@@ -4,6 +4,7 @@ import type { CoachingNarrative } from "./coaching-schema";
 import { howItPreachesSchema } from "./hip-schema";
 import { parseEvaluationResult } from "./schema";
 import { normalizeReportMode } from "./context";
+import { parseOutputLanguage } from "./output-language";
 
 export type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./growth-report-types";
 import type {
@@ -53,6 +54,7 @@ function mapEvaluationRow(
     created_at: row.created_at as string,
     started_at: (row.started_at as string | null) ?? null,
     completed_at: (row.completed_at as string | null) ?? null,
+    output_language: parseOutputLanguage(row.output_language),
   };
 }
 

@@ -85,5 +85,9 @@ describe("v3.5 live-run prompt locks", () => {
       prompt,
       /Never embed that observation mid-paragraph or before the close/,
     );
+    assert.match(
+      prompt,
+      /Always begin by naming the book in the first clause/,
+    );
   });
 });

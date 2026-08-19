@@ -2,17 +2,16 @@ import type { HowItPreaches } from "@/lib/evaluation/hip-schema";
 import {
   displaySubmissionMode,
   evaluationReportCopy,
+  type Criterion2Wording,
   type OutputLanguage,
 } from "@/lib/evaluation/output-language";
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
+import Link from "next/link";
 import { CategoryCard } from "./CategoryCard";
 import { HeadlineLockup } from "./HeadlineLockup";
 import { HeatMapSection } from "./HeatMapSection";
 import { HowItPreachesSection } from "./HowItPreachesSection";
-import {
-  MelodicLineSection,
-  type MelodicTreatmentView,
-} from "./MelodicLineSection";
+import { MelodicLineSection } from "./MelodicLineSection";
 import { MethodologySection } from "./MethodologySection";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
@@ -32,9 +31,8 @@ type EvaluationDashboardProps = {
    */
   headlineTitle?: string | null;
   outputLanguage?: OutputLanguage;
-  /** Quiet lead-in treatments for the descriptive melodic-line block. */
-  melodicTreatment?: MelodicTreatmentView;
-  melodicSwitcherHrefs?: Record<MelodicTreatmentView, string>;
+  criterion2Wording?: Criterion2Wording;
+  criterion2SwitcherHrefs?: Record<Criterion2Wording, string>;
 };
 
 export function EvaluationDashboard({
@@ -45,8 +43,8 @@ export function EvaluationDashboard({
   howItPreaches = null,
   headlineTitle = null,
   outputLanguage = "en",
-  melodicTreatment = 1,
-  melodicSwitcherHrefs,
+  criterion2Wording = "default",
+  criterion2SwitcherHrefs,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const copy = evaluationReportCopy(outputLanguage);
@@ -107,7 +105,7 @@ export function EvaluationDashboard({
 
       {showPrintActions ? (
         <div className="screen-only -mt-6 mb-10 flex justify-end gap-2">
-          <EvaluationPrintButtons />
+          <EvaluationPrintButtons outputLanguage={outputLanguage} />
         </div>
       ) : null}
 
@@ -121,9 +119,45 @@ export function EvaluationDashboard({
         <MelodicLineSection
           block={result.melodic_line_and_big_idea}
           outputLanguage={outputLanguage}
-          treatment={melodicTreatment}
-          switcherHrefs={melodicSwitcherHrefs}
         />
+      ) : null}
+
+      {criterion2SwitcherHrefs ? (
+        <nav
+          className="evaluation-c2-switcher screen-only mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1"
+          aria-label="Criterion 2 wording"
+        >
+          <span
+            className="text-[10px] font-medium uppercase tracking-[0.12em]"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            Criterion 2
+          </span>
+          {(
+            [
+              ["default", "centrado en Cristo"],
+              ["cristocentrico", "cristocéntrico"],
+            ] as const
+          ).map(([id, label]) => {
+            const active = id === criterion2Wording;
+            return (
+              <Link
+                key={id}
+                href={criterion2SwitcherHrefs[id]}
+                className="text-[12px] no-underline"
+                style={{
+                  ...uiFont,
+                  color: active ? "var(--sc-ink)" : "var(--sc-ink-soft)",
+                  fontWeight: active ? 600 : 400,
+                  textDecoration: active ? "underline" : "none",
+                  textUnderlineOffset: "0.18em",
+                }}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
       ) : null}
 
       {result.categories.map((category) => (
@@ -131,6 +165,7 @@ export function EvaluationDashboard({
           key={category.id}
           category={category}
           outputLanguage={outputLanguage}
+          criterion2Wording={criterion2Wording}
         />
       ))}
 

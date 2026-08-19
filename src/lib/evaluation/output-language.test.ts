@@ -3,8 +3,11 @@ import { describe, it } from "node:test";
 import {
   displayCategoryName,
   displayCriterionName,
+  displayPrincipleTag,
   displayScoreBand,
+  displayTraditionTag,
   evaluationReportCopy,
+  parseCriterion2Wording,
   parseOutputLanguage,
   resolveRequestedOutputLanguage,
   SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
@@ -33,9 +36,44 @@ describe("Spanish display maps", () => {
       "Gospel clarity",
     );
     assert.equal(
+      displayCriterionName(1, "Textual fidelity & exegesis", "es"),
+      "Fidelidad al texto y exégesis",
+    );
+    assert.equal(
+      displayCriterionName(2, "Christ-centered / redemptive arc", "es"),
+      "Arco redentor centrado en Cristo",
+    );
+    assert.equal(
+      displayCriterionName(
+        2,
+        "Christ-centered / redemptive arc",
+        "es",
+        "cristocentrico",
+      ),
+      "Arco redentor cristocéntrico",
+    );
+    assert.equal(
       displayCriterionName(3, "Gospel clarity", "es"),
       "Claridad del evangelio",
     );
+    assert.equal(
+      displayCriterionName(4, "Fallen Condition Focus", "es"),
+      "Enfoque de la condición caída",
+    );
+    assert.equal(
+      displayCriterionName(6, "Hard things handled", "es"),
+      "Manejo de temas difíciles",
+    );
+    assert.equal(
+      displayCriterionName(7, "Application to present audience", "es"),
+      "Aplicación a los oyentes presentes",
+    );
+    assert.equal(
+      displayCriterionName(9, "Pastoral specificity", "es"),
+      "Concreción pastoral",
+    );
+    assert.equal(parseCriterion2Wording("alt"), "cristocentrico");
+    assert.equal(parseCriterion2Wording(undefined), "default");
   });
 
   it("maps category ids and score bands for Spanish reports", () => {
@@ -45,16 +83,71 @@ describe("Spanish display maps", () => {
     );
     assert.equal(displayScoreBand("Faithful", "es"), "Fiel");
     assert.equal(displayScoreBand("Faithful", "en"), "Faithful");
+    assert.equal(
+      displayTraditionTag(1, "Simeon Trust · Expositional Preaching", "es"),
+      "Simeon Trust · La predicación expositiva",
+    );
+    assert.equal(
+      displayTraditionTag(6, "Simeon Trust · Workshop practice", "es"),
+      "Simeon Trust · práctica de taller",
+    );
+    assert.equal(
+      displayTraditionTag(10, "9Marks · Preach", "es"),
+      "9Marcas · Preach",
+    );
+    assert.equal(
+      displayTraditionTag(2, "Chapell · Christ-Centered Preaching", "en"),
+      "Chapell · Christ-Centered Preaching",
+    );
+    assert.equal(
+      displayPrincipleTag("Chapell · Fallen Condition Focus", "es"),
+      "Chapell · Enfoque de la condición caída",
+    );
+    assert.equal(
+      displayPrincipleTag("Keller · Application to present audience", "es"),
+      "Keller · Aplicación a los oyentes presentes",
+    );
+    assert.equal(
+      displayPrincipleTag("Keller · Preaching", "es"),
+      "Keller · La predicación",
+    );
+    assert.equal(
+      displayPrincipleTag("Chapell · Christ-Centered Preaching", "es"),
+      "Chapell · La predicación cristocéntrica",
+    );
+    assert.equal(
+      displayPrincipleTag("Robinson · Biblical Preaching", "es"),
+      "Robinson · La predicación bíblica",
+    );
   });
 
   it("keeps English report chrome by default", () => {
     const copy = evaluationReportCopy("en");
     assert.equal(copy.whereItsStrong, "Where It's Strong");
     assert.equal(copy.eyebrow, "Evaluation");
-    assert.equal(copy.melodicLineTitle, "Melodic line and big idea");
-    assert.equal(copy.melodicLineBook, "The book");
+    assert.equal(copy.melodicLineTitle, "The text");
     assert.equal(copy.melodicLinePassage, "This passage");
     assert.equal(copy.melodicLineReading, "Melodic line");
+    assert.equal(
+      copy.melodicLineReadingGloss,
+      "the theme the whole book keeps returning to",
+    );
+  });
+
+  it("maps the text-block chrome for Spanish reports", () => {
+    const copy = evaluationReportCopy("es");
+    assert.equal(copy.melodicLineTitle, "El texto");
+    assert.equal(copy.melodicLinePassage, "Este pasaje");
+    assert.equal(copy.melodicLineReading, "Línea melódica");
+    assert.equal(
+      copy.melodicLineReadingGloss,
+      "el tema al que vuelve todo el libro",
+    );
+    assert.equal(copy.howItPreaches, "Cómo predica");
+    assert.equal(copy.backToLibrary, "Volver a la biblioteca");
+    assert.equal(copy.printSavePdf, "Imprimir / Guardar como PDF");
+    assert.equal(copy.whereItsStrong, "Dónde está fuerte");
+    assert.equal(copy.summary, "Resumen");
   });
 
   it("includes Reina-Valera 1960 in the Spanish output contract", () => {
@@ -67,6 +160,10 @@ describe("Spanish display maps", () => {
     assert.match(
       SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
       /No em-dashes \(U\+2014\)/,
+    );
+    assert.match(
+      SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
+      /must begin by naming the book/,
     );
   });
 });

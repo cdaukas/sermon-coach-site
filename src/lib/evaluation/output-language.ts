@@ -1,4 +1,8 @@
 import { HIP_MOVEMENT_NAMES } from "./hip-schema";
+import {
+  CANONICAL_CRITERION_NAMES,
+  traditionTagForCriterion,
+} from "./tool-schema";
 
 export const OUTPUT_LANGUAGES = ["en", "es"] as const;
 export type OutputLanguage = (typeof OUTPUT_LANGUAGES)[number];
@@ -26,6 +30,7 @@ Keep JSON keys and schema-locked enum values in English:
 - \`scoring.band\` must remain the English band enum (Exemplary, Strong, Faithful, Needs Improvement, Significant Concerns)
 - category \`id\`, heat_map \`register\`, \`text_supports\`, and \`melodic_line_and_big_idea.reading_source\` stay English enums
 - You MAY write category \`name\` as a Spanish display label
+- \`melodic_line_and_big_idea.melodic_line\` must begin by naming the book in the first clause, same rule as English ("Hebreos insiste en...", "Filipenses sostiene..."). Exception: withheld or topical copy that explains there is no single book's line.
 
 PER-CRITERION CLOSE. Write the required close sentence in Spanish, same job as the English format:
 - Scores 1 to 4: "Para llegar a un [next score], [cambio concreto anclado a este sermón]."
@@ -47,17 +52,39 @@ When you cite the preacher's biblical text, quote Reina-Valera 1960 (RVR1960) or
 export const SPANISH_VERDICT_LINE_OUTPUT_INSTRUCTIONS = `Write every verdict_line in Spanish. Keep the twelve-to-eighteen-word band. Canonical criterion names in this prompt stay English; the sentences you write are Spanish. Quotes of the preacher stay in the manuscript's language. When citing Scripture, quote Reina-Valera 1960 or name the passage without quoting it. Never free-translate a verse.`;
 
 const SPANISH_CRITERION_NAMES: Record<number, string> = {
-  1: "Fidelidad textual y exégesis",
-  2: "Arco redentor / centrado en Cristo",
+  1: "Fidelidad al texto y exégesis",
+  2: "Arco redentor centrado en Cristo",
   3: "Claridad del evangelio",
-  4: "Enfoque en la condición caída",
+  4: "Enfoque de la condición caída",
   5: "Estructura",
-  6: "Temas difíciles",
-  7: "Aplicación a la audiencia presente",
+  6: "Manejo de temas difíciles",
+  7: "Aplicación a los oyentes presentes",
   8: "Arco emocional y dinámica",
-  9: "Especificidad pastoral",
+  9: "Concreción pastoral",
   10: "Fidelidad eclesial",
   11: "Exultación expositiva",
+};
+
+const CRITERION_2_CRISTOCENTRICO = "Arco redentor cristocéntrico";
+
+export type Criterion2Wording = "default" | "cristocentrico";
+
+export function parseCriterion2Wording(value: unknown): Criterion2Wording {
+  return value === "alt" ? "cristocentrico" : "default";
+}
+
+const SPANISH_TRADITION_TAGS: Record<number, string> = {
+  1: "Simeon Trust · La predicación expositiva",
+  2: "Chapell · La predicación cristocéntrica",
+  3: "Piper · La supremacía de Dios en la predicación",
+  4: "Chapell · La predicación cristocéntrica",
+  5: "Robinson · La predicación bíblica",
+  6: "Simeon Trust · práctica de taller",
+  7: "Keller · La predicación",
+  8: "Piper · Exultación expositiva",
+  9: "Keller · La predicación",
+  10: "9Marcas · Preach",
+  11: "Piper · Exultación expositiva",
 };
 
 const SPANISH_CATEGORY_NAMES: Record<string, string> = {
@@ -105,11 +132,76 @@ export function displayCriterionName(
   id: number,
   englishName: string,
   language: OutputLanguage,
+  criterion2Wording: Criterion2Wording = "default",
 ): string {
   if (language !== "es") {
     return englishName;
   }
+  if (id === 2 && criterion2Wording === "cristocentrico") {
+    return CRITERION_2_CRISTOCENTRICO;
+  }
   return SPANISH_CRITERION_NAMES[id] ?? englishName;
+}
+
+export function displayTraditionTag(
+  id: number,
+  fallback: string | undefined,
+  language: OutputLanguage,
+): string {
+  if (language !== "es") {
+    return traditionTagForCriterion(id, fallback);
+  }
+  return SPANISH_TRADITION_TAGS[id] ?? traditionTagForCriterion(id, fallback);
+}
+
+const SPANISH_WORK_TITLES: Record<string, string> = {
+  "Expositional Preaching": "La predicación expositiva",
+  "Christ-Centered Preaching": "La predicación cristocéntrica",
+  "The Supremacy of God in Preaching": "La supremacía de Dios en la predicación",
+  "Biblical Preaching": "La predicación bíblica",
+  "Workshop practice": "práctica de taller",
+  Preaching: "La predicación",
+  "Expository Exultation": "Exultación expositiva",
+};
+
+function displaySpanishAuthorWork(author: string, work: string): string {
+  const displayAuthor = author === "9Marks" ? "9Marcas" : author;
+  const criterionIndex = CANONICAL_CRITERION_NAMES.findIndex(
+    (name) => name.toLowerCase() === work.toLowerCase(),
+  );
+  if (criterionIndex >= 0) {
+    const spanishName = SPANISH_CRITERION_NAMES[criterionIndex + 1];
+    if (spanishName) {
+      return `${displayAuthor} · ${spanishName}`;
+    }
+  }
+
+  const spanishWork =
+    SPANISH_WORK_TITLES[work] ??
+    Object.entries(SPANISH_WORK_TITLES).find(
+      ([english]) => english.toLowerCase() === work.toLowerCase(),
+    )?.[1];
+
+  return `${displayAuthor} · ${spanishWork ?? work}`;
+}
+
+export function displayPrincipleTag(
+  tag: string,
+  language: OutputLanguage,
+): string {
+  if (language !== "es") {
+    return tag;
+  }
+
+  const separatorIndex = tag.indexOf("·");
+  if (separatorIndex === -1) {
+    return tag;
+  }
+
+  return displaySpanishAuthorWork(
+    tag.slice(0, separatorIndex).trim(),
+    tag.slice(separatorIndex + 1).trim(),
+  );
 }
 
 export function displayCategoryName(
@@ -240,10 +332,12 @@ export type EvaluationReportCopy = {
   verdictImprovementFallback: string;
   gradingBandMeanings: Record<string, string>;
   melodicLineTitle: string;
-  melodicLineBook: string;
   melodicLinePassage: string;
   melodicLineReading: string;
+  melodicLineReadingGloss: string;
   melodicLinePreacherNote: string;
+  backToLibrary: string;
+  printSavePdf: string;
 };
 
 const ENGLISH_COPY: EvaluationReportCopy = {
@@ -299,11 +393,14 @@ const ENGLISH_COPY: EvaluationReportCopy = {
     "Significant Concerns":
       "Multiple criteria scored 1s. Address before preaching again.",
   },
-  melodicLineTitle: "Melodic line and big idea",
-  melodicLineBook: "The book",
+  melodicLineTitle: "The text",
   melodicLinePassage: "This passage",
   melodicLineReading: "Melodic line",
+  melodicLineReadingGloss:
+    "the theme the whole book keeps returning to",
   melodicLinePreacherNote: "Working from the line you named.",
+  backToLibrary: "Back to library",
+  printSavePdf: "Print / Save as PDF",
 };
 
 const SPANISH_COPY: EvaluationReportCopy = {
@@ -342,7 +439,7 @@ const SPANISH_COPY: EvaluationReportCopy = {
     `La pantalla en base 10 convierte ponderada /55 ÷ 5.5 (${weighted} ÷ 5.5 = ${display}).`,
   whyDoubleWeightLead: "Por qué algunos criterios cuentan doble.",
   whyDoubleWeightBody:
-    "Tres de los once criterios llevan peso doble en la puntuación compuesta: Enfoque en la condición caída, Claridad del evangelio y Aplicación. Son las pruebas de carga de si un sermón realmente predica el evangelio a personas concretas: no solo si trata el texto con cuidado, sino si lleva ese texto a la condición caída, deja las buenas nuevas inconfundibles y las aterriza en la vida real del oyente. Un sermón puede puntuar decentemente en todo lo demás y aún así fallar el punto si estos tres están débiles, así que la matemática refleja lo que el púlpito refleja.",
+    "Tres de los once criterios llevan peso doble en la puntuación compuesta: Enfoque de la condición caída, Claridad del evangelio y Aplicación. Son las pruebas de carga de si un sermón realmente predica el evangelio a personas concretas: no solo si trata el texto con cuidado, sino si lleva ese texto a la condición caída, deja las buenas nuevas inconfundibles y las aterriza en la vida real del oyente. Un sermón puede puntuar decentemente en todo lo demás y aún así fallar el punto si estos tres están débiles, así que la matemática refleja lo que el púlpito refleja.",
   gradingBands: "Bandas de puntuación",
   placesThisSermon: (display, band, weighted) =>
     `La puntuación de pantalla de ${display} sitúa este sermón en ${band}. Los umbrales de banda usan la puntuación ponderada interna /55 (${weighted}/55).`,
@@ -359,11 +456,13 @@ const SPANISH_COPY: EvaluationReportCopy = {
     "Significant Concerns":
       "Varios criterios en 1. Atender antes de predicar de nuevo.",
   },
-  melodicLineTitle: "Línea melódica e idea central",
-  melodicLineBook: "El libro",
+  melodicLineTitle: "El texto",
   melodicLinePassage: "Este pasaje",
   melodicLineReading: "Línea melódica",
+  melodicLineReadingGloss: "el tema al que vuelve todo el libro",
   melodicLinePreacherNote: "A partir de la línea que nombraste.",
+  backToLibrary: "Volver a la biblioteca",
+  printSavePdf: "Imprimir / Guardar como PDF",
 };
 
 export function evaluationReportCopy(

@@ -4,10 +4,6 @@ import { notFound } from "next/navigation";
 import { CoachingReportView } from "@/components/evaluation/CoachingReportView";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
 import {
-  melodicTreatmentHref,
-  parseMelodicTreatment,
-} from "@/components/evaluation/MelodicLineSection";
-import {
   EvaluationPdfCover,
   type EvaluationPdfCoverVariant,
 } from "@/components/evaluation/EvaluationPdfCover";
@@ -27,13 +23,17 @@ import {
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
 import { createClient } from "@/lib/supabase/server";
+import {
+  parseOutputLanguage,
+  parseCriterion2Wording,
+  evaluationReportCopy,
+} from "@/lib/evaluation/output-language";
 import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
 const BACK_LABEL_MENTOR = "Back to mentoring";
 const BACK_HREF_LIBRARY = "/dashboard";
-const BACK_LABEL_LIBRARY = "Back to library";
 
 type EvaluationPageProps = {
   params: Promise<{ id: string; evaluationId: string }>;
@@ -44,13 +44,24 @@ type EvaluationPageProps = {
     preacher?: string;
     /** Owner stopgap debrief: omit or "evaluation" for scores; "debrief" for coaching. */
     view?: string;
-    /** Temporary: compare quiet melodic-line block treatments (1 | 2 | 3 | all). */
-    ml?: string;
+    /** Temporary: Spanish criterion 2 wording (omit or "alt"). */
+    c2?: string;
   }>;
 };
 
 function evaluationPath(sermonId: string, evaluationId: string): string {
   return `/dashboard/sermons/${sermonId}/evaluations/${evaluationId}`;
+}
+
+function evaluationHref(
+  path: string,
+  query: { view?: string; c2?: string },
+): string {
+  const params = new URLSearchParams();
+  if (query.view) params.set("view", query.view);
+  if (query.c2) params.set("c2", query.c2);
+  const encoded = params.toString();
+  return encoded ? `${path}?${encoded}` : path;
 }
 
 export async function generateMetadata({
@@ -106,13 +117,14 @@ export default async function EvaluationPage({
     variant: variantParam,
     preacher: preacherParam,
     view: viewParam,
-    ml: mlParam,
+    c2: c2Param,
   } = await searchParams;
   const pdfCapture = pdf === "1";
   const preparedFor = preparedForParam?.trim() ?? "";
   const showCover = pdfCapture && preparedFor.length > 0;
   const coverVariant: EvaluationPdfCoverVariant =
     variantParam === "mine" ? "mine" : "theirs";
+  const criterion2Wording = parseCriterion2Wording(c2Param);
   const data = await getEvaluation(evaluationId, sermonId);
 
   if (!data) {
@@ -120,10 +132,12 @@ export default async function EvaluationPage({
   }
 
   const { evaluation, sermon, manuscriptContent, resolvedVia } = data;
+  const outputLanguage = parseOutputLanguage(evaluation.output_language);
+  const reportCopy = evaluationReportCopy(outputLanguage);
   const backHref =
     resolvedVia === "owner" ? BACK_HREF_LIBRARY : "/dashboard/mentoring";
   const backLabel =
-    resolvedVia === "owner" ? BACK_LABEL_LIBRARY : BACK_LABEL_MENTOR;
+    resolvedVia === "owner" ? reportCopy.backToLibrary : BACK_LABEL_MENTOR;
 
   const isDebriefMode = evaluation.report_mode === "debrief";
   const hasScoredResult = evaluation.result != null;
@@ -322,16 +336,17 @@ export default async function EvaluationPage({
           scriptureReference={scriptureReference}
           showPrintActions={!pdfCapture}
           howItPreaches={evaluation.how_it_preaches}
-          outputLanguage={evaluation.output_language}
-          melodicTreatment={parseMelodicTreatment(mlParam)}
-          melodicSwitcherHrefs={
-            pdfCapture
+          outputLanguage={outputLanguage}
+          criterion2Wording={criterion2Wording}
+          criterion2SwitcherHrefs={
+            pdfCapture || outputLanguage !== "es"
               ? undefined
               : {
-                  1: melodicTreatmentHref(basePath, { view: viewParam }, 1),
-                  2: melodicTreatmentHref(basePath, { view: viewParam }, 2),
-                  3: melodicTreatmentHref(basePath, { view: viewParam }, 3),
-                  all: melodicTreatmentHref(basePath, { view: viewParam }, "all"),
+                  default: evaluationHref(basePath, { view: viewParam }),
+                  cristocentrico: evaluationHref(basePath, {
+                    view: viewParam,
+                    c2: "alt",
+                  }),
                 }
           }
         />

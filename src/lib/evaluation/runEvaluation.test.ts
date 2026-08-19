@@ -192,4 +192,30 @@ describe("runEvaluation schema retry", () => {
 
     assert.equal(createCalls, 1);
   });
+
+  it("passes an explicit model override into the API call", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+    const originalModel = process.env.EVALUATION_MODEL;
+    process.env.EVALUATION_MODEL = "claude-sonnet-4-6";
+
+    const models: string[] = [];
+    const createMessage: CreateEvaluationMessage = async (params) => {
+      models.push(params.model);
+      return messageWithToolInput(EVALUATION_FIXTURE);
+    };
+
+    try {
+      await runEvaluation(evaluationInput, {
+        createMessage,
+        model: "claude-opus-4-8",
+      });
+      assert.deepEqual(models, ["claude-opus-4-8"]);
+    } finally {
+      if (originalModel === undefined) {
+        delete process.env.EVALUATION_MODEL;
+      } else {
+        process.env.EVALUATION_MODEL = originalModel;
+      }
+    }
+  });
 });

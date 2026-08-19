@@ -361,9 +361,7 @@
     border: none !important;
   }
 
-  .evaluation-melodic-switcher,
-  .evaluation-melodic-treatment-kicker,
-  .evaluation-melodic-compare-extra {
+  .evaluation-c2-switcher {
     display: none !important;
   }
 
@@ -380,9 +378,28 @@
     color: var(--sc-ink-soft) !important;
   }
 
+  .evaluation-melodic-gloss {
+    display: inline !important;
+    margin-left: 0.35em !important;
+    margin-top: 0 !important;
+    font-size: 7pt !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    color: var(--sc-ink-soft) !important;
+    opacity: 0.7 !important;
+  }
+
   .evaluation-melodic-value {
-    font-size: 11pt !important;
+    font-size: 10pt !important;
+    line-height: 1.5 !important;
     color: var(--sc-ink) !important;
+  }
+
+  .evaluation-melodic-preacher-note {
+    font-size: 8.5pt !important;
+    margin-top: 0.25rem !important;
+    color: var(--sc-ink-soft) !important;
   }
 
   /*

@@ -3,10 +3,11 @@ import { categoryAverage } from "@/lib/evaluation/schema";
 import {
   displayCategoryName,
   displayCriterionName,
+  displayTraditionTag,
   evaluationReportCopy,
+  type Criterion2Wording,
   type OutputLanguage,
 } from "@/lib/evaluation/output-language";
-import { traditionTagForCriterion } from "@/lib/evaluation/tool-schema";
 import {
   criterionScoreColor,
   criterionScoreFillPercent,
@@ -17,6 +18,7 @@ import {
 type CategoryCardProps = {
   category: EvaluationResultStrict["categories"][number];
   outputLanguage?: OutputLanguage;
+  criterion2Wording?: Criterion2Wording;
 };
 
 const SCORE_BAR_VIEWBOX_WIDTH = 220;
@@ -59,6 +61,7 @@ function CriterionScoreBar({ score }: { score: number }) {
 export function CategoryCard({
   category,
   outputLanguage = "en",
+  criterion2Wording = "default",
 }: CategoryCardProps) {
   const average = categoryAverage(category.criteria);
   const copy = evaluationReportCopy(outputLanguage);
@@ -132,6 +135,7 @@ export function CategoryCard({
                     criterion.id,
                     criterion.name,
                     outputLanguage,
+                    criterion2Wording,
                   )}
                   <span
                     className="text-[11px] font-normal tracking-normal"
@@ -139,9 +143,10 @@ export function CategoryCard({
                   >
                     {" · "}
                     <em style={{ fontStyle: "italic" }}>
-                      {traditionTagForCriterion(
+                      {displayTraditionTag(
                         criterion.id,
                         criterion.tradition_tag,
+                        outputLanguage,
                       )}
                     </em>
                   </span>

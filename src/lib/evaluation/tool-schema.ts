@@ -317,7 +317,7 @@ export const submitSermonEvaluationInputSchema = {
         melodic_line: {
           type: "string" as const,
           description:
-            "One sentence: the unifying theme of the book as this report reads it. If the preacher named a working line, restate that line. Descriptive, not a verdict.",
+            "One sentence. Always begin by naming the book in the first clause, then the unifying theme of the book as this report reads it. Example: 'Hebrews keeps returning to the superiority of Christ over every prior covenant mediator...' Do not open with a claim that omits the book. If the preacher named a working line, restate it and still name the book first. Exception: withheld or topical copy that explains there is no single book's line — do not force a book name. Descriptive, not a verdict.",
         },
         reading_source: {
           type: "string" as const,
