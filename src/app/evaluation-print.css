@@ -247,6 +247,132 @@
     text-decoration: none;
   }
 
+  /* —— Commendation export (?pdf=1&doc=commendation) ——
+     Cover reuses the band and spacer rules above; only typography differs. */
+  .evaluation-commendation-cover-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-commendation-cover-church {
+    margin: 0.4rem 0 0;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-commendation-cover-sermon {
+    margin: 1.6rem 0 0;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--sc-rule);
+    border-bottom: 1px solid var(--sc-rule);
+  }
+
+  .evaluation-commendation-cover-sermon-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-commendation-cover-passage {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--sc-ink-soft);
+  }
+
+  /* Fixed gap, not flex growth: no min-height on the cover means the flex
+     spacer has nothing to distribute, and a min-height floor is what pushed
+     the sales cover CTA onto page 2. */
+  .evaluation-commendation-cover .evaluation-pdf-cover-spacer {
+    flex: 0 0 auto;
+    min-height: 2.5in;
+  }
+
+  .evaluation-commendation-cover-prepared {
+    margin: 0;
+    padding-top: 0.9rem;
+    border-top: 2px solid var(--sc-accent);
+  }
+
+  .evaluation-commendation-cover-prepared p {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-commendation-cover-prepared p + p {
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-commendation-affirmation {
+    margin: 0 0 1.75rem;
+    padding: 0 0 0 0.85rem;
+    border-left: 3px solid var(--sc-accent);
+    font-family: var(--font-serif);
+    font-size: 15pt;
+    line-height: 1.45;
+    color: var(--sc-ink);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .evaluation-commendation-closing {
+    margin: 1.5rem 0 0;
+    padding: 1rem 1.15rem;
+    border-left: 3px solid var(--sc-accent);
+    background: var(--sc-accent-pale);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .evaluation-commendation-closing p {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 11pt;
+    line-height: 1.55;
+    color: var(--sc-ink);
+  }
+
+  .evaluation-commendation-closing p + p {
+    margin-top: 0.7rem;
+  }
+
+  /* In flow, not fixed: a fixed footer repeats on every page and collides with
+     the section it follows. Repeats are not wanted on a gift document. */
+  .evaluation-commendation-footer {
+    margin: 1.75rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--sc-rule);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .evaluation-commendation-footer p {
+    margin: 0 0 0.2rem;
+    font-family: var(--font-ui);
+    font-size: 8pt;
+    line-height: 1.4;
+    color: var(--sc-ink-soft);
+  }
+
+  .evaluation-commendation-footer p:last-child {
+    margin-bottom: 0;
+  }
+
   .evaluation-print-header {
     margin: 0 0 1.25rem;
     padding-bottom: 0.85rem;
