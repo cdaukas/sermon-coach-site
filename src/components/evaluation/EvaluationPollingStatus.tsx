@@ -5,8 +5,9 @@ import {
   stageLabelForElapsed,
   slideIndexForElapsed,
   timeEstimateForElapsed,
-  WAIT_SLIDES,
+  waitSlidesFor,
 } from "@/components/evaluation/waitStateContent";
+import type { OutputLanguage } from "@/lib/evaluation/output-language";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -14,15 +15,18 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 type EvaluationPollingStatusProps = {
   elapsed: number;
   className?: string;
+  outputLanguage?: OutputLanguage;
 };
 
 export function EvaluationPollingStatus({
   elapsed,
   className = "mb-4",
+  outputLanguage = "en",
 }: EvaluationPollingStatusProps) {
-  const stageLabel = stageLabelForElapsed(elapsed);
-  const timeEstimate = timeEstimateForElapsed(elapsed);
+  const stageLabel = stageLabelForElapsed(elapsed, outputLanguage);
+  const timeEstimate = timeEstimateForElapsed(elapsed, outputLanguage);
   const slideIndex = slideIndexForElapsed(elapsed);
+  const slides = waitSlidesFor(outputLanguage);
   const [displayIndex, setDisplayIndex] = useState(slideIndex);
   const [visible, setVisible] = useState(true);
 
@@ -38,7 +42,7 @@ export function EvaluationPollingStatus({
     return () => window.clearTimeout(swap);
   }, [slideIndex, displayIndex]);
 
-  const slide = WAIT_SLIDES[displayIndex] ?? WAIT_SLIDES[0];
+  const slide = slides[displayIndex] ?? slides[0];
 
   return (
     <div

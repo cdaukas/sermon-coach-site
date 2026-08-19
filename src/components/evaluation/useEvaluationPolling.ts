@@ -14,11 +14,21 @@ export function formatEvaluationElapsed(seconds: number): string {
 type UseEvaluationPollingOptions = {
   onComplete?: (evaluationId: string, sermonId: string) => void;
   onFailed?: (message: string) => void;
+  statusCheckFailedMessage?: string;
+  waitFailedMessage?: string;
+  evaluationFailedFallback?: string;
 };
 
 export function useEvaluationPolling(options: UseEvaluationPollingOptions = {}) {
   const router = useRouter();
   const { onComplete, onFailed } = options;
+  const statusCheckFailedMessage =
+    options.statusCheckFailedMessage ?? "Could not check evaluation status.";
+  const waitFailedMessage =
+    options.waitFailedMessage ?? "Something went wrong while waiting.";
+  const evaluationFailedFallback =
+    options.evaluationFailedFallback ??
+    "We couldn't generate a valid evaluation.";
   const [polling, setPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -44,7 +54,7 @@ export function useEvaluationPolling(options: UseEvaluationPollingOptions = {}) 
       const response = await fetch(`/api/evaluations/${evaluationId}`);
 
       if (!response.ok) {
-        throw new Error("Could not check evaluation status.");
+        throw new Error(statusCheckFailedMessage);
       }
 
       const data = (await response.json()) as {
@@ -74,7 +84,7 @@ export function useEvaluationPolling(options: UseEvaluationPollingOptions = {}) 
       if (data.status === "failed") {
         stopPolling();
         const message =
-          data.errorMessage ?? "We couldn't generate a valid evaluation.";
+          data.errorMessage ?? evaluationFailedFallback;
         setError(message);
         onFailed?.(message);
       }

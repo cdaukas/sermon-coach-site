@@ -13,6 +13,11 @@ import {
 } from "@/lib/evaluation/context";
 import { requestEvaluation } from "@/lib/evaluation/actions";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
+import {
+  displayEvaluationError,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 import { EvaluationAccessGate } from "./EvaluationAccessGate";
 import { EvaluationPollingStatus } from "./EvaluationPollingStatus";
 import { useEvaluationPolling } from "./useEvaluationPolling";
@@ -30,6 +35,7 @@ type EvaluateButtonProps = {
   onRunClick?: (run: () => void) => void;
   disabled?: boolean;
   isMentoredMentee?: boolean;
+  outputLanguage?: OutputLanguage;
 };
 
 export function EvaluateButton({
@@ -43,13 +49,15 @@ export function EvaluateButton({
   onRunClick,
   disabled = false,
   isMentoredMentee = false,
+  outputLanguage = "en",
 }: EvaluateButtonProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const handlePollFailed = useCallback((message: string) => {
-    setError(message);
-  }, []);
+    setError(displayEvaluationError(message, outputLanguage));
+  }, [outputLanguage]);
 
   const { polling, elapsed, startPolling } = useEvaluationPolling({
     onFailed: handlePollFailed,
@@ -75,9 +83,14 @@ export function EvaluateButton({
     setError(null);
     startTransition(async () => {
       const context = readStashedContext();
-      const result = await requestEvaluation(sermonId, context, reportMode);
+      const result = await requestEvaluation(
+        sermonId,
+        context,
+        reportMode,
+        outputLanguage,
+      );
       if (!result.ok) {
-        setError(result.error);
+        setError(displayEvaluationError(result.error, outputLanguage));
         return;
       }
       startPolling(
@@ -106,14 +119,22 @@ export function EvaluateButton({
   if (!mayRunEvaluation) {
     return (
       <div className={rootClassName}>
-        <EvaluationAccessGate entitlement={entitlement} />
+        <EvaluationAccessGate
+          entitlement={entitlement}
+          outputLanguage={outputLanguage}
+        />
       </div>
     );
   }
 
   return (
     <div className={rootClassName}>
-      {polling ? <EvaluationPollingStatus elapsed={elapsed} /> : null}
+      {polling ? (
+        <EvaluationPollingStatus
+          elapsed={elapsed}
+          outputLanguage={outputLanguage}
+        />
+      ) : null}
 
       {!polling ? (
         <button
@@ -129,7 +150,7 @@ export function EvaluateButton({
             borderRadius: 4,
           }}
         >
-          {pending ? "Starting…" : buttonLabel}
+          {pending ? copy.starting : buttonLabel}
         </button>
       ) : null}
 
@@ -161,7 +182,7 @@ export function EvaluateButton({
 
       {hasActiveEvaluation && !polling ? (
         <p className="mt-2 text-[12px]" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-          An evaluation is already in progress for this sermon.
+          {copy.evaluationInProgress}
         </p>
       ) : null}
 
