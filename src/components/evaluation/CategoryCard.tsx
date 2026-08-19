@@ -20,20 +20,36 @@ function CriterionScoreBar({ score }: { score: number }) {
   const fillPercent = criterionScoreFillPercent(score);
 
   return (
-    <div
-      className="relative hidden h-2.5 rounded-full md:block"
-      style={{ background: "var(--sc-rule)" }}
-      aria-hidden
-    >
+    <>
       <div
-        className="absolute inset-y-0 left-0 rounded-full"
-        style={{ width: `${fillPercent}%`, background: color }}
-      />
+        className="evaluation-criterion-score-bar relative hidden h-2.5 rounded-full md:block"
+        style={{ background: "var(--sc-rule)" }}
+        aria-hidden
+      >
+        <div
+          className="absolute inset-y-0 left-0 rounded-full"
+          style={{ width: `${fillPercent}%`, background: color }}
+        />
+        <div
+          className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-[var(--sc-panel)]"
+          style={{ left: `${fillPercent}%`, borderColor: color }}
+        />
+      </div>
       <div
-        className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-[var(--sc-panel)]"
-        style={{ left: `${fillPercent}%`, borderColor: color }}
-      />
-    </div>
+        className="evaluation-criterion-score-bar-static relative h-2.5 rounded-full"
+        style={{ background: "var(--sc-rule)" }}
+        aria-hidden
+      >
+        <div
+          className="evaluation-criterion-score-bar-fill absolute inset-y-0 left-0 rounded-full"
+          style={{ width: `${fillPercent}%`, background: color }}
+        />
+        <div
+          className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-[var(--sc-panel)]"
+          style={{ left: `${fillPercent}%`, borderColor: color }}
+        />
+      </div>
+    </>
   );
 }
 

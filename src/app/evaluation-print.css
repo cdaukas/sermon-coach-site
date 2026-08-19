@@ -193,8 +193,8 @@
     display: none !important;
   }
 
-  /* Criterion score slider: track, fill, and knob (CategoryCard CriterionScoreBar) */
-  .evaluation-criterion > summary > div.relative.rounded-full {
+  /* Criterion score slider: hidden for governance print, kept for ?pdf=1 marketing PDF */
+  html:not([data-pdf-capture="1"]) .evaluation-criterion-score-bar {
     display: none !important;
   }
 

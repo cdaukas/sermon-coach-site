@@ -124,6 +124,11 @@ async function main(): Promise<void> {
 
     await waitForEvaluationRender(page);
 
+    await page.emulateMediaType("screen");
+    await page.evaluate(() =>
+      document.documentElement.setAttribute("data-pdf-capture", "1"),
+    );
+
     await page.pdf({
       path: outputPath,
       format: "Letter",
