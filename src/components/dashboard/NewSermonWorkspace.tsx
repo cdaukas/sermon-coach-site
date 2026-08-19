@@ -11,12 +11,14 @@ type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
   isMentoredMentee?: boolean;
   churchName?: string | null;
+  spanishEnabled?: boolean;
 };
 
 export function NewSermonWorkspace({
   entitlement,
   isMentoredMentee = false,
   churchName = null,
+  spanishEnabled = false,
 }: NewSermonWorkspaceProps) {
   const canEvaluate = entitlement?.canEvaluate ?? true;
   const showForm = isMentoredMentee || canEvaluate;
@@ -47,6 +49,7 @@ export function NewSermonWorkspace({
           entitlement={entitlement}
           isMentoredMentee={isMentoredMentee}
           churchName={churchName}
+          spanishEnabled={spanishEnabled}
         />
       ) : null}
     </>

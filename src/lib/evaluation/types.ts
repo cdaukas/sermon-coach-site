@@ -1,6 +1,7 @@
 import type { EvaluationResultStrict } from "./schema";
 import type { CoachingNarrative } from "./coaching-schema";
 import type { HowItPreaches } from "./hip-schema";
+import type { OutputLanguage } from "./output-language";
 
 export type EvaluationStatus = "pending" | "running" | "complete" | "failed";
 
@@ -24,6 +25,7 @@ export type SermonEvaluationRow = {
   created_at: string;
   started_at: string | null;
   completed_at: string | null;
+  output_language: OutputLanguage;
 };
 
 export type SermonEvaluationListItem = Pick<

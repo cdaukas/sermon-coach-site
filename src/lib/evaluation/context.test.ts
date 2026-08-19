@@ -47,6 +47,8 @@ describe("sermon context", () => {
     assert.match(preamble, /- Series: Week 3 of Romans/);
     assert.doesNotMatch(preamble, /Audience \/ setting:/);
     assert.doesNotMatch(preamble, /Additional notes:/);
+    assert.doesNotMatch(preamble, /Working melodic line/);
+    assert.doesNotMatch(preamble, /MELODIC LINE OVERRIDE/);
     assert.match(preamble, /in both your affirmation and[\s\S]*improvement paragraphs/);
     assert.match(
       preamble,
@@ -56,6 +58,25 @@ describe("sermon context", () => {
       preamble,
       /This context informs understanding, not leniency/,
     );
+  });
+
+  it("includes a preacher-named melodic line as an override, not as generic notes", () => {
+    const preamble = buildContextPreamble({
+      workingMelodicLine:
+        "Partnership in the gospel that holds under pressure because Christ is the pattern and the prize.",
+    });
+
+    assert.match(
+      preamble,
+      /Working melodic line for this book \(named by the preacher\): Partnership in the gospel/,
+    );
+    assert.match(preamble, /MELODIC LINE OVERRIDE/);
+    assert.match(preamble, /reading_source` to `preacher/);
+    assert.match(
+      preamble,
+      /observation paragraph at the end of criterion 1's narrative, after the/,
+    );
+    assert.doesNotMatch(preamble, /Additional notes:/);
   });
 
   it("uses sermon id in sessionStorage key", () => {
@@ -95,7 +116,7 @@ describe("buildUserMessage context injection", () => {
     assert.ok(manuscriptIndex > occasionIndex);
   });
 
-  it("injects the primary passage before the manuscript when provided", () => {
+  it("injects the primary passage and derived book before the manuscript", () => {
     const message = buildUserMessage({
       ...baseInput,
       primaryPassage: "Hebrews 12:5-17",
@@ -105,9 +126,36 @@ describe("buildUserMessage context injection", () => {
     const passageIndex = message.indexOf(
       "**Primary passage (provided by the preacher):** Hebrews 12:5-17",
     );
+    const bookIndex = message.indexOf(
+      "**Derived book (from the primary passage, not from any series title):** Hebrews",
+    );
 
     assert.ok(passageIndex >= 0);
-    assert.ok(manuscriptIndex > passageIndex);
+    assert.ok(bookIndex > passageIndex);
+    assert.ok(manuscriptIndex > bookIndex);
     assert.match(message, /Use the preacher-provided primary passage above/);
+  });
+
+  it("omits Spanish output instructions for English evaluations", () => {
+    const message = buildUserMessage(baseInput);
+    assert.doesNotMatch(message, /OUTPUT LANGUAGE \(SPANISH\)/);
+    assert.doesNotMatch(message, /Reina-Valera 1960/);
+  });
+
+  it("appends Spanish output and scripture instructions when outputLanguage is es", () => {
+    const message = buildUserMessage({
+      ...baseInput,
+      outputLanguage: "es",
+    });
+
+    const languageIndex = message.indexOf("OUTPUT LANGUAGE (SPANISH)");
+    const scriptureIndex = message.indexOf("Reina-Valera 1960");
+    const manuscriptIndex = message.indexOf("## Manuscript");
+
+    assert.ok(languageIndex >= 0);
+    assert.ok(scriptureIndex > languageIndex);
+    assert.ok(manuscriptIndex > scriptureIndex);
+    assert.match(message, /Never free-translate a verse/);
+    assert.match(message, /canonical English enum/);
   });
 });

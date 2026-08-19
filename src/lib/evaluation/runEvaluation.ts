@@ -43,6 +43,11 @@ export type CreateEvaluationMessage = (
 
 export type RunEvaluationOptions = {
   /**
+   * Override the scoring model for this call only.
+   * Does not read or write EVALUATION_MODEL in env files.
+   */
+  model?: string;
+  /**
    * Test hook: replaces Anthropic messages.create.
    * Each schema retry invokes this again (fresh generate, not re-validation).
    */
@@ -142,7 +147,7 @@ export async function runEvaluation(
     );
   }
 
-  const model = getEvaluationModel();
+  const model = options?.model ?? getEvaluationModel();
   const client = new Anthropic({ apiKey });
   const createMessage =
     options?.createMessage ??

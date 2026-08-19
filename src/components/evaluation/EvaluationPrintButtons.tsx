@@ -1,5 +1,7 @@
 "use client";
 
+import { evaluationReportCopy, type OutputLanguage } from "@/lib/evaluation/output-language";
+
 const uiFont = { fontFamily: "var(--font-ui)" };
 
 const primaryButtonClass =
@@ -21,7 +23,12 @@ function handlePrint() {
   window.print();
 }
 
-export function EvaluationPrintButtons() {
+export function EvaluationPrintButtons({
+  outputLanguage = "en",
+}: {
+  outputLanguage?: OutputLanguage;
+}) {
+  const copy = evaluationReportCopy(outputLanguage);
   return (
     <button
       type="button"
@@ -29,7 +36,7 @@ export function EvaluationPrintButtons() {
       className={primaryButtonClass}
       style={primaryButtonStyle}
     >
-      Print / Save as PDF
+      {copy.printSavePdf}
     </button>
   );
 }

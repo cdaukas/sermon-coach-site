@@ -39,7 +39,7 @@ export const submitCriterionVerdictLinesTool: Tool = {
             id: { type: "integer", minimum: 1, maximum: 11 },
             verdict_line: {
               type: "string",
-              description: `One complete sentence, ${VERDICT_LINE_MIN_WORDS}–${VERDICT_LINE_MAX_WORDS} words, ending with a period; takeaway not opening paraphrase; subject-verb agreement; no em-dash; no restated score.`,
+              description: `One complete sentence, ${VERDICT_LINE_MIN_WORDS} to ${VERDICT_LINE_MAX_WORDS} words, ending with a period; takeaway not opening paraphrase; subject-verb agreement; no em-dash or en-dash; no restated score.`,
             },
           },
         },
@@ -1218,7 +1218,8 @@ export function detectSubjectVerbAgreementIssue(
 export type VerdictLineQualityIssueReason =
   | "incomplete_grammatical_tail"
   | "subject_verb_agreement"
-  | "known_misspelling";
+  | "known_misspelling"
+  | "em_dash";
 
 export type VerdictLineQualityIssue = {
   id: number;
@@ -1275,6 +1276,13 @@ export function detectSentenceParseIssues(
     issues.push({
       reason: "known_misspelling",
       detail: `known misspelling "${misspelling.found}" (prefer "${misspelling.preferred}")`,
+    });
+  }
+
+  if (/[\u2014\u2013]/.test(normalized) || /--/.test(normalized)) {
+    issues.push({
+      reason: "em_dash",
+      detail: "contains an em-dash, en-dash, or double hyphen",
     });
   }
 

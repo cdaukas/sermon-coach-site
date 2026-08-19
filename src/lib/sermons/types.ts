@@ -26,6 +26,7 @@ export type DashboardSermonRow = {
   title: string;
   primary_passage: string | null;
   created_at: string;
+  excluded_from_growth: boolean;
   completeEvaluationCount: number;
   latestEvaluation: {
     id: string;
@@ -33,6 +34,18 @@ export type DashboardSermonRow = {
     completed_at: string | null;
   } | null;
 };
+
+export type DeletedSermonRow = {
+  id: string;
+  title: string;
+  deleted_at: string;
+};
+
+export const DELETE_RETENTION_DAYS = 30;
+
+export type SermonWriteResult =
+  | { ok: true }
+  | { ok: false; error: string };
 
 export type SermonWithLatestVersion = Sermon & {
   latest_version: SermonVersion | null;

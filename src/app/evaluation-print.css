@@ -352,6 +352,56 @@
     page-break-inside: avoid;
   }
 
+  .evaluation-melodic-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .evaluation-c2-switcher {
+    display: none !important;
+  }
+
+  .evaluation-melodic-title {
+    font-size: 8pt !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.1em !important;
+    color: var(--sc-ink-soft) !important;
+  }
+
+  .evaluation-melodic-label {
+    font-size: 8pt !important;
+    font-weight: 400 !important;
+    color: var(--sc-ink-soft) !important;
+  }
+
+  .evaluation-melodic-gloss {
+    display: inline !important;
+    margin-left: 0.35em !important;
+    margin-top: 0 !important;
+    font-size: 7pt !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    color: var(--sc-ink-soft) !important;
+    opacity: 0.7 !important;
+  }
+
+  .evaluation-melodic-value {
+    font-size: 10pt !important;
+    line-height: 1.5 !important;
+    color: var(--sc-ink) !important;
+  }
+
+  .evaluation-melodic-preacher-note {
+    font-size: 8.5pt !important;
+    margin-top: 0.25rem !important;
+    color: var(--sc-ink-soft) !important;
+  }
+
   /*
    * Category cards are tall; keep break-inside auto so the first category can
    * fill the lower half of page 1. Criteria blocks stay avoid (below).

@@ -25,6 +25,11 @@ import {
 } from "./eval-start-errors";
 import type { ReportMode, RequestEvaluationResult } from "./types";
 import { isMentoringDebriefAllowed } from "@/lib/mentor/uiAccess";
+import {
+  parseOutputLanguage,
+  resolveRequestedOutputLanguage,
+  type OutputLanguage,
+} from "./output-language";
 
 const MENTORED_GENERIC_FAILURE =
   "Something went wrong. Please try again.";
@@ -85,6 +90,7 @@ export async function requestEvaluation(
   sermonId: string,
   context?: SermonContext,
   reportMode: ReportMode = "diagnostic",
+  outputLanguage: OutputLanguage = "en",
 ): Promise<RequestEvaluationResult> {
   const supabase = await createClient();
   const {
@@ -99,6 +105,7 @@ export async function requestEvaluation(
     .from("sermons")
     .select("id, title, primary_passage")
     .eq("id", sermonId)
+    .is("deleted_at", null)
     .maybeSingle();
 
   if (sermonError) {
@@ -221,6 +228,20 @@ export async function requestEvaluation(
     return { ok: false, error: DEBRIEF_NOT_ALLOWED };
   }
 
+  const requestedLanguage = parseOutputLanguage(outputLanguage);
+  let resolvedLanguage: OutputLanguage = "en";
+  if (requestedLanguage === "es") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("spanish_enabled")
+      .eq("id", user.id)
+      .maybeSingle();
+    resolvedLanguage = resolveRequestedOutputLanguage(
+      requestedLanguage,
+      profile?.spanish_enabled === true,
+    );
+  }
+
   const eligibility = await checkEvaluationEligibility(user.id);
   if (!eligibility.ok) {
     if (eligibility.code === NO_EVALUATION_CREDITS_CODE) {
@@ -245,6 +266,7 @@ export async function requestEvaluation(
       prompt_version: EVALUATION_PROMPT_VERSION,
       credit_source: eligibility.creditSource,
       report_mode: reportMode,
+      output_language: resolvedLanguage,
     })
     .select("id")
     .single();

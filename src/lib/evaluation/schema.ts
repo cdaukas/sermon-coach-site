@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { VERDICT_STRICT_CAPS_FROM } from "./prompt";
-import { CANONICAL_CRITERION_NAMES } from "./tool-schema";
+import {
+  CANONICAL_CRITERION_NAMES,
+  traditionTagForCriterion,
+} from "./tool-schema";
 import { normalizeLegacyEvaluationResult } from "./schema-legacy";
 
 // ---------------------------------------------------------------------------
@@ -98,6 +101,21 @@ export const evaluationScoringStrictSchema = z.object({
   raw_total: z.number().int().min(11).max(55),
   raw_max: z.literal(55),
 });
+
+export const melodicLineReadingSourceSchema = z.enum([
+  "preacher",
+  "derived",
+  "withheld",
+]);
+
+export const melodicLineAndBigIdeaSchema = z.object({
+  book: z.string().min(1),
+  passage: z.string().min(1),
+  melodic_line: z.string().min(1),
+  reading_source: melodicLineReadingSourceSchema,
+});
+
+export type MelodicLineAndBigIdea = z.infer<typeof melodicLineAndBigIdeaSchema>;
 
 function countWords(s: string): number {
   const trimmed = s.trim();
@@ -204,6 +222,10 @@ function makeEvaluationCriterionStrictSchema(mode: VerdictLineSchemaMode) {
       .transform(
         (criterion): EvaluationCriterionStrict => ({
           ...criterion,
+          tradition_tag: traditionTagForCriterion(
+            criterion.id,
+            criterion.tradition_tag,
+          ),
           is_double_weighted: isDoubleWeightedCriterion(criterion.id),
         }),
       );
@@ -217,6 +239,10 @@ function makeEvaluationCriterionStrictSchema(mode: VerdictLineSchemaMode) {
     .transform(
       (criterion): EvaluationCriterionStrict => ({
         ...criterion,
+        tradition_tag: traditionTagForCriterion(
+          criterion.id,
+          criterion.tradition_tag,
+        ),
         is_double_weighted: isDoubleWeightedCriterion(criterion.id),
       }),
     );
@@ -489,6 +515,8 @@ function makeEvaluationResultStrictObjectSchema(
     whats_working: z.array(whatsWorkingCardStrictSchema).min(3).max(5),
     top_priorities: z.array(topPriorityStrictSchema).length(3),
     rewrites: z.array(evaluationRewriteStrictSchema).min(1).max(2),
+    // Optional on read: absent on pre-v3.5 rows. Tool schema requires it on write.
+    melodic_line_and_big_idea: melodicLineAndBigIdeaSchema.nullable().optional(),
   });
 }
 

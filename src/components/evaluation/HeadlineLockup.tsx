@@ -1,13 +1,27 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
+import {
+  displayScoreBand,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 import { serifFont, splitVerdictImprovement, uiFont } from "./shared";
 
 type HeadlineLockupProps = {
   scoring: EvaluationResultStrict["scoring"];
   verdict: EvaluationResultStrict["verdict"];
+  outputLanguage?: OutputLanguage;
 };
 
-export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
-  const { opener, body } = splitVerdictImprovement(verdict.improvement);
+export function HeadlineLockup({
+  scoring,
+  verdict,
+  outputLanguage = "en",
+}: HeadlineLockupProps) {
+  const copy = evaluationReportCopy(outputLanguage);
+  const { opener, body } = splitVerdictImprovement(
+    verdict.improvement,
+    copy.verdictImprovementFallback,
+  );
 
   return (
     <section
@@ -28,14 +42,14 @@ export function HeadlineLockup({ scoring, verdict }: HeadlineLockupProps) {
           className="evaluation-score-panel-band mb-3 text-[52px] leading-none italic"
           style={{ ...serifFont, color: "var(--sc-accent-soft)" }}
         >
-          {scoring.band}
+          {displayScoreBand(scoring.band, outputLanguage)}
         </p>
-        <p className="evaluation-score-panel-label">Summary</p>
+        <p className="evaluation-score-panel-label">{copy.summary}</p>
         <p
           className="evaluation-score-method-note text-[10px] tracking-[0.1em] uppercase"
           style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
         >
-          See methodology for score
+          {copy.seeMethodology}
         </p>
       </div>
       <div

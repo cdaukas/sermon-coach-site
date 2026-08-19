@@ -15,6 +15,32 @@ export const CANONICAL_CRITERION_NAMES = [
   "Expository exultation",
 ] as const;
 
+/**
+ * Locked `tradition_tag` values: author or org, middle dot, work.
+ * The work is never the criterion name. Criterion 4's work is
+ * Christ-Centered Preaching, not Fallen Condition Focus.
+ */
+export const CANONICAL_TRADITION_TAGS: Record<number, string> = {
+  1: "Simeon Trust · Expositional Preaching",
+  2: "Chapell · Christ-Centered Preaching",
+  3: "Piper · The Supremacy of God in Preaching",
+  4: "Chapell · Christ-Centered Preaching",
+  5: "Robinson · Biblical Preaching",
+  6: "Simeon Trust · Workshop practice",
+  7: "Keller · Preaching",
+  8: "Piper · Expository Exultation",
+  9: "Keller · Preaching",
+  10: "9Marks · Preach",
+  11: "Piper · Expository Exultation",
+};
+
+export function traditionTagForCriterion(
+  id: number,
+  fallback?: string,
+): string {
+  return CANONICAL_TRADITION_TAGS[id] ?? fallback ?? "";
+}
+
 const heatMapRegisterEnum = [
   "humor",
   "diagnostic",
@@ -55,7 +81,11 @@ const criterionSchema = {
     id: { type: "integer" as const, minimum: 1, maximum: 11 },
     name: { type: "string" as const, enum: [...CANONICAL_CRITERION_NAMES] },
     category: { type: "integer" as const, minimum: 1, maximum: 4 },
-    tradition_tag: { type: "string" as const },
+    tradition_tag: {
+      type: "string" as const,
+      description:
+        "Locked source attribution: author or org, space, middle dot, space, work title. Use the exact string from the tradition_tag table. Never put the criterion name in the work slot.",
+    },
     score: { type: "integer" as const, minimum: 1, maximum: 5 },
     narrative: { type: "string" as const },
     anchored_quote: anchoredQuoteSchema,
@@ -135,6 +165,7 @@ export const submitSermonEvaluationInputSchema = {
     "whats_working",
     "top_priorities",
     "rewrites",
+    "melodic_line_and_big_idea",
   ],
   properties: {
     meta: {
@@ -268,12 +299,38 @@ export const submitSermonEvaluationInputSchema = {
         },
       },
     },
+    melodic_line_and_big_idea: {
+      type: "object" as const,
+      additionalProperties: false,
+      required: ["book", "passage", "melodic_line", "reading_source"],
+      properties: {
+        book: {
+          type: "string" as const,
+          description:
+            "The book, named. Short. 'Philippians.' Not an argument and not a score.",
+        },
+        passage: {
+          type: "string" as const,
+          description:
+            "One sentence: the theme / big idea of this passage. Not the book's melodic line.",
+        },
+        melodic_line: {
+          type: "string" as const,
+          description:
+            "One sentence. Always begin by naming the book in the first clause, then the unifying theme of the book as this report reads it. Example: 'Hebrews keeps returning to the superiority of Christ over every prior covenant mediator...' Do not open with a claim that omits the book. If the preacher named a working line, restate it and still name the book first. Exception: withheld or topical copy that explains there is no single book's line — do not force a book name. Descriptive, not a verdict.",
+        },
+        reading_source: {
+          type: "string" as const,
+          enum: ["preacher", "derived", "withheld"],
+        },
+      },
+    },
   },
 };
 
 export const submitSermonEvaluationTool: Tool = {
   name: "submit_sermon_evaluation",
   description:
-    "Submit the complete structured sermon evaluation JSON. Use snake_case field names exactly as in the schema. Exactly 11 criteria (3+3+3+2) with canonical names. heat_map is null when meta.audio_available is false. Category subtotals are not submitted.",
+    "Submit the complete structured sermon evaluation JSON. Use snake_case field names exactly as in the schema. Exactly 11 criteria (3+3+3+2) with canonical names. heat_map is null when meta.audio_available is false. Include melodic_line_and_big_idea (not scored). Category subtotals are not submitted.",
   input_schema: submitSermonEvaluationInputSchema,
 };

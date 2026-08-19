@@ -1,11 +1,21 @@
 import type { HowItPreaches } from "@/lib/evaluation/hip-schema";
+import {
+  displayHipMovementName,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 import { serifFont, uiFont } from "./shared";
 
 type HowItPreachesSectionProps = {
   howItPreaches: HowItPreaches;
+  outputLanguage?: OutputLanguage;
 };
 
-export function HowItPreachesSection({ howItPreaches }: HowItPreachesSectionProps) {
+export function HowItPreachesSection({
+  howItPreaches,
+  outputLanguage = "en",
+}: HowItPreachesSectionProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   return (
     <section className="evaluation-hip-section mb-7 mt-12">
       <div className="mb-6">
@@ -13,19 +23,19 @@ export function HowItPreachesSection({ howItPreaches }: HowItPreachesSectionProp
           className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em]"
           style={{ ...uiFont, color: "var(--sc-amber)" }}
         >
-          Beyond the rubric
+          {copy.beyondTheRubric}
         </p>
         <h2
           className="mb-3 text-[32px] font-normal tracking-tight md:text-[36px]"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          How It Preaches
+          {copy.howItPreaches}
         </h2>
         <p
           className="max-w-[680px] text-[13.5px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          How the sermon actually moves. The craft of it, in five movements from the open to the landing.
+          {copy.howItPreachesDeck}
         </p>
       </div>
 
@@ -47,7 +57,7 @@ export function HowItPreachesSection({ howItPreaches }: HowItPreachesSectionProp
               className="mb-2.5 flex items-center gap-3.5 text-[11px] font-bold uppercase tracking-[0.16em]"
               style={{ ...uiFont, color: "var(--sc-accent)" }}
             >
-              <span>{movement.name}</span>
+              <span>{displayHipMovementName(movement.name, outputLanguage)}</span>
               <span
                 className="h-px flex-1"
                 style={{ background: "var(--sc-rule)" }}

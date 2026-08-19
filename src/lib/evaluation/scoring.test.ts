@@ -211,3 +211,27 @@ describe("computeScoringFromCategories", () => {
     assert.equal(recomputed.scoring.raw_total, 46);
   });
 });
+
+describe("melodic_line_and_big_idea", () => {
+  it("is present on the fixture and optional on read", () => {
+    assert.equal(
+      evaluationResultStrictSchema.safeParse(EVALUATION_FIXTURE).success,
+      true,
+    );
+    assert.equal(
+      EVALUATION_FIXTURE.melodic_line_and_big_idea?.book,
+      "2 Corinthians",
+    );
+    assert.match(
+      EVALUATION_FIXTURE.melodic_line_and_big_idea?.melodic_line ?? "",
+      /weakness/,
+    );
+
+    const withoutBlock = structuredClone(EVALUATION_FIXTURE);
+    delete withoutBlock.melodic_line_and_big_idea;
+    assert.equal(
+      evaluationResultStrictSchema.safeParse(withoutBlock).success,
+      true,
+    );
+  });
+});

@@ -88,7 +88,10 @@ export function criterionScoreFillPercent(score: number): number {
 }
 
 /** Split "Opener: body" improvement copy for headline verdict typography. */
-export function splitVerdictImprovement(sentence: string): {
+export function splitVerdictImprovement(
+  sentence: string,
+  fallbackOpener = "The single highest-leverage change for the next sermon:",
+): {
   opener: string;
   body: string;
 } {
@@ -97,7 +100,7 @@ export function splitVerdictImprovement(sentence: string): {
     return { opener: match[1], body: match[2] };
   }
   return {
-    opener: "The single highest-leverage change for the next sermon:",
+    opener: fallbackOpener,
     body: sentence,
   };
 }

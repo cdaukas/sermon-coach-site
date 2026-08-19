@@ -35,7 +35,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 1,
           name: "Textual fidelity & exegesis",
           category: 1,
-          tradition_tag: "Simeon Trust",
+          tradition_tag: "Simeon Trust · Expositional Preaching",
           score: 4,
           narrative:
             "The sermon names Paul's foolish-boasting frame and keeps the hardship list tied to apostolic legitimacy rather than generic suffering.",
@@ -49,7 +49,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 2,
           name: "Christ-centered / redemptive arc",
           category: 1,
-          tradition_tag: "Chapell",
+          tradition_tag: "Chapell · Christ-Centered Preaching",
           score: 4,
           narrative:
             "The contrast with the super-apostles stays Christward — weakness is displayed as the shape of apostolic legitimacy, not moralism.",
@@ -60,7 +60,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 3,
           name: "Gospel clarity",
           category: 1,
-          tradition_tag: "Piper",
+          tradition_tag: "Piper · The Supremacy of God in Preaching",
           score: 4,
           narrative:
             "The closing invitation makes grace audible: sinful weakness borne to the grave and back, not generic trust-more faith.",
@@ -81,7 +81,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 4,
           name: "Fallen Condition Focus",
           category: 2,
-          tradition_tag: "Chapell",
+          tradition_tag: "Chapell · Christ-Centered Preaching",
           score: 3,
           narrative:
             "The sermon implies a fallen condition — drawn to visible strength, ashamed of weakness — but never states it as one portable sentence at structural seams.",
@@ -92,7 +92,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 5,
           name: "Structure",
           category: 2,
-          tradition_tag: "Simeon Trust",
+          tradition_tag: "Robinson · Biblical Preaching",
           score: 4,
           narrative:
             "Each movement has a clear headline and the catalog of trials feels inevitable once the rhetorical game is named.",
@@ -103,7 +103,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 6,
           name: "Hard things handled",
           category: 2,
-          tradition_tag: "Simeon Trust",
+          tradition_tag: "Simeon Trust · Workshop practice",
           score: 3,
           narrative:
             "Paul's irony is not softened, though the hardest rhetorical sting in vv. 19–21 could surface earlier.",
@@ -124,7 +124,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 7,
           name: "Application to present audience",
           category: 3,
-          tradition_tag: "Keller",
+          tradition_tag: "Keller · Preaching",
           score: 3,
           narrative:
             "Hearers are told to boast in weakness but given few worked examples of what that looks like Monday morning; the 'voices in your life' question stays outward.",
@@ -138,7 +138,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 8,
           name: "Emotional arc and dynamics",
           category: 3,
-          tradition_tag: "Simeon Trust",
+          tradition_tag: "Piper · Expository Exultation",
           score: 3,
           narrative:
             "The emotional arc is partially designed (irony, catalog, doxological landing) but holds one register too long in the middle; the turn to doxology could be engineered more deliberately on the page.",
@@ -149,7 +149,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 9,
           name: "Pastoral specificity",
           category: 3,
-          tradition_tag: "Keller",
+          tradition_tag: "Keller · Preaching",
           score: 4,
           narrative:
             "The swagger question names recognizable categories of influence, even when it does not yet turn inward.",
@@ -167,7 +167,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 10,
           name: "Ecclesial faithfulness",
           category: 4,
-          tradition_tag: "9Marks",
+          tradition_tag: "9Marks · Preach",
           score: 4,
           narrative:
             "The sermon functions expositionally — the church hears the Word applied to congregational life, not a detached lecture.",
@@ -178,7 +178,7 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
           id: 11,
           name: "Expository exultation",
           category: 4,
-          tradition_tag: "Piper",
+          tradition_tag: "Piper · Expository Exultation",
           score: 4,
           narrative:
             "The closing invitation nudges toward trust in Christ's sufficiency without moralizing weakness as performance.",
@@ -255,6 +255,14 @@ export const EVALUATION_FIXTURE: EvaluationResultStrict = {
         "Is there a voice filled with swagger? And harder: whose voice are you when people hear your week?",
     },
   ],
+  melodic_line_and_big_idea: {
+    book: "2 Corinthians",
+    passage:
+      "Paul's fool's speech puts the hardship catalog in service of the letter's weakness-and-power argument, not as a résumé of suffering.",
+    melodic_line:
+      "2 Corinthians authenticates apostolic ministry by weakness, because Christ's power is made perfect there rather than in swagger.",
+    reading_source: "derived",
+  },
 };
 
 export const EVALUATION_FIXTURE_PROMPT_VERSION = "fixture-v3";

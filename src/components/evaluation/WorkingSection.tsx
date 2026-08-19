@@ -1,15 +1,21 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
+import { evaluationReportCopy, type OutputLanguage } from "@/lib/evaluation/output-language";
 import { SectionTitle } from "./SectionTitle";
 import { serifFont } from "./shared";
 
 type WorkingSectionProps = {
   whatsWorking: EvaluationResultStrict["whats_working"];
+  outputLanguage?: OutputLanguage;
 };
 
-export function WorkingSection({ whatsWorking }: WorkingSectionProps) {
+export function WorkingSection({
+  whatsWorking,
+  outputLanguage = "en",
+}: WorkingSectionProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   return (
     <section className="mb-7">
-      <SectionTitle>Where It&apos;s Strong</SectionTitle>
+      <SectionTitle>{copy.whereItsStrong}</SectionTitle>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {whatsWorking.map((card) => (
           <article

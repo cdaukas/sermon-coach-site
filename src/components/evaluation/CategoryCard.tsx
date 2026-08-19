@@ -1,6 +1,14 @@
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import { categoryAverage } from "@/lib/evaluation/schema";
 import {
+  displayCategoryName,
+  displayCriterionName,
+  displayTraditionTag,
+  evaluationReportCopy,
+  type Criterion2Wording,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
+import {
   criterionScoreColor,
   criterionScoreFillPercent,
   serifFont,
@@ -9,6 +17,8 @@ import {
 
 type CategoryCardProps = {
   category: EvaluationResultStrict["categories"][number];
+  outputLanguage?: OutputLanguage;
+  criterion2Wording?: Criterion2Wording;
 };
 
 const SCORE_BAR_VIEWBOX_WIDTH = 220;
@@ -48,9 +58,19 @@ function CriterionScoreBar({ score }: { score: number }) {
   );
 }
 
-export function CategoryCard({ category }: CategoryCardProps) {
+export function CategoryCard({
+  category,
+  outputLanguage = "en",
+  criterion2Wording = "default",
+}: CategoryCardProps) {
   const average = categoryAverage(category.criteria);
-  const averageLabel = `Average ${average} / 5`;
+  const copy = evaluationReportCopy(outputLanguage);
+  const averageLabel = copy.average(String(average));
+  const categoryName = displayCategoryName(
+    category.id,
+    category.name,
+    outputLanguage,
+  );
 
   return (
     <section
@@ -69,7 +89,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
       >
         <h2 className="text-2xl font-normal" style={serifFont}>
           <span style={{ color: "var(--sc-accent-soft)" }}>{category.number} ·</span>{" "}
-          {category.name}
+          {categoryName}
         </h2>
         <p
           className="text-[11px] tracking-[0.08em] uppercase"
@@ -111,13 +131,24 @@ export function CategoryCard({ category }: CategoryCardProps) {
                   }`}
                   style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
                 >
-                  {criterion.name}
+                  {displayCriterionName(
+                    criterion.id,
+                    criterion.name,
+                    outputLanguage,
+                    criterion2Wording,
+                  )}
                   <span
                     className="text-[11px] font-normal tracking-normal"
                     style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
                   >
                     {" · "}
-                    <em style={{ fontStyle: "italic" }}>{criterion.tradition_tag}</em>
+                    <em style={{ fontStyle: "italic" }}>
+                      {displayTraditionTag(
+                        criterion.id,
+                        criterion.tradition_tag,
+                        outputLanguage,
+                      )}
+                    </em>
                   </span>
                 </p>
               </div>
@@ -136,12 +167,19 @@ export function CategoryCard({ category }: CategoryCardProps) {
                 background: "var(--sc-accent-pale)",
               }}
             >
-              <p
-                className="mb-3 text-[15px] leading-relaxed"
-                style={{ ...serifFont, color: "var(--sc-ink)" }}
-              >
-                {criterion.narrative}
-              </p>
+              {criterion.narrative
+                .split(/\n\s*\n/)
+                .map((part) => part.trim())
+                .filter((part) => part.length > 0)
+                .map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="mb-3 text-[15px] leading-relaxed"
+                    style={{ ...serifFont, color: "var(--sc-ink)" }}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
               {criterion.anchored_quote ? (
                 <blockquote
                   className="mt-4 border-l-2 pl-4 text-[15px] italic leading-relaxed"

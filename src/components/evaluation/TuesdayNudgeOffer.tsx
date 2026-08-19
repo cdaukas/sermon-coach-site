@@ -7,18 +7,28 @@ import {
   markTuesdayNudgeOfferSeen,
   saveEmailPreferences,
 } from "@/lib/auth/profile-actions";
+import {
+  displayEvaluationError,
+  evaluationReportCopy,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 import { uiFont } from "./shared";
 
 type TuesdayNudgeOfferProps = {
   /** Live newsletter preference — always forwarded unchanged on opt-in. */
   newsletterOptedIn: boolean;
+  outputLanguage?: OutputLanguage;
 };
 
 /**
  * Screen-only post-report offer for the Tuesday nudge.
  * Must stay out of PDF export: parent gates on !pdfCapture; .screen-only is backup.
  */
-export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps) {
+export function TuesdayNudgeOffer({
+  newsletterOptedIn,
+  outputLanguage = "en",
+}: TuesdayNudgeOfferProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   const router = useRouter();
   const [checked, setChecked] = useState(true);
   const [pending, setPending] = useState(false);
@@ -38,14 +48,14 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
       if (optIn) {
         const prefResult = await saveEmailPreferences(newsletterOptedIn, true);
         if (!prefResult.ok) {
-          setError(prefResult.error);
+          setError(displayEvaluationError(prefResult.error, outputLanguage));
           return;
         }
       }
 
       const seenResult = await markTuesdayNudgeOfferSeen();
       if (!seenResult.ok) {
-        setError(seenResult.error);
+        setError(displayEvaluationError(seenResult.error, outputLanguage));
         return;
       }
 
@@ -64,7 +74,7 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
         boxShadow: "var(--sc-shadow)",
       }}
       data-tuesday-nudge-offer="1"
-      aria-label="Tuesday nudge offer"
+      aria-label={copy.tuesdayNudgeAria}
     >
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
 
@@ -90,14 +100,13 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
             className="block font-medium"
             style={{ color: "var(--sc-ink)" }}
           >
-            Send me the Tuesday nudge
+            {copy.tuesdayNudgeTitle}
           </span>
           <span
             className="mt-1 block text-[13px] leading-relaxed"
             style={{ color: "var(--sc-ink-soft)" }}
           >
-            A prompt each Tuesday to look back at Sunday and start next
-            week&apos;s sketch. One email a week.
+            {copy.tuesdayNudgeBody}
           </span>
         </span>
       </label>
@@ -115,7 +124,7 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
             color: "var(--sc-ink)",
           }}
         >
-          {pending ? "Saving…" : "Confirm"}
+          {pending ? copy.saving : copy.confirm}
         </button>
         <button
           type="button"
@@ -124,7 +133,7 @@ export function TuesdayNudgeOffer({ newsletterOptedIn }: TuesdayNudgeOfferProps)
           className="cursor-pointer border-0 bg-transparent px-2 py-2 text-[13px] font-medium underline-offset-2 hover:underline disabled:cursor-wait disabled:opacity-70 disabled:no-underline"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
         >
-          Not now
+          {copy.notNow}
         </button>
       </div>
     </section>

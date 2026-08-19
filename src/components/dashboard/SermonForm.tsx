@@ -15,6 +15,8 @@ import { requestEvaluation } from "@/lib/evaluation/actions";
 import { normalizeSermonContext, sermonContextStorageKey } from "@/lib/evaluation/context";
 import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-errors";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
+import type { OutputLanguage } from "@/lib/evaluation/output-language";
+import { parseOutputLanguage } from "@/lib/evaluation/output-language";
 import { createSermon } from "@/lib/sermons/actions";
 import type { TranscriptErrorCode } from "@/lib/transcripts/types";
 import { isNonYoutubeHostUrl } from "@/lib/transcripts/youtube-url";
@@ -73,6 +75,7 @@ type SermonFormProps = {
   isMentoredMentee?: boolean;
   /** Prefill only. Edits on the form never write back to profiles. */
   churchName?: string | null;
+  spanishEnabled?: boolean;
 };
 
 function countWords(text: string): number {
@@ -98,6 +101,7 @@ export function SermonForm({
   entitlement,
   isMentoredMentee = false,
   churchName = null,
+  spanishEnabled = false,
 }: SermonFormProps) {
   const router = useRouter();
   const savedSermonIdRef = useRef<string | null>(null);
@@ -105,6 +109,7 @@ export function SermonForm({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [primaryPassage, setPrimaryPassage] = useState("");
+  const [workingMelodicLine, setWorkingMelodicLine] = useState("");
   const [church, setChurch] = useState(
     typeof churchName === "string" ? churchName.trim() : "",
   );
@@ -121,6 +126,7 @@ export function SermonForm({
   const [transcriptHelpOpen, setTranscriptHelpOpen] = useState(false);
   const [transcriptHelpTab, setTranscriptHelpTab] =
     useState<TranscriptHelpTabId>("youtube-captions");
+  const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>("en");
 
   const canEvaluate = entitlement?.canEvaluate ?? false;
   const mayRunEvaluation = isMentoredMentee || canEvaluate;
@@ -213,6 +219,7 @@ export function SermonForm({
       audience,
       series,
       other,
+      workingMelodicLine,
     });
   }
 
@@ -294,6 +301,7 @@ export function SermonForm({
         result.sermonId,
         context,
         "diagnostic",
+        outputLanguage,
       );
 
       if (!evalResult.ok) {
@@ -355,6 +363,23 @@ export function SermonForm({
           placeholder: "e.g. Hebrews 12:5-17",
         }}
       />
+
+      <div className="mb-5 flex flex-col gap-1.5">
+        <AuthLabel htmlFor="sermon-working-melodic-line">
+          Working melodic line for this book, if you have one (optional)
+        </AuthLabel>
+        <textarea
+          id="sermon-working-melodic-line"
+          name="working-melodic-line"
+          value={workingMelodicLine}
+          onChange={(event) => setWorkingMelodicLine(event.target.value)}
+          disabled={formDisabled}
+          rows={2}
+          placeholder="The theme that holds this book together, in a sentence. The evaluation will work from your line rather than deriving one."
+          className={contextTextareaClassName}
+          style={contextTextareaStyle}
+        />
+      </div>
 
       <p
         className="-mt-1 mb-1 text-base leading-relaxed"
@@ -609,7 +634,44 @@ export function SermonForm({
             />
           </div>
         </div>
-      </details>
+        </details>
+
+      {spanishEnabled && !isMentoredMentee ? (
+        <fieldset className="flex flex-col gap-2 border-0 p-0">
+          <legend
+            className="mb-1 text-[13px] font-medium tracking-wide"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            Evaluation language
+          </legend>
+          <div className="flex flex-wrap gap-4">
+            {(
+              [
+                { value: "en", label: "English" },
+                { value: "es", label: "Español" },
+              ] as const
+            ).map((option) => (
+              <label
+                key={option.value}
+                className="flex cursor-pointer items-center gap-2 text-[14px]"
+                style={{ ...uiFont, color: "var(--sc-ink)" }}
+              >
+                <input
+                  type="radio"
+                  name="evaluation-language"
+                  value={option.value}
+                  checked={outputLanguage === option.value}
+                  disabled={formDisabled}
+                  onChange={(event) =>
+                    setOutputLanguage(parseOutputLanguage(event.target.value))
+                  }
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
 
       <div
         style={{

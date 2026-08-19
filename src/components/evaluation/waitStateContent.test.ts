@@ -9,6 +9,7 @@ import {
   WAIT_STAGE_LABELS,
   WAIT_TIME_ESTIMATE,
   WAIT_TIME_OVERRUN,
+  slideForElapsed,
 } from "./waitStateContent";
 
 describe("stageLabelForElapsed", () => {
@@ -46,6 +47,17 @@ describe("slideIndexForElapsed", () => {
     assert.equal(slideIndexForElapsed(150), 8);
     assert.equal(slideIndexForElapsed(999), 8);
   });
+
+  it("teaches the book-level melodic line on slide 3", () => {
+    assert.equal(WAIT_SLIDES[2]?.title, "The tune the whole book is singing");
+    assert.match(
+      WAIT_SLIDES[2]?.body ?? "",
+      /theme that holds an entire book together/,
+    );
+    assert.doesNotMatch(WAIT_SLIDES[2]?.body ?? "", /Every passage has one/);
+    assert.doesNotMatch(WAIT_SLIDES[2]?.body ?? "", /checks both/);
+    assert.match(WAIT_SLIDES[2]?.body ?? "", /does not score it/);
+  });
 });
 
 describe("timeEstimateForElapsed", () => {
@@ -60,5 +72,25 @@ describe("timeEstimateForElapsed", () => {
     assert.equal(timeEstimateForElapsed(200), WAIT_TIME_OVERRUN);
     assert.equal(slideIndexForElapsed(150), 8);
     assert.equal(WAIT_SLIDES[slideIndexForElapsed(150)]?.title, "Start with the growth edges");
+  });
+});
+
+describe("Spanish wait copy", () => {
+  it("keeps the same stage and slide cadence in Spanish", () => {
+    assert.equal(stageLabelForElapsed(0, "es"), "Leyendo el manuscrito...");
+    assert.equal(stageLabelForElapsed(110, "es"), "Terminando tu lectura...");
+    assert.equal(
+      timeEstimateForElapsed(0, "es"),
+      "Esto suele tardar unos dos minutos.",
+    );
+    assert.equal(
+      timeEstimateForElapsed(150, "es"),
+      "Sigue trabajando. Los manuscritos más largos tardan un poco más.",
+    );
+    assert.equal(slideForElapsed(0, "es").title, "Con fuente, no inventado");
+    assert.equal(
+      slideForElapsed(150, "es").title,
+      "Empieza por los bordes de crecimiento",
+    );
   });
 });

@@ -6,17 +6,22 @@ import type {
   CoachingStrengthPresentation,
 } from "@/lib/evaluation/coaching-report-types";
 import { EvaluationPrintButtons } from "@/components/evaluation/EvaluationPrintButtons";
+import {
+  displaySubmissionMode,
+  evaluationReportCopy,
+  formatEvaluationDate,
+  type OutputLanguage,
+} from "@/lib/evaluation/output-language";
 import { serifFont, uiFont } from "./shared";
 
 type CoachingReportViewProps = {
   data: CoachingReportPresentation;
   showPrintActions?: boolean;
+  outputLanguage?: OutputLanguage;
 };
 
-function formatEvaluatedDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-    new Date(iso),
-  );
+function formatEvaluatedDate(iso: string, language: OutputLanguage): string {
+  return formatEvaluationDate(iso, language);
 }
 
 function SectionHeading({ children }: { children: string }) {
@@ -65,13 +70,15 @@ function StrengthItem({ strength }: { strength: CoachingStrengthPresentation }) 
 
 function CoachingNarrativeSections({
   narrative,
+  copy,
 }: {
   narrative: CoachingNarrativePresentation;
+  copy: ReturnType<typeof evaluationReportCopy>;
 }) {
   return (
     <>
       <section className="evaluation-coaching-movement mb-7">
-        <SectionHeading>Where It&apos;s Strong</SectionHeading>
+        <SectionHeading>{copy.whereItsStrong}</SectionHeading>
         <div className="space-y-5">
           {narrative.lead_with_this.map((strength) => (
             <StrengthItem key={strength.claim} strength={strength} />
@@ -80,7 +87,7 @@ function CoachingNarrativeSections({
       </section>
 
       <section className="evaluation-coaching-movement mb-7">
-        <SectionHeading>How To Grow</SectionHeading>
+        <SectionHeading>{copy.howToGrow}</SectionHeading>
         <article
           className="border-t-[3px] px-6 py-6"
           style={{
@@ -100,7 +107,7 @@ function CoachingNarrativeSections({
             style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
           >
             <strong style={{ color: "var(--sc-ink)", fontWeight: 600 }}>
-              This week:
+              {copy.thisWeek}
             </strong>{" "}
             {narrative.how_to_grow.this_week}
           </p>
@@ -108,7 +115,7 @@ function CoachingNarrativeSections({
       </section>
 
       <section className="evaluation-coaching-movement mb-7">
-        <SectionHeading>What It Looks Like</SectionHeading>
+        <SectionHeading>{copy.whatItLooksLike}</SectionHeading>
         <article
           className="px-6 py-6"
           style={{
@@ -128,7 +135,7 @@ function CoachingNarrativeSections({
                 className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
                 style={{ ...uiFont, color: "var(--sc-red)" }}
               >
-                Before
+                {copy.before}
               </p>
               <p
                 className="text-[14px] italic leading-relaxed"
@@ -148,7 +155,7 @@ function CoachingNarrativeSections({
                 className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
                 style={{ ...uiFont, color: "var(--sc-green)" }}
               >
-                After
+                {copy.after}
               </p>
               <p
                 className="text-[14px] italic leading-relaxed"
@@ -177,14 +184,16 @@ function CoachingNarrativeSections({
 export function CoachingReportView({
   data,
   showPrintActions = true,
+  outputLanguage = "en",
 }: CoachingReportViewProps) {
+  const copy = evaluationReportCopy(outputLanguage);
   return (
     <article className="evaluation-report">
       <p
         className="evaluation-report-eyebrow mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
       >
-        Coaching report
+        {copy.coachingReport}
       </p>
       <h1
         className="evaluation-report-title mb-2 text-[36px] font-normal leading-tight tracking-tight md:text-[44px]"
@@ -206,38 +215,39 @@ export function CoachingReportView({
         style={{ ...uiFont, borderColor: "var(--sc-rule)", color: "var(--sc-ink-soft)" }}
       >
         <span>
-          <strong style={{ color: "var(--sc-ink)" }}>Sermon:</strong> {data.sermonTitle}
+          <strong style={{ color: "var(--sc-ink)" }}>{copy.sermon}:</strong> {data.sermonTitle}
         </span>
         {data.preacherName ? (
           <span>
-            <strong style={{ color: "var(--sc-ink)" }}>Preacher:</strong> {data.preacherName}
+            <strong style={{ color: "var(--sc-ink)" }}>{copy.preacher}:</strong> {data.preacherName}
           </span>
         ) : null}
         <span>
-          <strong style={{ color: "var(--sc-ink)" }}>Evaluated:</strong>{" "}
-          {formatEvaluatedDate(data.evaluatedAt)}
+          <strong style={{ color: "var(--sc-ink)" }}>{copy.evaluated}:</strong>{" "}
+          {formatEvaluatedDate(data.evaluatedAt, outputLanguage)}
         </span>
         {data.submissionMode ? (
           <span>
-            <strong style={{ color: "var(--sc-ink)" }}>Mode:</strong> {data.submissionMode}
+            <strong style={{ color: "var(--sc-ink)" }}>{copy.mode}:</strong>{" "}
+            {displaySubmissionMode(data.submissionMode, outputLanguage)}
           </span>
         ) : null}
       </div>
 
       {showPrintActions ? (
         <div className="screen-only -mt-6 mb-10 flex justify-end gap-2">
-          <EvaluationPrintButtons />
+          <EvaluationPrintButtons outputLanguage={outputLanguage} />
         </div>
       ) : null}
 
       {data.coachingNarrative ? (
-        <CoachingNarrativeSections narrative={data.coachingNarrative} />
+        <CoachingNarrativeSections narrative={data.coachingNarrative} copy={copy} />
       ) : (
         <p
           className="text-[15px] leading-relaxed"
           style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
         >
-          The coaching narrative is not available for this evaluation.
+          {copy.coachingNarrativeMissing}
         </p>
       )}
     </article>

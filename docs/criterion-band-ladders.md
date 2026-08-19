@@ -53,6 +53,8 @@ Five criteria carry a presumption: a named condition that presumes a ceiling. A 
 ## 1 · Textual fidelity & exegesis
 *Simeon Trust*
 
+Passage fidelity only. Does the sermon say what the text says? Simeon Trust's melodic line (the theme that holds the book together) is named as context in the display block and in this criterion's narrative. It is not a scored sub-question and must not move this band.
+
 - **5** — The sermon's argument is the passage's argument, in the passage's order of emphasis. Every clause the application depends on is explained. Claims about the text are demonstrated in front of the congregation or attributed to something checkable, and none outruns what the text supports.
 - **4** — The text drives the sermon and the main argument is the passage's, but a secondary clause goes unexplained, or the weight sits where the passage's does not, or a correct claim is asserted rather than shown.
 - **3** — The passage is genuinely present and not contradicted, but the text illustrates the sermon rather than generating it. The main points could have come from a different passage. Or the sermon works accurately through what the text says and never reaches what it is doing.
@@ -104,6 +106,8 @@ Five criteria carry a presumption: a named condition that presumes a ceiling. A 
 
 ## 5 · Structure
 *Robinson*
+
+Passage-level. The first sub-question is Robinson's **big idea** (Simeon Trust would call it the theme of the passage). It is not the melodic line, which belongs to the book and is named as context, not scored.
 
 - **5** — One idea, every section earning its place, the ending inevitable.
 - **4** — Clear spine, with one section overstaying or a transition announcing movement instead of creating it.

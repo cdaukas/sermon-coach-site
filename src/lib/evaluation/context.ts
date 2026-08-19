@@ -8,6 +8,8 @@ export type SermonContext = {
   audience?: string;
   series?: string;
   other?: string;
+  /** Preacher's working book-level melodic line, when they have one. */
+  workingMelodicLine?: string;
 };
 
 export type SermonContextInput = {
@@ -16,6 +18,7 @@ export type SermonContextInput = {
   audience?: string;
   series?: string;
   other?: string;
+  workingMelodicLine?: string;
 };
 
 export function sermonContextStorageKey(sermonId: string): string {
@@ -58,6 +61,7 @@ export function normalizeSermonContext(
   const audience = trimField(input.audience);
   const series = trimField(input.series);
   const other = trimField(input.other);
+  const workingMelodicLine = trimField(input.workingMelodicLine);
 
   if (church) {
     context.church = church;
@@ -73,6 +77,9 @@ export function normalizeSermonContext(
   }
   if (other) {
     context.other = other;
+  }
+  if (workingMelodicLine) {
+    context.workingMelodicLine = workingMelodicLine;
   }
 
   return Object.keys(context).length > 0 ? context : undefined;
@@ -92,6 +99,11 @@ export function buildContextPreamble(context: SermonContext): string {
   }
   if (context.series) {
     lines.push(`- Series: ${context.series}`);
+  }
+  if (context.workingMelodicLine) {
+    lines.push(
+      `- Working melodic line for this book (named by the preacher): ${context.workingMelodicLine}`,
+    );
   }
   if (context.other) {
     lines.push(`- Additional notes: ${context.other}`);
@@ -115,6 +127,17 @@ export function buildContextPreamble(context: SermonContext): string {
     "standard of the rubric. Do not raise or lower any score simply because of the",
     "setting. The rubric, criteria, and scoring are unchanged.",
   );
+
+  if (context.workingMelodicLine) {
+    lines.push(
+      "",
+      "MELODIC LINE OVERRIDE: The preacher named a working melodic line for this book.",
+      "Use THAT line as the premise for `melodic_line_and_big_idea` and for the",
+      "observation paragraph at the end of criterion 1's narrative, after the",
+      "per-criterion close. Do not score against it. Name it as",
+      "the preacher's reading before you comment. Set `reading_source` to `preacher`.",
+    );
+  }
 
   return lines.join("\n");
 }

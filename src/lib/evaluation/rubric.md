@@ -1,8 +1,9 @@
 <!--
 GENERATED FROM SKILL.md — DO NOT EDIT DIRECTLY
-rubric.md is the derived production artifact. SKILL.md (in Claude.ai at
-/mnt/skills/user/sermon-coach/SKILL.md) is the canonical source.
-To update: edit SKILL.md in chat, paste new version here, commit with
+rubric.md is the derived production artifact. Canonical skill copy in
+this repo: `.claude/skills/sermon-coach/SKILL.md`. Keep the Claude Code
+copy at `~/.claude/skills/user/sermon-coach/SKILL.md` identical.
+To update: edit the repo SKILL.md, paste here, commit with
 message "sync rubric from SKILL.md @ [date]".
 See SYNC.md for the full rule.
 -->
@@ -325,31 +326,35 @@ Display the full bands table in the Methodology appendix at the end of the dashb
 
 ## Category 1 — Text & Theology *(max 15 points)*
 
-**1. Textual fidelity & exegesis** *(Simeon Trust)*
+**1. Textual fidelity & exegesis** *(Simeon Trust, Expositional Preaching)*
 Does the sermon actually say what the text says? Does it honor the genre, context, grammar, and intended sense of the passage — or does it use the text as a launchpad for the preacher's own agenda? Scope: whether the sermon's claims are anchored in the passage. Wrestling with the *hard* parts of the text is scored separately under #6 (Hard things handled) — keep that distinction clean.
+
+The book's unifying theme (Simeon Trust's **melodic line**) is named as context in the display block and in this criterion's closing paragraph, as observation plus question. It is not scored here and must not move this band. Name the reading before you comment on it. The single dominant idea of *this passage* is scored under 5 (Robinson's big idea).
+
+Two paragraphs. First: passage-fidelity critique, then the per-criterion close ("To reach a 5, ..." or "To hold this, ..."). Second: two or three sentences, observation plus question, never a verdict. Never embed the observation mid-paragraph or before the close. Show the book's line; do not define the term. No em-dashes. Model for the second paragraph: "Philippians keeps returning to partnership in the gospel that holds under pressure, with Christ as both the pattern and the prize. Your sermon on 4:10-13 reads the passage as a lesson in learned contentment and does not lean on that larger argument. Was that a choice, this week standing on its own, or did the book recede without you meaning it to?"
 
 **2. Christ-centered / redemptive arc** *(Chapell, Christ-Centered Preaching)*
 Does the sermon land in the gospel — the person and work of Christ as the answer to the text's Fallen Condition Focus — or does it stop at moralism, advice, or principles for better living?
 
-**3. Gospel clarity** *(Desiring God / Piper)*
+**3. Gospel clarity** *(Piper, The Supremacy of God in Preaching)*
 Is the good news made unmistakable? Could a non-Christian in the room walk out knowing what the gospel is and why it matters, not just what they're supposed to do better?
 
 ---
 
 ## Category 2 — Structure & Craft *(max 15 points)*
 
-**4. Fallen Condition Focus** *(Chapell)*
+**4. Fallen Condition Focus** *(Chapell, Christ-Centered Preaching)*
 Is there a clear, specific human condition the text addresses — and does the sermon stay anchored to it throughout? The FCF should be one sentence in present tense, specific to this text, not generic fallenness. Drift from the FCF is the most common structural failure.
 
-**5. Structure** *(Simeon Trust, Robinson)*
+**5. Structure** *(Robinson, Biblical Preaching)*
 A single composite criterion with three sub-questions. Score 1–5 overall; the narrative should address all three.
-- *Melodic line.* One main thing, or many? Does the sermon have a single dominant idea (the "melodic line") that the text itself yields, and does every section serve it? Or is it a string of true-but-unconnected observations?
+- *Big idea.* One main thing, or many? Does the sermon have a single dominant idea, the one this passage itself yields, that every section serves? Or is it a string of true-but-unconnected observations? Robinson's term is the big idea; Simeon Trust would call it the theme of the passage. It is **not** the melodic line, which belongs to the book and is named as context, not scored.
 - *Structural fit.* Does the sermon's shape rise out of the passage, or is it imposed on the passage from outside? Three points pulled cleanly from a three-part text is structural fit; three points pulled from the preacher's prior framework and then mapped onto the text is not.
 - *Memorability.* Will anyone remember this by Tuesday? Is the structure clear enough that a listener could explain the sermon's argument the next day? Memorable doesn't mean clever — it means the shape of the thought is graspable.
 
 A 5 on this criterion requires strength in all three. A weakness in any one of them caps the score at 3, no matter how strong the other two are — the structure isn't doing its full job.
 
-**6. Hard things handled** *(Sermon-coach, drawing on Simeon Trust workshop practice)*
+**6. Hard things handled** *(Simeon Trust, Workshop practice)*
 Does the sermon wrestle with the genuinely difficult parts of the passage — the verses that resist easy resolution, the moves that don't fit neat homiletical packaging, the texts that disturb before they comfort — or does it skip them, defuse them too quickly, or paper them over with theological correctness?
 
 This criterion exists because congregations can absorb hard exegesis far better than preachers assume; what they cannot absorb is a preacher who has *avoided* the hard thing while looking like he addressed it. Common failure modes: hedging the disturbing text into immediate comfort; quoting the difficult verse without preaching it; using a footnote-level interpretive move to neutralize the text's rhetorical force; reaching for the resurrection too fast.
@@ -360,23 +365,23 @@ A 5 here means the preacher let the hard thing be hard, named what makes it hard
 
 ## Category 3 — Application & Audience Connection *(max 15 points)*
 
-**7. Application to present audience** *(Keller)*
+**7. Application to present audience** *(Keller, Preaching)*
 Does this land in the present moment, in this room, with these people — or is it a lecture about ancient Israel that never crosses the bridge into the listener's actual life? This is the highest-stakes category in Chris's rubric. A sermon can be exegetically faithful and homiletically irrelevant; that combination is the failure this criterion exists to catch. Keller's three-audiences framework (believers, doubters, seekers present simultaneously) is the diagnostic lens — does the sermon address only the in-group, or all three?
 
-**8. Emotional arc and dynamics**
+**8. Emotional arc and dynamics** *(Piper, Expository Exultation)*
 Is the emotional shape of the sermon — lament, joy, warning, comfort, conviction, awe — designed into the manuscript itself? Does the text engineer its own dynamics: escalation and restraint, the turn from weight to hope, the short line that lands after a long stretch, the pause built by a paragraph break rather than left to chance? This criterion scores the emotional architecture on the page — where the sermon presses in and where it releases. A manuscript can fully succeed here. A 5 means the emotional arc is deliberately built, paced, and varied, so the text itself carries the congregation through real movement rather than holding one flat register from open to close. The failure mode — one emotional gear the whole way, all teaching or all intensity, with no engineered rise and fall — is visible on the page and named here. When audio or video is available, the Heat Map subsection assesses whether *delivery* matched this designed arc; without audio, this criterion scores the design alone, to a full 5.
 
-**9. Pastoral specificity** *(Keller)*
+**9. Pastoral specificity** *(Keller, Preaching)*
 Does the application address actual people in actual situations? "We all struggle with idolatry" is generic. "If you're the dad who can't stop checking work email at the dinner table, this text is naming what's happening" is specific. Generic application is sermon-shaped wallpaper.
 
 ---
 
 ## Category 4 — Ecclesial & Spiritual *(max 10 points)*
 
-**10. Ecclesial faithfulness** *(9Marks)*
+**10. Ecclesial faithfulness** *(9Marks, Preach)*
 Does this sermon strengthen the church's understanding of itself as the people of God under the Word? Expositional preaching is the first mark of a healthy church in the 9Marks framework — does this sermon function as such?
 
-**11. Expository exultation** *(Piper)*
+**11. Expository exultation** *(Piper, Expository Exultation)*
 Is there evidence the preacher has been affected by what he's preaching, not just informing about it? "Expository exultation" is Piper's phrase for preaching that combines rigorous explanation with worshipful affection. A sermon that explains without exulting is a lecture; a sermon that exults without explaining is a pep talk.
 
 ---
@@ -393,6 +398,12 @@ You may propose ONE OR TWO of these as additions during Step 2 of the protocol �
 Do not add more than two. The rubric exists to focus the feedback, not to exhaust it.
 
 ---
+
+## Rubric changelog from v4 (August 2026)
+
+- **Melodic line restored to book level (Simeon Trust).** The theme that holds a whole book together is named as context and coaching, not as a scored sub-question. Criterion 1 scores passage fidelity only. Melodic line must not raise or lower that band. Eleven criteria, 55 points, weighting unchanged.
+- **Criterion 5's first sub-question renamed from "melodic line" to "big idea" (Robinson).** The passage's single dominant idea stays in Structure; the attribution is Robinson, not Simeon Trust. Structural fit and memorability are unchanged.
+- **Display block.** A non-scored two-row block (the melodic line as this report reads it, then this passage) sits under the sermon header. The melodic-line sentence always begins by naming the book. No traffic light, no band. Criterion 1's narrative names the reading, names where the sermon sits relative to it, and asks whether any difference was deliberate.
 
 ## Rubric changelog from v3 (June 2026)
 
@@ -440,7 +451,7 @@ If Chris uploads anything by Chapell, anchor the FCF and Christ-centered criteri
 ### Simeon Trust Workshop Materials
 The Simeon Trust workshop method emphasizes:
 - **Textual fidelity** — letting the text drive the sermon, not vice versa
-- **Melodic line** — the single dominant theme the text itself yields
+- **Melodic line** — the theme that unites an entire book, and the control on how any passage inside it is read
 - **Theme, aim, application** — the workshop's three-part framework
 - **Structure flowing from the text** rather than imposed on it
 
@@ -468,7 +479,7 @@ The foundational text on "big idea" preaching. Robinson's framework provides:
 - **Subject and complement** — how a text's question (subject) is answered by its content (complement)
 - **The three developmental questions** — *What does this mean? Is it true? So what?* — for moving from explanation through validation to application
 
-Robinson's "big idea" framework overlaps with and reinforces Simeon Trust's melodic line, but is more methodologically explicit about how to derive it. Anchor the **Structure** criterion (melodic line, structural fit, memorability) to Robinson's framework when his work is in view. The three developmental questions are particularly useful for diagnosing where a sermon over-explains, under-validates, or skips application.
+Robinson's "big idea" operates at the passage level and is the correct anchor for criterion 5. It is distinct from Simeon Trust's melodic line, which operates at the book level and is named as context and coaching, not as a scored dimension. A sermon can have a crisp big idea and still sit apart from the book. The three developmental questions are particularly useful for diagnosing where a sermon over-explains, under-validates, or skips application.
 
 ### Tim Keller — *Preaching: Communicating Faith in an Age of Skepticism*
 Keller's framework provides:
