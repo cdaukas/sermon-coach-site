@@ -851,23 +851,37 @@
   padding: 8px 16px;
   border-radius: 4px;
   font-size: 13px;
-  font-weight: 600;
   cursor: pointer;
 }
 
 .dashboard-dialog-cancel {
-  border: 1px solid #d4cfc1;
+  border: none;
   background: transparent;
-  color: #1a2332;
+  color: var(--sc-ink-soft);
+  font-weight: 500;
+}
+
+.dashboard-dialog-cancel:hover {
+  color: var(--sc-ink);
 }
 
 .dashboard-dialog-delete {
-  border: 1px solid #1a2332;
-  background: #1a2332;
-  color: #f7f4ec;
+  border: none;
+  background: var(--sc-red);
+  color: #ffffff;
+  font-weight: 600;
 }
 
-.dashboard-dialog-delete:disabled,
+.dashboard-dialog-delete:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--sc-red) 82%, #1a2332);
+}
+
+.dashboard-dialog-delete:disabled {
+  background: color-mix(in srgb, var(--sc-red) 28%, var(--sc-rule));
+  color: color-mix(in srgb, #ffffff 65%, var(--sc-ink-soft));
+  cursor: wait;
+}
+
 .dashboard-recently-deleted-restore:disabled {
   opacity: 0.55;
   cursor: default;

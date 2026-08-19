@@ -62,6 +62,7 @@ async function main(): Promise<void> {
   const browser = await puppeteer.launch({
     headless: false,
     defaultViewport: null,
+    protocolTimeout: 6 * 60_000,
   });
 
   try {
