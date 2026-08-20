@@ -101,8 +101,8 @@ describe("runEvaluation schema retry", () => {
         result.meta.sermon_title,
         EVALUATION_FIXTURE.meta.sermon_title,
       );
-      assert.equal(inputTokens, 30);
-      assert.equal(outputTokens, 40);
+      assert.equal(inputTokens, 40);
+      assert.equal(outputTokens, 60);
 
       const evalCostLine = logs.find((line) => line.includes('"eval_cost"'));
       assert.ok(evalCostLine);
@@ -191,6 +191,63 @@ describe("runEvaluation schema retry", () => {
     );
 
     assert.equal(createCalls, 1);
+  });
+
+  it("marks the static system prompt cacheable and leaves the user message uncached", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+
+    const seen: Anthropic.Messages.MessageCreateParamsNonStreaming[] = [];
+    const createMessage: CreateEvaluationMessage = async (received) => {
+      seen.push(received);
+      return seen.length === 1
+        ? messageWithToolInput({ invalid: "schema" })
+        : messageWithToolInput(EVALUATION_FIXTURE);
+    };
+
+    const originalError = console.error;
+    console.error = () => {};
+    try {
+      await runEvaluation(evaluationInput, { createMessage });
+    } finally {
+      console.error = originalError;
+    }
+
+    // Both the first attempt and the schema retry must carry the breakpoint.
+    assert.equal(seen.length, 2);
+    for (const params of seen) {
+      assert.ok(Array.isArray(params.system));
+      const system = params.system as Anthropic.Messages.TextBlockParam[];
+      assert.equal(system.length, 1);
+      assert.equal(system[0]!.type, "text");
+      assert.deepEqual(system[0]!.cache_control, { type: "ephemeral" });
+      assert.ok(system[0]!.text.length > 1000);
+      assert.equal(system[0]!.text.includes(evaluationInput.manuscript), false);
+      assert.equal(typeof params.messages[0]!.content, "string");
+    }
+    // Byte-identical across attempts, which is what makes the retry a cache read.
+    assert.equal(
+      (seen[0]!.system as Anthropic.Messages.TextBlockParam[])[0]!.text,
+      (seen[1]!.system as Anthropic.Messages.TextBlockParam[])[0]!.text,
+    );
+  });
+
+  it("counts cache writes and reads toward the billed input total", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key";
+
+    const createMessage: CreateEvaluationMessage = async () =>
+      messageWithToolInput(EVALUATION_FIXTURE, "claude-test-model", {
+        input_tokens: 700,
+        output_tokens: 40,
+        cache_creation_input_tokens: 0,
+        cache_read_input_tokens: 24_000,
+      } as Anthropic.Messages.Usage);
+
+    const { inputTokens, outputTokens } = await runEvaluation(evaluationInput, {
+      createMessage,
+    });
+
+    assert.equal(inputTokens, 24_700);
+    assert.equal(outputTokens, 40);
   });
 
   it("passes an explicit model override into the API call", async () => {

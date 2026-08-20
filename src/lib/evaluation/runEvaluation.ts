@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  billedInputTokens,
   buildEvalCostLogPayload,
   logEvalCost,
   sumEvalUsage,
@@ -115,7 +116,16 @@ async function callClaude(
     response = await createMessage({
       model,
       max_tokens: 16_000,
-      system: buildSystemPrompt(),
+      // buildSystemPrompt() is byte-identical on every call for every user, so
+      // the whole prefix (tools + system) is cacheable. The user message carries
+      // the manuscript and must stay outside the breakpoint.
+      system: [
+        {
+          type: "text",
+          text: buildSystemPrompt(),
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       tools: [submitSermonEvaluationTool],
       tool_choice: { type: "tool", name: submitSermonEvaluationTool.name },
       messages: [{ role: "user", content: buildUserMessage(input) }],
@@ -178,8 +188,8 @@ export async function runEvaluation(
       return {
         result,
         model: responseModel,
-        inputTokens: call.usage.input_tokens,
-        outputTokens: call.usage.output_tokens,
+        inputTokens: billedInputTokens(billedUsage),
+        outputTokens: billedUsage.output_tokens,
       };
     } catch (error) {
       if (

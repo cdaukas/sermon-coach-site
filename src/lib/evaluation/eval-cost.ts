@@ -48,6 +48,19 @@ export function usageFromResponse(usage: Anthropic.Messages.Usage): EvalUsageTot
   };
 }
 
+/**
+ * Total input tokens billed for a call. Cache writes and reads are billed input
+ * but are reported outside usage.input_tokens, so reading that field alone
+ * under-reports any call that hits a cache breakpoint.
+ */
+export function billedInputTokens(usage: EvalUsageTotals): number {
+  return (
+    usage.input_tokens +
+    usage.cache_creation_input_tokens +
+    usage.cache_read_input_tokens
+  );
+}
+
 export function sumEvalUsage(totals: EvalUsageTotals[]): EvalUsageTotals {
   return totals.reduce(
     (acc, row) => ({
