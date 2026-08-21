@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AnnualUpgradePrompt } from "@/components/dashboard/AnnualUpgradePrompt";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { CreditStrip } from "@/components/dashboard/CreditStrip";
 import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
@@ -31,19 +32,36 @@ export default async function BuyPage() {
     hasActiveSubscription && usage !== null && usage.used >= usage.limit;
 
   let stripeCustomerId: string | null = null;
+  let planTier: string | null = null;
+  let subscriptionInterval: string | null = null;
   if (user && hasActiveSubscription) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id, plan_tier, subscription_interval")
       .eq("id", user.id)
       .maybeSingle();
     const raw = profile?.stripe_customer_id;
     stripeCustomerId =
       typeof raw === "string" && raw.trim() ? raw.trim() : null;
+    planTier =
+      typeof profile?.plan_tier === "string" ? profile.plan_tier : null;
+    subscriptionInterval =
+      typeof profile?.subscription_interval === "string"
+        ? profile.subscription_interval
+        : null;
   }
 
   const showManageSubscription =
     hasActiveSubscription && Boolean(stripeCustomerId);
+
+  // Monthly Coach only. A null interval means comped, webhook-incomplete, or
+  // otherwise unknown cadence — render nothing rather than pitch annual to
+  // someone who already has it.
+  const showAnnualUpgrade =
+    hasActiveSubscription &&
+    Boolean(stripeCustomerId) &&
+    planTier === "coach" &&
+    subscriptionInterval === "month";
 
   return (
     <main>
@@ -70,6 +88,12 @@ export default async function BuyPage() {
             showManageSubscription ? <ManageSubscriptionButton /> : undefined
           }
         />
+      ) : null}
+
+      {showAnnualUpgrade ? (
+        <div className="mb-6 max-w-3xl">
+          <AnnualUpgradePrompt />
+        </div>
       ) : null}
 
       {!hasActiveSubscription ? (

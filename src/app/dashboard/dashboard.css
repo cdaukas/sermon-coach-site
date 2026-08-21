@@ -315,6 +315,64 @@
   background: var(--sc-ink-mid);
 }
 
+/* Buy-page annual upgrade promo — pack-card treatment, cream fill */
+.dashboard-annual-promo {
+  background: var(--sc-cream-tint);
+  box-shadow: var(--sc-shadow);
+  border-radius: 4px;
+  border-left: 3px solid var(--sc-accent-soft);
+  padding: 26px 28px;
+}
+
+.dashboard-annual-promo-heading {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--sc-ink);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.dashboard-annual-promo-body {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--sc-ink-soft);
+}
+
+.dashboard-annual-promo-cta {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 12px 22px;
+  border: 1px solid var(--sc-ink);
+  border-radius: 4px;
+  background: var(--sc-ink);
+  color: var(--sc-bg);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dashboard-annual-promo-cta:hover {
+  background: var(--sc-ink-mid);
+}
+
+.dashboard-annual-promo-cta:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.dashboard-annual-promo-error {
+  margin: 10px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8b4a3a;
+}
+
 /* Buy-page pack cards — match pricing.html .pack */
 .dashboard-pack-grid {
   display: grid;
