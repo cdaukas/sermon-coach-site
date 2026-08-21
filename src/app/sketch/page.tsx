@@ -2,10 +2,36 @@ import type { Metadata } from "next";
 import { PublicSketchWorkspace } from "@/components/sketch/PublicSketchWorkspace";
 import { createClient } from "@/lib/supabase/server";
 
+const SHARE_TITLE = "The Sketch · An honest read on your outline";
+const SHARE_DESCRIPTION =
+  "Six questions about your outline, before you write a word. Free, no account.";
+
 export const metadata: Metadata = {
-  title: "The Sketch",
+  title: { absolute: "The Sketch · The Sermon Coach" },
   description:
     "Answer six questions about your sermon outline. Get an honest read on where it is solid and where it is still thin, before you write a word. No account needed.",
+  alternates: { canonical: "/sketch" },
+  openGraph: {
+    type: "website",
+    url: "/sketch",
+    siteName: "The Sermon Coach",
+    title: SHARE_TITLE,
+    description: SHARE_DESCRIPTION,
+    images: [
+      {
+        url: "/og/og-sketch.png",
+        width: 1200,
+        height: 630,
+        alt: "The Sketch — The Sermon Coach",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SHARE_TITLE,
+    description: SHARE_DESCRIPTION,
+    images: ["/og/og-sketch.png"],
+  },
 };
 
 /**
