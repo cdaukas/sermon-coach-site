@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         destination: "/start",
         statusCode: 301,
       },
+      // The rewrite below maps / → /index.html internally. These two catch
+      // anyone who still requests the file path so the duplicate URL 301s
+      // to the canonical one instead of serving a second live copy.
+      { source: "/index.html", destination: "/", statusCode: 301 },
+      { source: "/blog/index.html", destination: "/blog", statusCode: 301 },
       // Extensionless marketing bookmarks → canonical .html URLs (301, not rewrite).
       { source: "/pricing", destination: "/pricing.html", statusCode: 301 },
       { source: "/faq", destination: "/faq.html", statusCode: 301 },

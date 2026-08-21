@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Sample Sketch",
   description:
     "A full Sermon Coach Sketch read of a real outline, shown as a public sample.",
+  alternates: { canonical: "/sample-sketch" },
   robots: {
     index: true,
     follow: true,

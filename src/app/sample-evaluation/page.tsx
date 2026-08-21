@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Sample Evaluation",
   description:
     "A full Sermon Coach evaluation of a real sermon, shown as a public sample.",
+  alternates: { canonical: "/sample-evaluation" },
   robots: {
     index: true,
     follow: true,

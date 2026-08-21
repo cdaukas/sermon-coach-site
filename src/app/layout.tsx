@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sermoncoach.com"),
   title: {
     default: "The Sermon Coach",
     template: "%s · The Sermon Coach",
