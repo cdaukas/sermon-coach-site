@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CoachingReportView } from "@/components/evaluation/CoachingReportView";
+import { CommendationDocument } from "@/components/evaluation/CommendationDocument";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
 import {
   EvaluationPdfCover,
@@ -40,6 +41,10 @@ type EvaluationPageProps = {
     for?: string;
     variant?: string;
     preacher?: string;
+    /** PDF export only: "commendation" swaps the assembler. See CommendationDocument. */
+    doc?: string;
+    preacher_name?: string;
+    church_name?: string;
     /** Owner stopgap debrief: omit or "evaluation" for scores; "debrief" for coaching. */
     view?: string;
     /** Temporary: Spanish criterion 2 wording (omit or "alt"). */
@@ -116,6 +121,9 @@ export default async function EvaluationPage({
     for: preparedForParam,
     variant: variantParam,
     preacher: preacherParam,
+    doc: docParam,
+    preacher_name: commendationPreacherParam,
+    church_name: commendationChurchParam,
     view: viewParam,
     c2: c2Param,
   } = await searchParams;
@@ -261,6 +269,36 @@ export default async function EvaluationPage({
     evaluation.result?.meta.scripture_reference.trim() ||
     null;
   const footerDate = formatEvaluationDate(evaluatedAt, outputLanguage);
+
+  // Single branch point for the commendation export. Everything below is the
+  // unchanged evaluation page; no shared child knows this variant exists.
+  const commendationPreacher = commendationPreacherParam?.trim() ?? "";
+  if (
+    pdfCapture &&
+    docParam === "commendation" &&
+    commendationPreacher &&
+    evaluation.result
+  ) {
+    return (
+      <main
+        className="evaluation-page-main rounded px-6 py-10 md:px-8"
+        data-pdf-capture="1"
+        style={{ background: "var(--sc-panel)" }}
+      >
+        <EvaluationPdfCapture />
+        <CommendationDocument
+          preacherName={commendationPreacher}
+          churchName={commendationChurchParam?.trim() || null}
+          sermonTitle={sermon.title}
+          scriptureReference={scriptureReference}
+          affirmation={evaluation.result.verdict.affirmation}
+          whatsWorking={evaluation.result.whats_working}
+          howItPreaches={evaluation.how_it_preaches}
+          outputLanguage={outputLanguage}
+        />
+      </main>
+    );
+  }
 
   const showManuscript =
     !pdfCapture &&
