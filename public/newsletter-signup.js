@@ -64,7 +64,7 @@
 
           showMessage(
             message,
-            "Something went wrong. Try again or email chris@sermoncoach.online.",
+            "Something went wrong. Try again or email chris@sermoncoach.com.",
             "error",
           );
           btn.disabled = false;
@@ -72,7 +72,7 @@
         .catch(function () {
           showMessage(
             message,
-            "Something went wrong. Try again or email chris@sermoncoach.online.",
+            "Something went wrong. Try again or email chris@sermoncoach.com.",
             "error",
           );
           btn.disabled = false;
