@@ -31,6 +31,8 @@
     --rule: #d4cfc1;
     --panel: #ffffff;
     --accent: #a67c2e;
+    --accent-on-dark: #b08431;
+    --accent-on-cream: #8d6927;
     --accent-soft: #c9a55c;
     --accent-pale: #faf6ed;
     --bg-soft: #ebe6d5;
@@ -369,8 +371,8 @@
   .section--dark h3,
   .section--dark .section-title,
   .section--dark strong { color: var(--bg); }
-  .section--dark .eyebrow,
-  .section--dark .section-eyebrow,
+  .section--dark:not(.testimonials--inverse) .eyebrow,
+  .section--dark:not(.testimonials--inverse) .section-eyebrow,
   .section--dark a:not(.cta):not([class*="cta"]):not(.btn-primary) { color: var(--accent-soft); }
   .section--dark li::before { color: var(--accent-soft); }
   .section--dark .card,
@@ -720,6 +722,7 @@
     color: var(--ink);
     border-color: var(--bg-soft);
   }
+  .hero--inverse .eyebrow { color: var(--accent-on-dark); }
   .hero--inverse h1 { color: var(--bg); }
   .hero--inverse .hero-sub { color: var(--bg-soft); }
   .hero--inverse .hero-cta-caption { color: var(--bg-softer); }
@@ -741,6 +744,7 @@
     color: var(--ink);
   }
   .testimonials--inverse h2 { color: var(--ink); }
+  .testimonials--inverse .section-eyebrow { color: var(--accent-on-cream); }
   .testimonials--inverse .testimonial-card {
     background: var(--ink);
     border-color: transparent;
