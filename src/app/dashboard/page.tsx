@@ -8,6 +8,7 @@ import {
   packSourceDisplayName,
 } from "@/lib/billing/pack-credits";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
+import { profileHasGrowthAccess } from "@/lib/growth/access";
 import {
   listDashboardSermons,
   listDeletedSermons,
@@ -25,12 +26,14 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermons, deleted, entitlement, recentGrant] = await Promise.all([
-    listDashboardSermons(),
-    listDeletedSermons(),
-    user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
-    getMostRecentPackGrant(),
-  ]);
+  const [sermons, deleted, entitlement, recentGrant, growthAllowed] =
+    await Promise.all([
+      listDashboardSermons(),
+      listDeletedSermons(),
+      user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
+      getMostRecentPackGrant(),
+      user ? profileHasGrowthAccess(user.id) : Promise.resolve(false),
+    ]);
 
   const libraryEmpty = sermons.length === 0;
 
@@ -120,7 +123,11 @@ export default async function DashboardPage() {
         />
       ) : null}
 
-      <DashboardLibrary sermons={sermons} deleted={deleted} />
+      <DashboardLibrary
+        sermons={sermons}
+        deleted={deleted}
+        growthAllowed={growthAllowed}
+      />
     </div>
   );
 }

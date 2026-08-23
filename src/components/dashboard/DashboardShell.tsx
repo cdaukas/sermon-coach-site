@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { DashboardRail } from "./DashboardRail";
 import { formatCreditChipLabel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
+import { profileHasGrowthAccess } from "@/lib/growth/access";
 import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
@@ -41,12 +42,14 @@ export async function DashboardShell({ children }: DashboardShellProps) {
 
   const chip = formatCreditChipLabel(entitlement);
   const mentoringUiAllowed = user ? isMentoringUiAllowed(user.id) : false;
+  const growthAllowed = user ? await profileHasGrowthAccess(user.id) : false;
 
   return (
     <div className="dashboard-shell">
       <DashboardRail
         creditChipLabel={chip}
         mentoringUiAllowed={mentoringUiAllowed}
+        growthAllowed={growthAllowed}
       />
       <div className="dashboard-content">{children}</div>
     </div>

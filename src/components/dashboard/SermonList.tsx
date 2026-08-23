@@ -22,12 +22,16 @@ function bandLabel(scoreBand: string | null): string {
 type SermonListProps = {
   sermons: DashboardSermonRow[];
   header?: ReactNode;
+  growthAllowed: boolean;
   onToggleExclude: (sermonId: string, excluded: boolean) => void;
   onRequestDelete: (sermon: DashboardSermonRow) => void;
   busySermonId?: string | null;
 };
 
-function buildMobileMeta(sermon: DashboardSermonRow): string {
+function buildMobileMeta(
+  sermon: DashboardSermonRow,
+  growthAllowed: boolean,
+): string {
   const segments: string[] = [];
   const passage = sermon.primary_passage?.trim() || null;
   if (passage) {
@@ -42,7 +46,7 @@ function buildMobileMeta(sermon: DashboardSermonRow): string {
   if (sermon.completeEvaluationCount > 1) {
     segments.push(`${sermon.completeEvaluationCount} runs`);
   }
-  if (sermon.excluded_from_growth) {
+  if (growthAllowed && sermon.excluded_from_growth) {
     segments.push("Not counted in growth");
   }
   return segments.join(" · ");
@@ -51,11 +55,13 @@ function buildMobileMeta(sermon: DashboardSermonRow): string {
 function SermonRowMenu({
   sermon,
   busy,
+  growthAllowed,
   onToggleExclude,
   onRequestDelete,
 }: {
   sermon: DashboardSermonRow;
   busy: boolean;
+  growthAllowed: boolean;
   onToggleExclude: (sermonId: string, excluded: boolean) => void;
   onRequestDelete: (sermon: DashboardSermonRow) => void;
 }) {
@@ -104,20 +110,22 @@ function SermonRowMenu({
       </button>
       {open ? (
         <div className="dashboard-sermon-row-menu-panel" role="menu" id={menuId}>
-          <button
-            type="button"
-            role="menuitem"
-            className="dashboard-sermon-row-menu-item"
-            title={EXCLUSION_HELP_TEXT}
-            onClick={() => {
-              setOpen(false);
-              onToggleExclude(sermon.id, !sermon.excluded_from_growth);
-            }}
-          >
-            {sermon.excluded_from_growth
-              ? "Include in growth tracking"
-              : "Exclude from growth tracking"}
-          </button>
+          {growthAllowed ? (
+            <button
+              type="button"
+              role="menuitem"
+              className="dashboard-sermon-row-menu-item"
+              title={EXCLUSION_HELP_TEXT}
+              onClick={() => {
+                setOpen(false);
+                onToggleExclude(sermon.id, !sermon.excluded_from_growth);
+              }}
+            >
+              {sermon.excluded_from_growth
+                ? "Include in growth tracking"
+                : "Exclude from growth tracking"}
+            </button>
+          ) : null}
           <button
             type="button"
             role="menuitem"
@@ -138,11 +146,13 @@ function SermonRowMenu({
 function SermonRow({
   sermon,
   busy,
+  growthAllowed,
   onToggleExclude,
   onRequestDelete,
 }: {
   sermon: DashboardSermonRow;
   busy: boolean;
+  growthAllowed: boolean;
   onToggleExclude: (sermonId: string, excluded: boolean) => void;
   onRequestDelete: (sermon: DashboardSermonRow) => void;
 }) {
@@ -167,7 +177,7 @@ function SermonRow({
         <Link href={href} className="dashboard-sermon-row-link">
           <span className="dashboard-sermon-row-title-cell">
             <span className="dashboard-sermon-row-title">{sermon.title}</span>
-            {sermon.excluded_from_growth ? (
+            {growthAllowed && sermon.excluded_from_growth ? (
               <span className="dashboard-sermon-row-growth-tag">
                 Not counted in growth
               </span>
@@ -182,12 +192,13 @@ function SermonRow({
             {bandText}
           </span>
           <span className="dashboard-sermon-row-mobile-meta">
-            {buildMobileMeta(sermon)}
+            {buildMobileMeta(sermon, growthAllowed)}
           </span>
         </Link>
         <SermonRowMenu
           sermon={sermon}
           busy={busy}
+          growthAllowed={growthAllowed}
           onToggleExclude={onToggleExclude}
           onRequestDelete={onRequestDelete}
         />
@@ -199,6 +210,7 @@ function SermonRow({
 export function SermonList({
   sermons,
   header,
+  growthAllowed,
   onToggleExclude,
   onRequestDelete,
   busySermonId = null,
@@ -216,6 +228,7 @@ export function SermonList({
             key={sermon.id}
             sermon={sermon}
             busy={busySermonId === sermon.id}
+            growthAllowed={growthAllowed}
             onToggleExclude={onToggleExclude}
             onRequestDelete={onRequestDelete}
           />

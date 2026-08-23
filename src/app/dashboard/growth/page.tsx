@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { GrowthReportPicker } from "@/components/dashboard/GrowthReportPicker";
+import { profileHasGrowthAccess } from "@/lib/growth/access";
+import { createClient } from "@/lib/supabase/server";
 import { GrowthReportView } from "@/components/dashboard/GrowthReportView";
 import { GrowthTrendArc } from "@/components/dashboard/GrowthTrendArc";
 import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
@@ -122,6 +124,15 @@ function resolveSelectedEvaluationId(
 export default async function GrowthReportPage({
   searchParams,
 }: GrowthReportPageProps) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user || !(await profileHasGrowthAccess(user.id))) {
+    notFound();
+  }
+
   const [options, trendPoints] = await Promise.all([
     listRecentCompleteEvaluations(),
     listCompleteEvaluationsForTrendArc(),
