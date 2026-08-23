@@ -515,89 +515,51 @@
     margin-bottom: 0;
   }
 
-  /* ---------- SAMPLES ---------- */
-  /* Two cards: fixed max track width, centered — not auto-fit 1fr banners. */
-  .samples {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 340px));
-    justify-content: center;
-    gap: 20px;
+  /* ---------- FOUR-STAGE SPINE ---------- */
+  .spine {
     margin-top: 40px;
   }
-  .sample-card {
-    background: var(--panel);
-    box-shadow: 0 6px 20px rgba(26,35,50,0.10), 0 2px 6px rgba(26,35,50,0.06);
-    padding: 28px;
-    text-decoration: none;
-    color: var(--ink);
-    transition: all 0.18s ease;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid transparent;
+  .spine-stage {
+    margin-bottom: 36px;
   }
-  .sample-card:hover {
-    box-shadow: 0 12px 30px rgba(26,35,50,0.14), 0 4px 10px rgba(26,35,50,0.08);
-    transform: translateY(-2px);
-    border-color: var(--accent-soft);
+  .spine-stage:last-of-type {
+    margin-bottom: 0;
   }
-  .sample-card.placeholder {
-    background: transparent;
-    box-shadow: none;
-    border: 1px dashed var(--rule);
-    cursor: default;
-    color: var(--ink-soft);
-  }
-  .sample-card.placeholder:hover {
-    transform: none;
-    border-color: var(--rule);
-    box-shadow: none;
-  }
-  .sample-eyebrow {
+  .spine-label {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 10px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--accent);
     font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .spine-stage h3 {
+    margin-bottom: 10px;
+  }
+  .spine-stage p {
     margin-bottom: 12px;
   }
-  .sample-card.placeholder .sample-eyebrow { color: var(--ink-soft); }
-  .sample-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    line-height: 1.3;
-  }
-  .sample-meta {
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin-bottom: 16px;
-    font-style: italic;
-  }
-  .sample-verdict {
-    font-size: 14.5px;
-    line-height: 1.55;
-    color: var(--ink);
-    margin-bottom: 18px;
-    flex-grow: 1;
-  }
-  .sample-card.placeholder .sample-verdict { color: var(--ink-soft); }
-  .sample-link {
+  .spine-link {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px;
     font-weight: 600;
     color: var(--accent);
     letter-spacing: 0.02em;
+    text-decoration: none;
   }
-  .sample-card.placeholder .sample-link { color: var(--ink-soft); }
-  .sample-passage-note {
+  .spine-link:hover { text-decoration: underline; }
+  .spine-note {
     max-width: 560px;
-    margin: 24px auto 0;
+    margin: 32px auto 0;
     text-align: center;
     font-size: 13px;
     line-height: 1.55;
     color: var(--ink-soft);
     font-style: italic;
+  }
+  .rhythm-link {
+    margin-top: 28px;
   }
 
   /* ---------- TESTIMONIALS ---------- */
@@ -768,9 +730,6 @@
     section.block.section--dark { padding: 64px 20px; }
     .felt-pain-band { padding: 44px 20px; }
     .feature-grid { grid-template-columns: 1fr; }
-    .samples {
-      grid-template-columns: minmax(0, 340px);
-    }
     .testimonials {
       grid-template-columns: 1fr;
     }
@@ -907,7 +866,7 @@
   </div>
 </section>
 
-<!-- WHAT IT IS — DARK -->
+<!-- WHAT IT IS -->
 <section class="block dark">
   <div class="block-inner">
     <div class="section-head">
@@ -918,6 +877,42 @@
   </div>
 </section>
 
+<!-- FOUR-STAGE SPINE -->
+<section class="block" id="sample">
+  <div class="block-inner">
+    <div class="section-head">
+      <h2>Prepare. Evaluate. Grow. Develop others.</h2>
+    </div>
+
+    <div class="spine">
+      <div class="spine-stage">
+        <div class="spine-label">Prepare</div>
+        <h3>Before you build it</h3>
+        <p>Six questions about the outline you are still building, and a read on whether it holds together. Free, and no account needed.</p>
+        <a href="/sample-sketch" class="spine-link">See a sample sketch</a>
+      </div>
+      <div class="spine-stage">
+        <div class="spine-label">Evaluate</div>
+        <h3>Before and after you preach it</h3>
+        <p>Eleven criteria, each one traced to a named source you can go read for yourself. Your first evaluation is free.</p>
+        <a href="/sample-evaluation" class="spine-link">See a sample evaluation</a>
+      </div>
+      <div class="spine-stage">
+        <div class="spine-label">Grow</div>
+        <h3>Across a season of preaching</h3>
+        <p>One sermon tells you how you did. A body of sermons tells you how you are growing.</p>
+      </div>
+      <div class="spine-stage">
+        <div class="spine-label">Develop others</div>
+        <h3>When you are ready</h3>
+        <p>Bring another set of eyes that is not a machine.</p>
+      </div>
+    </div>
+    <p class="spine-note">Both reads are on Hebrews 3:1-6. The Sketch found the gospel turn in tension at the outline stage. The evaluation found it resolved in the sermon.</p>
+  </div>
+</section>
+
+<!-- AI BEAT -->
 <section class="rhythm">
   <div class="rhythm-head">
     <div class="eyebrow">Where it fits your week</div>
@@ -932,53 +927,7 @@
         alt="The preaching rhythm: pray and study, sketch the outline with The Sermon Coach, write the sermon, strengthen the manuscript with The Sermon Coach, preach the sermon, then keep growing from the transcript with The Sermon Coach." />
     </picture>
   </figure>
-</section>
-
-<!-- WHO IT'S FOR -->
-<section class="block dark">
-  <div class="block-inner">
-    <div class="section-head">
-      <div class="section-eyebrow">Who it's for</div>
-      <h2 class="h2--extended">The Sermon Coach is for preachers who take the craft seriously and want to strengthen every sermon before they step into the pulpit. Especially:</h2>
-    </div>
-
-    <ul class="audience-list">
-      <li>Pastors in expository evangelical traditions, where the rubric resonates naturally</li>
-      <li>Solo and small-staff churches, where you're the only one preaching most Sundays</li>
-      <li>Preaching cohorts and coaching groups using The Sermon Coach as a shared evaluation tool</li>
-      <li>Seminary preaching courses and homiletics professors</li>
-      <li>Mentors discipling younger preachers</li>
-    </ul>
-    <div class="audience-cta">
-      <a href="/start" class="btn-primary">Get Your First Evaluation Free</a>
-    </div>
-  </div>
-</section>
-
-<!-- SAMPLES -->
-<section class="block" id="sample">
-  <div class="block-inner">
-    <div class="section-head">
-      <div class="section-eyebrow">See a real read</div>
-      <h2>Two reads across your preaching week.</h2>
-    </div>
-
-    <div class="samples">
-      <a href="/sample-sketch" class="sample-card">
-        <div class="sample-eyebrow">Before you build it</div>
-        <div class="sample-title">The Sketch</div>
-        <div class="sample-verdict">Six questions about the outline you are still building, and a read on whether it holds together. Free, and no account needed.</div>
-        <div class="sample-link">See a sample sketch →</div>
-      </a>
-      <a href="/sample-evaluation" class="sample-card">
-        <div class="sample-eyebrow">Before and after you preach it</div>
-        <div class="sample-title">The Evaluation</div>
-        <div class="sample-verdict">Eleven criteria, each one traced to a named source you can go read for yourself. Your first evaluation is free.</div>
-        <div class="sample-link">See a sample evaluation →</div>
-      </a>
-    </div>
-    <p class="sample-passage-note">Both reads are on Hebrews 3:1-6. The Sketch found the gospel turn in tension at the outline stage. The evaluation found it resolved in the sermon.</p>
-  </div>
+  <p class="rhythm-link"><a href="/why-sermon-coach.html" class="story-link">Why I built this</a></p>
 </section>
 
 <!-- TESTIMONIALS -->
@@ -1008,6 +957,27 @@
   </div>
   <div class="testimonial-cta">
     <a href="/start" class="btn-primary">Get Your First Evaluation Free</a>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="block dark">
+  <div class="block-inner">
+    <div class="section-head">
+      <div class="section-eyebrow">Who it's for</div>
+      <h2 class="h2--extended">The Sermon Coach is for preachers who take the craft seriously and want to strengthen every sermon before they step into the pulpit. Especially:</h2>
+    </div>
+
+    <ul class="audience-list">
+      <li>Pastors in expository evangelical traditions, where the rubric resonates naturally</li>
+      <li>Solo and small-staff churches, where you're the only one preaching most Sundays</li>
+      <li>Preaching cohorts and coaching groups using The Sermon Coach as a shared evaluation tool</li>
+      <li>Seminary preaching courses and homiletics professors</li>
+      <li>Mentors discipling younger preachers</li>
+    </ul>
+    <div class="audience-cta">
+      <a href="/start" class="btn-primary">Get Your First Evaluation Free</a>
+    </div>
   </div>
 </section>
 
