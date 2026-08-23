@@ -420,6 +420,31 @@
   .rhythm-head p { max-width: 560px; margin: 0 auto 28px; color: var(--ink-soft); font-style: italic; }
   .rhythm-figure { margin: 0; }
   .rhythm-figure img { width: 100%; height: auto; display: block; }
+  .rhythm-samples {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 28px;
+    margin: 24px 0 0;
+  }
+  .rhythm-samples a {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+  .rhythm-samples a:hover { text-decoration: underline; }
+  .rhythm-note {
+    max-width: 560px;
+    margin: 16px auto 0;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
   @media (max-width: 640px) {
     .rhythm-figure img { max-width: 360px; margin: 0 auto; }
   }
@@ -515,49 +540,6 @@
     margin-bottom: 0;
   }
 
-  /* ---------- FOUR-STAGE SPINE ---------- */
-  .spine {
-    margin-top: 40px;
-  }
-  .spine-stage {
-    margin-bottom: 36px;
-  }
-  .spine-stage:last-of-type {
-    margin-bottom: 0;
-  }
-  .spine-label {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .spine-stage h3 {
-    margin-bottom: 10px;
-  }
-  .spine-stage p {
-    margin-bottom: 12px;
-  }
-  .spine-link {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.02em;
-    text-decoration: none;
-  }
-  .spine-link:hover { text-decoration: underline; }
-  .spine-note {
-    max-width: 560px;
-    margin: 32px auto 0;
-    text-align: center;
-    font-size: 13px;
-    line-height: 1.55;
-    color: var(--ink-soft);
-    font-style: italic;
-  }
   .rhythm-link {
     margin-top: 28px;
   }
@@ -840,6 +822,29 @@
   </div>
 </header>
 
+<!-- PREACHING RHYTHM -->
+<section class="rhythm" id="sample">
+  <div class="rhythm-head">
+    <div class="eyebrow">Where it fits your week</div>
+    <h2>The Sermon Coach doesn't replace the work.<br>It refines it.</h2>
+    <p>Your study, your writing, your preaching, and the Spirit's work in all of it stay yours.
+       The Sermon Coach is the refinery in between.</p>
+  </div>
+  <figure class="rhythm-figure">
+    <picture>
+      <source media="(max-width: 640px)" srcset="/preaching-rhythm-flow-mobile.svg">
+      <img src="/preaching-rhythm-flow.svg"
+        alt="The preaching rhythm: pray and study, sketch the outline with The Sermon Coach, write the sermon, strengthen the manuscript with The Sermon Coach, preach the sermon, then keep growing from the transcript with The Sermon Coach." />
+    </picture>
+  </figure>
+  <p class="rhythm-samples">
+    <a href="/sample-sketch">See a sample sketch</a>
+    <a href="/sample-evaluation">See a sample evaluation</a>
+  </p>
+  <p class="rhythm-note">Both reads are on Hebrews 3:1-6. The Sketch found the gospel turn in tension at the outline stage. The evaluation found it resolved in the sermon.</p>
+  <p class="rhythm-link"><a href="/why-sermon-coach.html" class="story-link">Why I built this</a></p>
+</section>
+
 <!-- FELT PAIN -->
 <div class="felt-pain-band">
   <h2>You already know there's a problem. You're living it.</h2>
@@ -875,59 +880,6 @@
     </div>
     <p class="lede">Paste your manuscript and in a few minutes you get a structured read: scored, narrated, and prioritized, measured against eleven key questions that the expository tradition has always cared about answering. These eleven questions are drawn from the published work of Chapell, Keller, Piper, Robinson, the Simeon Trust, and 9Marks, none of whom are affiliated with The Sermon Coach. None of these individuals or organizations, nor any author or teacher associated with them, has endorsed or is affiliated with The Sermon Coach.</p>
   </div>
-</section>
-
-<!-- FOUR-STAGE SPINE -->
-<section class="block" id="sample">
-  <div class="block-inner">
-    <div class="section-head">
-      <h2>Prepare. Evaluate. Grow. Develop others.</h2>
-    </div>
-
-    <div class="spine">
-      <div class="spine-stage">
-        <div class="spine-label">Prepare</div>
-        <h3>Before you build it</h3>
-        <p>Six questions about the outline you are still building, and a read on whether it holds together. Free, and no account needed.</p>
-        <a href="/sample-sketch" class="spine-link">See a sample sketch</a>
-      </div>
-      <div class="spine-stage">
-        <div class="spine-label">Evaluate</div>
-        <h3>Before and after you preach it</h3>
-        <p>Eleven criteria, each one traced to a named source you can go read for yourself. Your first evaluation is free.</p>
-        <a href="/sample-evaluation" class="spine-link">See a sample evaluation</a>
-      </div>
-      <div class="spine-stage">
-        <div class="spine-label">Grow</div>
-        <h3>Across a season of preaching</h3>
-        <p>One sermon tells you how you did. A body of sermons tells you how you are growing.</p>
-      </div>
-      <div class="spine-stage">
-        <div class="spine-label">Develop others</div>
-        <h3>When you are ready</h3>
-        <p>Bring another set of eyes that is not a machine.</p>
-      </div>
-    </div>
-    <p class="spine-note">Both reads are on Hebrews 3:1-6. The Sketch found the gospel turn in tension at the outline stage. The evaluation found it resolved in the sermon.</p>
-  </div>
-</section>
-
-<!-- AI BEAT -->
-<section class="rhythm">
-  <div class="rhythm-head">
-    <div class="eyebrow">Where it fits your week</div>
-    <h2>The Sermon Coach doesn't replace the work.<br>It refines it.</h2>
-    <p>Your study, your writing, your preaching, and the Spirit's work in all of it stay yours.
-       The Sermon Coach is the refinery in between.</p>
-  </div>
-  <figure class="rhythm-figure">
-    <picture>
-      <source media="(max-width: 640px)" srcset="/preaching-rhythm-flow-mobile.svg">
-      <img src="/preaching-rhythm-flow.svg"
-        alt="The preaching rhythm: pray and study, sketch the outline with The Sermon Coach, write the sermon, strengthen the manuscript with The Sermon Coach, preach the sermon, then keep growing from the transcript with The Sermon Coach." />
-    </picture>
-  </figure>
-  <p class="rhythm-link"><a href="/why-sermon-coach.html" class="story-link">Why I built this</a></p>
 </section>
 
 <!-- TESTIMONIALS -->
@@ -990,7 +942,7 @@
 
   <div class="founder">
     <p>The Sermon Coach was built by <strong>Dr. Christopher M. Daukas</strong>, a former church planter in Phoenix, Arizona, with 25 years of pastoral ministry experience and 14 years as a Lead Pastor. Chris has been preaching for 25 years, has been shaped by these resources, and has spent the last several years sharpening his own preaching against the rubric this tool now offers other preachers.</p>
-    <p>The Sermon Coach is the actual rubric Chris uses on his own work, including the sample evaluations 1 and 2 above, which he ran on two of his own old sermons. It finds the soft spots in a sermon. He let it find his before he showed it to you.</p>
+    <p>The Sermon Coach is the actual rubric Chris uses on his own work. He ran it on his own sermons before he showed it to anyone. It finds the soft spots in a sermon, and he let it find his first.</p>
     <p>Have questions? Email Chris directly at chris@sermoncoach.com. He reads everything.</p>
     <p><a href="./story.html" class="story-link">Read the story &rarr;</a></p>
   </div>
