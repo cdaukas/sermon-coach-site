@@ -28,6 +28,13 @@
   <!-- eyebrow -->
   <text x="640" y="30" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" font-weight="700" letter-spacing="3.2" fill="#a67c2e">THE PREACHING RHYTHM</text>
 
+  <!-- stage eyebrows: Prepare 1–2, Evaluate 3–4, Grow 5–6 -->
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="9.5" font-weight="700" letter-spacing="1.6" fill="#a67c2e" text-anchor="middle">
+    <text x="180" y="78">PREPARE</text>
+    <text x="620" y="78">EVALUATE</text>
+    <text x="1060" y="78">GROW</text>
+  </g>
+
   <!-- ============ CONNECTORS ============ -->
   <g stroke="#c9a55c" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <path d="M110,150 H210 M210,150 l-7,-6 M210,150 l-7,6"/>

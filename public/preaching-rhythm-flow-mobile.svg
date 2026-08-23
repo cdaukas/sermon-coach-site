@@ -15,6 +15,13 @@
   <!-- eyebrow -->
   <text x="24" y="26" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" font-weight="700" letter-spacing="2.6" fill="#a67c2e">THE PREACHING RHYTHM</text>
 
+  <!-- stage eyebrows: Prepare 1–2, Evaluate 3–4, Grow 5–6 -->
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="9.5" font-weight="700" letter-spacing="1.4" fill="#a67c2e">
+    <text x="100" y="48">PREPARE</text>
+    <text x="100" y="252">EVALUATE</text>
+    <text x="100" y="454">GROW</text>
+  </g>
+
   <!-- ============ REFINER'S FIRE BEHIND THE THREE SERMON COACH STEPS ============ -->
   <g>
     <g transform="translate(54,155) scale(4.1) translate(-12,-12)"><path d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.177 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1.005A5.99 5.99 0 0 1 12.49 10.5a3.75 3.75 0 0 1 3.26 3.75Z" fill="#c9a55c" opacity="0.28"/></g>
