@@ -702,6 +702,63 @@
   }
   .story-link:hover { text-decoration: underline; }
 
+  /* ---------- HERO INVERSE ---------- */
+  .hero--inverse {
+    background: var(--ink);
+  }
+  .hero--inverse .wordmark { color: var(--bg); }
+  .hero--inverse .nav-link { color: var(--bg-soft); }
+  .hero--inverse .nav-link:hover { color: var(--accent-soft); }
+  .hero--inverse .nav-toggle-bar { background: var(--bg); }
+  .hero--inverse .nav-start {
+    background: var(--bg);
+    color: var(--ink);
+    border-color: var(--bg);
+  }
+  .hero--inverse .nav-start:hover {
+    background: var(--bg-soft);
+    color: var(--ink);
+    border-color: var(--bg-soft);
+  }
+  .hero--inverse h1 { color: var(--bg); }
+  .hero--inverse .hero-sub { color: var(--bg-soft); }
+  .hero--inverse .hero-cta-caption { color: var(--bg-softer); }
+  .hero--inverse .btn-primary {
+    background: var(--bg);
+    color: var(--ink);
+    border-color: var(--bg);
+  }
+  .hero--inverse .btn-primary:hover {
+    background: var(--bg-soft);
+    color: var(--ink);
+    border-color: var(--bg-soft);
+    box-shadow: none;
+  }
+
+  /* ---------- TESTIMONIALS INVERSE ---------- */
+  .testimonials--inverse {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .testimonials--inverse h2 { color: var(--ink); }
+  .testimonials--inverse .testimonial-card {
+    background: var(--ink);
+    border-color: transparent;
+    box-shadow: var(--shadow);
+    border-top-color: var(--accent);
+  }
+  .testimonials--inverse .testimonial-card,
+  .testimonials--inverse .testimonial-quote {
+    color: var(--bg);
+  }
+  .testimonials--inverse .testimonial-attribution {
+    color: var(--bg-soft);
+    border-top-color: rgba(250,248,243,0.18);
+  }
+  .testimonials--inverse .testimonial-cta {
+    background: var(--bg);
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 720px) {
     h1 { font-size: 38px; }
@@ -783,6 +840,14 @@
       color: var(--bg);
       border-color: var(--ink-mid);
     }
+    .hero--inverse .nav.is-open .nav-link {
+      color: var(--ink-soft);
+    }
+    .hero--inverse .nav.is-open .nav-start {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
     .hero-cta-row { flex-direction: column; align-items: stretch; }
     .btn-primary, .btn-secondary { text-align: center; }
   }
@@ -791,6 +856,7 @@
 </head>
 <body>
 
+<div class="hero--inverse">
 <!-- NAV -->
 <nav class="nav">
   <a href="/" class="wordmark">The Sermon <span class="wordmark-accent">Coach</span>&trade;</a>
@@ -823,6 +889,7 @@
     <p class="hero-cta-caption">No card, no commitment. Full evaluation, back in minutes.</p>
   </div>
 </header>
+</div>
 
 <!-- PREACHING RHYTHM -->
 <section class="rhythm" id="sample">
@@ -885,7 +952,7 @@
 </section>
 
 <!-- TESTIMONIALS -->
-<section class="block section--dark" id="testimonials">
+<section class="block section--dark testimonials--inverse" id="testimonials">
   <div class="section-head">
     <div class="section-eyebrow">What Preachers Are Saying</div>
     <h2>From preachers using The Sermon Coach.</h2>
