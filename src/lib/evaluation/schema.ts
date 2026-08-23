@@ -4,7 +4,7 @@ import {
   CANONICAL_CRITERION_NAMES,
   traditionTagForCriterion,
 } from "./tool-schema";
-import { normalizeLegacyEvaluationResult } from "./schema-legacy";
+import { normalizeLegacyCriterionNames } from "./criterion-names";
 
 // ---------------------------------------------------------------------------
 // Strict v2 (SCHEMA_SPEC) — Claude tool output; keep in sync with tool-schema.ts
@@ -1008,14 +1008,18 @@ export function evaluationResultSchemaForPromptVersion(
 
 export type ParseEvaluationResultOptions = {
   promptVersion?: string | null;
+  evaluationId?: string | null;
 };
 
 export function parseEvaluationResult(
   value: unknown,
   options: ParseEvaluationResultOptions = {},
 ): EvaluationResultStrict | null {
+  const normalized = normalizeLegacyCriterionNames(value, {
+    evaluationId: options.evaluationId ?? undefined,
+  });
   const schema = evaluationResultSchemaForPromptVersion(options.promptVersion);
-  const strict = schema.safeParse(value);
+  const strict = schema.safeParse(normalized);
   if (strict.success) return strict.data as EvaluationResultStrict;
 
   const v2 = evaluationResultSchema.safeParse(value);

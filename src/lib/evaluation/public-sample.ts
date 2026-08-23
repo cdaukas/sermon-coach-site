@@ -39,6 +39,7 @@ export async function getPublicSampleEvaluation(): Promise<PublicSampleEvaluatio
 
   const result = parseEvaluationResult(row.result, {
     promptVersion: row.prompt_version as string | null | undefined,
+    evaluationId: row.id,
   });
 
   if (!result) {

@@ -52,6 +52,16 @@ describe("selectGrowthCriterion", () => {
       "Fallen Condition Focus",
     );
   });
+
+  it("resolves a Heat Map principle_tag to criterion 8 by id", () => {
+    const result = structuredClone(EVALUATION_FIXTURE);
+    result.top_priorities[0] = {
+      ...result.top_priorities[0],
+      principle_tag: "Piper · Heat Map: emotional delivery",
+    };
+    const growth = selectGrowthCriterion(result);
+    assert.equal(growth.criterion.id, 8);
+  });
 });
 
 describe("extractManuscriptExcerpt", () => {

@@ -29,6 +29,7 @@ function mapEvaluationRow(
     row.result != null
       ? parseEvaluationResult(row.result, {
           promptVersion: row.prompt_version as string | null | undefined,
+          evaluationId: row.id as string,
         })
       : null;
 

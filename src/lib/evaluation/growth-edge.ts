@@ -1,3 +1,4 @@
+import { criterionIdFromName } from "./criterion-names";
 import type { EvaluationResultStrict } from "./schema";
 
 export type FlatCriterion = {
@@ -42,13 +43,11 @@ export function parseCriterionNameFromPrincipleTag(
   return name || null;
 }
 
-function findCriterionByName(
+function findCriterionById(
   criteria: FlatCriterion[],
-  name: string,
+  id: number,
 ): FlatCriterion | undefined {
-  return criteria.find(
-    (criterion) => criterion.name.toLowerCase() === name.toLowerCase(),
-  );
+  return criteria.find((criterion) => criterion.id === id);
 }
 
 function lowestScoringCriterion(
@@ -82,8 +81,10 @@ export function selectGrowthCriterion(
   }
 
   const taggedName = parseCriterionNameFromPrincipleTag(priority.principle_tag);
+  const taggedId =
+    taggedName != null ? criterionIdFromName(taggedName) : undefined;
   const matched =
-    taggedName != null ? findCriterionByName(criteria, taggedName) : undefined;
+    taggedId != null ? findCriterionById(criteria, taggedId) : undefined;
 
   return {
     priority,

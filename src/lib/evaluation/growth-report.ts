@@ -1,3 +1,4 @@
+import { canonicalCriterionNameForId } from "./criterion-names";
 import { getEvaluationById, sermonsEligibleForGrowth } from "./queries";
 import { formatDisplayScoreBare } from "./display-score";
 import { orderGrowthReportSnapshotsByDate } from "./growth-report-ordering";
@@ -137,7 +138,7 @@ export function buildCriterionDeltas(
 
     deltas.push({
       id,
-      name: scoreA.name,
+      name: canonicalCriterionNameForId(id) ?? scoreA.name,
       category: scoreA.category,
       score_a: scoreA.score,
       score_b: scoreB.score,
@@ -314,7 +315,7 @@ export function buildQuotePairs(
 
     pairs.push({
       criterionId: id,
-      criterionName: currentCriterion.name,
+      criterionName: canonicalCriterionNameForId(id) ?? currentCriterion.name,
       delta,
       isDoubleWeighted: currentCriterion.isDoubleWeighted,
       baselineQuote,

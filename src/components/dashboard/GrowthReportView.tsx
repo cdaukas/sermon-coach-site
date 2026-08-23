@@ -9,6 +9,7 @@ import {
   GROWTH_RUBRIC_BOUNDARY_CRITERION_MESSAGE,
   GROWTH_RUBRIC_BOUNDARY_PAIR_DELTA_MESSAGE,
 } from "@/lib/evaluation/growth-report-types";
+import { canonicalCriterionNameForId } from "@/lib/evaluation/criterion-names";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -64,12 +65,16 @@ const deltaToneStyles = {
 
 const CRITERION_SCORE_COLUMN_WIDTH = "4.5rem";
 
-const CRITERION_DISPLAY_LABELS: Record<string, string> = {
-  "Fallen Condition Focus": "Fallen condition focus",
+const CRITERION_DISPLAY_LABELS_BY_ID: Record<number, string> = {
+  4: "Fallen condition focus",
 };
 
-function formatCriterionDisplayLabel(name: string): string {
-  return CRITERION_DISPLAY_LABELS[name] ?? name;
+function formatCriterionDisplayLabel(id: number, name: string): string {
+  return (
+    CRITERION_DISPLAY_LABELS_BY_ID[id] ??
+    canonicalCriterionNameForId(id) ??
+    name
+  );
 }
 
 function OverallMovementPanel({
@@ -173,7 +178,7 @@ function CriterionMovementRow({
       <td className="px-4 py-3 align-top">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="text-[14px] font-medium" style={{ ...serifFont, color: "var(--sc-ink)" }}>
-            {formatCriterionDisplayLabel(row.name)}
+            {formatCriterionDisplayLabel(row.id, row.name)}
           </span>
           {row.is_double_weighted ? (
             <span
