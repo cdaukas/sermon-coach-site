@@ -371,8 +371,8 @@
   .section--dark h3,
   .section--dark .section-title,
   .section--dark strong { color: var(--bg); }
-  .section--dark:not(.testimonials--inverse) .eyebrow,
-  .section--dark:not(.testimonials--inverse) .section-eyebrow,
+  .section--dark .eyebrow,
+  .section--dark .section-eyebrow,
   .section--dark a:not(.cta):not([class*="cta"]):not(.btn-primary) { color: var(--accent-soft); }
   .section--dark li::before { color: var(--accent-soft); }
   .section--dark .card,
@@ -704,65 +704,6 @@
   }
   .story-link:hover { text-decoration: underline; }
 
-  /* ---------- HERO INVERSE ---------- */
-  .hero--inverse {
-    background: var(--ink);
-  }
-  .hero--inverse .wordmark { color: var(--bg); }
-  .hero--inverse .nav-link { color: var(--bg-soft); }
-  .hero--inverse .nav-link:hover { color: var(--accent-soft); }
-  .hero--inverse .nav-toggle-bar { background: var(--bg); }
-  .hero--inverse .nav-start {
-    background: var(--bg);
-    color: var(--ink);
-    border-color: var(--bg);
-  }
-  .hero--inverse .nav-start:hover {
-    background: var(--bg-soft);
-    color: var(--ink);
-    border-color: var(--bg-soft);
-  }
-  .hero--inverse .eyebrow { color: var(--accent-on-dark); }
-  .hero--inverse h1 { color: var(--bg); }
-  .hero--inverse .hero-sub { color: var(--bg-soft); }
-  .hero--inverse .hero-cta-caption { color: var(--bg-softer); }
-  .hero--inverse .btn-primary {
-    background: var(--bg);
-    color: var(--ink);
-    border-color: var(--bg);
-  }
-  .hero--inverse .btn-primary:hover {
-    background: var(--bg-soft);
-    color: var(--ink);
-    border-color: var(--bg-soft);
-    box-shadow: none;
-  }
-
-  /* ---------- TESTIMONIALS INVERSE ---------- */
-  .testimonials--inverse {
-    background: var(--bg);
-    color: var(--ink);
-  }
-  .testimonials--inverse h2 { color: var(--ink); }
-  .testimonials--inverse .section-eyebrow { color: var(--accent-on-cream); }
-  .testimonials--inverse .testimonial-card {
-    background: var(--ink);
-    border-color: transparent;
-    box-shadow: var(--shadow);
-    border-top-color: var(--accent);
-  }
-  .testimonials--inverse .testimonial-card,
-  .testimonials--inverse .testimonial-quote {
-    color: var(--bg);
-  }
-  .testimonials--inverse .testimonial-attribution {
-    color: var(--bg-soft);
-    border-top-color: rgba(250,248,243,0.18);
-  }
-  .testimonials--inverse .testimonial-cta {
-    background: var(--bg);
-  }
-
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 720px) {
     h1 { font-size: 38px; }
@@ -844,14 +785,6 @@
       color: var(--bg);
       border-color: var(--ink-mid);
     }
-    .hero--inverse .nav.is-open .nav-link {
-      color: var(--ink-soft);
-    }
-    .hero--inverse .nav.is-open .nav-start {
-      background: var(--ink);
-      color: var(--bg);
-      border-color: var(--ink);
-    }
     .hero-cta-row { flex-direction: column; align-items: stretch; }
     .btn-primary, .btn-secondary { text-align: center; }
   }
@@ -860,7 +793,6 @@
 </head>
 <body>
 
-<div class="hero--inverse">
 <!-- NAV -->
 <nav class="nav">
   <a href="/" class="wordmark">The Sermon <span class="wordmark-accent">Coach</span>&trade;</a>
@@ -893,30 +825,6 @@
     <p class="hero-cta-caption">No card, no commitment. Full evaluation, back in minutes.</p>
   </div>
 </header>
-</div>
-
-<!-- PREACHING RHYTHM -->
-<section class="rhythm" id="sample">
-  <div class="rhythm-head">
-    <div class="eyebrow">Where it fits your week</div>
-    <h2>The Sermon Coach doesn't replace the work.<br>It refines it.</h2>
-    <p>Your study, your writing, your preaching, and the Spirit's work in all of it stay yours.
-       The Sermon Coach is the refinery in between.</p>
-  </div>
-  <figure class="rhythm-figure">
-    <picture>
-      <source media="(max-width: 640px)" srcset="/preaching-rhythm-flow-mobile.svg">
-      <img src="/preaching-rhythm-flow.svg"
-        alt="The preaching rhythm: pray and study, sketch the outline with The Sermon Coach, write the sermon, strengthen the manuscript with The Sermon Coach, preach the sermon, then keep growing from the transcript with The Sermon Coach." />
-    </picture>
-  </figure>
-  <p class="rhythm-samples">
-    <a href="/sample-sketch">See a sample sketch</a>
-    <a href="/sample-evaluation">See a sample evaluation</a>
-  </p>
-  <p class="rhythm-note">Both reads are on Hebrews 3:1-6. The Sketch found the gospel turn in tension at the outline stage. The evaluation found it resolved in the sermon.</p>
-  <p class="rhythm-link"><a href="/why-sermon-coach.html" class="story-link">Why I built this</a></p>
-</section>
 
 <!-- FELT PAIN -->
 <div class="felt-pain-band">
@@ -955,8 +863,31 @@
   </div>
 </section>
 
+<!-- PREACHING RHYTHM -->
+<section class="rhythm" id="sample">
+  <div class="rhythm-head">
+    <div class="eyebrow">Where it fits your week</div>
+    <h2>The Sermon Coach doesn't replace the work.<br>It refines it.</h2>
+    <p>Your study, your writing, your preaching, and the Spirit's work in all of it stay yours.
+       The Sermon Coach is the refinery in between.</p>
+  </div>
+  <figure class="rhythm-figure">
+    <picture>
+      <source media="(max-width: 640px)" srcset="/preaching-rhythm-flow-mobile.svg">
+      <img src="/preaching-rhythm-flow.svg"
+        alt="The preaching rhythm: pray and study, sketch the outline with The Sermon Coach, write the sermon, strengthen the manuscript with The Sermon Coach, preach the sermon, then keep growing from the transcript with The Sermon Coach." />
+    </picture>
+  </figure>
+  <p class="rhythm-samples">
+    <a href="/sample-sketch">See a sample sketch</a>
+    <a href="/sample-evaluation">See a sample evaluation</a>
+  </p>
+  <p class="rhythm-note">Both reads are on Hebrews 3:1-6. The Sketch found the gospel turn in tension at the outline stage. The evaluation found it resolved in the sermon.</p>
+  <p class="rhythm-link"><a href="/why-sermon-coach.html" class="story-link">Why I built this</a></p>
+</section>
+
 <!-- TESTIMONIALS -->
-<section class="block section--dark testimonials--inverse" id="testimonials">
+<section class="block section--dark" id="testimonials">
   <div class="section-head">
     <div class="section-eyebrow">What Preachers Are Saying</div>
     <h2>From preachers using The Sermon Coach.</h2>
