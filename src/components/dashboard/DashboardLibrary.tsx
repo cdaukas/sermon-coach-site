@@ -44,9 +44,11 @@ function deletedRowMeta(deletedAt: string): string {
 export function DashboardLibrary({
   sermons,
   deleted,
+  growthAllowed,
 }: {
   sermons: DashboardSermonRow[];
   deleted: DeletedSermonRow[];
+  growthAllowed: boolean;
 }) {
   const router = useRouter();
   const [busySermonId, setBusySermonId] = useState<string | null>(null);
@@ -147,6 +149,7 @@ export function DashboardLibrary({
         <SermonList
           sermons={sermons}
           busySermonId={busySermonId}
+          growthAllowed={growthAllowed}
           onToggleExclude={handleToggleExclude}
           onRequestDelete={(sermon) => {
             setDeleteError(null);
@@ -210,9 +213,9 @@ export function DashboardLibrary({
               Delete this sermon?
             </h2>
             <p style={{ ...uiFont }}>
-              This removes the sermon and its evaluation from your dashboard and
-              your growth tracking. You can restore it for the next 30 days, after
-              which it is permanently deleted.
+              {growthAllowed
+                ? "This removes the sermon and its evaluation from your dashboard and your growth tracking. You can restore it for the next 30 days, after which it is permanently deleted."
+                : "This removes the sermon and its evaluation from your dashboard. You can restore it for the next 30 days, after which it is permanently deleted."}
             </p>
             <p style={{ ...uiFont }}>
               Deleting does not return the evaluation credit you used.
