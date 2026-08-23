@@ -5,8 +5,8 @@ import {
   MENTORED_NO_SEAT_CAPACITY_ERROR,
 } from "./eval-start-errors";
 import { HIP_MOVEMENT_NAMES } from "./hip-schema";
+import { canonicalCriterionNameForId, criterionIdFromName } from "./criterion-names";
 import {
-  CANONICAL_CRITERION_NAMES,
   traditionTagForCriterion,
 } from "./tool-schema";
 
@@ -141,7 +141,7 @@ export function displayCriterionName(
   criterion2Wording: Criterion2Wording = "default",
 ): string {
   if (language !== "es") {
-    return englishName;
+    return canonicalCriterionNameForId(id) ?? englishName;
   }
   if (id === 2 && criterion2Wording === "cristocentrico") {
     return CRITERION_2_CRISTOCENTRICO;
@@ -172,11 +172,9 @@ const SPANISH_WORK_TITLES: Record<string, string> = {
 
 function displaySpanishAuthorWork(author: string, work: string): string {
   const displayAuthor = author === "9Marks" ? "9Marcas" : author;
-  const criterionIndex = CANONICAL_CRITERION_NAMES.findIndex(
-    (name) => name.toLowerCase() === work.toLowerCase(),
-  );
-  if (criterionIndex >= 0) {
-    const spanishName = SPANISH_CRITERION_NAMES[criterionIndex + 1];
+  const criterionId = criterionIdFromName(work);
+  if (criterionId != null) {
+    const spanishName = SPANISH_CRITERION_NAMES[criterionId];
     if (spanishName) {
       return `${displayAuthor} · ${spanishName}`;
     }

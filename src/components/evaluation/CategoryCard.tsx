@@ -102,7 +102,7 @@ export function CategoryCard({
       <div className="py-2">
         {category.criteria.map((criterion) => (
           <details
-            key={`${criterion.id}-${criterion.name}`}
+            key={criterion.id}
             className="evaluation-criterion group border-b last:border-b-0"
             style={{ borderColor: "var(--sc-rule)" }}
           >
