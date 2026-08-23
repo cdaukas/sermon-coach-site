@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Concerned about AI and preaching? · The Sermon Coach</title>
+<link rel="canonical" href="https://sermoncoach.com/why-sermon-coach.html">
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #a67c2e;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .nav {
+    padding: 28px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .wordmark-accent { color: var(--accent); }
+  .nav-toggle {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .nav-toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .nav-toggle-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 1px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .nav.is-open .nav-toggle-bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .nav.is-open .nav-toggle-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .nav.is-open .nav-toggle-bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .nav-link {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .nav-link:hover { color: var(--accent); }
+  .nav-start {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--ink);
+    transition: all 0.15s ease;
+    letter-spacing: 0.02em;
+  }
+  .nav-start:hover {
+    background: var(--ink-mid);
+    border-color: var(--ink-mid);
+  }
+
+  .hero {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 8px;
+  }
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 42px;
+    line-height: 1.12;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+  .lede p {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-mid);
+    margin-bottom: 1.1em;
+  }
+  .lede p:last-child { margin-bottom: 0; }
+
+  .content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 24px 64px;
+  }
+  .content h2 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 56px 0 20px;
+    color: var(--ink);
+  }
+  .content p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink-mid);
+    margin-bottom: 1.05em;
+  }
+  .beliefs p {
+    margin-bottom: 0.85em;
+  }
+  .belief-turn {
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 19px;
+    line-height: 1.45;
+  }
+  .signoff {
+    margin-top: 36px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .cta {
+    margin-top: 40px;
+  }
+  .cta-btn {
+    display: inline-block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+    text-decoration: none;
+    padding: 14px 22px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .cta-btn:hover { background: var(--ink-mid); }
+
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 48px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    border-top: 1px solid var(--rule);
+  }
+  .footer-tagline {
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  footer a { color: var(--ink-soft); }
+  footer a:hover { color: var(--accent); }
+  .footer-legal { margin-top: 12px; font-size: 12px; }
+
+  @media (max-width: 768px) {
+    .nav-toggle { display: flex; flex-direction: column; }
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 88px;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--rule);
+      padding: 8px 24px 20px;
+      z-index: 20;
+    }
+    .nav.is-open .nav-links { display: flex; }
+    .nav { position: relative; }
+    .nav-link, .nav-start { padding: 12px 0; }
+    .nav-start { text-align: center; }
+    h1 { font-size: 32px; }
+    .lede p, .content p { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="wordmark">The Sermon <span class="wordmark-accent">Coach</span>&trade;</a>
+  <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+    <span class="nav-toggle-bar"></span>
+  </button>
+  <div class="nav-links" id="nav-menu">
+    <a href="/sketch" class="nav-link">Free Outline Check</a>
+    <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="./pricing.html" class="nav-link">Pricing</a>
+    <a href="./faq.html" class="nav-link">FAQ</a>
+    <a href="./story.html" class="nav-link">Story</a>
+    <a href="/login" class="nav-link">Log in</a>
+    <a href="/start" class="nav-start">Start free</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow">Why I built this</div>
+  <h1>Concerned about AI and preaching? Good. So am I.</h1>
+  <div class="lede">
+    <p>I have preached for twenty five years, and I am not looking for something to do the work for me. Neither should you be. I believe the hard work of prayer and study and wrestling with the text is what the Spirit uses to form the preacher, not just the sermon.</p>
+    <p>So I built The Sermon Coach around a narrower question. Could technology help preachers see what they actually wrote, without touching any of the work that formed them?</p>
+  </div>
+</header>
+
+<main class="content">
+  <h2>What it will not do</h2>
+  <p>It will not write your sermon, and it will not study the passage for you.</p>
+  <p>It will not tell you what God is saying. It does not know, and neither does anything else you can buy.</p>
+  <p>It will not replace your judgment about the people who will be sitting in front of you on Sunday. It has never met them.</p>
+  <p>And it will not tell you whether you were faithful. That is not something software can measure, and anything that claims otherwise is selling you something.</p>
+
+  <h2>What it does</h2>
+  <p>It reads the sermon you already wrote.</p>
+  <p>It evaluates that sermon against eleven criteria I built out of Bryan Chapell, Tim Keller, John Piper, Haddon Robinson, the Simeon Trust, and 9Marks. The criteria are mine. The convictions underneath them are not, and I have named where they came from.</p>
+  <p>It shows you the sentences in your own manuscript that led to each observation, so you can check the work rather than take its word for it.</p>
+  <p>It tells you what is working, which is the part most preachers never hear specifically.</p>
+  <p>It puts the growth areas in order, so you know which change is worth making first.</p>
+  <p>And it keeps your evaluations together, so you can see what your preaching is doing over months instead of on one Sunday.</p>
+
+  <h2>What I believe</h2>
+  <div class="beliefs">
+    <p>Preaching can improve and is worth developing.</p>
+    <p>The preacher is responsible for the work.</p>
+    <p>Scripture is the authority and technology is not.</p>
+    <p>Feedback makes preachers better, and most of us are not getting any.</p>
+    <p>One sermon can teach you something, and a body of sermons can show you a pattern.</p>
+    <p>Technology can serve the preacher without becoming the preacher.</p>
+    <p class="belief-turn">Never let a tool become a replacement for the Holy Spirit.</p>
+  </div>
+
+  <h2>You do not have to agree with it</h2>
+  <p>The evaluation is an assessment, not a verdict. Read it, take what is useful, and throw out the rest. You know the text, the room, and what that Sunday was for. It does not.</p>
+  <p>I ran my own sermons through it before I showed it to anyone. It found things I had missed, and I knew it the second I saw them. That is roughly what a good editor does.</p>
+  <p class="signoff">Dr. Christopher M. Daukas</p>
+
+  <div class="cta">
+    <a href="/start" class="cta-btn">Start with a free evaluation</a>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-tagline">Strengthen the Local Church. Train the Global Church.</div>
+  The Sermon Coach&trade; · Built by <a href="mailto:chris@sermoncoach.com">Dr. Christopher M. Daukas</a> · Phoenix, Arizona<br>
+  <a href="/">Home</a> · <a href="./pricing.html">Pricing</a> · <a href="./how-its-scored.html">How It's Scored</a> · <a href="./faq.html">FAQ</a> · <a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a>
+  <div class="footer-legal">&copy; May 2026 Daukas Group LLC. All rights reserved.</div>
+</footer>
+
+<script>
+(function () {
+  var nav = document.querySelector('.nav');
+  var toggle = document.querySelector('.nav-toggle');
+  if (!nav || !toggle) return;
+
+  function setOpen(open) {
+    nav.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  toggle.addEventListener('click', function () {
+    setOpen(!nav.classList.contains('is-open'));
+  });
+
+  toggle.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setOpen(!nav.classList.contains('is-open'));
+    }
+  });
+
+  nav.querySelectorAll('.nav-link, .nav-start').forEach(function (link) {
+    link.addEventListener('click', function () {
+      setOpen(false);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
