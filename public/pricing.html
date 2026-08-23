@@ -245,6 +245,47 @@
   }
   .toggle-btn.active .toggle-savings { background: var(--accent-soft); color: #1a2332; }
 
+  /* ---------- PACK SIZE SELECTOR (3-state; not the billing pill) ---------- */
+  .pack-size-wrap {
+    max-width: 420px;
+    margin: 0 auto 20px;
+    padding: 0 24px;
+    display: flex;
+    justify-content: center;
+  }
+  .pack-size-control {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .pack-size-option {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 8px;
+    border: none;
+    border-right: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-mid);
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .pack-size-option:last-child { border-right: none; }
+  .pack-size-option[aria-checked="true"] {
+    background: var(--accent-pale);
+    color: var(--ink);
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+  .pack-size-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    z-index: 1;
+  }
+
   /* ---------- SUBSCRIPTION TIERS ---------- */
   .subs {
     max-width: 900px;
@@ -580,11 +621,11 @@
 
   /* ---------- PACKS ---------- */
   .packs {
-    max-width: 1100px;
+    max-width: 420px;
     margin: 16px auto 0;
     padding: 0 24px 24px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: 20px;
   }
   .pack {
@@ -595,12 +636,14 @@
     flex-direction: column;
     border-radius: 4px;
     text-align: center;
-    transition: all 0.18s ease;
+    transition: box-shadow 0.18s ease, border-color 0.18s ease;
     position: relative;
+    margin-top: 16px;
+    border-top: 3px solid transparent;
   }
   .pack.featured {
     box-shadow: var(--shadow-lift);
-    border-top: 3px solid var(--accent-soft);
+    border-top-color: var(--accent-soft);
   }
   .pack-best-value {
     position: absolute;
@@ -630,6 +673,7 @@
     font-style: italic;
     color: var(--ink-soft);
     margin-bottom: 16px;
+    min-height: 6.6em;
   }
   .pack-price {
     font-size: 30px;
@@ -648,8 +692,15 @@
     font-size: 13px;
     color: var(--ink-soft);
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
     font-style: italic;
+  }
+  .pack-save {
+    font-size: 13px;
+    color: var(--ink-mid);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 1.4em;
+    margin-bottom: 16px;
   }
   .pack-features {
     list-style: none;
@@ -807,7 +858,7 @@
     .subs { grid-template-columns: 1fr; max-width: 480px; }
     .subs.subs-solo { max-width: 480px; }
     .subs.develop-others { grid-template-columns: 1fr; max-width: 480px; }
-    .packs { grid-template-columns: 1fr; max-width: 420px; }
+    .packs { max-width: 420px; }
     .tier.featured, .pack.featured, .tier.start-here { margin-top: 16px; }
   }
   @media (max-width: 720px) {
@@ -921,8 +972,8 @@
 </div>
 
 <!-- SECTION 1: YOUR OWN PREACHING -->
-<div id="choose" class="section-header">
-  <h2>Your own preaching</h2>
+<div id="choose" class="section-header" style="margin-top: 56px;">
+  <h2>Subscription</h2>
   <p>Subscribe if you are in the pulpit most weeks. Buy credits if you step in a few times a year.</p>
 </div>
 
@@ -976,55 +1027,39 @@
   Pulpit Supply (6): https://buy.stripe.com/eVq6oA6xY2dU3Ck97T04805
   Series Prep (12): https://buy.stripe.com/3cI14gcWm2dUa0I6ZL04806
 -->
+<div class="section-header" style="margin-top: 56px;">
+  <h2>Individual Packs</h2>
+</div>
+
+<div class="pack-size-wrap">
+  <div class="pack-size-control" role="radiogroup" aria-label="Pack size">
+    <button type="button" class="pack-size-option" role="radio" aria-checked="false" data-pack-size="2">2 credits</button>
+    <button type="button" class="pack-size-option" role="radio" aria-checked="true" data-pack-size="6">6 credits</button>
+    <button type="button" class="pack-size-option" role="radio" aria-checked="false" data-pack-size="12">12 credits</button>
+  </div>
+</div>
+
 <section class="packs" id="packs">
-
-  <!-- GUEST PREACHER -->
-  <div class="pack">
-    <div class="pack-name">Guest Preacher (2)</div>
-    <div class="pack-price"><span class="currency">$</span>29</div>
-    <div class="pack-per">$14.50 per credit</div>
-    <div class="pack-tagline">For the occasional guest spot.</div>
+  <div class="pack" id="pack-card" data-pack-card>
+    <div class="pack-best-value" data-pack-badge hidden>Best Pack Value</div>
+    <div class="pack-name" data-pack-name>Pulpit Supply (6)</div>
+    <div class="pack-price"><span class="currency">$</span><span data-pack-price>69</span></div>
+    <div class="pack-per" data-pack-per>$11.50 per credit</div>
+    <div class="pack-save" data-pack-save>Saves $18 against the 2-pack rate.</div>
+    <div class="pack-tagline" data-pack-tagline>For steady pulpit rotation.</div>
     <ul class="pack-features">
-      <li>Two full credits</li>
+      <li data-pack-credits>Six full credits</li>
       <li>Valid 18 months</li>
     </ul>
-    <a href="/checkout?pack=pack_2" class="pack-cta">Buy 2 credits</a>
+    <a href="/checkout?pack=pack_6" class="pack-cta" data-pack-cta>Buy 6 credits</a>
   </div>
-
-  <!-- PULPIT SUPPLY -->
-  <div class="pack">
-    <div class="pack-name">Pulpit Supply (6)</div>
-    <div class="pack-price"><span class="currency">$</span>69</div>
-    <div class="pack-per">$11.50 per credit</div>
-    <div class="pack-tagline">For steady pulpit rotation.</div>
-    <ul class="pack-features">
-      <li>Six full credits</li>
-      <li>Valid 18 months</li>
-    </ul>
-    <a href="/checkout?pack=pack_6" class="pack-cta">Buy 6 credits</a>
-  </div>
-
-  <!-- SERIES PREP -->
-  <div class="pack featured">
-    <div class="pack-best-value">Best Pack Value</div>
-    <div class="pack-name">Series Prep (12)</div>
-    <div class="pack-price"><span class="currency">$</span>109</div>
-    <div class="pack-per">$9.08 per credit</div>
-    <div class="pack-tagline">Run every manuscript through the rubric the week before you preach it. A full quarter of sermons, twelve honest reads, one series done right.</div>
-    <ul class="pack-features">
-      <li>Twelve full credits</li>
-      <li>Valid 18 months</li>
-    </ul>
-    <a href="/checkout?pack=pack_12" class="pack-cta">Buy 12 credits</a>
-  </div>
-
 </section>
 
 <p class="pack-note">Pack credits stay valid for 18 months, and they keep working if you subscribe later.</p>
 
 <!-- SECTION 2: MENTORING -->
 <div class="section-header mentoring-header" style="margin-top: 56px;">
-  <h2>Mentoring</h2>
+  <h2>Develop Others</h2>
   <p>A seat gives another preacher their own account, their own submissions, and a library you can read.</p>
 </div>
 
@@ -1260,6 +1295,93 @@
   });
 
   applyBillingCadence('monthly');
+</script>
+
+<script>
+  const PACKS = {
+    '2': {
+      name: 'Guest Preacher (2)',
+      price: '29',
+      per: '$14.50 per credit',
+      save: '',
+      tagline: 'For the occasional guest spot.',
+      credits: 'Two full credits',
+      cta: 'Buy 2 credits',
+      href: '/checkout?pack=pack_2',
+      featured: false,
+    },
+    '6': {
+      name: 'Pulpit Supply (6)',
+      price: '69',
+      per: '$11.50 per credit',
+      save: 'Saves $18 against the 2-pack rate.',
+      tagline: 'For steady pulpit rotation.',
+      credits: 'Six full credits',
+      cta: 'Buy 6 credits',
+      href: '/checkout?pack=pack_6',
+      featured: false,
+    },
+    '12': {
+      name: 'Series Prep (12)',
+      price: '109',
+      per: '$9.08 per credit',
+      save: 'Saves $65 against the 2-pack rate.',
+      tagline: 'Run every manuscript through the rubric the week before you preach it. A full quarter of sermons, twelve honest reads, one series done right.',
+      credits: 'Twelve full credits',
+      cta: 'Buy 12 credits',
+      href: '/checkout?pack=pack_12',
+      featured: true,
+    },
+  };
+
+  function applyPackSize(size) {
+    const data = PACKS[size];
+    if (!data) return;
+    const card = document.querySelector('[data-pack-card]');
+    if (!card) return;
+
+    const nameEl = card.querySelector('[data-pack-name]');
+    const priceEl = card.querySelector('[data-pack-price]');
+    const perEl = card.querySelector('[data-pack-per]');
+    const saveEl = card.querySelector('[data-pack-save]');
+    const taglineEl = card.querySelector('[data-pack-tagline]');
+    const creditsEl = card.querySelector('[data-pack-credits]');
+    const ctaEl = card.querySelector('[data-pack-cta]');
+    const badgeEl = card.querySelector('[data-pack-badge]');
+
+    if (nameEl) nameEl.textContent = data.name;
+    if (priceEl) priceEl.textContent = data.price;
+    if (perEl) perEl.textContent = data.per;
+    if (saveEl) saveEl.textContent = data.save;
+    if (taglineEl) taglineEl.textContent = data.tagline;
+    if (creditsEl) creditsEl.textContent = data.credits;
+    if (ctaEl) {
+      ctaEl.textContent = data.cta;
+      ctaEl.setAttribute('href', data.href);
+    }
+    if (badgeEl) badgeEl.hidden = !data.featured;
+    card.classList.toggle('featured', data.featured);
+  }
+
+  const packSizeButtons = Array.from(document.querySelectorAll('[data-pack-size]'));
+  packSizeButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const size = btn.getAttribute('data-pack-size');
+      packSizeButtons.forEach((b) => {
+        b.setAttribute('aria-checked', b === btn ? 'true' : 'false');
+      });
+      applyPackSize(size);
+    });
+    btn.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      const index = packSizeButtons.indexOf(btn);
+      const delta = event.key === 'ArrowRight' ? 1 : -1;
+      const next = packSizeButtons[(index + delta + packSizeButtons.length) % packSizeButtons.length];
+      next.focus();
+      next.click();
+    });
+  });
 </script>
 
 
