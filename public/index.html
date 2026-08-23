@@ -33,6 +33,8 @@
     --accent: #a67c2e;
     --accent-soft: #c9a55c;
     --accent-pale: #faf6ed;
+    --bg-soft: #ebe6d5;
+    --bg-softer: #d8d2c2;
     --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
     --shadow-lift: 0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06);
   }
@@ -341,7 +343,7 @@
     margin-bottom: 20px;
   }
   .block.dark p.lede {
-    color: #d8d2c2;
+    color: var(--bg-softer);
   }
 
   /* ---------- SECTION DARK MODIFIER ---------- */
@@ -455,7 +457,7 @@
     color: var(--ink);
     margin-bottom: 20px;
   }
-  .block.dark p { color: #ebe6d5; }
+  .block.dark p { color: var(--bg-soft); }
 
   /* ---------- FELT PAIN ---------- */
   .pain-block {
@@ -658,7 +660,7 @@
     box-shadow: var(--shadow-lift);
   }
   .reserve .hero-cta-caption {
-    color: #d8d2c2;
+    color: var(--bg-softer);
     max-width: 540px;
     margin: 24px auto 0;
   }
