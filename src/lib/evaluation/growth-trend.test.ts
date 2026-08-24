@@ -3,7 +3,9 @@ import { describe, it } from "node:test";
 import { EVALUATION_FIXTURE } from "./fixture";
 import {
   buildGrowthTrendSeries,
+  directionCopyForSeries,
   evaluationIsValidForGrowth,
+  type GrowthTrendRollingPoint,
   type GrowthTrendSourceRow,
 } from "./growth-trend";
 import {
@@ -223,6 +225,28 @@ describe("buildGrowthTrendSeries", () => {
     );
     const series = buildGrowthTrendSeries(rows);
     assert.match(series.directionCopy, /^Holding steady/);
+  });
+
+  it("compares first-half and second-half rolling means, not endpoints", () => {
+    const sermons = Array.from({ length: 6 }, (_, index) =>
+      sourceRow({
+        evaluationId: `e${index}`,
+        sermonId: `s${index}`,
+        completedAt: `2026-05-0${index + 1}T12:00:00.000Z`,
+        createdAt: `2026-05-0${index + 1}T12:00:00.000Z`,
+        overallScore: 40,
+      }),
+    );
+    const rolling: GrowthTrendRollingPoint[] = [
+      { ...sermons[0], rollingMean: 50 },
+      { ...sermons[1], rollingMean: 30 },
+      { ...sermons[2], rollingMean: 40 },
+      { ...sermons[3], rollingMean: 48 },
+      { ...sermons[4], rollingMean: 45 },
+    ];
+    const copy = directionCopyForSeries(sermons, rolling);
+    assert.match(copy, /^Up /);
+    assert.doesNotMatch(copy, /^Down /);
   });
 });
 

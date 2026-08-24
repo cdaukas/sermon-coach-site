@@ -139,7 +139,7 @@ function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
           {series.showStatPair &&
           series.firstFourDisplay != null &&
           series.latestFourDisplay != null ? (
-            <dl className="mb-4 flex flex-wrap gap-8">
+            <dl className="mb-2 flex flex-wrap gap-8">
               <div>
                 <dt
                   className="text-[12px]"
@@ -170,6 +170,12 @@ function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
               </div>
             </dl>
           ) : null}
+          <p
+            className="mb-4 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            {series.sampleLine}
+          </p>
           <GrowthTrendArc points={rollingPointsToArcItems(series)} />
           <p
             className="mt-2 text-[14px] leading-relaxed"
@@ -179,20 +185,22 @@ function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
           </p>
         </>
       ) : (
-        <p
-          className="text-[14px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          role="status"
-        >
-          {series.directionCopy}
-        </p>
+        <>
+          <p
+            className="text-[14px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            role="status"
+          >
+            {series.directionCopy}
+          </p>
+          <p
+            className="mt-3 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            {series.sampleLine}
+          </p>
+        </>
       )}
-      <p
-        className="mt-3 text-[13px] leading-relaxed"
-        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-      >
-        {series.sampleLine}
-      </p>
     </section>
   );
 }

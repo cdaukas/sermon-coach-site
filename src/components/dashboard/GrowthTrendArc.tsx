@@ -192,7 +192,7 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
   const linePoints = plotted.map((point) => `${point.x},${point.y}`).join(" ");
 
   return (
-    <figure className="relative mb-8 w-full">
+    <figure className="relative mb-0 w-full">
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="h-auto w-full"

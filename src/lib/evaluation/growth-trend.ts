@@ -13,7 +13,6 @@ export {
 export const GROWTH_ROLLING_WINDOW = 4;
 export const GROWTH_LINE_MIN_SERMONS = 6;
 export const GROWTH_STAT_PAIR_MIN_SERMONS = 8;
-export const GROWTH_DIRECTION_WINDOW = 12;
 export const GROWTH_CHART_POINT_LIMIT = 24;
 export const GROWTH_DIRECTION_FLOOR = 0.6;
 
@@ -237,29 +236,27 @@ export function directionCopyForSeries(
     return `Your trend line starts at six sermons. You have ${count} so far.`;
   }
 
-  const span = Math.min(GROWTH_DIRECTION_WINDOW, count);
-  const latest = rollingPoints[rollingPoints.length - 1];
-  const earlierSermonIndex = Math.max(GROWTH_ROLLING_WINDOW - 1, count - span);
-  const earlier =
-    rollingPoints.find(
-      (point) =>
-        point.evaluationId ===
-        includedSermons[earlierSermonIndex]?.evaluationId,
-    ) ?? rollingPoints[0];
-
-  if (!latest || !earlier) {
+  const mid = Math.floor(rollingPoints.length / 2);
+  if (mid === 0) {
     return `Your trend line starts at six sermons. You have ${count} so far.`;
   }
 
-  const delta =
-    toDisplayScore(latest.rollingMean) - toDisplayScore(earlier.rollingMean);
+  const firstHalf = rollingPoints.slice(0, mid);
+  const secondHalf = rollingPoints.slice(rollingPoints.length - mid);
+  const firstMean =
+    firstHalf.reduce((sum, point) => sum + point.rollingMean, 0) /
+    firstHalf.length;
+  const secondMean =
+    secondHalf.reduce((sum, point) => sum + point.rollingMean, 0) /
+    secondHalf.length;
+  const delta = toDisplayScore(secondMean) - toDisplayScore(firstMean);
 
   if (Math.abs(delta) < GROWTH_DIRECTION_FLOOR) {
     return "Holding steady. Movement this small is ordinary variation in the evaluation, not a change in your preaching.";
   }
 
   const direction = delta > 0 ? "Up" : "Down";
-  return `${direction} ${Math.abs(delta).toFixed(1)} over your last ${spellSermonCount(span)} sermons.`;
+  return `${direction} ${Math.abs(delta).toFixed(1)} over your last ${spellSermonCount(rollingPoints.length)} sermons.`;
 }
 
 export function buildGrowthTrendSeries(
