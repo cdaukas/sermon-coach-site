@@ -25,6 +25,7 @@ export const GROWTH_DIRECTION_FLOOR = 0.6;
  * the sermon, so a sermon-level excluded_from_growth flag cannot remove that
  * run from the mentor's own line. Small now; real once Develop Others has volume.
  */
+export type GrowthTrendSourceRow = {
   evaluationId: string;
   sermonId: string;
   sermonTitle: string;
