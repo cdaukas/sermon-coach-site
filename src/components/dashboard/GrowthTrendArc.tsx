@@ -26,8 +26,16 @@ const BAND_FILL = {
   exemplary: "color-mix(in srgb, var(--sc-accent-soft) 32%, var(--sc-accent-pale))",
 } as const;
 
+/** Drop titles when the slash-joined line will overflow the tooltip. */
+const TOOLTIP_TITLES_MAX_CHARS = 72;
+
+export type GrowthTrendArcPoint = TrendArcEvaluationItem & {
+  windowSermonTitles: string[];
+  windowStartedAt: string;
+};
+
 type GrowthTrendArcProps = {
-  points: TrendArcEvaluationItem[];
+  points: GrowthTrendArcPoint[];
 };
 
 function scoreToY(score: number, plotTop: number, plotHeight: number): number {
@@ -41,11 +49,6 @@ function pointX(index: number, count: number, plotLeft: number, plotWidth: numbe
   }
 
   return plotLeft + ((index + 0.5) / count) * plotWidth;
-}
-
-/** Full tooltip date — same pattern as GrowthReportView (`dateStyle: "medium"`). */
-function formatTooltipDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(iso));
 }
 
 function formatEndpointDate(iso: string, includeYear: boolean): string {
@@ -62,7 +65,7 @@ function spanCrossesCalendarYear(firstCompletedAt: string, lastCompletedAt: stri
   );
 }
 
-type PlottedPoint = TrendArcEvaluationItem & {
+type PlottedPoint = GrowthTrendArcPoint & {
   x: number;
   y: number;
   displayScore: string;
@@ -92,6 +95,39 @@ function versionBoundaries(plotted: readonly PlottedPoint[]): VersionBoundary[] 
   return boundaries;
 }
 
+function tooltipCopy(point: PlottedPoint): {
+  headline: string;
+  detail: string | null;
+} {
+  const includeYear = spanCrossesCalendarYear(
+    point.windowStartedAt,
+    point.completedAt,
+  );
+  const through = formatEndpointDate(point.completedAt, includeYear);
+  const titles = point.windowSermonTitles.map((title) => title.trim()).filter(Boolean);
+  const titlesLine = titles.join(" / ");
+
+  if (titles.length > 0 && titlesLine.length <= TOOLTIP_TITLES_MAX_CHARS) {
+    return {
+      headline: `Four-sermon average through ${through}`,
+      detail: titlesLine,
+    };
+  }
+
+  const from = formatEndpointDate(point.windowStartedAt, includeYear);
+  return {
+    headline: "Four-sermon average",
+    detail: `Four sermons, ${from} to ${through}`,
+  };
+}
+
+function nativeTooltipText(point: PlottedPoint): string {
+  const copy = tooltipCopy(point);
+  return copy.detail
+    ? `${copy.headline}. ${point.displayScore}. ${copy.detail}`
+    : `${copy.headline}. ${point.displayScore}`;
+}
+
 function ArcDotTooltip({
   point,
   svgWidth,
@@ -101,9 +137,11 @@ function ArcDotTooltip({
   svgWidth: number;
   svgHeight: number;
 }) {
+  const { headline, detail } = tooltipCopy(point);
+
   return (
     <div
-      className="pointer-events-none absolute z-10 max-w-[200px] rounded border px-2.5 py-2 text-center shadow-sm"
+      className="pointer-events-none absolute z-10 max-w-[240px] rounded border px-2.5 py-2 text-left shadow-sm"
       style={{
         left: `${(point.x / svgWidth) * 100}%`,
         top: `${(point.y / svgHeight) * 100}%`,
@@ -114,14 +152,16 @@ function ArcDotTooltip({
       role="tooltip"
     >
       <p className="text-[11px] leading-snug" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-        {formatTooltipDate(point.completedAt)}
+        {headline}
       </p>
       <p className="text-[12px] font-semibold leading-snug" style={{ ...uiFont, color: "var(--sc-ink)" }}>
-        {point.displayScore} / 10
+        {point.displayScore}
       </p>
-      <p className="text-[11px] leading-snug" style={{ ...uiFont, color: "var(--sc-ink-mid)" }}>
-        {point.sermonTitle}
-      </p>
+      {detail ? (
+        <p className="text-[11px] leading-snug" style={{ ...uiFont, color: "var(--sc-ink-mid)" }}>
+          {detail}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -197,7 +237,7 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
         viewBox={`0 0 ${width} ${height}`}
         className="h-auto w-full"
         role="img"
-        aria-label="Score over time across completed sermon evaluations"
+        aria-label="Four-sermon rolling average over time"
       >
         <rect
           x={plotLeft}
@@ -304,7 +344,7 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
             <circle
               cx={point.x}
               cy={point.y}
-              r="8"
+              r="10"
               fill="transparent"
               className="cursor-pointer"
               onMouseEnter={() => setActivePointId(point.evaluationId)}
@@ -325,17 +365,13 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
                 )
               }
             >
-              <title>
-                {point.sermonTitle} · {point.displayScore}
-              </title>
+              <title>{nativeTooltipText(point)}</title>
             </circle>
             <circle
               cx={point.x}
               cy={point.y}
-              r="4"
+              r="2"
               fill="var(--sc-accent)"
-              stroke="var(--sc-panel)"
-              strokeWidth="1.5"
               pointerEvents="none"
             />
             {labeledScoreIds.has(point.evaluationId) ? (

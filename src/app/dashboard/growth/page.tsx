@@ -5,7 +5,10 @@ import { GrowthReportPicker } from "@/components/dashboard/GrowthReportPicker";
 import { profileHasGrowthAccess } from "@/lib/growth/access";
 import { createClient } from "@/lib/supabase/server";
 import { GrowthReportView } from "@/components/dashboard/GrowthReportView";
-import { GrowthTrendArc } from "@/components/dashboard/GrowthTrendArc";
+import {
+  GrowthTrendArc,
+  type GrowthTrendArcPoint,
+} from "@/components/dashboard/GrowthTrendArc";
 import { NewEvaluationButton } from "@/components/dashboard/NewEvaluationButton";
 import {
   loadGrowthReportData,
@@ -16,8 +19,10 @@ import {
   listRecentCompleteEvaluations,
   loadGrowthTrendSeries,
 } from "@/lib/evaluation/queries";
-import type { GrowthTrendSeries } from "@/lib/evaluation/growth-trend";
-import type { TrendArcEvaluationItem } from "@/lib/evaluation/growth-report-types";
+import {
+  GROWTH_ROLLING_WINDOW,
+  type GrowthTrendSeries,
+} from "@/lib/evaluation/growth-trend";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -113,15 +118,28 @@ function GrowthReportHeadline() {
 
 function rollingPointsToArcItems(
   series: GrowthTrendSeries,
-): TrendArcEvaluationItem[] {
-  return series.rollingPoints.map((point) => ({
-    evaluationId: point.evaluationId,
-    sermonTitle: point.sermonTitle,
-    completedAt: point.completedAt,
-    createdAt: point.createdAt,
-    compositeWeighted: point.rollingMean,
-    promptVersion: point.promptVersion,
-  }));
+): GrowthTrendArcPoint[] {
+  return series.rollingPoints.map((point) => {
+    const endIndex = series.includedSermons.findIndex(
+      (sermon) => sermon.evaluationId === point.evaluationId,
+    );
+    const startIndex = Math.max(0, endIndex - (GROWTH_ROLLING_WINDOW - 1));
+    const window =
+      endIndex >= 0
+        ? series.includedSermons.slice(startIndex, endIndex + 1)
+        : [];
+
+    return {
+      evaluationId: point.evaluationId,
+      sermonTitle: point.sermonTitle,
+      completedAt: point.completedAt,
+      createdAt: point.createdAt,
+      compositeWeighted: point.rollingMean,
+      promptVersion: point.promptVersion,
+      windowSermonTitles: window.map((sermon) => sermon.sermonTitle),
+      windowStartedAt: window[0]?.completedAt ?? point.completedAt,
+    };
+  });
 }
 
 function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
