@@ -13,9 +13,11 @@ import {
 } from "@/lib/evaluation/growth-report";
 import { orderEvaluationIdsByCompletedAt } from "@/lib/evaluation/growth-report-ordering";
 import {
-  listCompleteEvaluationsForTrendArc,
   listRecentCompleteEvaluations,
+  loadGrowthTrendSeries,
 } from "@/lib/evaluation/queries";
+import type { GrowthTrendSeries } from "@/lib/evaluation/growth-trend";
+import type { TrendArcEvaluationItem } from "@/lib/evaluation/growth-report-types";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -108,6 +110,93 @@ function GrowthReportHeadline() {
   );
 }
 
+
+function rollingPointsToArcItems(
+  series: GrowthTrendSeries,
+): TrendArcEvaluationItem[] {
+  return series.rollingPoints.map((point) => ({
+    evaluationId: point.evaluationId,
+    sermonTitle: point.sermonTitle,
+    completedAt: point.completedAt,
+    createdAt: point.createdAt,
+    compositeWeighted: point.rollingMean,
+    promptVersion: point.promptVersion,
+  }));
+}
+
+function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
+  return (
+    <section className="mb-8" aria-label="Preaching trend">
+      {series.showLine ? (
+        <>
+          <p
+            className="mb-4 text-[14px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            Each point is the average of your last four sermons. That keeps one
+            unusual Sunday from looking like a trend.
+          </p>
+          {series.showStatPair &&
+          series.firstFourDisplay != null &&
+          series.latestFourDisplay != null ? (
+            <dl className="mb-4 flex flex-wrap gap-8">
+              <div>
+                <dt
+                  className="text-[12px]"
+                  style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                >
+                  First four sermons
+                </dt>
+                <dd
+                  className="text-[22px] font-semibold"
+                  style={{ ...serifFont, color: "var(--sc-ink)" }}
+                >
+                  {series.firstFourDisplay.toFixed(1)}
+                </dd>
+              </div>
+              <div>
+                <dt
+                  className="text-[12px]"
+                  style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                >
+                  Most recent four
+                </dt>
+                <dd
+                  className="text-[22px] font-semibold"
+                  style={{ ...serifFont, color: "var(--sc-ink)" }}
+                >
+                  {series.latestFourDisplay.toFixed(1)}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
+          <GrowthTrendArc points={rollingPointsToArcItems(series)} />
+          <p
+            className="mt-2 text-[14px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            {series.directionCopy}
+          </p>
+        </>
+      ) : (
+        <p
+          className="text-[14px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          role="status"
+        >
+          {series.directionCopy}
+        </p>
+      )}
+      <p
+        className="mt-3 text-[13px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
+        {series.sampleLine}
+      </p>
+    </section>
+  );
+}
+
 function resolveSelectedEvaluationId(
   options: { evaluationId: string }[],
   requestedId: string | undefined,
@@ -133,16 +222,16 @@ export default async function GrowthReportPage({
     notFound();
   }
 
-  const [options, trendPoints] = await Promise.all([
+  const [options, trendSeries] = await Promise.all([
     listRecentCompleteEvaluations(),
-    listCompleteEvaluationsForTrendArc(),
+    loadGrowthTrendSeries(),
   ]);
 
-  if (trendPoints.length === 0) {
+  if (trendSeries.includedSermonCount === 0) {
     return <GrowthReportUnavailable />;
   }
 
-  if (trendPoints.length === 1) {
+  if (options.length < 2) {
     return (
       <main
         className="rounded px-8 py-10"
@@ -153,14 +242,7 @@ export default async function GrowthReportPage({
         }}
       >
         <GrowthReportHeadline />
-        <GrowthTrendArc points={trendPoints} />
-        <p
-          className="text-[14px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          role="status"
-        >
-          Run another and the arc begins.
-        </p>
+        <GrowthTrendSection series={trendSeries} />
       </main>
     );
   }
@@ -228,7 +310,7 @@ export default async function GrowthReportPage({
       >
         {!reportData ? <GrowthReportHeadline /> : null}
 
-        <GrowthTrendArc points={trendPoints} />
+        <GrowthTrendSection series={trendSeries} />
 
         <GrowthReportPicker
           options={options}

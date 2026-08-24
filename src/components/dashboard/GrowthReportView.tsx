@@ -242,7 +242,7 @@ function CriterionMovementTable({ data }: { data: GrowthReportPresentation }) {
       >
         {spansBoundary
           ? GROWTH_RUBRIC_BOUNDARY_CRITERION_MESSAGE
-          : "All eleven rubric criteria — baseline (A) to current (B). Green marks improvement, muted rows held steady."}
+          : "All eleven rubric criteria, baseline (A) to current (B). Green marks improvement, muted rows held steady."}
       </p>
 
       <div className="flex flex-col gap-5">

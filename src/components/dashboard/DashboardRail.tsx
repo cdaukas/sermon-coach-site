@@ -42,7 +42,6 @@ const PRIMARY_ITEMS: NavItem[] = [
   {
     href: "/dashboard/growth",
     label: "Growth",
-    freeTag: true,
     isActive: (pathname) => pathname.startsWith("/dashboard/growth"),
   },
 ];
