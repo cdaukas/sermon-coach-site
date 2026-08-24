@@ -8,6 +8,10 @@ import {
   GROWTH_RUBRIC_BOUNDARY_MARKER_LABEL,
   type TrendArcEvaluationItem,
 } from "@/lib/evaluation/growth-report-types";
+import {
+  clampScoreToPlot,
+  isMaterialPromptBoundary,
+} from "@/lib/evaluation/growth-trend-plot";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
@@ -27,7 +31,8 @@ type GrowthTrendArcProps = {
 };
 
 function scoreToY(score: number, plotTop: number, plotHeight: number): number {
-  return plotTop + ((SCORE_MAX - score) / SCORE_RANGE) * plotHeight;
+  const clamped = clampScoreToPlot(score);
+  return plotTop + ((SCORE_MAX - clamped) / SCORE_RANGE) * plotHeight;
 }
 
 function pointX(index: number, count: number, plotLeft: number, plotWidth: number): number {
@@ -72,7 +77,12 @@ type VersionBoundary = {
 function versionBoundaries(plotted: readonly PlottedPoint[]): VersionBoundary[] {
   const boundaries: VersionBoundary[] = [];
   for (let i = 1; i < plotted.length; i++) {
-    if (plotted[i].promptVersion !== plotted[i - 1].promptVersion) {
+    if (
+      isMaterialPromptBoundary(
+        plotted[i - 1].promptVersion,
+        plotted[i].promptVersion,
+      )
+    ) {
       boundaries.push({
         x: (plotted[i - 1].x + plotted[i].x) / 2,
         index: i,

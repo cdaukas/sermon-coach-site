@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import type { RecentCompleteEvaluationItem, TrendArcEvaluationItem } from "./growth-report-types";
+import {
+  buildGrowthTrendSeries,
+  type GrowthTrendSeries,
+  type GrowthTrendSourceRow,
+} from "./growth-trend";
 import type { CoachingNarrative } from "./coaching-schema";
 import { howItPreachesSchema } from "./hip-schema";
 import { parseEvaluationResult } from "./schema";
@@ -137,11 +142,17 @@ export async function getEvaluationStatus(
   };
 }
 
+export type GetEvaluationByIdOptions = {
+  includeExcludedFromGrowth?: boolean;
+};
+
 export async function getEvaluation(
   evaluationId: string,
   sermonId: string,
 ): Promise<EvaluationWithSermon | null> {
-  const loaded = await getEvaluationById(evaluationId);
+  const loaded = await getEvaluationById(evaluationId, {
+    includeExcludedFromGrowth: true,
+  });
 
   if (!loaded || loaded.sermon.id !== sermonId) {
     return null;
@@ -152,6 +163,7 @@ export async function getEvaluation(
 
 export async function getEvaluationById(
   evaluationId: string,
+  options: GetEvaluationByIdOptions = {},
 ): Promise<EvaluationWithSermon | null> {
   const supabase = await createClient();
 
@@ -192,7 +204,7 @@ export async function getEvaluationById(
   if (version) {
     const { data, error: sermonError } = await supabase
       .from("sermons")
-      .select("id, title, primary_passage, deleted_at")
+      .select("id, title, primary_passage, deleted_at, excluded_from_growth")
       .eq("id", version.sermon_id)
       .maybeSingle();
 
@@ -201,6 +213,10 @@ export async function getEvaluationById(
     }
 
     if (data?.deleted_at) {
+      return null;
+    }
+
+    if (data?.excluded_from_growth && !options.includeExcludedFromGrowth) {
       return null;
     }
 
@@ -328,13 +344,13 @@ export async function listRecentCompleteEvaluations(
   return items;
 }
 
-export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEvaluationItem[]> {
+export async function listGrowthTrendSourceRows(): Promise<GrowthTrendSourceRow[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("sermon_evaluations")
     .select(
-      "id, completed_at, created_at, sermon_version_id, overall_score, prompt_version",
+      "id, completed_at, created_at, sermon_version_id, overall_score, prompt_version, result",
     )
     .eq("status", "complete")
     .eq("report_mode", "diagnostic")
@@ -368,10 +384,9 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
   const sermonIds = [...new Set(versionToSermonId.values())];
   const { data: sermons, error: sermonsError } = await supabase
     .from("sermons")
-    .select("id, title")
+    .select("id, title, excluded_from_growth")
     .in("id", sermonIds)
-    .is("deleted_at", null)
-    .eq("excluded_from_growth", false);
+    .is("deleted_at", null);
 
   if (sermonsError) {
     throw new Error(sermonsError.message);
@@ -381,7 +396,7 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
     (sermons ?? []).map((sermon) => [sermon.id, sermon]),
   );
 
-  const items: TrendArcEvaluationItem[] = [];
+  const items: GrowthTrendSourceRow[] = [];
 
   for (const row of rows) {
     const sermonId = versionToSermonId.get(row.sermon_version_id);
@@ -397,18 +412,37 @@ export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEval
 
     items.push({
       evaluationId: row.id,
+      sermonId,
       sermonTitle: sermon.title,
       completedAt: row.completed_at,
       createdAt: row.created_at,
-      compositeWeighted: row.overall_score,
+      overallScore: row.overall_score,
       promptVersion:
         typeof row.prompt_version === "string" && row.prompt_version.trim()
           ? row.prompt_version.trim()
           : "unknown",
+      excludedFromGrowth: sermon.excluded_from_growth === true,
+      result: row.result,
     });
   }
 
   return items;
+}
+
+export async function loadGrowthTrendSeries(): Promise<GrowthTrendSeries> {
+  return buildGrowthTrendSeries(await listGrowthTrendSourceRows());
+}
+
+export async function listCompleteEvaluationsForTrendArc(): Promise<TrendArcEvaluationItem[]> {
+  const series = await loadGrowthTrendSeries();
+  return series.includedSermons.map((sermon) => ({
+    evaluationId: sermon.evaluationId,
+    sermonTitle: sermon.sermonTitle,
+    completedAt: sermon.completedAt,
+    createdAt: sermon.createdAt,
+    compositeWeighted: sermon.overallScore,
+    promptVersion: sermon.promptVersion,
+  }));
 }
 
 /**
