@@ -6,6 +6,7 @@ import { profileHasGrowthAccess } from "@/lib/growth/access";
 import { createClient } from "@/lib/supabase/server";
 import { GrowthReportView } from "@/components/dashboard/GrowthReportView";
 import {
+  GROWTH_TREND_PLOT_INSET,
   GrowthTrendArc,
   type GrowthTrendArcPoint,
 } from "@/components/dashboard/GrowthTrendArc";
@@ -157,7 +158,10 @@ function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
           {series.showStatPair &&
           series.firstFourDisplay != null &&
           series.latestFourDisplay != null ? (
-            <dl className="mb-2 flex flex-wrap gap-8">
+            <dl
+              className="mb-2 flex flex-wrap gap-8"
+              style={{ paddingLeft: GROWTH_TREND_PLOT_INSET }}
+            >
               <div>
                 <dt
                   className="text-[12px]"
@@ -190,7 +194,11 @@ function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
           ) : null}
           <p
             className="mb-4 text-[13px] leading-relaxed"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+            style={{
+              ...uiFont,
+              color: "var(--sc-ink-soft)",
+              paddingLeft: GROWTH_TREND_PLOT_INSET,
+            }}
           >
             {series.sampleLine}
           </p>
