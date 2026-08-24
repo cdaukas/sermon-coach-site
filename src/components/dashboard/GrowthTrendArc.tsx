@@ -19,6 +19,12 @@ const SCORE_MIN = 30;
 const SCORE_MAX = 55;
 const SCORE_RANGE = SCORE_MAX - SCORE_MIN;
 
+const ARC_VIEWBOX_WIDTH = 720;
+const ARC_PLOT_LEFT = 92;
+
+/** Left inset of the plot inside the SVG, as a percent of chart width. */
+export const GROWTH_TREND_PLOT_INSET = `${(ARC_PLOT_LEFT / ARC_VIEWBOX_WIDTH) * 100}%`;
+
 /** Band backdrop fills: accent-pale (Faithful) → accent-soft tint (Strong) → richer soft-gold (Exemplary). */
 const BAND_FILL = {
   faithful: "var(--sc-accent-pale)",
@@ -121,7 +127,7 @@ function tooltipCopy(point: PlottedPoint): {
   };
 }
 
-function nativeTooltipText(point: PlottedPoint): string {
+function pointAriaLabel(point: PlottedPoint): string {
   const copy = tooltipCopy(point);
   return copy.detail
     ? `${copy.headline}. ${point.displayScore}. ${copy.detail}`
@@ -175,8 +181,8 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
     return null;
   }
 
-  const margin = { top: 28, right: 20, bottom: 56, left: 92 };
-  const width = 720;
+  const margin = { top: 28, right: 20, bottom: 56, left: ARC_PLOT_LEFT };
+  const width = ARC_VIEWBOX_WIDTH;
   const height = 312;
   const plotLeft = margin.left;
   const plotTop = margin.top;
@@ -347,6 +353,7 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
               r="10"
               fill="transparent"
               className="cursor-pointer"
+              aria-labelledby={`growth-trend-point-${point.evaluationId}`}
               onMouseEnter={() => setActivePointId(point.evaluationId)}
               onMouseLeave={() =>
                 setActivePointId((current) =>
@@ -364,9 +371,7 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
                   current === point.evaluationId ? null : point.evaluationId,
                 )
               }
-            >
-              <title>{nativeTooltipText(point)}</title>
-            </circle>
+            />
             <circle
               cx={point.x}
               cy={point.y}
@@ -407,6 +412,26 @@ export function GrowthTrendArc({ points }: GrowthTrendArcProps) {
           </text>
         ) : null}
       </svg>
+
+      {plotted.map((point) => (
+        <span
+          key={point.evaluationId}
+          id={`growth-trend-point-${point.evaluationId}`}
+          style={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            overflow: "hidden",
+            clip: "rect(0, 0, 0, 0)",
+            whiteSpace: "nowrap",
+            border: 0,
+            padding: 0,
+            margin: -1,
+          }}
+        >
+          {pointAriaLabel(point)}
+        </span>
+      ))}
 
       {activePoint ? (
         <ArcDotTooltip point={activePoint} svgWidth={width} svgHeight={height} />
