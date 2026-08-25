@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revokeExcessPendingForMentor } from "@/lib/billing/mentor-seat-revoke-pending";
 
 const ACTIVATION_STATUSES = new Set(["active", "trialing"]);
+const GRACE_STATUSES = new Set(["past_due"]);
 
 export type StripeWebhookDeps = {
   supabase: SupabaseClient;
@@ -17,6 +18,10 @@ export type SubscriptionBillingFields = {
 
 export function isActivatingSubscriptionStatus(status: string): boolean {
   return ACTIVATION_STATUSES.has(status);
+}
+
+export function isGraceSubscriptionStatus(status: string): boolean {
+  return GRACE_STATUSES.has(status);
 }
 
 function getCustomerId(subscription: Stripe.Subscription): string | null {
@@ -713,6 +718,12 @@ export async function handleSubscriptionActivationEvent(
       customerId,
       extractSubscriptionBillingFields(subscription),
     );
+  } else if (isGraceSubscriptionStatus(subscription.status)) {
+    // Stripe is still retrying. Write nothing: not activate, not deactivate.
+    console.log("[stripe-webhook] grace status, no profile write", {
+      profileId: match.profileId,
+      status: subscription.status,
+    });
   } else {
     await deactivateProfile(deps.supabase, match.profileId);
   }
@@ -834,7 +845,9 @@ export async function handleInvoicePaymentFailed(
     return { matched: false, skipped };
   }
 
-  await deactivateProfile(deps.supabase, match.profileId);
+  console.log("[stripe-webhook] payment failed, access retained during retries", {
+    profileId: match.profileId,
+  });
   return { matched: true };
 }
 
