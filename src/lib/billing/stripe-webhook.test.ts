@@ -15,6 +15,10 @@ import {
 
 const PERIOD_END_UNIX = 1_893_456_000;
 const PERIOD_END_ISO = new Date(PERIOD_END_UNIX * 1000).toISOString();
+const START_UNIX = PERIOD_END_UNIX - 30 * 24 * 3600;
+const START_ISO = new Date(START_UNIX * 1000).toISOString();
+const CANCELED_AT_UNIX = PERIOD_END_UNIX - 5 * 24 * 3600;
+const CANCELED_AT_ISO = new Date(CANCELED_AT_UNIX * 1000).toISOString();
 
 function makeSubscription(
   overrides: Partial<Stripe.Subscription> = {},
@@ -24,6 +28,7 @@ function makeSubscription(
     object: "subscription",
     status: "active",
     customer: "cus_abc",
+    start_date: START_UNIX,
     items: {
       object: "list",
       data: [
@@ -55,6 +60,7 @@ function makeSupabaseMock(handlers: {
   profileByCustomerId?: ProfileRow | null;
   profileById?: string | null;
   profileIdByEmail?: string | null;
+  existingStartedAt?: string | null;
   updateError?: string;
   /** Seat counters returned when profiles row is re-read for pending revoke. */
   seatProfile?: {
@@ -151,7 +157,11 @@ function makeSupabaseMock(handlers: {
             eq(col: string, value: string) {
               return {
                 async maybeSingle() {
-                  if (col === "id" && handlers.profileById === value) {
+                  if (
+                    col === "id" &&
+                    (handlers.profileById === value ||
+                      handlers.profileByCustomerId?.id === value)
+                  ) {
                     // Seat re-read after provision uses multi-column select
                     // or just-written path reads comp only.
                     if (
@@ -161,7 +171,14 @@ function makeSupabaseMock(handlers: {
                     ) {
                       return { data: { ...seatRow }, error: null };
                     }
-                    return { data: { id: value }, error: null };
+                    return {
+                      data: {
+                        id: value,
+                        subscription_started_at:
+                          handlers.existingStartedAt ?? null,
+                      },
+                      error: null,
+                    };
                   }
                   if (
                     col === "stripe_customer_id" &&
@@ -221,6 +238,21 @@ const activeProfileValues = {
   subscription_status: "active",
   subscription_interval: "month",
   current_period_end: PERIOD_END_ISO,
+  subscription_started_at: START_ISO,
+  canceled_at: null,
+  cancellation_effective_at: null,
+  cancellation_source: null,
+  cancellation_reason: null,
+  cancellation_comment: null,
+};
+
+const inactiveEndedValues = {
+  subscription_status: "inactive",
+  canceled_at: null,
+  cancellation_effective_at: PERIOD_END_ISO,
+  cancellation_source: "payment_failure" as const,
+  cancellation_reason: null,
+  cancellation_comment: null,
 };
 
 describe("extractSubscriptionBillingFields", () => {
@@ -228,6 +260,7 @@ describe("extractSubscriptionBillingFields", () => {
     assert.deepEqual(extractSubscriptionBillingFields(makeSubscription()), {
       subscriptionInterval: "month",
       currentPeriodEnd: PERIOD_END_ISO,
+      startDate: START_ISO,
     });
   });
 
@@ -256,6 +289,7 @@ describe("extractSubscriptionBillingFields", () => {
     assert.deepEqual(extractSubscriptionBillingFields(subscription), {
       subscriptionInterval: "year",
       currentPeriodEnd: PERIOD_END_ISO,
+      startDate: START_ISO,
     });
   });
 
@@ -272,6 +306,7 @@ describe("extractSubscriptionBillingFields", () => {
     assert.deepEqual(extractSubscriptionBillingFields(subscription), {
       subscriptionInterval: null,
       currentPeriodEnd: null,
+      startDate: START_ISO,
     });
   });
 });
@@ -585,7 +620,7 @@ describe("handleSubscriptionActivationEvent", () => {
     assert.deepEqual(updates, [
       {
         id: "user-1",
-        values: { subscription_status: "inactive" },
+        values: inactiveEndedValues,
       },
     ]);
   });
@@ -704,6 +739,65 @@ describe("handleSubscriptionActivationEvent", () => {
     ]);
   });
 
+  it("clears cancellation fields on reactivation without overwriting subscription_started_at", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+      existingStartedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const result = await handleSubscriptionActivationEvent(makeSubscription(), {
+      supabase,
+      stripe: {} as Stripe,
+      logError: () => {},
+    });
+
+    assert.equal(result.matched, true);
+    assert.equal(updates.length, 1);
+    assert.equal(updates[0]?.values.subscription_status, "active");
+    assert.equal(updates[0]?.values.canceled_at, null);
+    assert.equal(updates[0]?.values.cancellation_effective_at, null);
+    assert.equal(updates[0]?.values.cancellation_source, null);
+    assert.equal(updates[0]?.values.cancellation_reason, null);
+    assert.equal(updates[0]?.values.cancellation_comment, null);
+    assert.equal(updates[0]?.values.subscription_started_at, undefined);
+  });
+
+  it("keeps access active and stamps cancellation when cancel_at_period_end", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+      existingStartedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const result = await handleSubscriptionActivationEvent(
+      makeSubscription({
+        cancel_at_period_end: true,
+        canceled_at: CANCELED_AT_UNIX,
+        cancellation_details: {
+          reason: "cancellation_requested",
+          comment: "too expensive",
+          feedback: "too_expensive",
+        },
+      }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.equal(updates[0]?.values.subscription_status, "active");
+    assert.equal(updates[0]?.values.canceled_at, CANCELED_AT_ISO);
+    assert.equal(updates[0]?.values.cancellation_effective_at, PERIOD_END_ISO);
+    assert.equal(updates[0]?.values.cancellation_source, "voluntary");
+    assert.equal(
+      updates[0]?.values.cancellation_reason,
+      "cancellation_requested",
+    );
+    assert.equal(updates[0]?.values.cancellation_comment, "too expensive");
+    assert.equal(updates[0]?.values.subscription_started_at, undefined);
+  });
+
   it("bootstraps stripe_customer_id via email when no metadata or customer id match", async () => {
     const { supabase, updates } = makeSupabaseMock({
       profileByCustomerId: null,
@@ -782,7 +876,15 @@ describe("handleSubscriptionDeletedEvent", () => {
     });
 
     const result = await handleSubscriptionDeletedEvent(
-      makeSubscription({ status: "canceled" }),
+      makeSubscription({
+        status: "canceled",
+        canceled_at: CANCELED_AT_UNIX,
+        cancellation_details: {
+          reason: "cancellation_requested",
+          comment: "too expensive",
+          feedback: null,
+        },
+      }),
       {
         supabase,
         stripe: {} as Stripe,
@@ -794,9 +896,43 @@ describe("handleSubscriptionDeletedEvent", () => {
     assert.deepEqual(updates, [
       {
         id: "user-1",
-        values: { subscription_status: "inactive" },
+        values: {
+          subscription_status: "inactive",
+          canceled_at: CANCELED_AT_ISO,
+          cancellation_effective_at: PERIOD_END_ISO,
+          cancellation_source: "voluntary",
+          cancellation_reason: "cancellation_requested",
+          cancellation_comment: "too expensive",
+        },
       },
     ]);
+  });
+
+  it("writes payment_failure when deleted after retry exhaustion", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
+
+    const result = await handleSubscriptionDeletedEvent(
+      makeSubscription({
+        status: "canceled",
+        canceled_at: CANCELED_AT_UNIX,
+        cancellation_details: {
+          reason: "payment_failed",
+          comment: null,
+          feedback: null,
+        },
+      }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.equal(updates[0]?.values.cancellation_source, "payment_failure");
+    assert.equal(updates[0]?.values.cancellation_reason, "payment_failed");
   });
 });
 
@@ -942,6 +1078,11 @@ describe("handleSubscriptionCheckoutCompleted", () => {
           subscription_status: "active",
           subscription_interval: null,
           current_period_end: null,
+          canceled_at: null,
+          cancellation_effective_at: null,
+          cancellation_source: null,
+          cancellation_reason: null,
+          cancellation_comment: null,
         },
       },
     ]);
