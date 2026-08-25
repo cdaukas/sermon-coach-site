@@ -10,43 +10,13 @@ import {
 } from "@/lib/evaluation/output-language";
 import type { EvaluationResultStrict } from "@/lib/evaluation/schema";
 import {
+  buildGradingBandTableRows,
   CATEGORY_MAX_POINTS,
   categorySubtotal,
 } from "@/lib/evaluation/schema";
 import { serifFont, uiFont } from "./shared";
 
-const GRADING_BANDS = [
-  {
-    range: "47–55",
-    rangeDisplay: "8.5–10.0",
-    band: "Exemplary",
-    meaning: "Multiple criteria scored 5s. Worth studying or sharing.",
-  },
-  {
-    range: "39–46",
-    rangeDisplay: "7.1–8.4",
-    band: "Strong",
-    meaning: "Most criteria scored 4s. Doing the work well.",
-  },
-  {
-    range: "30–38",
-    rangeDisplay: "5.5–6.9",
-    band: "Faithful",
-    meaning: "Most criteria scored 3s. Faithfully doing the work.",
-  },
-  {
-    range: "22–29",
-    rangeDisplay: "4.0–5.4",
-    band: "Needs Improvement",
-    meaning: "Multiple criteria scored 2s. Real gaps to address.",
-  },
-  {
-    range: "<22",
-    rangeDisplay: "<4.0",
-    band: "Significant Concerns",
-    meaning: "Multiple criteria scored 1s. Address before preaching again.",
-  },
-] as const;
+const GRADING_BANDS = buildGradingBandTableRows();
 
 type MethodologySectionProps = {
   scoring: EvaluationResultStrict["scoring"];
@@ -263,7 +233,7 @@ export function MethodologySection({
                       className="border-b px-3 py-2.5"
                       style={{ borderColor: "var(--sc-rule)" }}
                     >
-                      {copy.gradingBandMeanings[band.band] ?? band.meaning}
+                      {copy.gradingBandMeanings[band.band]}
                     </td>
                   </tr>
                 );
@@ -271,6 +241,12 @@ export function MethodologySection({
             </tbody>
           </table>
         </div>
+        <p
+          className="mt-3 text-[13px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+        >
+          {copy.displayScoreRoundingNote}
+        </p>
       </div>
     </details>
   );

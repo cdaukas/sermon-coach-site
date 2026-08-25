@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatDisplayScoreBare } from "./display-score";
 import { VERDICT_STRICT_CAPS_FROM } from "./prompt";
 import {
   CANONICAL_CRITERION_NAMES,
@@ -647,12 +648,62 @@ export type ScoreLetter = z.infer<typeof scoreLetterSchema>;
 /** Tier index from weighted /55 score (internal; same thresholds as bands). Not shown in UI. */
 export type ScoreTier = 1 | 2 | 3 | 4 | 5;
 
+/** Maximum weighted composite on the /55 scale. */
+export const WEIGHTED_SCORE_MAX = 55;
+
+/** Single source of truth for /55 band cut points (public commitment — do not change lightly). */
+export const SCORE_BAND_DEFINITIONS = [
+  { band: "Exemplary", minInclusive: 47, letter: "A", tier: 5 },
+  { band: "Strong", minInclusive: 39, letter: "B", tier: 4 },
+  { band: "Faithful", minInclusive: 30, letter: "C", tier: 3 },
+  { band: "Needs Improvement", minInclusive: 22, letter: "D", tier: 2 },
+] as const satisfies ReadonlyArray<{
+  band: ScoreBand;
+  minInclusive: number;
+  letter: ScoreLetter;
+  tier: ScoreTier;
+}>;
+
+export type GradingBandTableRow = {
+  band: ScoreBand;
+  range: string;
+  rangeDisplay: string;
+};
+
+/** /55 and display (/10) columns for the methodology Grading Bands table. */
+export function buildGradingBandTableRows(): GradingBandTableRow[] {
+  const bounded: GradingBandTableRow[] = SCORE_BAND_DEFINITIONS.map(
+    (def, index) => {
+      const maxInclusive =
+        index === 0
+          ? WEIGHTED_SCORE_MAX
+          : SCORE_BAND_DEFINITIONS[index - 1]!.minInclusive - 1;
+      return {
+        band: def.band,
+        range: `${def.minInclusive}–${maxInclusive}`,
+        rangeDisplay: `${formatDisplayScoreBare(def.minInclusive)}–${formatDisplayScoreBare(maxInclusive)}`,
+      };
+    },
+  );
+
+  const floorThreshold =
+    SCORE_BAND_DEFINITIONS[SCORE_BAND_DEFINITIONS.length - 1]!.minInclusive;
+
+  return [
+    ...bounded,
+    {
+      band: "Significant Concerns",
+      range: `<${floorThreshold}`,
+      rangeDisplay: `<${formatDisplayScoreBare(floorThreshold)}`,
+    },
+  ];
+}
+
 /** Letter grade from weighted /55 score (methodology appendix only). */
 export function deriveLetterFromWeighted(weighted: number): ScoreLetter {
-  if (weighted >= 47) return "A";
-  if (weighted >= 39) return "B";
-  if (weighted >= 30) return "C";
-  if (weighted >= 22) return "D";
+  for (const def of SCORE_BAND_DEFINITIONS) {
+    if (weighted >= def.minInclusive) return def.letter;
+  }
   return "F";
 }
 
@@ -661,10 +712,9 @@ export function deriveLetterFromWeighted(weighted: number): ScoreLetter {
  * non-display callers; display surfaces must not render this as a rank label.
  */
 export function deriveTierFromWeighted(weighted: number): ScoreTier {
-  if (weighted >= 47) return 5;
-  if (weighted >= 39) return 4;
-  if (weighted >= 30) return 3;
-  if (weighted >= 22) return 2;
+  for (const def of SCORE_BAND_DEFINITIONS) {
+    if (weighted >= def.minInclusive) return def.tier;
+  }
   return 1;
 }
 
@@ -728,10 +778,9 @@ export function sumCriterionScores(
 
 /** Band label from weighted /55 composite (SCHEMA_SPEC grading bands). */
 export function deriveBandFromWeighted(weighted: number): ScoreBand {
-  if (weighted >= 47) return "Exemplary";
-  if (weighted >= 39) return "Strong";
-  if (weighted >= 30) return "Faithful";
-  if (weighted >= 22) return "Needs Improvement";
+  for (const def of SCORE_BAND_DEFINITIONS) {
+    if (weighted >= def.minInclusive) return def.band;
+  }
   return "Significant Concerns";
 }
 
