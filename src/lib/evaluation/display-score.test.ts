@@ -7,7 +7,13 @@ import {
   parseEvaluationCardLabels,
   toDisplayScore,
 } from "./display-score";
-import { deriveBandFromWeighted, formatScoreBandStrict } from "./schema";
+import {
+  buildGradingBandTableRows,
+  deriveBandFromWeighted,
+  formatScoreBandStrict,
+  SCORE_BAND_DEFINITIONS,
+  WEIGHTED_SCORE_MAX,
+} from "./schema";
 
 describe("display score conversion", () => {
   it("converts band-edge weighted scores to base-10 display values", () => {
@@ -15,6 +21,11 @@ describe("display score conversion", () => {
     assert.equal(toDisplayScore(39), 7.1);
     assert.equal(toDisplayScore(30), 5.5);
     assert.equal(toDisplayScore(37), 6.7);
+    assert.equal(toDisplayScore(55), 10.0);
+    assert.equal(toDisplayScore(46), 8.4);
+    assert.equal(toDisplayScore(38), 6.9);
+    assert.equal(toDisplayScore(29), 5.3);
+    assert.equal(toDisplayScore(22), 4.0);
   });
 
   it("formats bare and denom display strings", () => {
@@ -25,6 +36,37 @@ describe("display score conversion", () => {
   it("derives bands from internal /55 scores, not display values", () => {
     assert.equal(deriveBandFromWeighted(37), "Faithful");
     assert.equal(deriveBandFromWeighted(toDisplayScore(37)), "Significant Concerns");
+  });
+
+  it("derives grading band table display column from band endpoints", () => {
+    const rows = buildGradingBandTableRows();
+    assert.equal(rows.length, SCORE_BAND_DEFINITIONS.length + 1);
+
+    for (let i = 0; i < SCORE_BAND_DEFINITIONS.length; i++) {
+      const def = SCORE_BAND_DEFINITIONS[i]!;
+      const maxInclusive =
+        i === 0
+          ? WEIGHTED_SCORE_MAX
+          : SCORE_BAND_DEFINITIONS[i - 1]!.minInclusive - 1;
+      const row = rows[i]!;
+
+      assert.equal(row.band, def.band);
+      assert.equal(row.range, `${def.minInclusive}–${maxInclusive}`);
+      assert.equal(
+        row.rangeDisplay,
+        `${formatDisplayScoreBare(def.minInclusive)}–${formatDisplayScoreBare(maxInclusive)}`,
+      );
+    }
+
+    const floorThreshold =
+      SCORE_BAND_DEFINITIONS[SCORE_BAND_DEFINITIONS.length - 1]!.minInclusive;
+    const floorRow = rows[rows.length - 1]!;
+    assert.equal(floorRow.band, "Significant Concerns");
+    assert.equal(floorRow.range, `<${floorThreshold}`);
+    assert.equal(
+      floorRow.rangeDisplay,
+      `<${formatDisplayScoreBare(floorThreshold)}`,
+    );
   });
 });
 

@@ -335,6 +335,7 @@ export type EvaluationReportCopy = {
   thisSermon: string;
   verdictImprovementFallback: string;
   gradingBandMeanings: Record<string, string>;
+  displayScoreRoundingNote: string;
   melodicLineTitle: string;
   melodicLinePassage: string;
   melodicLineReading: string;
@@ -440,6 +441,8 @@ const ENGLISH_COPY: EvaluationReportCopy = {
     "Significant Concerns":
       "Multiple criteria scored 1s. Address before preaching again.",
   },
+  displayScoreRoundingNote:
+    "Display scores are rounded from the internal /55 total, so some tenths never occur.",
   melodicLineTitle: "The text",
   melodicLinePassage: "This passage",
   melodicLineReading: "Melodic line",
@@ -551,6 +554,8 @@ const SPANISH_COPY: EvaluationReportCopy = {
     "Significant Concerns":
       "Varios criterios en 1. Atender antes de predicar de nuevo.",
   },
+  displayScoreRoundingNote:
+    "Las puntuaciones de pantalla se redondean desde el total interno /55, así que algunas décimas nunca aparecen.",
   melodicLineTitle: "El texto",
   melodicLinePassage: "Este pasaje",
   melodicLineReading: "Línea melódica",
