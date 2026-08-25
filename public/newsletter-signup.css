@@ -1,3 +1,7 @@
+:root {
+  --accent-on-dark: #b08431;
+}
+
 .newsletter-signup {
   font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
 }
@@ -118,6 +122,57 @@
 
 .newsletter-signup-message--error {
   color: #9b2c2c;
+}
+
+.newsletter-band {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 48px 24px;
+  margin-top: 56px;
+}
+.newsletter-band-inner {
+  max-width: var(--spine, 700px);
+  margin: 0 auto;
+}
+.newsletter-band .newsletter-signup-lead {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--bg);
+  margin: 0 0 20px;
+  text-align: left;
+}
+.newsletter-band .newsletter-signup-lead strong {
+  color: var(--bg);
+}
+.newsletter-band .newsletter-signup-row {
+  justify-content: flex-start;
+}
+.newsletter-band .newsletter-signup-input {
+  background: var(--bg);
+  border-color: var(--bg);
+  color: var(--ink);
+}
+.newsletter-band .newsletter-signup-input::placeholder {
+  color: var(--ink-soft);
+}
+.newsletter-band .newsletter-signup-btn {
+  background: var(--accent-on-dark);
+  color: var(--ink);
+}
+.newsletter-band .newsletter-signup-btn:hover {
+  opacity: 0.92;
+}
+.newsletter-band .newsletter-signup-message--success {
+  color: var(--bg);
+}
+.newsletter-band .newsletter-signup-message--error {
+  color: #f5c6c6;
+}
+
+@media (max-width: 720px) {
+  .newsletter-band {
+    padding: 40px 20px;
+  }
 }
 
 @media (max-width: 640px) {
