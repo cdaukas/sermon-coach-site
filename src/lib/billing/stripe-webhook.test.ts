@@ -547,7 +547,7 @@ describe("resolveCustomerEmail", () => {
 });
 
 describe("handleSubscriptionActivationEvent", () => {
-  it("deactivates profile when Stripe status is not active or trialing", async () => {
+  it("writes nothing when Stripe status is past_due", async () => {
     const { supabase, updates } = makeSupabaseMock({
       profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
     });
@@ -563,13 +563,100 @@ describe("handleSubscriptionActivationEvent", () => {
     );
 
     assert.equal(result.matched, true);
+    assert.equal(updates.length, 0);
+    assert.equal(errors.length, 0);
+  });
+
+  it("deactivates profile when Stripe status is unpaid", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
+
+    const result = await handleSubscriptionActivationEvent(
+      makeSubscription({ status: "unpaid" }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
     assert.deepEqual(updates, [
       {
         id: "user-1",
         values: { subscription_status: "inactive" },
       },
     ]);
-    assert.equal(errors.length, 0);
+  });
+
+  it("deactivates profile when Stripe status is paused", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
+
+    const result = await handleSubscriptionActivationEvent(
+      makeSubscription({ status: "paused" }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.deepEqual(updates, [
+      {
+        id: "user-1",
+        values: { subscription_status: "inactive" },
+      },
+    ]);
+  });
+
+  it("deactivates profile when Stripe status is incomplete_expired", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
+
+    const result = await handleSubscriptionActivationEvent(
+      makeSubscription({ status: "incomplete_expired" }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.deepEqual(updates, [
+      {
+        id: "user-1",
+        values: { subscription_status: "inactive" },
+      },
+    ]);
+  });
+
+  it("deactivates profile when Stripe status is incomplete", async () => {
+    const { supabase, updates } = makeSupabaseMock({
+      profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
+    });
+
+    const result = await handleSubscriptionActivationEvent(
+      makeSubscription({ status: "incomplete" }),
+      {
+        supabase,
+        stripe: {} as Stripe,
+        logError: () => {},
+      },
+    );
+
+    assert.equal(result.matched, true);
+    assert.deepEqual(updates, [
+      {
+        id: "user-1",
+        values: { subscription_status: "inactive" },
+      },
+    ]);
   });
 
   it("activates profile matched by subscription metadata supabase_user_id", async () => {
@@ -738,7 +825,7 @@ describe("handleInvoicePaymentFailed", () => {
     assert.equal(errors.length, 1);
   });
 
-  it("deactivates profile matched by stripe_customer_id", async () => {
+  it("leaves subscription_status untouched for a matched profile", async () => {
     const { supabase, updates } = makeSupabaseMock({
       profileByCustomerId: { id: "user-1", stripe_customer_id: "cus_abc" },
     });
@@ -773,12 +860,7 @@ describe("handleInvoicePaymentFailed", () => {
     );
 
     assert.equal(result.matched, true);
-    assert.deepEqual(updates, [
-      {
-        id: "user-1",
-        values: { subscription_status: "inactive" },
-      },
-    ]);
+    assert.equal(updates.length, 0);
   });
 });
 
