@@ -14,7 +14,10 @@ export type StripeWebhookDeps = {
 export type SubscriptionBillingFields = {
   subscriptionInterval: string | null;
   currentPeriodEnd: string | null;
+  startDate: string | null;
 };
+
+export type CancellationSource = "voluntary" | "payment_failure" | "admin";
 
 export function isActivatingSubscriptionStatus(status: string): boolean {
   return ACTIVATION_STATUSES.has(status);
@@ -71,6 +74,46 @@ export function extractSubscriptionBillingFields(
       periodEndUnix != null
         ? new Date(periodEndUnix * 1000).toISOString()
         : null,
+    startDate:
+      typeof subscription.start_date === "number"
+        ? new Date(subscription.start_date * 1000).toISOString()
+        : null,
+  };
+}
+
+export function cancellationSourceFromStripe(
+  subscription: Stripe.Subscription,
+): CancellationSource | null {
+  if (subscription.status === "unpaid") {
+    return "payment_failure";
+  }
+
+  const reason = subscription.cancellation_details?.reason;
+  if (reason === "payment_failed") {
+    return "payment_failure";
+  }
+  if (reason === "cancellation_requested") {
+    return "voluntary";
+  }
+
+  return null;
+}
+
+function cancellationStampFromSubscription(subscription: Stripe.Subscription): {
+  canceled_at: string | null;
+  cancellation_effective_at: string | null;
+  cancellation_reason: string | null;
+  cancellation_comment: string | null;
+} {
+  const billing = extractSubscriptionBillingFields(subscription);
+  return {
+    canceled_at:
+      typeof subscription.canceled_at === "number"
+        ? new Date(subscription.canceled_at * 1000).toISOString()
+        : null,
+    cancellation_effective_at: billing.currentPeriodEnd,
+    cancellation_reason: subscription.cancellation_details?.reason ?? null,
+    cancellation_comment: subscription.cancellation_details?.comment ?? null,
   };
 }
 
@@ -100,15 +143,50 @@ async function activateProfile(
   profileId: string,
   customerId: string,
   billing: SubscriptionBillingFields,
+  pendingCancellation?: { subscription: Stripe.Subscription },
 ): Promise<void> {
+  const { data: existing, error: readError } = await supabase
+    .from("profiles")
+    .select("subscription_started_at")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (readError) {
+    throw new Error(
+      `Failed to read profile ${profileId} before activate: ${readError.message}`,
+    );
+  }
+
+  const values: Record<string, unknown> = {
+    stripe_customer_id: customerId,
+    subscription_status: "active",
+    subscription_interval: billing.subscriptionInterval,
+    current_period_end: billing.currentPeriodEnd,
+  };
+
+  if (pendingCancellation && pendingCancellation.subscription) {
+    const source =
+      cancellationSourceFromStripe(pendingCancellation.subscription) ??
+      "voluntary";
+    Object.assign(values, {
+      cancellation_source: source,
+      ...cancellationStampFromSubscription(pendingCancellation.subscription),
+    });
+  } else {
+    values.canceled_at = null;
+    values.cancellation_effective_at = null;
+    values.cancellation_source = null;
+    values.cancellation_reason = null;
+    values.cancellation_comment = null;
+  }
+
+  if (existing?.subscription_started_at == null && billing.startDate) {
+    values.subscription_started_at = billing.startDate;
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({
-      stripe_customer_id: customerId,
-      subscription_status: "active",
-      subscription_interval: billing.subscriptionInterval,
-      current_period_end: billing.currentPeriodEnd,
-    })
+    .update(values)
     .eq("id", profileId);
 
   if (error) {
@@ -119,13 +197,26 @@ async function activateProfile(
 async function deactivateProfile(
   supabase: SupabaseClient,
   profileId: string,
+  source: CancellationSource | null,
+  subscription: Stripe.Subscription,
 ): Promise<void> {
   // Intentionally does not null subscription_interval or current_period_end.
+  const values: Record<string, unknown> = {
+    subscription_status: "inactive",
+  };
+
+  const isEndedStatus =
+    subscription.status === "canceled" || subscription.status === "unpaid";
+  if (source != null || isEndedStatus) {
+    Object.assign(values, {
+      cancellation_source: source,
+      ...cancellationStampFromSubscription(subscription),
+    });
+  }
+
   const { error } = await supabase
     .from("profiles")
-    .update({
-      subscription_status: "inactive",
-    })
+    .update(values)
     .eq("id", profileId);
 
   if (error) {
@@ -637,6 +728,7 @@ async function loadBillingFieldsForCheckoutSession(
   const empty: SubscriptionBillingFields = {
     subscriptionInterval: null,
     currentPeriodEnd: null,
+    startDate: null,
   };
 
   const subscriptionRef = session.subscription;
@@ -717,6 +809,7 @@ export async function handleSubscriptionActivationEvent(
       match.profileId,
       customerId,
       extractSubscriptionBillingFields(subscription),
+      subscription.cancel_at_period_end ? { subscription } : undefined,
     );
   } else if (isGraceSubscriptionStatus(subscription.status)) {
     // Stripe is still retrying. Write nothing: not activate, not deactivate.
@@ -725,7 +818,28 @@ export async function handleSubscriptionActivationEvent(
       status: subscription.status,
     });
   } else {
-    await deactivateProfile(deps.supabase, match.profileId);
+    const source = cancellationSourceFromStripe(subscription);
+    if (
+      (subscription.status === "canceled" ||
+        subscription.status === "unpaid") &&
+      source == null
+    ) {
+      deps.logError(
+        "cancellation source ambiguous; writing inactive without guessing source",
+        {
+          profileId: match.profileId,
+          subscriptionId: subscription.id,
+          stripeStatus: subscription.status,
+          cancellationReason: subscription.cancellation_details?.reason ?? null,
+        },
+      );
+    }
+    await deactivateProfile(
+      deps.supabase,
+      match.profileId,
+      source,
+      subscription,
+    );
   }
 
   return { matched: true };
@@ -768,7 +882,18 @@ export async function handleSubscriptionDeletedEvent(
     return { matched: false };
   }
 
-  await deactivateProfile(deps.supabase, match.profileId);
+  const source = cancellationSourceFromStripe(subscription);
+  if (source == null) {
+    deps.logError(
+      "subscription.deleted: cancellation source ambiguous; writing inactive without guessing source",
+      {
+        profileId: match.profileId,
+        subscriptionId: subscription.id,
+        cancellationReason: subscription.cancellation_details?.reason ?? null,
+      },
+    );
+  }
+  await deactivateProfile(deps.supabase, match.profileId, source, subscription);
   return { matched: true };
 }
 
