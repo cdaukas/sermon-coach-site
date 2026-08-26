@@ -1,9 +1,11 @@
+import Link from "next/link";
+
 const NAV_ITEMS = [
-  "How It Works",
-  "Growth",
-  "Methodology",
-  "For Churches",
-  "Pricing",
+  { label: "How It's Scored", href: "/how-its-scored.html" },
+  { label: "Free Outline Check", href: "/sketch" },
+  { label: "Pricing", href: "/pricing.html" },
+  { label: "FAQ", href: "/faq.html" },
+  { label: "Story", href: "/story.html" },
 ] as const;
 
 export function HomeV2Header() {
@@ -13,12 +15,21 @@ export function HomeV2Header() {
         <div className="brand">
           The Sermon <span className="brand-accent">Coach</span>&trade;
         </div>
-        <div className="navlinks" aria-hidden="true">
-          {NAV_ITEMS.map((label) => (
-            <span key={label}>{label}</span>
+        <div className="navlinks">
+          {NAV_ITEMS.map((item) => (
+            <a key={item.label} href={item.href}>
+              {item.label}
+            </a>
           ))}
         </div>
-        <span className="btn">Start Free</span>
+        <div className="navactions">
+          <Link href="/login" className="navlogin">
+            Log in
+          </Link>
+          <Link href="/start" className="btn">
+            Start free
+          </Link>
+        </div>
       </div>
     </nav>
   );
