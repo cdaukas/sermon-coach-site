@@ -10,6 +10,7 @@ import { HomeV2PreachingWeek } from "@/components/home-v2/HomeV2PreachingWeek";
 import { HomeV2Tagline } from "@/components/home-v2/HomeV2Tagline";
 import { HomeV2Testimonial } from "@/components/home-v2/HomeV2Testimonial";
 import { HomeV2WhatCoachDoes } from "@/components/home-v2/HomeV2WhatCoachDoes";
+import "@/components/home-v2/home-v2.css";
 
 export const metadata: Metadata = {
   title: "Homepage draft v2",
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function HomeV2Page() {
   return (
-    <main>
+    <div className="home-v2">
       <HomeV2Header />
       <HomeV2Hero />
       <HomeV2Tagline />
@@ -35,6 +36,6 @@ export default function HomeV2Page() {
       <HomeV2PreachingWeek />
       <HomeV2ClosingCta />
       <HomeV2Footer />
-    </main>
+    </div>
   );
 }
