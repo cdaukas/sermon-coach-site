@@ -409,3 +409,33 @@ At the start of any task:
 7. **Run appropriate checks** — unit tests, typecheck, lint, build as warranted.
 8. **Report exactly what changed**: files, why, what was verified, and what was
    deliberately left alone.
+
+---
+
+## 12. Site chrome lives in two places
+
+The header, nav, and footer are implemented twice. Any change to them touches
+17 surfaces:
+
+- `src/components/home-v2/HomeV2Header.tsx` — the React homepage at `/`.
+  Mobile nav is a `"use client"` component driven by `useState`.
+- 16 hand-written static HTML files — the 7 root pages in `public/` plus
+  `public/blog/` (8 posts + `_template.html`). Each carries its own inline
+  `<style>` block; there is no shared stylesheet. Mobile nav is a vanilla-JS
+  listener.
+
+Rules when touching any of them:
+
+1. Change all 17 or none. `public/blog/` is the one that gets forgotten.
+2. Verify by parsing CSS rules and diffing normalized output — never by
+   string matching. The blog files write `.nav-links` on a single line while
+   the root pages use multi-line, so a literal-match replacement silently
+   skips 9 files.
+3. Spot-checking two or three files does not establish uniformity. Check all 17.
+4. `why-sermon-coach.html` has drifted from the other root pages and may need
+   its own handling.
+5. Nav order is canonical and identical everywhere: How It's Scored,
+   Free Outline Check, Blog, Pricing, FAQ, Story, Log in, Start free.
+
+The durable fix is porting the static pages into React so there is one header.
+Until then, assume every chrome change is a 17-file change.
