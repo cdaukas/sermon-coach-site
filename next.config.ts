@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Without this, a stray package-lock.json in the home directory wins the
+  // workspace-root inference and Turbopack watches every file under ~/.
+  turbopack: {
+    root: __dirname,
+  },
   async redirects() {
     return [
       {
@@ -14,9 +19,8 @@ const nextConfig: NextConfig = {
         destination: "/start",
         statusCode: 301,
       },
-      // The rewrite below maps / → /index.html internally. These two catch
-      // anyone who still requests the file path so the duplicate URL 301s
-      // to the canonical one instead of serving a second live copy.
+      // /index.html no longer exists; this keeps any lingering bookmark or
+      // backlink 301ing to the canonical "/" instead of 404ing.
       { source: "/index.html", destination: "/", statusCode: 301 },
       { source: "/blog/index.html", destination: "/blog", statusCode: 301 },
       // Extensionless marketing bookmarks → canonical .html URLs (301, not rewrite).
@@ -64,10 +68,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        {
-          source: "/",
-          destination: "/index.html",
-        },
+        // "/" is now the app route in src/app/page.tsx. The old rewrite to the
+        // static /index.html is gone with the file (docs/legacy-homepage.html).
         {
           source: "/blog",
           destination: "/blog/index.html",
