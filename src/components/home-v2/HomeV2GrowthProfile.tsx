@@ -37,7 +37,7 @@ export function HomeV2GrowthProfile() {
         <div className="profilecard">
           <div className="profilehead">
             <strong>Your preaching growth profile</strong>
-            <span className="illustration">Illustration</span>
+            <span className="illustration">Example profile</span>
           </div>
 
           <div className="profilebody">
