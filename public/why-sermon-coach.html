@@ -178,7 +178,7 @@
   .beliefs p {
     margin-bottom: 0.85em;
   }
-  .belief-turn {
+  .content .belief-turn {
     margin-top: 28px;
     padding-top: 28px;
     border-top: 1px solid var(--rule);
@@ -214,6 +214,7 @@
     max-width: 1100px;
     margin: 0 auto;
     padding: 40px 24px 48px;
+    text-align: center;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px;
     color: var(--ink-soft);
@@ -294,6 +295,151 @@
     h1 { font-size: 32px; }
     .lede p, .content p { font-size: 17px; }
   }
+
+  /* ---------- AI and preaching: structured sections ---------- */
+  .lede .lede-setup {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .lede .lede-question {
+    padding: 22px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-size: 21px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin-bottom: 0;
+  }
+
+  /* what it won't do — compact cards */
+  .wont-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .wont-card {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 22px 20px;
+  }
+  .wont-card strong {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .wont-card p {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  /* what it does — numbered progression */
+  .content .does-intro { color: var(--ink-soft); margin-bottom: 28px; }
+  .does-list { list-style: none; margin: 0; padding: 0; }
+  .does-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 16px;
+    align-items: baseline;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .does-row:last-child { border-bottom: 1px solid var(--rule); }
+  .does-num {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+  .does-text strong {
+    display: block;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .does-text p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  /* what I believe — statements, then the concluding conviction */
+  .content ul.beliefs { list-style: none; margin: 0; padding: 0; }
+  .content ul.beliefs li {
+    position: relative;
+    padding: 15px 0 15px 24px;
+    border-top: 1px solid var(--rule);
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .content ul.beliefs li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 26px;
+    width: 10px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .content .belief-turn {
+    margin-top: 36px;
+    padding: 26px 24px;
+    border-top: none;
+    background: var(--panel);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .content .agree { color: var(--ink-soft); }
+
+  /* founder statement — pull quote, not a testimonial */
+  .founder-quote {
+    margin: 48px 0 0;
+    padding-left: 24px;
+    border-left: 3px solid var(--accent);
+  }
+  .founder-quote blockquote {
+    margin: 0 0 14px;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .founder-quote figcaption {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+  }
+  .content .founder-close { margin-top: 20px; padding-left: 27px; color: var(--ink-soft); }
+
+  @media (max-width: 640px) {
+    .wont-grid { grid-template-columns: 1fr; }
+    .does-row { grid-template-columns: 1fr; gap: 4px; }
+    .lede .lede-question { font-size: 18px; }
+    .content .belief-turn { font-size: 18px; padding: 22px 20px; }
+    .founder-quote { padding-left: 18px; }
+    .founder-quote blockquote { font-size: 19px; }
+    .content .founder-close { padding-left: 21px; }
+  }
 </style>
 </head>
 <body>
@@ -318,45 +464,96 @@
 </nav>
 
 <header class="hero">
-  <div class="eyebrow">Why I built this</div>
-  <h1>Concerned about AI and preaching? Good. So am I.</h1>
+  <div class="eyebrow">AI and preaching</div>
+  <h1>AI should help you see your preaching. Not replace it.</h1>
   <img class="founder-photo" src="/chris-daukas.png" width="682" height="1024" alt="Dr. Christopher M. Daukas">
   <div class="lede">
-    <p>I have preached for twenty five years, and I am not looking for something to do the work for me. Neither should you be. I believe the hard work of prayer and study and wrestling with the text is what the Spirit uses to form the preacher, not just the sermon.</p>
-    <p>So I built The Sermon Coach around a narrower question. Could technology help preachers see what they actually wrote, without touching any of the work that formed them?</p>
+    <p>I have preached for twenty five years, and I am not looking for something to do the work for me. Neither should you be. The hard work of prayer, study, and wrestling with the text is what the Spirit uses to form the preacher&mdash;not just the sermon.</p>
+    <p class="lede-setup">So I built The Sermon Coach around a narrower question:</p>
+    <p class="lede-question">Could technology help preachers see what they actually wrote, without touching the work that formed them?</p>
   </div>
 </header>
 
 <main class="content">
-  <h2>What it will not do</h2>
-  <p>It will not write your sermon, and it will not study the passage for you.</p>
-  <p>It will not tell you what God is saying. It does not know, and neither does anything else you can buy.</p>
-  <p>It will not replace your judgment about the people who will be sitting in front of you on Sunday. It has never met them.</p>
-  <p>And it will not tell you whether you were faithful. That is not something software can measure, and anything that claims otherwise is selling you something.</p>
-
-  <h2>What it does</h2>
-  <p>It reads the sermon you already wrote.</p>
-  <p>It evaluates that sermon against eleven criteria I built out of Bryan Chapell, Tim Keller, John Piper, Haddon Robinson, the Simeon Trust, and 9Marks. The criteria are mine. The convictions underneath them are not, and I have named where they came from.</p>
-  <p>It shows you the sentences in your own manuscript that led to each observation, so you can check the work rather than take its word for it.</p>
-  <p>It tells you what is working, which is the part most preachers never hear specifically.</p>
-  <p>It puts the growth areas in order, so you know which change is worth making first.</p>
-  <p>And it keeps your evaluations together, so you can see what your preaching is doing over months instead of on one Sunday.</p>
-
-  <h2>What I believe</h2>
-  <div class="beliefs">
-    <p>Preaching can improve and is worth developing.</p>
-    <p>The preacher is responsible for the work.</p>
-    <p>Scripture is the authority and technology is not.</p>
-    <p>Feedback makes preachers better, and most of us are not getting any.</p>
-    <p>One sermon can teach you something, and a body of sermons can show you a pattern.</p>
-    <p>Technology can serve the preacher without becoming the preacher.</p>
-    <p class="belief-turn">Never let a tool become a replacement for the Holy Spirit.</p>
+  <h2>What it won&rsquo;t do</h2>
+  <div class="wont-grid">
+    <div class="wont-card">
+      <strong>It won&rsquo;t write your sermon.</strong>
+      <p>You do the study, the wrestling, the writing, and the preaching.</p>
+    </div>
+    <div class="wont-card">
+      <strong>It won&rsquo;t tell you what God is saying.</strong>
+      <p>Scripture is the authority. Technology isn&rsquo;t.</p>
+    </div>
+    <div class="wont-card">
+      <strong>It won&rsquo;t know your people.</strong>
+      <p>You know the people sitting in front of you on Sunday. It doesn&rsquo;t.</p>
+    </div>
+    <div class="wont-card">
+      <strong>It won&rsquo;t judge your faithfulness.</strong>
+      <p>Faithfulness isn&rsquo;t something software can measure.</p>
+    </div>
   </div>
 
-  <h2>You do not have to agree with it</h2>
-  <p>The evaluation is an assessment, not a verdict. Read it, take what is useful, and throw out the rest. You know the text, the room, and what that Sunday was for. It does not.</p>
-  <p>I ran my own sermons through it before I showed it to anyone. It found things I had missed, and I knew it the second I saw them. That is roughly what a good editor does.</p>
-  <p class="signoff">Dr. Christopher M. Daukas</p>
+  <h2>What it does</h2>
+  <p class="does-intro">It reads the sermon you already wrote.</p>
+  <ol class="does-list">
+    <li class="does-row">
+      <span class="does-num">01</span>
+      <div class="does-text">
+        <strong>It evaluates your sermon against the standard.</strong>
+        <p>Eleven criteria built from established convictions about faithful, clear, Christ-centered preaching.</p>
+      </div>
+    </li>
+    <li class="does-row">
+      <span class="does-num">02</span>
+      <div class="does-text">
+        <strong>It shows its work.</strong>
+        <p>See the sentences in your own manuscript that led to each observation, so you can examine the feedback rather than simply take its word for it.</p>
+      </div>
+    </li>
+    <li class="does-row">
+      <span class="does-num">03</span>
+      <div class="does-text">
+        <strong>It tells you what is working.</strong>
+        <p>Most preachers hear what needs fixing. Sermon Coach also shows you what you&rsquo;re already doing well.</p>
+      </div>
+    </li>
+    <li class="does-row">
+      <span class="does-num">04</span>
+      <div class="does-text">
+        <strong>It prioritizes your growth.</strong>
+        <p>Your growth areas are put in order, so you know which change is worth making first.</p>
+      </div>
+    </li>
+    <li class="does-row">
+      <span class="does-num">05</span>
+      <div class="does-text">
+        <strong>It tracks your development.</strong>
+        <p>Keep your evaluations together and see what your preaching is doing over months&mdash;not just on one Sunday.</p>
+      </div>
+    </li>
+  </ol>
+
+  <h2>What I believe</h2>
+  <ul class="beliefs">
+    <li>Preaching can improve and is worth developing.</li>
+    <li>The preacher is responsible for the work.</li>
+    <li>Scripture is the authority and technology is not.</li>
+    <li>Feedback makes preachers better, and most of us are not getting any.</li>
+    <li>One sermon can teach you something. A body of sermons can show you a pattern.</li>
+    <li>Technology can serve the preacher without becoming the preacher.</li>
+  </ul>
+  <p class="belief-turn">Never let a tool become a replacement for the Holy Spirit.</p>
+
+  <h2>You don&rsquo;t have to agree with it.</h2>
+  <p class="agree">The evaluation is an assessment, not a verdict. Read it, take what is useful, and throw out the rest. You know the text, the room, and what that Sunday was for. It doesn&rsquo;t.</p>
+
+  <figure class="founder-quote">
+    <blockquote>I ran my own sermons through it before I showed it to anyone. It found things I had missed, and I knew it the second I saw them.</blockquote>
+    <figcaption>Dr. Christopher M. Daukas</figcaption>
+  </figure>
+  <p class="founder-close">That&rsquo;s roughly what a good editor does.</p>
 
   <div class="cta">
     <a href="/start" class="cta-btn">Start with a free evaluation</a>
