@@ -799,6 +799,9 @@
 .home-v2 .objection h2 {
   margin: 10px auto 18px;
   max-width: 780px;
+  /* Keeps "Not replace it." from splitting across the line break at desktop.
+     Ignored by browsers without support, which fall back to normal wrapping. */
+  text-wrap: balance;
 }
 
 .home-v2 .objection-lead {
