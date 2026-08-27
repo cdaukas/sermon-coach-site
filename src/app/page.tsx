@@ -7,8 +7,6 @@ import { HomeV2Framework } from "@/components/home-v2/HomeV2Framework";
 import { HomeV2GrowthProfile } from "@/components/home-v2/HomeV2GrowthProfile";
 import { HomeV2Header } from "@/components/home-v2/HomeV2Header";
 import { HomeV2Hero } from "@/components/home-v2/HomeV2Hero";
-import { HomeV2Institutions } from "@/components/home-v2/HomeV2Institutions";
-import { HomeV2Mentoring } from "@/components/home-v2/HomeV2Mentoring";
 import { HomeV2Newsletter } from "@/components/home-v2/HomeV2Newsletter";
 import { HomeV2Proof } from "@/components/home-v2/HomeV2Proof";
 import { HomeV2SampleSermon } from "@/components/home-v2/HomeV2SampleSermon";
@@ -62,8 +60,6 @@ export default function HomePage() {
       <HomeV2SampleSermon />
       <HomeV2GrowthProfile />
       <HomeV2Proof />
-      <HomeV2Mentoring />
-      <HomeV2Institutions />
       <HomeV2AiAndPreaching />
       <HomeV2StartFree />
       <HomeV2Newsletter />
