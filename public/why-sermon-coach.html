@@ -16,6 +16,7 @@
     --ink-soft: #4a5568;
     --ink-mid: #2a3447;
     --rule: #d4cfc1;
+    --shadow-lift: 0 12px 32px rgba(26,35,50,.10), 0 4px 12px rgba(26,35,50,.06);
     --panel: #ffffff;
     --accent: #a67c2e;
     --accent-soft: #c9a55c;
@@ -33,8 +34,9 @@
   }
 
   .nav {
-    padding: 28px 24px;
-    max-width: 1100px;
+    height: 78px;
+    padding: 0 28px;
+    max-width: 1160px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -87,7 +89,7 @@
   }
   .nav-links {
     display: flex;
-    gap: 24px;
+    gap: 26px;
     align-items: center;
   }
   .nav-link {
@@ -98,15 +100,15 @@
     text-decoration: none;
     transition: color 0.15s ease;
   }
-  .nav-link:hover { color: var(--accent); }
+  .nav-link:hover { color: var(--ink); text-decoration: underline; }
   .nav-start {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     background: var(--ink);
     color: var(--bg);
     text-decoration: none;
-    padding: 10px 16px;
+    padding: 13px 18px;
     border-radius: 4px;
     border: 1px solid var(--ink);
     transition: all 0.15s ease;
@@ -230,24 +232,65 @@
 
   @media (max-width: 768px) {
     .nav-toggle { display: flex; flex-direction: column; }
+    .nav {
+      position: relative;
+      padding: 0 20px;
+      gap: 12px;
+    }
+    .wordmark {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      font-size: clamp(13px, 4.1vw, 20px);
+    }
     .nav-links {
       display: none;
       position: absolute;
-      top: 88px;
+      top: 100%;
       left: 0;
       right: 0;
+      z-index: 100;
       flex-direction: column;
       align-items: stretch;
       gap: 0;
+      margin: 0;
+      padding: 8px 20px 20px;
       background: var(--bg);
       border-bottom: 1px solid var(--rule);
-      padding: 8px 24px 20px;
-      z-index: 20;
+      box-shadow: var(--shadow-lift);
     }
-    .nav.is-open .nav-links { display: flex; }
-    .nav { position: relative; }
-    .nav-link, .nav-start { padding: 12px 0; }
-    .nav-start { text-align: center; }
+    .nav.is-open .nav-links {
+      display: flex;
+    }
+    .nav-link {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      font-size: 15px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-link:last-of-type {
+      border-bottom: none;
+    }
+    .nav-start {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 12px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+    .nav-start:hover {
+      background: var(--ink-mid);
+      color: var(--bg);
+      border-color: var(--ink-mid);
+    }
     h1 { font-size: 32px; }
     .lede p, .content p { font-size: 17px; }
   }
@@ -263,8 +306,8 @@
     <span class="nav-toggle-bar"></span>
   </button>
   <div class="nav-links" id="nav-menu">
-    <a href="/sketch" class="nav-link">Free Outline Check</a>
     <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
+    <a href="/sketch" class="nav-link">Free Outline Check</a>
     <a href="/blog" class="nav-link">Blog</a>
     <a href="./pricing.html" class="nav-link">Pricing</a>
     <a href="./faq.html" class="nav-link">FAQ</a>

@@ -23,6 +23,7 @@
 }
 
 .home-v2 .brand {
+  text-decoration: none;
   font-family: var(--font-serif);
   font-weight: 600;
   font-size: 20px;
@@ -32,6 +33,56 @@
 
 .home-v2 .brand-accent {
   color: var(--sc-accent);
+}
+
+/* Transparent on desktop so brand | links | actions remain three flex
+   children of .nav. Becomes the dropdown panel at ≤720px. */
+.home-v2 .navmenu {
+  display: contents;
+}
+
+.home-v2 .navtoggle {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.home-v2 .navtoggle:focus-visible {
+  outline: 2px solid var(--sc-accent);
+  outline-offset: 2px;
+}
+
+.home-v2 .navtoggle-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--sc-ink);
+  border-radius: 1px;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.home-v2 .nav.is-open .navtoggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.home-v2 .nav.is-open .navtoggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.home-v2 .nav.is-open .navtoggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
 }
 
 .home-v2 .navlinks {
@@ -979,8 +1030,72 @@
     padding: 0 20px;
   }
 
-  .home-v2 .navlinks {
+  .home-v2 .nav {
+    position: relative;
+    gap: 12px;
+  }
+
+  .home-v2 .brand {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .home-v2 .navtoggle {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home-v2 .navmenu {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin: 0;
+    padding: 8px 20px 20px;
+    background: var(--sc-bg);
+    border-bottom: 1px solid var(--sc-rule);
+    box-shadow: var(--sc-shadow-lift);
+  }
+
+  .home-v2 .nav.is-open .navmenu {
+    display: flex;
+  }
+
+  .home-v2 .navmenu .navlinks,
+  .home-v2 .navmenu .navactions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .home-v2 .navmenu .navlinks a,
+  .home-v2 .navmenu .navlogin {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    font-size: 15px;
+    border-bottom: 1px solid var(--sc-rule);
+  }
+
+  .home-v2 .navmenu .navlogin {
+    border-bottom: none;
+  }
+
+  .home-v2 .navmenu .btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    padding: 12px 18px;
+    font-size: 14px;
   }
 
   .home-v2 .hero {
