@@ -60,10 +60,13 @@ export async function endMentorRelationshipAction(
   }
 
   if (result.ok === true) {
+    const notifyId =
+      result.relationship_id.length > 0 ? result.relationship_id : id;
+    console.error("[seat-end-email] rpc ok, notifying", {
+      relationshipId: notifyId,
+    });
     try {
-      await notifyMenteeSeatEnded(
-        result.relationship_id.length > 0 ? result.relationship_id : id,
-      );
+      await notifyMenteeSeatEnded(notifyId);
     } catch (notifyError) {
       console.error(
         "[seat-end-email] notify failed after end; termination stands",
