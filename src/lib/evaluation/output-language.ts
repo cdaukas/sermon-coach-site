@@ -329,6 +329,11 @@ export type EvaluationReportCopy = {
   displayConversion: (weighted: number, display: string) => string;
   whyDoubleWeightLead: string;
   whyDoubleWeightBody: string;
+  whatTheScoresMean: string;
+  criterionScaleLead: string;
+  criterionScoreTableHeaders: [string, string];
+  criterionScoreMeanings: Array<{ score: number; meaning: string }>;
+  criterionScaleClose: string;
   gradingBands: string;
   placesThisSermon: (display: string, band: string, weighted: number) => string;
   bandTableHeaders: [string, string, string, string];
@@ -425,6 +430,36 @@ const ENGLISH_COPY: EvaluationReportCopy = {
   whyDoubleWeightLead: "Why some criteria count twice.",
   whyDoubleWeightBody:
     "Three of the eleven criteria carry double weight in the composite score: Fallen Condition Focus, Gospel Clarity, and Application. These are the load-bearing tests of whether a sermon actually preaches the gospel to real people, not just whether it handles the text well, but whether it brings that text to bear on human fallenness, makes the good news unmistakable, and lands it in the hearer's actual life. A sermon can score respectably everywhere else and still miss the point if these three are weak, so the math reflects what the pulpit reflects.",
+  whatTheScoresMean: "What the scores mean",
+  criterionScaleLead: "Each of the eleven criteria is scored 1 to 5.",
+  criterionScoreTableHeaders: ["Score", "What it means"],
+  criterionScoreMeanings: [
+    {
+      score: 5,
+      meaning:
+        "Excellent. Nothing this criterion asks for is missing, and another preacher could learn from how it was done.",
+    },
+    {
+      score: 4,
+      meaning:
+        "Competent and strong. One improvement is available, and it is a matter of execution rather than something absent.",
+    },
+    {
+      score: 3,
+      meaning:
+        "Present and genuinely done, but underdeveloped, general, or asserted rather than shown.",
+    },
+    {
+      score: 2,
+      meaning: "Present in name only, or working against itself.",
+    },
+    {
+      score: 1,
+      meaning: "Absent, or wrong.",
+    },
+  ],
+  criterionScaleClose:
+    "A 3 is not a failing mark. Most faithful weekly preaching lands at 3 on several criteria, and a sermon built of 3s and 4s is doing the work. A 4 asks for something beyond competence, and a 5 is worth studying, not flawless.",
   gradingBands: "Grading Bands",
   placesThisSermon: (display, band, weighted) =>
     `Display score of ${display} places this sermon in ${band}. Band thresholds use the internal weighted /55 score (${weighted}/55).`,
@@ -538,6 +573,36 @@ const SPANISH_COPY: EvaluationReportCopy = {
   whyDoubleWeightLead: "Por qué algunos criterios cuentan doble.",
   whyDoubleWeightBody:
     "Tres de los once criterios llevan peso doble en la puntuación compuesta: Enfoque de la condición caída, Claridad del evangelio y Aplicación. Son las pruebas de carga de si un sermón realmente predica el evangelio a personas concretas: no solo si trata el texto con cuidado, sino si lleva ese texto a la condición caída, deja las buenas nuevas inconfundibles y las aterriza en la vida real del oyente. Un sermón puede puntuar decentemente en todo lo demás y aún así fallar el punto si estos tres están débiles, así que la matemática refleja lo que el púlpito refleja.",
+  whatTheScoresMean: "Qué significan las puntuaciones",
+  criterionScaleLead: "Cada uno de los once criterios se puntúa del 1 al 5.",
+  criterionScoreTableHeaders: ["Puntuación", "Qué significa"],
+  criterionScoreMeanings: [
+    {
+      score: 5,
+      meaning:
+        "Excelente. Nada de lo que este criterio pide falta, y otro predicador podría aprender de cómo se hizo.",
+    },
+    {
+      score: 4,
+      meaning:
+        "Competente y sólido. Hay una mejora disponible, y es cuestión de ejecución más que de algo ausente.",
+    },
+    {
+      score: 3,
+      meaning:
+        "Presente y hecho de verdad, pero poco desarrollado, general, o afirmado más que mostrado.",
+    },
+    {
+      score: 2,
+      meaning: "Presente solo de nombre, o trabajando contra sí mismo.",
+    },
+    {
+      score: 1,
+      meaning: "Ausente, o equivocado.",
+    },
+  ],
+  criterionScaleClose:
+    "Un 3 no es una nota de suspenso. La mayor parte de la predicación fiel semanal obtiene un 3 en varios criterios, y un sermón hecho de 3s y 4s está haciendo el trabajo. Un 4 pide algo más que competencia, y un 5 vale la pena estudiarlo, no es impecable.",
   gradingBands: "Bandas de puntuación",
   placesThisSermon: (display, band, weighted) =>
     `La puntuación de pantalla de ${display} sitúa este sermón en ${band}. Los umbrales de banda usan la puntuación ponderada interna /55 (${weighted}/55).`,

@@ -158,6 +158,63 @@ export function MethodologySection({
           className="mb-3 text-lg font-normal"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
+          {copy.whatTheScoresMean}
+        </h3>
+        <p
+          className="mb-5 text-[14px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+        >
+          {copy.criterionScaleLead}
+        </p>
+        <div className="-mx-2 overflow-x-auto">
+          <table className="w-full border-collapse text-[13px]">
+            <thead>
+              <tr style={{ ...uiFont, color: "var(--sc-ink)" }}>
+                {copy.criterionScoreTableHeaders.map((col) => (
+                  <th
+                    key={col}
+                    className="border-b px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.06em]"
+                    style={{
+                      borderColor: "var(--sc-rule)",
+                      background: "var(--sc-cream-tint)",
+                    }}
+                  >
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {copy.criterionScoreMeanings.map((row) => (
+                <tr key={row.score} style={{ ...serifFont, color: "var(--sc-ink)" }}>
+                  <td
+                    className="border-b px-3 py-2.5 font-semibold"
+                    style={{ borderColor: "var(--sc-rule)" }}
+                  >
+                    {row.score}
+                  </td>
+                  <td
+                    className="border-b px-3 py-2.5"
+                    style={{ borderColor: "var(--sc-rule)" }}
+                  >
+                    {row.meaning}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p
+          className="mb-8 mt-3 text-[13px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+        >
+          {copy.criterionScaleClose}
+        </p>
+
+        <h3
+          className="mb-3 text-lg font-normal"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
           {copy.gradingBands}
         </h3>
         <p
