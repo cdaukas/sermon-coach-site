@@ -8,10 +8,8 @@ import {
   releaseMentoredEvaluationErrorMessage,
   type ReleaseMentoredEvaluationResult,
 } from "@/lib/mentor/release";
-import {
-  endMentorRelationshipErrorMessage,
-  type EndMentorRelationshipResult,
-} from "@/lib/mentor/relationships";
+import { endMentorRelationshipAction } from "@/lib/mentor/actions";
+import { endMentorRelationshipErrorMessage } from "@/lib/mentor/relationships";
 import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import type { MentoredSubmissionListItem } from "@/lib/mentor/submissions";
 import { createClient } from "@/lib/supabase/client";
@@ -413,28 +411,14 @@ function EndMentoring({
     setEnding(true);
 
     try {
-      const supabase = createClient();
-      const { data, error: rpcError } = await supabase.rpc(
-        "end_mentor_relationship",
-        { p_relationship_id: relationshipId },
-      );
+      const result = await endMentorRelationshipAction(relationshipId);
 
-      if (rpcError) {
-        setError(endMentorRelationshipErrorMessage(null));
-        return;
-      }
-
-      const result = data as EndMentorRelationshipResult | null;
-      if (result?.ok === true) {
+      if (result.ok === true) {
         onEnded(relationshipId);
         return;
       }
 
-      setError(
-        endMentorRelationshipErrorMessage(
-          result && "error_code" in result ? result.error_code : null,
-        ),
-      );
+      setError(endMentorRelationshipErrorMessage(result.error_code));
     } catch {
       setError(endMentorRelationshipErrorMessage(null));
     } finally {
