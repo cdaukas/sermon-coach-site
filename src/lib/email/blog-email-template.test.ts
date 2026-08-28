@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { renderBlogEmailHtml } from "./blog-email-template";
 import { BLOG_EMAIL_CTA_URL, BLOG_EMAIL_MAILING_ADDRESS } from "./constants";
-import { buildUnsubscribeUrl, signUnsubscribeToken, verifyUnsubscribeToken } from "./unsubscribe";
+import { buildUnsubscribePostUrl, buildUnsubscribeUrl, signUnsubscribeToken, verifyUnsubscribeToken } from "./unsubscribe";
 
 describe("blog email template", () => {
   it("renders week content into the locked template", () => {
@@ -36,5 +36,20 @@ describe("unsubscribe tokens", () => {
     process.env.EMAIL_UNSUBSCRIBE_SECRET = "test-secret";
     const token = signUnsubscribeToken("Reader@Example.com");
     assert.equal(verifyUnsubscribeToken(token), "reader@example.com");
+  });
+
+  it("builds a human URL and a same-host one-click POST URL", () => {
+    process.env.EMAIL_UNSUBSCRIBE_SECRET = "test-secret";
+    const human = buildUnsubscribeUrl("reader@example.com");
+    const post = buildUnsubscribePostUrl("reader@example.com");
+
+    assert.match(human, /^https:\/\/www\.sermoncoach\.online\/unsubscribe\?token=/);
+    assert.match(post, /^https:\/\/www\.sermoncoach\.online\/api\/unsubscribe\?token=/);
+
+    const humanToken = new URL(human).searchParams.get("token");
+    const postToken = new URL(post).searchParams.get("token");
+    assert.ok(humanToken);
+    assert.equal(humanToken, postToken);
+    assert.equal(verifyUnsubscribeToken(humanToken), "reader@example.com");
   });
 });
