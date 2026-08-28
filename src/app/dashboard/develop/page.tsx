@@ -78,7 +78,7 @@ const CARDS: SeatCard[] = [
       </>,
       <>
         <strong>4 credits per seat</strong>
-        {" each month, pooled across the class"}
+        {" each month"}
       </>,
       "The instructor seat is free",
       "Everything in Coach for every preacher in the class",
