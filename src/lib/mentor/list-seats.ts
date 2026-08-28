@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mentoredMonthlySubmissionLimit } from "@/lib/mentor/allotment";
+import { parseMenteeReads } from "@/lib/mentor/mentee-reads";
 import { countMentoredSubmissionsThisMonth } from "@/lib/mentor/submission-usage";
 import type {
   ActiveMentorMentee,
@@ -19,6 +20,7 @@ type RelationshipRow = {
   invite_email_to: string | null;
   invite_email_sent_at: string | null;
   mentor_label: string | null;
+  mentee_reads: string | null;
 };
 
 function asMentorLabel(value: string | null): string | null {
@@ -81,7 +83,7 @@ export async function listMentorSeatsForMentor(): Promise<{
   const { data, error } = await supabase
     .from("mentor_relationships")
     .select(
-      "id, status, seat_type, invite_token, mentee_id, created_at, accepted_at, invite_email_to, invite_email_sent_at, mentor_label",
+      "id, status, seat_type, invite_token, mentee_id, created_at, accepted_at, invite_email_to, invite_email_sent_at, mentor_label, mentee_reads",
     )
     .in("status", ["pending", "active"])
     .order("created_at", { ascending: false });
@@ -129,6 +131,7 @@ export async function listMentorSeatsForMentor(): Promise<{
         seatType,
         menteeId: row.mentee_id,
         mentorLabel: asMentorLabel(row.mentor_label),
+        menteeReads: parseMenteeReads(row.mentee_reads),
         acceptedAt:
           typeof row.accepted_at === "string" ? row.accepted_at : null,
       });

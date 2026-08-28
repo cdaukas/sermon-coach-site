@@ -1,3 +1,4 @@
+import type { MenteeReads } from "@/lib/mentor/mentee-reads";
 import type { MentoredSubmissionListItem } from "@/lib/mentor/submissions";
 import type {
   ActiveMentorMentee,
@@ -17,6 +18,7 @@ export type PreacherCard = {
   seatType: MentorSeatType;
   menteeEmail: string | null;
   mentorLabel: string | null;
+  menteeReads: MenteeReads;
   acceptedAt: string | null;
   submissionsUsed: number;
   submissionsLimit: number;
@@ -51,6 +53,7 @@ export function buildPreacherCards(
     seatType: mentee.seatType,
     menteeEmail: mentee.menteeEmail,
     mentorLabel: mentee.mentorLabel,
+    menteeReads: mentee.menteeReads,
     acceptedAt: mentee.acceptedAt,
     submissionsUsed: mentee.submissionsUsed,
     submissionsLimit: mentee.submissionsLimit,
