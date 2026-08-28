@@ -235,40 +235,45 @@ export function PendingInvitesList({
     );
   }
 
+  // Nothing pending is the normal resting state; an empty box would be noise.
+  if (invites.length === 0) {
+    return null;
+  }
+
   return (
     <section
-      className="mt-10 border-t pt-10"
-      style={{ borderColor: "var(--sc-rule)" }}
+      className="rounded px-6 py-6 sm:px-8"
+      style={{
+        background: "var(--sc-panel)",
+        border: "1px solid var(--sc-rule)",
+      }}
       aria-labelledby="pending-invites-heading"
     >
-      <h2
+      <h3
         id="pending-invites-heading"
-        className="text-[28px] font-semibold leading-tight tracking-tight"
+        className="text-[17px] font-semibold leading-snug tracking-tight"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Pending invitations
-      </h2>
+        Awaiting acceptance
+      </h3>
+      <p
+        className="mt-1.5 text-[13px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
+        An invitation stays here until they accept or you revoke it, so a
+        reload does not lose the link.
+      </p>
 
-      {invites.length === 0 ? (
-        <p
-          className="mt-4 text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          No open invitations. When you create one, it stays here until they
-          accept or you revoke it, so a reload does not lose the link.
-        </p>
-      ) : (
-        <ul className="mt-2">
-          {invites.map((item, index) => (
-            <PendingInviteRow
-              key={item.relationshipId}
-              item={item}
-              showDivider={index > 0}
-              onRevoked={handleRevoked}
-            />
-          ))}
-        </ul>
-      )}
+      <ul className="mt-2">
+        {invites.map((item, index) => (
+          <PendingInviteRow
+            key={item.relationshipId}
+            item={item}
+            showDivider={index > 0}
+            onRevoked={handleRevoked}
+          />
+        ))}
+      </ul>
     </section>
   );
 }

@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
-/** Invite creation now lives in the dashboard mentoring surface. */
+/** Invite creation now lives at /dashboard/develop. */
 export default async function MentorInvitePage() {
   const supabase = await createClient();
   const {
@@ -13,5 +13,5 @@ export default async function MentorInvitePage() {
     notFound();
   }
 
-  redirect("/dashboard/mentoring");
+  redirect("/dashboard/develop");
 }
