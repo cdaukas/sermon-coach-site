@@ -103,7 +103,19 @@ async function sendSeatEndEmailForEndedRelationship(
   }
 
   const row = relationship as RelationshipRow | null;
-  if (!row || !shouldSendSeatEndEmail(row)) {
+  if (!row) {
+    console.error(`${LOG_PREFIX} skip: relationship not found`, {
+      relationshipId,
+    });
+    return;
+  }
+  if (!shouldSendSeatEndEmail(row)) {
+    console.error(`${LOG_PREFIX} skip: shouldSend false`, {
+      relationshipId,
+      status: row.status,
+      mentee_id: row.mentee_id,
+      seat_end_email_sent_at: row.seat_end_email_sent_at,
+    });
     return;
   }
 
@@ -199,5 +211,11 @@ async function sendSeatEndEmailForEndedRelationship(
       relationshipId,
       resend_id: sendResult.id,
     });
+    return;
   }
+
+  console.error(`${LOG_PREFIX} sent`, {
+    relationshipId,
+    resend_id: sendResult.id,
+  });
 }
