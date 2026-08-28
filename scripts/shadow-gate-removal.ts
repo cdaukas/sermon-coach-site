@@ -1,4 +1,7 @@
 /**
+ * This script makes real Anthropic API calls at roughly $0.28 each, writes
+ * nothing to the database, and has a hard $6 ceiling with no override.
+ *
  * Shadow run: does removing the upward-pressure scoring language change the
  * criterion distribution? Nothing here ships.
  *
@@ -22,7 +25,6 @@
  *   npx tsx scripts/shadow-gate-removal.ts --select-only       (DB read only)
  *   npx tsx scripts/shadow-gate-removal.ts --estimate-only
  *   npx tsx scripts/shadow-gate-removal.ts
- *   npx tsx scripts/shadow-gate-removal.ts --force
  */
 
 import { createHash } from "node:crypto";
@@ -55,8 +57,10 @@ const TARGET_PROMPT_VERSION = "v3.5";
 const EXCLUDED_COMPOSITE = 11;
 const ESTIMATED_OUTPUT_TOKENS = 10_000;
 const CHARS_PER_TOKEN = 4;
-/** Twelve Opus runs land near $5. Abort above this unless --force. */
-const COST_ABORT_USD = 8;
+/** Hard ceiling. If the pre-run estimate exceeds this, exit. No override. */
+const COST_ABORT_USD = 6;
+/** Planned scoring calls (sermons × arms). Checked before the first API call. */
+const MAX_API_CALLS = 12;
 
 type Arm = (typeof ARMS)[number];
 
@@ -223,7 +227,6 @@ type Args = {
   verifyPrompts: boolean;
   selectOnly: boolean;
   estimateOnly: boolean;
-  force: boolean;
 };
 
 function parseArgs(argv: string[]): Args {
@@ -231,7 +234,6 @@ function parseArgs(argv: string[]): Args {
     verifyPrompts: false,
     selectOnly: false,
     estimateOnly: false,
-    force: false,
   };
 
   for (const token of argv.slice(2)) {
@@ -244,9 +246,6 @@ function parseArgs(argv: string[]): Args {
         break;
       case "--estimate-only":
         args.estimateOnly = true;
-        break;
-      case "--force":
-        args.force = true;
         break;
       default:
         console.error(`Unknown flag: ${token}`);
@@ -843,15 +842,24 @@ async function main(): Promise<void> {
     `${runCount} runs (${selection.selected.length} sermons × ${ARMS.length} arms) at ~${ESTIMATED_OUTPUT_TOKENS} output tokens each`,
   );
   console.log(`  Total: ~$${totalEstimate.toFixed(2)}`);
-  console.log(`  Abort threshold: $${COST_ABORT_USD.toFixed(2)}${args.force ? " (--force set, threshold ignored)" : ""}`);
+  console.log(`  Hard cost ceiling: $${COST_ABORT_USD.toFixed(2)} (no override)`);
+  console.log(`  Hard run ceiling: ${MAX_API_CALLS} API calls (no override)`);
   console.log(
     "  Prompt-prefix caching is not assumed. Schema retries are not included; a retry roughly doubles that run.",
   );
 
-  if (totalEstimate > COST_ABORT_USD && !args.force) {
+  if (runCount > MAX_API_CALLS) {
     console.error("");
     console.error(
-      `Estimate $${totalEstimate.toFixed(2)} exceeds $${COST_ABORT_USD.toFixed(2)}. Stopping. Re-run with --force to override.`,
+      `Planned ${runCount} API calls exceeds the hard cap of ${MAX_API_CALLS}. Stopping.`,
+    );
+    process.exit(2);
+  }
+
+  if (totalEstimate > COST_ABORT_USD) {
+    console.error("");
+    console.error(
+      `Estimate $${totalEstimate.toFixed(2)} exceeds $${COST_ABORT_USD.toFixed(2)}. Stopping.`,
     );
     process.exit(2);
   }
