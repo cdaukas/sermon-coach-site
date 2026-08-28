@@ -243,8 +243,8 @@ function SignupForm() {
           >
             Check your spam or junk folder if it doesn't arrive within a minute.
             Confirmation emails sometimes land there. Still nothing? Email Chris at{" "}
-            <AuthLink href="mailto:chris@sermoncoach.online">
-              chris@sermoncoach.online
+            <AuthLink href="mailto:chris@sermoncoach.com">
+              chris@sermoncoach.com
             </AuthLink>{" "}
             and he'll sort it out.
           </p>
