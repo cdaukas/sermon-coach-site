@@ -314,13 +314,21 @@ function ScoreBlock({ item }: { item: MentoredSubmissionListItem }) {
 function SubmissionBlock({
   item,
   label,
+  offerRelease,
   onReleased,
 }: {
   item: MentoredSubmissionListItem;
   label?: string;
+  offerRelease: boolean;
   onReleased: (evaluationId: string, releasedAt: string) => void;
 }) {
   const held = canRelease(item);
+  const showRelease = offerRelease && held;
+  const explanation = showRelease
+    ? "Coaching debrief and How It Preaches are available to you. Release the score when you're ready."
+    : !offerRelease && item.status === "complete"
+      ? "This evaluation is for you. He reads nothing here; you deliver it in person."
+      : null;
 
   return (
     <div>
@@ -359,13 +367,12 @@ function SubmissionBlock({
         </div>
       </div>
 
-      {held ? (
+      {explanation ? (
         <p
           className="mt-3 max-w-xl text-[14px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
         >
-          Coaching debrief and How It Preaches are available to you. Release the
-          score when you&rsquo;re ready.
+          {explanation}
         </p>
       ) : null}
 
@@ -374,7 +381,7 @@ function SubmissionBlock({
           <PrimaryButton href={evaluationHref(item)}>
             Open evaluation
           </PrimaryButton>
-          {held ? (
+          {showRelease ? (
             <ReleaseControl
               evaluationId={item.evaluationId}
               onReleased={(releasedAt) =>
@@ -534,6 +541,7 @@ function PreacherCardView({
             <SubmissionBlock
               item={latest}
               label="Latest sermon"
+              offerRelease={card.menteeReads !== "none"}
               onReleased={onReleased}
             />
 
@@ -553,6 +561,7 @@ function PreacherCardView({
                       <SubmissionBlock
                         key={item.evaluationId}
                         item={item}
+                        offerRelease={card.menteeReads !== "none"}
                         onReleased={onReleased}
                       />
                     ))}

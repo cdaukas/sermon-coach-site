@@ -1,3 +1,5 @@
+import type { MenteeReads } from "@/lib/mentor/mentee-reads";
+
 export type MentorSeatType = "debrief" | "evaluation";
 
 export type PendingMentorInvite = {
@@ -19,6 +21,11 @@ export type ActiveMentorMentee = {
    * Not the mentee's `profiles.display_name`. Null on older rows.
    */
   mentorLabel: string | null;
+  /**
+   * What the mentee reads on this seat. none is the dark Apprentice option.
+   * Null from the database is parsed as debrief.
+   */
+  menteeReads: MenteeReads;
   acceptedAt: string | null;
   /** Diagnostic submissions this calendar month vs seat allotment. */
   submissionsUsed: number;
