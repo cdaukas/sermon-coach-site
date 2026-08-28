@@ -24,7 +24,7 @@ const RELEASE_CONFIRM_HEADING = "Release the score?";
 const RELEASE_CONFIRM_BODY =
   "Once released, your preacher can see the scored evaluation. This cannot be undone.";
 const END_CONFIRM_BODY =
-  "This ends the mentoring relationship. Any held evaluations will be released to them. They will see every scored evaluation that was closed to them for this seat, and you cannot take that back.";
+  "Ending this releases every scored evaluation you are still holding. Continue?";
 
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(

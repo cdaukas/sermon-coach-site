@@ -258,7 +258,8 @@ function subscriptionItemQuantity(
 }
 
 /**
- * Write purchased seat counters and always re-sync pending invites to capacity.
+ * Write purchased seat counters and always re-sync pending invites and
+ * excess active relationships to capacity.
  * Every quantity/cancel path must go through here so revoke cannot be skipped
  * (including customer.subscription.deleted → forceZero).
  */
@@ -298,8 +299,8 @@ async function setPurchasedMentorSeats(
  * Recomputes quantity as the sum of item quantities across all active/trialing
  * mentor-seat subscriptions of that type for the customer (safe if they open
  * more than one Checkout Session). Does not touch Coach status or
- * comp_debrief_seats. Excess pending of this seat type are revoked when
- * capacity no longer covers them; active relationships stay put.
+ * comp_debrief_seats. Excess pending of this seat type are revoked, then
+ * excess active relationships end oldest-first, until used <= capacity.
  */
 export async function applyMentorSeatSubscriptionState(
   subscription: Stripe.Subscription,
@@ -342,7 +343,7 @@ export async function applyMentorSeatSubscriptionState(
       })
     : await sumActiveMentorSeatQuantity(deps.stripe, customerId, seatType);
 
-  // Writes purchased_* and revokes excess pending for this mentor (both types).
+  // Writes purchased_* and closes excess pending then active for this mentor.
   await setPurchasedMentorSeats(
     deps.supabase,
     match.profileId,
