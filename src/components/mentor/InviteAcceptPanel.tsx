@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AuthMessage } from "@/components/auth/AuthMessage";
 import { AuthSubmit } from "@/components/auth/AuthForm";
@@ -19,7 +19,7 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
 const primaryLinkClass =
-  "block w-full rounded border px-7 py-3.5 text-center text-sm font-semibold tracking-wide no-underline transition-all";
+  "block w-full rounded border px-7 py-4 text-center text-sm font-semibold tracking-wide no-underline transition-opacity hover:opacity-90";
 
 const primaryLinkStyle = {
   ...uiFont,
@@ -29,12 +29,12 @@ const primaryLinkStyle = {
 } as const;
 
 const secondaryLinkClass =
-  "block w-full rounded border px-7 py-3.5 text-center text-sm font-semibold tracking-wide no-underline transition-all";
+  "block w-full rounded border px-7 py-4 text-center text-sm font-semibold tracking-wide no-underline transition-colors";
 
 const secondaryLinkStyle = {
   ...uiFont,
   background: "var(--sc-panel)",
-  color: "var(--sc-ink)",
+  color: "var(--sc-ink-mid)",
   borderColor: "var(--sc-rule)",
 } as const;
 
@@ -49,6 +49,8 @@ type InviteAcceptPanelProps = {
 
 type AcceptErrorView = "self_invite" | "already_mentored";
 
+type Step = { title: string; body: string };
+
 async function clearInviteCookie(): Promise<void> {
   try {
     await fetch("/mentor/accept/clear", { method: "POST" });
@@ -57,65 +59,169 @@ async function clearInviteCookie(): Promise<void> {
   }
 }
 
-function DebriefDisclosure({ mentorName }: { mentorName: string }) {
+/**
+ * Seat mechanics as the preacher experiences them. Deliberately says nothing
+ * about whose seat is being drawn down — that is billing, and it is the
+ * mentor's business, not theirs.
+ */
+function stepsFor(seatType: MentorSeatType, mentorName: string): Step[] {
+  if (seatType === "debrief") {
+    return [
+      {
+        title: "Submit your sermon",
+        body: "You can submit up to 2 sermons each month.",
+      },
+      {
+        title: "Get coached",
+        body: "Each submission produces a coaching debrief and How It Preaches report.",
+      },
+      {
+        title: "Get honest feedback",
+        body: `${mentorName} evaluates your preaching against the Sermon Coach rubric.`,
+      },
+      {
+        title: "Talk it through",
+        body: `Your full evaluation stays private until ${mentorName} has had the opportunity to discuss it with you.`,
+      },
+      {
+        title: "Keep growing",
+        body: "When your coaching relationship ends, your evaluations are released to you.",
+      },
+    ];
+  }
+
+  return [
+    {
+      title: "Submit your sermon",
+      body: "You can submit up to 4 sermons each month.",
+    },
+    {
+      title: "Get coached",
+      body: "Each submission produces a coaching debrief and How It Preaches report.",
+    },
+    {
+      title: "Get honest feedback",
+      body: `${mentorName} evaluates your preaching against the Sermon Coach rubric.`,
+    },
+    {
+      title: "See everything",
+      body: "Your full evaluation, including your score, is yours the moment it is ready.",
+    },
+    {
+      title: "Keep growing",
+      body: "Every report stays in your library, and you keep it.",
+    },
+  ];
+}
+
+function StepList({ steps }: { steps: Step[] }) {
+  return (
+    <ol className="mt-6 space-y-6">
+      {steps.map((step, index) => (
+        <li key={step.title} className="flex gap-4 sm:gap-5">
+          <span
+            aria-hidden="true"
+            className="shrink-0 text-[15px] font-semibold leading-7 tabular-nums"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            {index + 1}
+          </span>
+          <div className="min-w-0">
+            <p
+              className="text-[18px] font-semibold leading-snug tracking-tight"
+              style={{ ...serifFont, color: "var(--sc-ink)" }}
+            >
+              {step.title}
+            </p>
+            <p
+              className="mt-1 text-[15px] leading-relaxed"
+              style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+            >
+              {step.body}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Callout({
+  seatType,
+  mentorName,
+}: {
+  seatType: MentorSeatType;
+  mentorName: string;
+}) {
+  const heading =
+    seatType === "debrief"
+      ? "Honest feedback. Real conversation."
+      : "Honest feedback. Nothing held back.";
+
   return (
     <div
-      className="space-y-3 text-[15px] leading-relaxed"
-      style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+      className="mt-9 rounded px-6 py-6"
+      style={{ background: "var(--sc-accent-pale)" }}
     >
-      <p>Plainly, so there are no surprises.</p>
-      <ul className="list-disc space-y-2 pl-5">
-        <li>
-          Two submissions a month, drawn from {mentorName}&apos;s seat rather
-          than your credits.
-        </li>
-        <li>
-          Every submission generates a coaching debrief and How It Preaches. You
-          both read those.
-        </li>
-        <li>
-          Every submission is also evaluated in full against the rubric. The
-          scored evaluation stays closed to you until {mentorName} releases it.
-        </li>
-        <li>
-          You&apos;ll see that it happened. The date shows up in your history,
-          marked closed.
-        </li>
-        <li>
-          When {mentorName} ends the mentoring, every held evaluation opens to
-          you.
-        </li>
-      </ul>
       <p
-        className="text-[13px] leading-relaxed"
-        style={{ color: "var(--sc-ink-soft)" }}
+        className="text-[17px] font-semibold leading-snug tracking-tight"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        An evaluation names weaknesses bluntly. A mentor worth having wants to
-        say those to you themselves before you read them cold on a screen.
-        Nothing is hidden from you permanently. It is held until the conversation
-        happens.
+        {heading}
       </p>
+      {seatType === "debrief" ? (
+        <>
+          <p
+            className="mt-3 text-[15px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            Your evaluation may identify areas where you need to grow.{" "}
+            {mentorName} will talk through those with you before you read the
+            evaluation yourself.
+          </p>
+          <p
+            className="mt-3 text-[15px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            Nothing is hidden from you permanently. It&rsquo;s simply held until
+            the conversation happens.
+          </p>
+        </>
+      ) : (
+        <p
+          className="mt-3 text-[15px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+        >
+          You read everything {mentorName} reads, at the same time they read it,
+          including your score.
+        </p>
+      )}
     </div>
   );
 }
 
-function EvaluationDisclosure({ mentorName }: { mentorName: string }) {
+/** Shared frame for the terminal states, so they match the invitation itself. */
+function Notice({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
   return (
-    <div
-      className="space-y-3 text-[15px] leading-relaxed"
-      style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-    >
-      <p>Plainly, so there are no surprises.</p>
-      <ul className="list-disc space-y-2 pl-5">
-        <li>
-          Four submissions a month, drawn from {mentorName}&apos;s seat.
-        </li>
-        <li>
-          Every sermon you submit generates a debrief and a full evaluation.
-          You both read everything the moment it is ready, including the score.
-          Nothing is held back.
-        </li>
-      </ul>
+    <div className="space-y-4">
+      <h1
+        className="text-[26px] font-semibold leading-tight tracking-tight sm:text-[28px]"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
+      >
+        {title}
+      </h1>
+      <p
+        className="text-[15px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+      >
+        {children}
+      </p>
     </div>
   );
 }
@@ -190,52 +296,30 @@ export function InviteAcceptPanel({
 
   if (acceptErrorView === "self_invite") {
     return (
-      <div className="space-y-4">
-        <h1
-          className="text-[28px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          That&apos;s your own invitation
-        </h1>
-        <p
-          className="text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          You can&apos;t be your own mentee. Send this link to the person you
-          are developing.
-        </p>
-      </div>
+      <Notice title="That’s your own invitation">
+        You can&rsquo;t be your own mentee. Send this link to the person you are
+        developing.
+      </Notice>
     );
   }
 
   if (acceptErrorView === "already_mentored") {
     return (
-      <div className="space-y-4">
-        <h1
-          className="text-[28px] font-semibold leading-tight tracking-tight"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          You already have a mentor
-        </h1>
-        <p
-          className="text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          Someone is already reading your work here. One mentor at a time, so
-          this invitation can&apos;t be accepted until that relationship ends.
-        </p>
-      </div>
+      <Notice title="You already have a mentor">
+        Someone is already reading your work here. One mentor at a time, so this
+        invitation can&rsquo;t be accepted until that relationship ends.
+      </Notice>
     );
   }
 
   if (accepted) {
     const successBody =
       seatType === "debrief"
-        ? "You are connected. Submit sermons the way you normally would. Your mentor reads every debrief, and the full evaluations stay closed to you until they open one."
-        : "You are connected. Submit sermons the way you normally would. Your mentor reads everything you read, at the same time you read it.";
+        ? `You are connected. Submit sermons the way you normally would. ${mentorName} reads every debrief, and your full evaluations stay private until they have had the chance to talk them through with you.`
+        : `You are connected. Submit sermons the way you normally would. ${mentorName} reads everything you read, at the same time you read it.`;
 
     return (
-      <div className="space-y-4 text-center">
+      <div className="space-y-5 text-center">
         <AuthMessage variant="success">
           You are now connected with your mentor.
         </AuthMessage>
@@ -245,44 +329,101 @@ export function InviteAcceptPanel({
         >
           {successBody}
         </p>
+
+        {/* Accepting requires a session, so the dashboard is always reachable
+            from here. Without this the invitee lands on a dead end. */}
+        <div className="flex flex-col gap-4 pt-1 text-left">
+          <Link
+            href="/dashboard"
+            className={primaryLinkClass}
+            style={primaryLinkStyle}
+          >
+            Go to your dashboard
+          </Link>
+          <Link
+            href="/dashboard/sermons/new"
+            className={secondaryLinkClass}
+            style={secondaryLinkStyle}
+          >
+            Submit your first sermon
+          </Link>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <h1
-        className="text-[28px] font-semibold leading-tight tracking-tight"
-        style={{ ...serifFont, color: "var(--sc-ink)" }}
-      >
-        {mentorName} wants to read your preaching
-      </h1>
+  const seatName = mentorSeatDisplayName(seatType);
 
+  return (
+    <div>
       <p
-        className="text-[14px] font-medium"
+        className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+        style={{ ...uiFont, color: "var(--sc-accent)" }}
+      >
+        {seatName}
+      </p>
+      <p
+        className="mt-2 text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        {mentorSeatDisplayName(seatType)} seat
+        A personal coaching relationship with {mentorName}.
       </p>
 
-      {seatType === "debrief" ? (
-        <DebriefDisclosure mentorName={mentorName} />
-      ) : (
-        <EvaluationDisclosure mentorName={mentorName} />
-      )}
+      <h1
+        className="mt-7 text-[28px] font-semibold leading-[1.2] tracking-tight sm:text-[32px]"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
+      >
+        {mentorName} is inviting you into Sermon Coaching
+      </h1>
+      <p
+        className="mt-4 text-[17px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+      >
+        {seatType === "debrief"
+          ? `${mentorName} will read your sermons, give you honest feedback, and help you become a stronger preacher.`
+          : `${mentorName} will read your sermons alongside you, give you honest feedback, and help you become a stronger preacher.`}
+      </p>
+
+      <section
+        className="mt-10 border-t pt-8"
+        style={{ borderColor: "var(--sc-rule)" }}
+        aria-labelledby="what-happens-heading"
+      >
+        <h2
+          id="what-happens-heading"
+          className="text-[22px] font-semibold leading-tight tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          Here&rsquo;s what happens
+        </h2>
+        <StepList steps={stepsFor(seatType, mentorName)} />
+      </section>
+
+      <Callout seatType={seatType} mentorName={mentorName} />
+
+      <p
+        className="mt-8 text-[14px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
+        Your {seatName} seat is provided by {mentorName}.
+        <br />
+        There is nothing for you to purchase.
+      </p>
 
       {genericError ? (
-        <AuthMessage variant="error">{genericError}</AuthMessage>
+        <div className="mt-6">
+          <AuthMessage variant="error">{genericError}</AuthMessage>
+        </div>
       ) : null}
 
-      <div className="flex flex-col gap-3">
+      <div className="mt-8 flex flex-col gap-4">
         {loggedIn ? (
           <AuthSubmit
             type="button"
             disabled={loading}
             onClick={() => void handleAccept()}
           >
-            {loading ? "Accepting…" : "Accept the invitation"}
+            {loading ? "Accepting…" : `Accept the ${seatName} invitation`}
           </AuthSubmit>
         ) : (
           <Link
