@@ -12,7 +12,7 @@ import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Develop others",
+  title: "Mentoring",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
