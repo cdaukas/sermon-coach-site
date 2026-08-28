@@ -39,6 +39,7 @@ export default async function DashboardPage() {
         : Promise.resolve({
             isMentoredMentee: false,
             menteeReadsNone: false,
+            debriefVisibleSince: null,
             mentorName: "your mentor",
           }),
     ]);
@@ -136,6 +137,7 @@ export default async function DashboardPage() {
         deleted={deleted}
         growthAllowed={growthAllowed}
         hideUnevaluatedBand={coachingView.menteeReadsNone}
+        debriefVisibleSince={coachingView.debriefVisibleSince}
       />
     </div>
   );

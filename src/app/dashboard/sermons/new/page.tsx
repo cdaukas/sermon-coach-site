@@ -24,6 +24,7 @@ export default async function NewSermonPage() {
     : {
         isMentoredMentee: false,
         menteeReadsNone: false,
+        debriefVisibleSince: null,
         mentorName: "your mentor",
       };
   const isMentoredMentee = coachingView.isMentoredMentee;

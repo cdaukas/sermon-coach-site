@@ -21,6 +21,7 @@ type RelationshipRow = {
   invite_email_sent_at: string | null;
   mentor_label: string | null;
   mentee_reads: string | null;
+  debrief_visible_since: string | null;
 };
 
 function asMentorLabel(value: string | null): string | null {
@@ -83,7 +84,7 @@ export async function listMentorSeatsForMentor(): Promise<{
   const { data, error } = await supabase
     .from("mentor_relationships")
     .select(
-      "id, status, seat_type, invite_token, mentee_id, created_at, accepted_at, invite_email_to, invite_email_sent_at, mentor_label, mentee_reads",
+      "id, status, seat_type, invite_token, mentee_id, created_at, accepted_at, invite_email_to, invite_email_sent_at, mentor_label, mentee_reads, debrief_visible_since",
     )
     .in("status", ["pending", "active"])
     .order("created_at", { ascending: false });
@@ -132,6 +133,10 @@ export async function listMentorSeatsForMentor(): Promise<{
         menteeId: row.mentee_id,
         mentorLabel: asMentorLabel(row.mentor_label),
         menteeReads: parseMenteeReads(row.mentee_reads),
+        debriefVisibleSince:
+          typeof row.debrief_visible_since === "string"
+            ? row.debrief_visible_since
+            : null,
         acceptedAt:
           typeof row.accepted_at === "string" ? row.accepted_at : null,
       });

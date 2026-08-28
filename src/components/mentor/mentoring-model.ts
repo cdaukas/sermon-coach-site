@@ -19,6 +19,7 @@ export type PreacherCard = {
   menteeEmail: string | null;
   mentorLabel: string | null;
   menteeReads: MenteeReads;
+  debriefVisibleSince: string | null;
   acceptedAt: string | null;
   submissionsUsed: number;
   submissionsLimit: number;
@@ -54,6 +55,7 @@ export function buildPreacherCards(
     menteeEmail: mentee.menteeEmail,
     mentorLabel: mentee.mentorLabel,
     menteeReads: mentee.menteeReads,
+    debriefVisibleSince: mentee.debriefVisibleSince,
     acceptedAt: mentee.acceptedAt,
     submissionsUsed: mentee.submissionsUsed,
     submissionsLimit: mentee.submissionsLimit,

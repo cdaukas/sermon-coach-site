@@ -26,6 +26,11 @@ export type ActiveMentorMentee = {
    * Null from the database is parsed as debrief.
    */
   menteeReads: MenteeReads;
+  /**
+   * When the mentee started seeing the debrief on new submissions.
+   * Null on never-dark and still-dark rows.
+   */
+  debriefVisibleSince: string | null;
   acceptedAt: string | null;
   /** Diagnostic submissions this calendar month vs seat allotment. */
   submissionsUsed: number;
@@ -57,6 +62,18 @@ export type RevokeMentorInviteResult =
       error_code: string;
     };
 
+export type EnableMenteeDebriefResult =
+  | {
+      ok: true;
+      error_code: null;
+      relationship_id: string;
+      debrief_visible_since: string;
+    }
+  | {
+      ok: false;
+      error_code: string;
+    };
+
 const END_ERROR_MESSAGES: Record<string, string> = {
   not_authenticated: "Sign in to end mentoring.",
   not_found: "That mentoring relationship could not be found.",
@@ -71,6 +88,14 @@ const REVOKE_ERROR_MESSAGES: Record<string, string> = {
   not_pending: "That invitation is no longer pending.",
 };
 
+const ENABLE_DEBRIEF_ERROR_MESSAGES: Record<string, string> = {
+  not_authenticated: "Sign in to change this arrangement.",
+  not_found: "That mentoring relationship could not be found.",
+  not_the_mentor: "You can only change your own mentoring seats.",
+  not_active: "That mentoring relationship is not active.",
+  not_dark: "He already reads the coaching debrief.",
+};
+
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
 export function endMentorRelationshipErrorMessage(
@@ -78,6 +103,15 @@ export function endMentorRelationshipErrorMessage(
 ): string {
   if (errorCode && errorCode in END_ERROR_MESSAGES) {
     return END_ERROR_MESSAGES[errorCode];
+  }
+  return GENERIC_ERROR;
+}
+
+export function enableMenteeDebriefErrorMessage(
+  errorCode: string | null | undefined,
+): string {
+  if (errorCode && errorCode in ENABLE_DEBRIEF_ERROR_MESSAGES) {
+    return ENABLE_DEBRIEF_ERROR_MESSAGES[errorCode];
   }
   return GENERIC_ERROR;
 }
