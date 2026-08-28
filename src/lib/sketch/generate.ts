@@ -122,7 +122,7 @@ function stripProseGlance(read: string): string {
  * Split model output into the human-facing read and the telemetry row.
  *
  * Defensive on purpose: the model will occasionally trail prose after the JSON
- * or omit the block entirely. Neither should cost the preacher his read, and
+ * or omit the block entirely. Neither should cost the preacher their read, and
  * neither should write a garbage row.
  */
 function splitRead(raw: string): {

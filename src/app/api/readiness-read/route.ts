@@ -117,7 +117,7 @@ export async function POST(request: Request) {
 
   // --- write, but never at the preacher's expense --------------------------
   // The read is the product. Telemetry is ours. A failed insert gets logged and
-  // swallowed; it must not cost him his read.
+  // swallowed; it must not cost them their read.
   //
   // NOTE: this awaits before responding, which adds a little latency. If this
   // repo is on Next 15+, move the insert into `after()` from "next/server" to

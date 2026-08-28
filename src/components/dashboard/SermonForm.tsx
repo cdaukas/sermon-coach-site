@@ -636,7 +636,7 @@ export function SermonForm({
               onChange={(event) => setOther(event.target.value)}
               disabled={formDisabled}
               rows={2}
-              placeholder="The thing you'd tell a friend before he read your manuscript."
+              placeholder="The thing you'd tell a friend before they read your manuscript."
               className={contextTextareaClassName}
               style={contextTextareaStyle}
             />
