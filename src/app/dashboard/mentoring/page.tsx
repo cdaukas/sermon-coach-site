@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ActiveMenteesList } from "@/components/mentor/ActiveMenteesList";
-import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
-import { MentoredSubmissionsList } from "@/components/mentor/MentoredSubmissionsList";
-import { MentorSeatCapacityPanel } from "@/components/mentor/MentorSeatCapacityPanel";
+import { MentorInviteFlow } from "@/components/mentor/MentorInviteFlow";
+import { MentoringPlans } from "@/components/mentor/MentoringPlans";
 import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
+import { PreacherList } from "@/components/mentor/PreacherList";
+import { YourSeats } from "@/components/mentor/YourSeats";
+import { buildPreacherCards } from "@/components/mentor/mentoring-model";
 import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
@@ -17,6 +18,24 @@ export const metadata: Metadata = {
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
+
+function SectionHeading({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <h2
+      id={id}
+      className="text-[28px] font-semibold leading-tight tracking-tight"
+      style={{ ...serifFont, color: "var(--sc-ink)" }}
+    >
+      {children}
+    </h2>
+  );
+}
 
 export default async function MentoringPage() {
   const supabase = await createClient();
@@ -45,50 +64,87 @@ export default async function MentoringPage() {
     getMentorSeatCapacity(),
   ]);
 
+  const preachers = buildPreacherCards(seats.active, submissions);
+
   return (
-    <main
-      className="rounded px-8 py-10"
-      style={{
-        background: "var(--sc-panel)",
-        border: "1px solid var(--sc-rule)",
-        boxShadow: "var(--sc-shadow-lift)",
-      }}
-    >
-      <h1
-        className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
-        style={{ ...serifFont, color: "var(--sc-ink)" }}
-      >
-        Mentoring
-      </h1>
-
-      {capacity ? <MentorSeatCapacityPanel capacity={capacity} /> : null}
-
-      <section aria-labelledby="invite-heading">
-        <h2
-          id="invite-heading"
-          className="text-[28px] font-semibold leading-tight tracking-tight"
+    <main className="mx-auto w-full max-w-3xl px-1 pb-20">
+      {/* 1 — Hero */}
+      <header className="pt-2 pb-12 sm:pb-16">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+          style={{ ...uiFont, color: "var(--sc-accent)" }}
+        >
+          Mentoring
+        </p>
+        <h1
+          className="mt-4 max-w-2xl text-[34px] font-semibold leading-[1.15] tracking-tight sm:text-[42px]"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
-          Invite someone you are developing
-        </h2>
+          Develop a preacher, one sermon at a time.
+        </h1>
         <p
-          className="mt-3 max-w-2xl text-[15px] leading-relaxed"
+          className="mt-5 max-w-xl text-[16px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
         >
-          They preach. You read. The seat is yours, not theirs, and you can end
-          it whenever the season is over.
+          Invite someone you&rsquo;re mentoring. They submit sermons to Sermon
+          Coach, you review the evaluation, and you decide when to release
+          their score.
         </p>
+        <div className="mt-8">
+          {capacity ? (
+            <MentorInviteFlow
+              capacity={capacity}
+              initialDisplayName={initialDisplayName}
+            />
+          ) : null}
+        </div>
+      </header>
 
-        <div className="mt-6">
-          <MentorInvitePanel initialDisplayName={initialDisplayName} />
+      {/* 2 — Your Preachers */}
+      <section
+        aria-labelledby="preachers-heading"
+        className="border-t pt-12 sm:pt-14"
+        style={{ borderColor: "var(--sc-rule)" }}
+      >
+        <SectionHeading id="preachers-heading">Your Preachers</SectionHeading>
+
+        <div className="mt-7 space-y-5">
+          <PreacherList
+            cards={preachers}
+            inviteAction={
+              capacity ? (
+                <MentorInviteFlow
+                  capacity={capacity}
+                  initialDisplayName={initialDisplayName}
+                />
+              ) : null
+            }
+          />
+          <PendingInvitesList invites={seats.pending} />
         </div>
       </section>
 
-      <PendingInvitesList invites={seats.pending} />
+      {/* 3 — Mentoring Plans */}
+      <section
+        aria-labelledby="plans-heading"
+        className="mt-16 border-t pt-12 sm:mt-20 sm:pt-14"
+        style={{ borderColor: "var(--sc-rule)" }}
+      >
+        <SectionHeading id="plans-heading">Mentoring Plans</SectionHeading>
+        <div className="mt-7">
+          <MentoringPlans />
+        </div>
+      </section>
 
-      <ActiveMenteesList mentees={seats.active} />
-
-      <MentoredSubmissionsList submissions={submissions} />
+      {/* 4 — Seats and billing, deliberately quiet */}
+      {capacity ? (
+        <div
+          className="mt-16 border-t pt-10 sm:mt-20"
+          style={{ borderColor: "var(--sc-rule)" }}
+        >
+          <YourSeats capacity={capacity} />
+        </div>
+      ) : null}
     </main>
   );
 }
