@@ -1,6 +1,6 @@
 const POINTS = [
   "$25 per seat, per month, billed by the term, with a five-seat floor",
-  "Four credits per seat each month, pooled across the class",
+  "Four credits per seat each month",
   "The instructor seat is free",
   "Each preacher keeps a private library, visible to the instructor, never to classmates",
   "One invoice for the institution",
