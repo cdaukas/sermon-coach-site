@@ -49,7 +49,7 @@ export default async function UnsubscribePage({
     return (
       <UnsubscribeShell
         title="Something went wrong"
-        message="We could not save your unsubscribe request. Email Chris at chris@sermoncoach.online and he will remove you manually."
+        message="We could not save your unsubscribe request. Email Chris at chris@sermoncoach.com and he will remove you manually."
       />
     );
   }

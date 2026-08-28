@@ -16,7 +16,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 
 /** ~5 minutes — stop polling rather than spinning forever. */
 const POLL_CEILING_MS = 5 * 60 * 1000;
-const SUPPORT_EMAIL = "chris@sermoncoach.online";
+const SUPPORT_EMAIL = "chris@sermoncoach.com";
 
 type IncompleteEvaluationPollerProps = {
   evaluationId: string;
