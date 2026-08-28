@@ -25,12 +25,14 @@ type SermonListProps = {
   growthAllowed: boolean;
   onToggleExclude: (sermonId: string, excluded: boolean) => void;
   onRequestDelete: (sermon: DashboardSermonRow) => void;
+  hideUnevaluatedBand?: boolean;
   busySermonId?: string | null;
 };
 
 function buildMobileMeta(
   sermon: DashboardSermonRow,
   growthAllowed: boolean,
+  hideUnevaluatedBand: boolean,
 ): string {
   const segments: string[] = [];
   const passage = sermon.primary_passage?.trim() || null;
@@ -40,7 +42,7 @@ function buildMobileMeta(
   segments.push(formatSavedDate(sermon.created_at));
   if (sermon.latestEvaluation) {
     segments.push(bandLabel(sermon.latestEvaluation.score_band));
-  } else {
+  } else if (!hideUnevaluatedBand) {
     segments.push("Not run");
   }
   if (sermon.completeEvaluationCount > 1) {
@@ -147,12 +149,14 @@ function SermonRow({
   sermon,
   busy,
   growthAllowed,
+  hideUnevaluatedBand,
   onToggleExclude,
   onRequestDelete,
 }: {
   sermon: DashboardSermonRow;
   busy: boolean;
   growthAllowed: boolean;
+  hideUnevaluatedBand: boolean;
   onToggleExclude: (sermonId: string, excluded: boolean) => void;
   onRequestDelete: (sermon: DashboardSermonRow) => void;
 }) {
@@ -169,7 +173,9 @@ function SermonRow({
       : null;
   const bandText = evaluated
     ? bandLabel(sermon.latestEvaluation!.score_band)
-    : "Not run";
+    : hideUnevaluatedBand
+      ? ""
+      : "Not run";
 
   return (
     <li className="dashboard-sermon-row">
@@ -192,7 +198,7 @@ function SermonRow({
             {bandText}
           </span>
           <span className="dashboard-sermon-row-mobile-meta">
-            {buildMobileMeta(sermon, growthAllowed)}
+            {buildMobileMeta(sermon, growthAllowed, hideUnevaluatedBand)}
           </span>
         </Link>
         <SermonRowMenu
@@ -211,6 +217,7 @@ export function SermonList({
   sermons,
   header,
   growthAllowed,
+  hideUnevaluatedBand = false,
   onToggleExclude,
   onRequestDelete,
   busySermonId = null,
@@ -229,6 +236,7 @@ export function SermonList({
             sermon={sermon}
             busy={busySermonId === sermon.id}
             growthAllowed={growthAllowed}
+            hideUnevaluatedBand={hideUnevaluatedBand}
             onToggleExclude={onToggleExclude}
             onRequestDelete={onRequestDelete}
           />

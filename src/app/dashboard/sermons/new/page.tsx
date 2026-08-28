@@ -3,7 +3,7 @@ import Link from "next/link";
 import { NewSermonWorkspace } from "@/components/dashboard/NewSermonWorkspace";
 import { createClient } from "@/lib/supabase/server";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
-import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
+import { getMenteeCoachingView } from "@/lib/mentor/relationship";
 
 export const metadata: Metadata = {
   title: "New evaluation",
@@ -19,9 +19,14 @@ export default async function NewSermonPage() {
   const entitlement = user
     ? await getEvaluationEntitlement(user.id)
     : null;
-  const isMentoredMentee = user
-    ? await viewerHasActiveMentorRelationship(user.id)
-    : false;
+  const coachingView = user
+    ? await getMenteeCoachingView(user.id)
+    : {
+        isMentoredMentee: false,
+        menteeReadsNone: false,
+        mentorName: "your mentor",
+      };
+  const isMentoredMentee = coachingView.isMentoredMentee;
 
   let churchName: string | null = null;
   let spanishEnabled = false;
@@ -63,6 +68,7 @@ export default async function NewSermonPage() {
       <NewSermonWorkspace
         entitlement={entitlement}
         isMentoredMentee={isMentoredMentee}
+        menteeReadsNone={coachingView.menteeReadsNone}
         churchName={churchName}
         spanishEnabled={spanishEnabled}
       />

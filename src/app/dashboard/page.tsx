@@ -9,6 +9,7 @@ import {
 } from "@/lib/billing/pack-credits";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { profileHasGrowthAccess } from "@/lib/growth/access";
+import { getMenteeCoachingView } from "@/lib/mentor/relationship";
 import {
   listDashboardSermons,
   listDeletedSermons,
@@ -26,13 +27,20 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermons, deleted, entitlement, recentGrant, growthAllowed] =
+  const [sermons, deleted, entitlement, recentGrant, growthAllowed, coachingView] =
     await Promise.all([
       listDashboardSermons(),
       listDeletedSermons(),
       user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
       getMostRecentPackGrant(),
       user ? profileHasGrowthAccess(user.id) : Promise.resolve(false),
+      user
+        ? getMenteeCoachingView(user.id)
+        : Promise.resolve({
+            isMentoredMentee: false,
+            menteeReadsNone: false,
+            mentorName: "your mentor",
+          }),
     ]);
 
   const libraryEmpty = sermons.length === 0;
@@ -127,6 +135,7 @@ export default async function DashboardPage() {
         sermons={sermons}
         deleted={deleted}
         growthAllowed={growthAllowed}
+        hideUnevaluatedBand={coachingView.menteeReadsNone}
       />
     </div>
   );

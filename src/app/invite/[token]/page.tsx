@@ -5,6 +5,7 @@ import {
   InviteAcceptPanel,
   type InviteSeatType,
 } from "@/components/mentor/InviteAcceptPanel";
+import { parseMenteeReads, type MenteeReads } from "@/lib/mentor/mentee-reads";
 import { createClient } from "@/lib/supabase/server";
 import { CANONICAL_SITE_ORIGIN } from "@/lib/site-origin";
 
@@ -22,6 +23,7 @@ type PreviewResult =
       ok: true;
       mentor_name: string;
       seat_type: InviteSeatType;
+      mentee_reads: MenteeReads;
     }
   | {
       ok: false;
@@ -45,7 +47,7 @@ function parsePreview(data: unknown): PreviewResult {
   ) {
     return { ok: false, error_code: "invalid_or_used" };
   }
-  return { ok: true, mentor_name, seat_type };
+  return { ok: true, mentor_name, seat_type, mentee_reads: parseMenteeReads(row.mentee_reads) };
 }
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -149,6 +151,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
         token={token}
         mentorName={preview.mentor_name}
         seatType={preview.seat_type}
+        menteeReads={preview.mentee_reads}
         loggedIn={Boolean(user)}
       />
     </InviteShell>

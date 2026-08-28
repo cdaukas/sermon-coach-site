@@ -63,6 +63,53 @@ function PrimaryButton({
   );
 }
 
+function MenteeReadsOptions({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: "debrief" | "none";
+  disabled?: boolean;
+  onChange: (next: "debrief" | "none") => void;
+}) {
+  const options: Array<{ id: "debrief" | "none"; label: string }> = [
+    {
+      id: "debrief",
+      label: "He reads the coaching debrief and How It Preaches",
+    },
+    {
+      id: "none",
+      label: "He reads nothing. You deliver it in person.",
+    },
+  ];
+
+  return (
+    <div className="mt-4 space-y-2" role="radiogroup">
+      {options.map((option) => {
+        const checked = value === option.id;
+        return (
+          <label
+            key={option.id}
+            className="flex cursor-pointer items-start gap-2 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            <input
+              type="radio"
+              name="mentee-reads"
+              value={option.id}
+              checked={checked}
+              disabled={disabled}
+              onChange={() => onChange(option.id)}
+              className="mt-1 shrink-0"
+            />
+            <span>{option.label}</span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 function QuietButton({
   children,
   onClick,
@@ -181,6 +228,7 @@ function InviteByEmail({
   onClose: () => void;
 }) {
   const [seatType, setSeatType] = useState<MentorSeatType>(seatTypes[0]);
+  const [menteeReads, setMenteeReads] = useState<"debrief" | "none">("debrief");
   const [preacherName, setPreacherName] = useState("");
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
@@ -240,6 +288,10 @@ function InviteByEmail({
           {
             p_seat_type: seatType,
             p_mentor_label: label.length > 0 ? label : null,
+            p_mentee_reads:
+              seatType === "debrief" && menteeReads === "none"
+                ? "none"
+                : null,
           },
         );
 
@@ -416,42 +468,83 @@ function InviteByEmail({
           >
             Which seat?
           </p>
-          <div className="flex flex-wrap gap-3" role="radiogroup">
+          <div className="flex flex-col gap-3" role="radiogroup">
             {seatTypes.map((type) => {
               const isSelected = seatType === type;
               return (
-                <button
+                <div
                   key={type}
-                  type="button"
-                  role="radio"
-                  aria-checked={isSelected}
-                  onClick={() => setSeatType(type)}
-                  className="rounded border px-4 py-2 text-[13px] font-semibold"
+                  className="rounded border px-4 py-3"
                   style={{
-                    ...uiFont,
                     background: isSelected
                       ? "var(--sc-accent-pale)"
                       : "var(--sc-panel)",
                     borderColor: isSelected
                       ? "var(--sc-accent)"
                       : "var(--sc-rule)",
-                    color: "var(--sc-ink)",
-                    cursor: "pointer",
                   }}
                 >
-                  {mentorSeatDisplayName(type)}
-                </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => {
+                      setSeatType(type);
+                      if (type !== "debrief") {
+                        setMenteeReads("debrief");
+                      }
+                    }}
+                    className="w-full rounded border-0 bg-transparent p-0 text-left text-[13px] font-semibold"
+                    style={{
+                      ...uiFont,
+                      color: "var(--sc-ink)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {mentorSeatDisplayName(type)}
+                  </button>
+                  {type === "debrief" && isSelected ? (
+                    <MenteeReadsOptions
+                      value={menteeReads}
+                      disabled={sending}
+                      onChange={setMenteeReads}
+                    />
+                  ) : null}
+                </div>
               );
             })}
           </div>
         </div>
       ) : (
-        <p
-          className="mb-6 text-[13px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-        >
-          Using your available {mentorSeatDisplayName(seatType)} seat.
-        </p>
+        <div className="mb-6">
+          <p
+            className="text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            Using your available {mentorSeatDisplayName(seatType)} seat.
+          </p>
+          {seatType === "debrief" ? (
+            <div
+              className="mt-4 rounded border px-4 py-3"
+              style={{
+                background: "var(--sc-panel)",
+                borderColor: "var(--sc-rule)",
+              }}
+            >
+              <p
+                className="text-[13px] font-semibold"
+                style={{ ...uiFont, color: "var(--sc-ink)" }}
+              >
+                {mentorSeatDisplayName("debrief")}
+              </p>
+              <MenteeReadsOptions
+                value={menteeReads}
+                disabled={sending}
+                onChange={setMenteeReads}
+              />
+            </div>
+          ) : null}
+        </div>
       )}
 
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}

@@ -11,6 +11,10 @@ import {
   parseAcceptMentorInviteResult,
   type AcceptMentorInviteErrorCode,
 } from "@/lib/mentor/invite";
+import {
+  darkInviteDebriefLine,
+  type MenteeReads,
+} from "@/lib/mentor/mentee-reads";
 import type { MentorSeatType } from "@/lib/mentor/relationships";
 import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import { CANONICAL_SITE_ORIGIN } from "@/lib/site-origin";
@@ -44,6 +48,7 @@ type InviteAcceptPanelProps = {
   token: string;
   mentorName: string;
   seatType: InviteSeatType;
+  menteeReads: MenteeReads;
   loggedIn: boolean;
 };
 
@@ -64,8 +69,24 @@ async function clearInviteCookie(): Promise<void> {
  * about whose seat is being drawn down — that is billing, and it is the
  * mentor's business, not theirs.
  */
-function stepsFor(seatType: MentorSeatType, mentorName: string): Step[] {
+function stepsFor(
+  seatType: MentorSeatType,
+  mentorName: string,
+  menteeReads: MenteeReads,
+): Step[] {
   if (seatType === "debrief") {
+    if (menteeReads === "none") {
+      return [
+        {
+          title: "Submit your sermon",
+          body: "You can submit up to 2 sermons each month.",
+        },
+        {
+          title: "Talk it through",
+          body: darkInviteDebriefLine(mentorName),
+        },
+      ];
+    }
     return [
       {
         title: "Submit your sermon",
@@ -149,10 +170,15 @@ function StepList({ steps }: { steps: Step[] }) {
 function Callout({
   seatType,
   mentorName,
+  menteeReads,
 }: {
   seatType: MentorSeatType;
   mentorName: string;
+  menteeReads: MenteeReads;
 }) {
+  if (menteeReads === "none") {
+    return null;
+  }
   const heading =
     seatType === "debrief"
       ? "Honest feedback. Real conversation."
@@ -230,6 +256,7 @@ export function InviteAcceptPanel({
   token,
   mentorName,
   seatType,
+  menteeReads,
   loggedIn,
 }: InviteAcceptPanelProps) {
   const [loading, setLoading] = useState(false);
@@ -314,9 +341,11 @@ export function InviteAcceptPanel({
 
   if (accepted) {
     const successBody =
-      seatType === "debrief"
-        ? `You are connected. Submit sermons the way you normally would. ${mentorName} reads every debrief, and your full evaluations stay private until they have had the chance to talk them through with you.`
-        : `You are connected. Submit sermons the way you normally would. ${mentorName} reads everything you read, at the same time you read it.`;
+      menteeReads === "none"
+        ? darkInviteDebriefLine(mentorName)
+        : seatType === "debrief"
+          ? `You are connected. Submit sermons the way you normally would. ${mentorName} reads every debrief, and your full evaluations stay private until they have had the chance to talk them through with you.`
+          : `You are connected. Submit sermons the way you normally would. ${mentorName} reads everything you read, at the same time you read it.`;
 
     return (
       <div className="space-y-5 text-center">
@@ -380,7 +409,9 @@ export function InviteAcceptPanel({
         style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
       >
         {seatType === "debrief"
-          ? `${mentorName} will read your sermons, give you honest feedback, and help you become a stronger preacher.`
+          ? menteeReads === "none"
+            ? darkInviteDebriefLine(mentorName)
+            : `${mentorName} will read your sermons, give you honest feedback, and help you become a stronger preacher.`
           : `${mentorName} will read your sermons alongside you, give you honest feedback, and help you become a stronger preacher.`}
       </p>
 
@@ -396,10 +427,14 @@ export function InviteAcceptPanel({
         >
           Here&rsquo;s what happens
         </h2>
-        <StepList steps={stepsFor(seatType, mentorName)} />
+        <StepList steps={stepsFor(seatType, mentorName, menteeReads)} />
       </section>
 
-      <Callout seatType={seatType} mentorName={mentorName} />
+      <Callout
+        seatType={seatType}
+        mentorName={mentorName}
+        menteeReads={menteeReads}
+      />
 
       <p
         className="mt-8 text-[14px] leading-relaxed"

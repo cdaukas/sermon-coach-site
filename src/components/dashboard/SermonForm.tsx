@@ -73,6 +73,8 @@ type InputMethod = "paste" | "youtube";
 type SermonFormProps = {
   entitlement: EvaluationEntitlement | null;
   isMentoredMentee?: boolean;
+  /** Dark Apprentice: skip the debrief poller and land on the handoff. */
+  menteeReadsNone?: boolean;
   /** Prefill only. Edits on the form never write back to profiles. */
   churchName?: string | null;
   spanishEnabled?: boolean;
@@ -100,6 +102,7 @@ function estimateSermonMinutes(wordCount: number): number {
 export function SermonForm({
   entitlement,
   isMentoredMentee = false,
+  menteeReadsNone = false,
   churchName = null,
   spanishEnabled = false,
 }: SermonFormProps) {
@@ -308,6 +311,11 @@ export function SermonForm({
         router.push(
           `/dashboard/sermons/${result.sermonId}?evalError=${evalErrorParamForStartFailure(evalResult.error)}`,
         );
+        return;
+      }
+
+      if (menteeReadsNone) {
+        router.push(`/dashboard/sermons/${evalResult.sermonId}`);
         return;
       }
 
