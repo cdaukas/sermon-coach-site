@@ -10,7 +10,7 @@ import { CANONICAL_SITE_ORIGIN } from "@/lib/site-origin";
 
 export const metadata: Metadata = {
   title: "Mentoring invitation",
-  description: "Review a mentoring invitation from The Sermon Coach.",
+  description: "Accept a personal sermon coaching invitation.",
 };
 
 type InvitePageProps = {
@@ -68,13 +68,12 @@ function InviteShell({ children }: { children: ReactNode }) {
         </Link>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-1 flex-col justify-center py-10">
+      <main className="mx-auto flex w-full max-w-[620px] flex-1 flex-col justify-center py-10">
         <div
-          className="rounded px-8 py-9"
+          className="rounded px-6 py-9 sm:px-10 sm:py-11"
           style={{
             background: "var(--sc-panel)",
             border: "1px solid var(--sc-rule)",
-            boxShadow: "var(--sc-shadow-lift)",
           }}
         >
           {children}

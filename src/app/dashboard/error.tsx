@@ -54,11 +54,11 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
           The list could not be reached just now. Nothing has been lost. Try
           again, and if it keeps happening, email{" "}
           <a
-            href="mailto:chris@sermoncoach.online"
+            href="mailto:chris@sermoncoach.com"
             className="underline"
             style={{ color: "var(--sc-accent)" }}
           >
-            chris@sermoncoach.online
+            chris@sermoncoach.com
           </a>{" "}
           and I will look at it personally.
         </p>
