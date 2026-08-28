@@ -132,8 +132,8 @@ export function DashboardRail({
 
   const developOthersItem: NavItem = {
     href: "/dashboard/develop",
-    label: "Develop others",
-    shortLabel: "Develop others",
+    label: "Mentoring",
+    shortLabel: "Mentoring",
     locked: !mentoringUiAllowed,
     isActive: (path) =>
       path.startsWith("/dashboard/develop") ||
