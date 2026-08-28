@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { notifyMenteesSeatsEnded } from "@/lib/mentor/notify-seat-end";
 
 export type MentorSeatCapacityType = "debrief" | "evaluation";
 
@@ -138,6 +139,8 @@ export async function revokeExcessPendingMentorInvites(
       `revokeExcessPendingMentorInvites: end failed: ${endError.message}`,
     );
   }
+
+  await notifyMenteesSeatsEnded(endIds);
 }
 
 /**
