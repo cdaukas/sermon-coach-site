@@ -341,7 +341,7 @@ function SubmissionBlock({
   const explanation = showRelease
     ? "Coaching debrief and How It Preaches are available to you. Release the score when you're ready."
     : !offerRelease && item.status === "complete"
-      ? "This evaluation is for you. He reads nothing here; you deliver it in person."
+      ? "This evaluation is for you. Nothing here reaches them; you deliver it in person."
       : null;
 
   return (

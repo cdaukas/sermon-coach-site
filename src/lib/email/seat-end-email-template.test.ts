@@ -41,7 +41,7 @@ describe("seat-end email copy", () => {
     assert.match(html, /James,/);
     assert.match(
       html,
-      /Your mentoring seat with Chris Daukas has ended\. Everything he released to you is still in your library, and your account stays open\./,
+      /Your mentoring seat with Chris Daukas has ended\. Everything they released to you is still in your library, and your account stays open\./,
     );
     assert.match(
       html,
@@ -64,7 +64,7 @@ describe("seat-end email copy", () => {
     });
 
     assert.match(html, /Hi there,/);
-    assert.match(html, /Everything he released to you is still in your library/);
+    assert.match(html, /Everything they released to you is still in your library/);
     assert.doesNotMatch(html, /\$29/);
     assert.match(html, /https:\/\/sermoncoach\.com\/dashboard\/buy/);
   });

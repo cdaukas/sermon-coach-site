@@ -40,8 +40,8 @@ export async function viewerHasActiveMentorRelationship(
 }
 
 /**
- * Active mentee seat plus whether he reads the debrief. Used by submit and
- * the sermon page so a dark relationship never polls a row he cannot read.
+ * Active mentee seat plus whether they read the debrief. Used by submit and
+ * the sermon page so a dark relationship never polls a row they cannot read.
  */
 export async function getMenteeCoachingView(
   userId: string,

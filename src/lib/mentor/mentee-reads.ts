@@ -43,18 +43,18 @@ export function sermonHidesUnevaluatedBand(
 
 /** Confirm copy when opening a dark seat to the debrief. Name only. */
 export function enableDebriefConfirmBody(preacherName: string): string {
-  return `${preacherName} will start seeing the coaching debrief and How It Preaches for sermons she submits from now on. Sermons she has already submitted stay with you. Worth telling her before she notices.`;
+  return `${preacherName} will start seeing the coaching debrief and How It Preaches for sermons submitted from now on. Anything already submitted stays with you. Worth saying something before it turns up.`;
 }
 
 /** Handoff after a dark submission. Two sentences. Nothing else. */
 export function menteeHandoffSentences(mentorName: string): [string, string] {
   return [
     `Your sermon went to ${mentorName}.`,
-    "He'll set up a time to talk with you about it.",
+    "You'll hear from them about it.",
   ];
 }
 
 /** Invite-page replacement for the debrief line, dark invites only. */
 export function darkInviteDebriefLine(mentorName: string): string {
-  return `${mentorName} will read your sermons and talk with you about them. Everything comes through him.`;
+  return `${mentorName} will read your sermons and talk with you about them. Everything comes through them.`;
 }
