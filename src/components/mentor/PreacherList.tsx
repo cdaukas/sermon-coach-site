@@ -123,10 +123,12 @@ function QuietAction({
   children,
   disabled,
   onClick,
+  onAccent = false,
 }: {
   children: ReactNode;
   disabled?: boolean;
   onClick: () => void;
+  onAccent?: boolean;
 }) {
   return (
     <button
@@ -134,7 +136,11 @@ function QuietAction({
       disabled={disabled}
       onClick={onClick}
       className="border-0 bg-transparent p-0 text-[13px] font-medium underline-offset-4 hover:underline disabled:cursor-wait disabled:no-underline disabled:opacity-60"
-      style={{ ...uiFont, color: "var(--sc-ink-soft)", cursor: "pointer" }}
+      style={{
+        ...uiFont,
+        color: onAccent ? "var(--sc-bg)" : "var(--sc-ink-soft)",
+        cursor: "pointer",
+      }}
     >
       {children}
     </button>
@@ -512,7 +518,7 @@ function EnableDebrief({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inFlightRef = useRef(false);
-  const actionLabel = `Let ${preacherName} read the coaching debrief`;
+  const actionLabel = `Let ${preacherName} read the coaching debrief from now on`;
 
   async function handleEnable() {
     if (inFlightRef.current) {
@@ -563,6 +569,7 @@ function EnableDebrief({
       <div className="space-y-2">
         {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
         <QuietAction
+          onAccent
           onClick={() => {
             setError(null);
             setConfirming(true);
@@ -662,6 +669,17 @@ function PreacherCardView({
           {card.submissionsUsed} of {card.submissionsLimit} sermon
           {card.submissionsLimit === 1 ? "" : "s"} this month
         </p>
+        {card.menteeReads === "none" ? (
+          <div className="mt-3">
+            <EnableDebrief
+              relationshipId={card.relationshipId}
+              preacherName={heading}
+              onEnabled={(since) =>
+                onDebriefEnabled(card.relationshipId, since)
+              }
+            />
+          </div>
+        ) : null}
       </header>
 
       <div className="px-6 py-6 sm:px-8 sm:py-8">
@@ -712,18 +730,9 @@ function PreacherCardView({
         )}
 
         <div
-          className="mt-6 space-y-4 border-t pt-5"
+          className="mt-6 border-t pt-5"
           style={{ borderColor: "var(--sc-rule)" }}
         >
-          {card.menteeReads === "none" ? (
-            <EnableDebrief
-              relationshipId={card.relationshipId}
-              preacherName={heading}
-              onEnabled={(since) =>
-                onDebriefEnabled(card.relationshipId, since)
-              }
-            />
-          ) : null}
           <EndMentoring relationshipId={card.relationshipId} onEnded={onEnded} />
         </div>
       </div>
