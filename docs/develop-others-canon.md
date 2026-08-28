@@ -1,6 +1,6 @@
 # Develop-others lane, canon
 
-**Last updated: 2026-08-03**
+**Last updated: 2026-08-27**
 
 This file is the current shape of the develop-others lane. It supersedes every
 earlier document, chat, brief, and Asana note by definition. If something
@@ -13,10 +13,14 @@ date under it inherits the file date.
 Do not delete superseded entries silently. Move them to the Retired section so
 the next person can see what changed and stop resurrecting it.
 
-The **user-facing product name is Mentoring** (rail, dashboard seats page
-heading, and pricing section). "Develop others" is an internal / doc lane name
-only. Do not rename this file, routes such as `/dashboard/develop`, or database
-identifiers to match the display string.
+The **user-facing product name is Mentoring** on the dashboard page heading
+and the pricing section. The rail item is **Develop others**, under a
+Developing others group, because Teams, Preaching Lab, and Classroom will
+share that one nav item. Do not rename this file or database identifiers to
+match the rail string.
+
+Canonical dashboard route is `/dashboard/develop`. `/dashboard/mentoring`
+permanently redirects to it. Do not delete the mentoring route.
 
 ---
 
@@ -171,9 +175,10 @@ Tables: `mentor_relationships`, `profiles.display_name`,
 
 ## Build order
 
-1. **Shipped.** Display name prompt + invite creation UI at
-   `/dashboard/mentoring`. PR #172, merged at `5990f34`. `/mentor/invite`
-   redirects here.
+1. **Shipped.** Display name prompt + invite creation UI. Originally at
+   `/dashboard/mentoring` (PR #172, `5990f34`). Canonical path is now
+   `/dashboard/develop`; `/dashboard/mentoring` 301s there. `/mentor/invite`
+   redirects to `/dashboard/develop`.
 2. **Shipped.** `/invite/[token]`, public, root layout only, calling
    `preview_mentor_invite` server-side. Seat-branched disclosure. PR #173.
    `/mentor/accept` redirects here with the token preserved, currently a 307
@@ -298,8 +303,8 @@ Do not reintroduce any of these.
   closes the gap.
 - **Zero-arg `create_mentor_invite()`.** Dropped. `p_seat_type` is required
   because it decides whether the mentee ever sees his own scores.
-- **`/mentor/invite` as a rendering route.** Redirects to `/dashboard/mentoring`
-  as of PR #172. It renders nothing of its own.
+- **`/mentor/invite` as a rendering route.** Redirects to `/dashboard/develop`
+  (was `/dashboard/mentoring` as of PR #172). It renders nothing of its own.
 - **`/mentor/accept` as a rendering route.** Redirects to `/invite/[token]` as of
   PR #173. The carry and clear routes underneath it are still live and in use.
 - **The old MentorAcceptForm consent copy.** Said the mentor "can request a full
@@ -314,7 +319,9 @@ Do not reintroduce any of these.
   of monthly seats.
 - **"Term end" language.** Replaced by "relationship end."
 - **Cohort tier.** Fully retired. Replaced by Classroom.
-- **"Develop others" as the user-facing product name.** Used briefly on the
-  rail, seats page, and pricing section on `develop-others-discovery`.
-  Replaced by **Mentoring** for display. Internal lane name and
-  `docs/develop-others-canon.md` filename stay.
+- **"Develop others" as the name on the seats page heading and pricing
+  section.** Used briefly on `develop-others-discovery`, then replaced by
+  **Mentoring** for those surfaces. The rail item was restored to **Develop
+  others** on 2026-08-27 so Teams, Lab, and Classroom can share one nav item
+  later. Mentoring stays on the page heading and pricing. Internal lane name
+  and `docs/develop-others-canon.md` filename stay.

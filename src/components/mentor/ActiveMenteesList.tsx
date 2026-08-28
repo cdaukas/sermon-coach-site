@@ -205,6 +205,10 @@ export function ActiveMenteesList({
     );
   }
 
+  if (mentees.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="mt-10 border-t pt-10"
@@ -216,28 +220,19 @@ export function ActiveMenteesList({
         className="text-[28px] font-semibold leading-tight tracking-tight"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        People you are developing
+        Your Preachers
       </h2>
 
-      {mentees.length === 0 ? (
-        <p
-          className="mt-4 text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          No one yet. When someone accepts an invitation, they appear here.
-        </p>
-      ) : (
-        <ul className="mt-2">
-          {mentees.map((item, index) => (
-            <ActiveMenteeRow
-              key={item.relationshipId}
-              item={item}
-              showDivider={index > 0}
-              onEnded={handleEnded}
-            />
-          ))}
-        </ul>
-      )}
+      <ul className="mt-2">
+        {mentees.map((item, index) => (
+          <ActiveMenteeRow
+            key={item.relationshipId}
+            item={item}
+            showDivider={index > 0}
+            onEnded={handleEnded}
+          />
+        ))}
+      </ul>
     </section>
   );
 }

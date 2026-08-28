@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import type { ReactNode } from "react";
+import { notFound } from "next/navigation";
+import { ActiveMenteesList } from "@/components/mentor/ActiveMenteesList";
+import { AddSomeonePlans } from "@/components/mentor/AddSomeonePlans";
+import { MentorInvitePanel } from "@/components/mentor/MentorInvitePanel";
+import { MentoredSubmissionsList } from "@/components/mentor/MentoredSubmissionsList";
+import { MentorSeatCapacityPanel } from "@/components/mentor/MentorSeatCapacityPanel";
+import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
+import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
+import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
+import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
+import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Mentoring",
@@ -9,146 +19,115 @@ export const metadata: Metadata = {
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
-const CTA_LABEL = "Tell us who you're developing";
-const CTA_HREF =
-  "mailto:chris@sermoncoach.online?subject=Mentoring%20seat";
-const CLASSROOM_CTA_LABEL = "Tell us about your class";
-const CLASSROOM_CTA_HREF =
-  "mailto:chris@sermoncoach.online?subject=Classroom%20interest";
+export default async function DevelopPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-type SeatCard = {
-  name: string;
-  priceLead: string;
-  priceAmount: string;
-  priceSuffix: string;
-  priceNote: string | null;
-  tagline: string;
-  features: ReactNode[];
-  ctaLabel: string;
-  ctaHref: string;
-  startHere?: boolean;
-};
+  if (!user || !isMentoringUiAllowed(user.id)) {
+    notFound();
+  }
 
-const CARDS: SeatCard[] = [
-  {
-    name: "Apprentice",
-    priceLead: "$",
-    priceAmount: "12",
-    priceSuffix: "/mo",
-    priceNote: "Per seat, billed monthly.",
-    tagline:
-      "For the associate, the lay preacher, the church planter you are bringing along.",
-    features: [
-      "Two submissions a month, drawn from the seat and not from their credits",
-      "They read the coaching debrief and How It Preaches",
-      "The scored evaluation is generated and held until you release it",
-      "Their own account and their own library, which you can read",
-    ],
-    ctaLabel: CTA_LABEL,
-    ctaHref: CTA_HREF,
-    startHere: true,
-  },
-  {
-    name: "Colleague",
-    priceLead: "$",
-    priceAmount: "25",
-    priceSuffix: "/mo",
-    priceNote: "Per seat, billed monthly.",
-    tagline: "For the peer you are reading, and who is ready to see everything.",
-    features: [
-      "Four submissions a month, drawn from the seat",
-      "They read everything the moment it is ready, including the score",
-      "Their own account and their own library, which you can read",
-    ],
-    ctaLabel: CTA_LABEL,
-    ctaHref: CTA_HREF,
-  },
-  {
-    name: "Classroom",
-    priceLead: "from $",
-    priceAmount: "125",
-    priceSuffix: "/mo",
-    priceNote: "$25 per seat, five-seat minimum. Billed by the term.",
-    tagline:
-      "For institutions training preachers, a seminary course, a church planting cohort, a denominational track.",
-    features: [
-      <>
-        <strong>$25 per seat, per month</strong>
-        {", billed by the term, with a five-seat floor"}
-      </>,
-      <>
-        <strong>4 credits per seat</strong>
-        {" each month"}
-      </>,
-      "The instructor seat is free",
-      "Everything in Coach for every preacher in the class",
-      "Each preacher keeps a private library, visible to the instructor, never to classmates",
-      "One invoice for the institution. We set up the class by hand before your term starts",
-    ],
-    ctaLabel: CLASSROOM_CTA_LABEL,
-    ctaHref: CLASSROOM_CTA_HREF,
-  },
-];
+  let initialDisplayName: string | null = null;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .maybeSingle();
 
-export default function DevelopPage() {
+  const raw = profile?.display_name;
+  initialDisplayName =
+    typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
+
+  const [submissions, seats, capacity] = await Promise.all([
+    listMentoredEvaluationsForMentor(),
+    listMentorSeatsForMentor(),
+    getMentorSeatCapacity(),
+  ]);
+
+  const hasPreachers = seats.active.length > 0;
+  const hasPendingInvites = seats.pending.length > 0;
+  const hasSubmissions = submissions.length > 0;
+
   return (
-    <main className="develop-seats-page">
-      <div className="mb-8">
+    <>
+      <main
+        className="rounded px-8 py-10"
+        style={{
+          background: "var(--sc-panel)",
+          border: "1px solid var(--sc-rule)",
+          boxShadow: "var(--sc-shadow-lift)",
+        }}
+      >
         <h1
-          className="text-[32px] font-semibold leading-tight tracking-tight"
+          className="mb-8 text-[32px] font-semibold leading-tight tracking-tight"
           style={{ ...serifFont, color: "var(--sc-ink)" }}
         >
           Mentoring
         </h1>
-        <p className="develop-seats-lede">
-          A Coach subscription evaluates your own preaching; a seat gives
-          another preacher their own account, their own submissions, and a library
-          you can read.
-        </p>
-      </div>
 
-      <div className="develop-seats-grid">
-        {CARDS.map((card) => (
-          <article
-            key={card.name}
-            className={`develop-seat-card${card.startHere ? " is-start-here" : ""}`}
+        {capacity ? <MentorSeatCapacityPanel capacity={capacity} /> : null}
+
+        <section aria-labelledby="invite-heading">
+          <h2
+            id="invite-heading"
+            className="text-[28px] font-semibold leading-tight tracking-tight"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
-            {card.startHere ? (
-              <div className="develop-seat-ribbon" style={uiFont}>
-                Start Here
-              </div>
-            ) : null}
-            <h2 className="develop-seat-name" style={serifFont}>
-              {card.name}
-            </h2>
-            <p className="develop-seat-tagline" style={serifFont}>
-              {card.tagline}
-            </p>
-            <div className="develop-seat-price-row" style={serifFont}>
-              <span className="develop-seat-price">
-                <span className="develop-seat-currency">{card.priceLead}</span>
-                {card.priceAmount}
-              </span>
-              <span className="develop-seat-period" style={uiFont}>
-                {card.priceSuffix}
-              </span>
-            </div>
-            {card.priceNote ? (
-              <p className="develop-seat-note" style={uiFont}>
-                {card.priceNote}
-              </p>
-            ) : null}
-            <ul className="develop-seat-features" style={uiFont}>
-              {card.features.map((feature, index) => (
-                <li key={`${card.name}-${index}`}>{feature}</li>
-              ))}
-            </ul>
-            <Link href={card.ctaHref} className="develop-seat-cta" style={uiFont}>
-              {card.ctaLabel}
-            </Link>
-          </article>
-        ))}
-      </div>
-    </main>
+            Invite someone you are developing
+          </h2>
+          <p
+            className="mt-3 max-w-2xl text-[15px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            They preach. You read. The seat is yours, not theirs, and you can end
+            it whenever the season is over.
+          </p>
+
+          <div className="mt-6">
+            <MentorInvitePanel initialDisplayName={initialDisplayName} />
+          </div>
+        </section>
+
+        {/* Your Team — render only when the pastor holds a Teams subscription. */}
+        {/*
+          Teams is dark. A team card shows names, submission counts, and dates.
+          Never sermon titles, never scores, never an Open evaluation link.
+          Only when Team Coaching is active does it look like a mentor card.
+          Copying the Your Preachers card here would break the privacy model.
+        */}
+
+        {/* Your Preaching Lab — render only when the pastor holds an active lab term. */}
+
+        {/* Your Class — render only when the pastor holds a hand-provisioned Classroom. */}
+
+        {hasPreachers ? <ActiveMenteesList mentees={seats.active} /> : null}
+
+        {hasSubmissions ? (
+          <MentoredSubmissionsList submissions={submissions} />
+        ) : null}
+
+        {hasPendingInvites ? (
+          <PendingInvitesList invites={seats.pending} />
+        ) : null}
+      </main>
+
+      <section
+        className="mt-10"
+        aria-labelledby="add-someone-heading"
+      >
+        <h2
+          id="add-someone-heading"
+          className="text-[28px] font-semibold leading-tight tracking-tight"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+        >
+          Add someone
+        </h2>
+        <div className="mt-6">
+          <AddSomeonePlans />
+        </div>
+      </section>
+    </>
   );
 }

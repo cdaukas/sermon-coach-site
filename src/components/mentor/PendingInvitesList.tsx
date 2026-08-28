@@ -235,6 +235,10 @@ export function PendingInvitesList({
     );
   }
 
+  if (invites.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="mt-10 border-t pt-10"
@@ -249,26 +253,16 @@ export function PendingInvitesList({
         Pending invitations
       </h2>
 
-      {invites.length === 0 ? (
-        <p
-          className="mt-4 text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          No open invitations. When you create one, it stays here until they
-          accept or you revoke it, so a reload does not lose the link.
-        </p>
-      ) : (
-        <ul className="mt-2">
-          {invites.map((item, index) => (
-            <PendingInviteRow
-              key={item.relationshipId}
-              item={item}
-              showDivider={index > 0}
-              onRevoked={handleRevoked}
-            />
-          ))}
-        </ul>
-      )}
+      <ul className="mt-2">
+        {invites.map((item, index) => (
+          <PendingInviteRow
+            key={item.relationshipId}
+            item={item}
+            showDivider={index > 0}
+            onRevoked={handleRevoked}
+          />
+        ))}
+      </ul>
     </section>
   );
 }

@@ -14,9 +14,6 @@ import { createClient } from "@/lib/supabase/client";
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
-const EMPTY_COPY =
-  "No submissions yet. When someone you are mentoring submits a sermon, it will show up here.";
-
 const CONTROL_LABEL = "Release the score";
 const CONFIRM_HEADING = "Release the score?";
 const CONFIRM_BODY =
@@ -330,6 +327,10 @@ export function MentoredSubmissionsList({
     );
   }
 
+  if (submissions.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="mt-10 border-t pt-10"
@@ -344,25 +345,16 @@ export function MentoredSubmissionsList({
         Submissions
       </h2>
 
-      {submissions.length === 0 ? (
-        <p
-          className="mt-4 text-[15px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          {EMPTY_COPY}
-        </p>
-      ) : (
-        <ul className="mt-2">
-          {submissions.map((item, index) => (
-            <SubmissionRow
-              key={item.evaluationId}
-              item={item}
-              showDivider={index > 0}
-              onReleased={handleReleased}
-            />
-          ))}
-        </ul>
-      )}
+      <ul className="mt-2">
+        {submissions.map((item, index) => (
+          <SubmissionRow
+            key={item.evaluationId}
+            item={item}
+            showDivider={index > 0}
+            onReleased={handleReleased}
+          />
+        ))}
+      </ul>
     </section>
   );
 }

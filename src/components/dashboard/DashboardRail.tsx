@@ -130,14 +130,14 @@ export function DashboardRail({
     (item) => item.href !== "/dashboard/growth" || growthAllowed,
   );
 
-  const coachingItem: NavItem = {
-    href: "/dashboard/mentoring",
-    label: "Mentoring",
-    shortLabel: "Mentoring",
+  const developOthersItem: NavItem = {
+    href: "/dashboard/develop",
+    label: "Develop others",
+    shortLabel: "Develop others",
     locked: !mentoringUiAllowed,
     isActive: (path) =>
-      path.startsWith("/dashboard/mentoring") ||
-      path.startsWith("/dashboard/develop"),
+      path.startsWith("/dashboard/develop") ||
+      path.startsWith("/dashboard/mentoring"),
   };
 
   return (
@@ -153,13 +153,16 @@ export function DashboardRail({
       </Link>
 
       <nav className="dashboard-rail-nav" aria-label="Main">
+        <p className="dashboard-rail-group-label" style={uiFont}>
+          Your preaching
+        </p>
         {primaryItems.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
         <p className="dashboard-rail-group-label" style={uiFont}>
-          Coaching
+          Developing others
         </p>
-        <NavLink item={coachingItem} pathname={pathname} />
+        <NavLink item={developOthersItem} pathname={pathname} />
         <div
           className="dashboard-rail-divider"
           role="presentation"

@@ -135,7 +135,7 @@ export default async function EvaluationPage({
   const outputLanguage = parseOutputLanguage(evaluation.output_language);
   const reportCopy = evaluationReportCopy(outputLanguage);
   const backHref =
-    resolvedVia === "owner" ? "/dashboard" : "/dashboard/mentoring";
+    resolvedVia === "owner" ? "/dashboard" : "/dashboard/develop";
   const backLabel =
     resolvedVia === "owner" ? reportCopy.backToLibrary : reportCopy.backToMentoring;
 
