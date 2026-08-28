@@ -25,14 +25,14 @@ describe("handoff and invite copy", () => {
   it("returns the two handoff sentences with the mentor name", () => {
     assert.deepEqual(menteeHandoffSentences("Tyler James"), [
       "Your sermon went to Tyler James.",
-      "He'll set up a time to talk with you about it.",
+      "You'll hear from them about it.",
     ]);
   });
 
   it("returns the dark invite line verbatim", () => {
     assert.equal(
       darkInviteDebriefLine("Tyler James"),
-      "Tyler James will read your sermons and talk with you about them. Everything comes through him.",
+      "Tyler James will read your sermons and talk with you about them. Everything comes through them.",
     );
   });
 });
@@ -81,7 +81,7 @@ describe("enableDebriefConfirmBody", () => {
   it("keeps the confirm copy and substitutes only the name", () => {
     assert.equal(
       enableDebriefConfirmBody("Tara"),
-      "Tara will start seeing the coaching debrief and How It Preaches for sermons she submits from now on. Sermons she has already submitted stay with you. Worth telling her before she notices.",
+      "Tara will start seeing the coaching debrief and How It Preaches for sermons submitted from now on. Anything already submitted stays with you. Worth saying something before it turns up.",
     );
   });
 });

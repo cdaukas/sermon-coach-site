@@ -73,7 +73,7 @@ export function renderSeatEndEmailHtml(
           <tr>
             <td style="padding:32px 32px 28px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#2a3447;">
               <p style="margin:0 0 16px;">${greeting},</p>
-              <p style="margin:0 0 16px;">Your mentoring seat with ${mentorName} has ended. Everything he released to you is still in your library, and your account stays open.</p>
+              <p style="margin:0 0 16px;">Your mentoring seat with ${mentorName} has ended. Everything they released to you is still in your library, and your account stays open.</p>
               ${pitch}
               <p style="margin:0 0 24px;"><a href="${keepGoingUrl}" style="color:#1a2332;font-weight:600;">Keep going</a></p>
               <p style="margin:0;">Christopher M. Daukas<br>The Sermon Coach</p>

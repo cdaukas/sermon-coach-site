@@ -5,8 +5,8 @@ import { menteeHandoffSentences } from "@/lib/mentor/mentee-reads";
 const uiFont = { fontFamily: "var(--font-ui)" };
 
 /**
- * Dark Apprentice handoff. The product does not speak to him; everything
- * reaches him through his pastor. Two sentences. Nothing else.
+ * Dark Apprentice handoff. The product does not speak to them; everything
+ * reaches them through their pastor. Two sentences. Nothing else.
  */
 export function MenteeHandoffCopy({ mentorName }: { mentorName: string }) {
   const [first, second] = menteeHandoffSentences(mentorName);

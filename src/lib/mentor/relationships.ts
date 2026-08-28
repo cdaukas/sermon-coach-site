@@ -93,7 +93,7 @@ const ENABLE_DEBRIEF_ERROR_MESSAGES: Record<string, string> = {
   not_found: "That mentoring relationship could not be found.",
   not_the_mentor: "You can only change your own mentoring seats.",
   not_active: "That mentoring relationship is not active.",
-  not_dark: "He already reads the coaching debrief.",
+  not_dark: "They already read the coaching debrief.",
 };
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";

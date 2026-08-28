@@ -75,11 +75,11 @@ function MenteeReadsOptions({
   const options: Array<{ id: "debrief" | "none"; label: string }> = [
     {
       id: "debrief",
-      label: "He reads the coaching debrief and How It Preaches",
+      label: "They read the coaching debrief and How It Preaches",
     },
     {
       id: "none",
-      label: "He reads nothing. You deliver it in person.",
+      label: "They read nothing. You deliver it in person.",
     },
   ];
 
@@ -457,7 +457,7 @@ function InviteByEmail({
   return (
     <Panel
       title="Invite a preacher"
-      lede="Name the man you’re developing, then send the invitation to his email."
+      lede="Name the preacher you’re developing, then send the invitation to their email."
       onClose={onClose}
     >
       {seatTypes.length > 1 ? (
