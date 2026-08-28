@@ -10,6 +10,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
   isMentoredMentee?: boolean;
+  menteeReadsNone?: boolean;
   churchName?: string | null;
   spanishEnabled?: boolean;
 };
@@ -17,6 +18,7 @@ type NewSermonWorkspaceProps = {
 export function NewSermonWorkspace({
   entitlement,
   isMentoredMentee = false,
+  menteeReadsNone = false,
   churchName = null,
   spanishEnabled = false,
 }: NewSermonWorkspaceProps) {
@@ -48,6 +50,7 @@ export function NewSermonWorkspace({
         <SermonForm
           entitlement={entitlement}
           isMentoredMentee={isMentoredMentee}
+          menteeReadsNone={menteeReadsNone}
           churchName={churchName}
           spanishEnabled={spanishEnabled}
         />

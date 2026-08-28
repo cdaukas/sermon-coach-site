@@ -45,10 +45,12 @@ export function DashboardLibrary({
   sermons,
   deleted,
   growthAllowed,
+  hideUnevaluatedBand = false,
 }: {
   sermons: DashboardSermonRow[];
   deleted: DeletedSermonRow[];
   growthAllowed: boolean;
+  hideUnevaluatedBand?: boolean;
 }) {
   const router = useRouter();
   const [busySermonId, setBusySermonId] = useState<string | null>(null);
@@ -150,6 +152,7 @@ export function DashboardLibrary({
           sermons={sermons}
           busySermonId={busySermonId}
           growthAllowed={growthAllowed}
+          hideUnevaluatedBand={hideUnevaluatedBand}
           onToggleExclude={handleToggleExclude}
           onRequestDelete={(sermon) => {
             setDeleteError(null);

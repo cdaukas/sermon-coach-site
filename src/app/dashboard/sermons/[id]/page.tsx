@@ -10,7 +10,7 @@ import {
   listEvaluationsForSermon,
   sermonHasActiveEvaluation,
 } from "@/lib/evaluation/queries";
-import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
+import { getMenteeCoachingView } from "@/lib/mentor/relationship";
 import { isMentoringDebriefAllowed } from "@/lib/mentor/uiAccess";
 import { getSermonWithLatestVersion } from "@/lib/sermons/queries";
 
@@ -56,15 +56,19 @@ export default async function SermonDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [sermon, evaluations, entitlement, hasActiveEvaluation, isMentoredMentee] =
+  const [sermon, evaluations, entitlement, hasActiveEvaluation, coachingView] =
     await Promise.all([
       getSermonWithLatestVersion(id),
       listEvaluationsForSermon(id),
       user ? getEvaluationEntitlement(user.id) : Promise.resolve(null),
       sermonHasActiveEvaluation(id),
       user
-        ? viewerHasActiveMentorRelationship(user.id)
-        : Promise.resolve(false),
+        ? getMenteeCoachingView(user.id)
+        : Promise.resolve({
+            isMentoredMentee: false,
+            menteeReadsNone: false,
+            mentorName: "your mentor",
+          }),
     ]);
 
   if (!sermon?.latest_version) {
@@ -121,8 +125,10 @@ export default async function SermonDetailPage({
         completeEvaluations={completeEvaluations}
         entitlement={entitlement}
         hasActiveEvaluation={hasActiveEvaluation}
-        isMentoredMentee={isMentoredMentee}
+        isMentoredMentee={coachingView.isMentoredMentee}
         mentoringDebriefAllowed={mentoringDebriefAllowed}
+        menteeReadsNone={coachingView.menteeReadsNone}
+        handoffMentorName={coachingView.mentorName}
       />
 
       <SermonDetailManuscript content={version.content} />
