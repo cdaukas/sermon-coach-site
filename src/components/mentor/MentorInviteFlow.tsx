@@ -181,6 +181,7 @@ function InviteByEmail({
   onClose: () => void;
 }) {
   const [seatType, setSeatType] = useState<MentorSeatType>(seatTypes[0]);
+  const [preacherName, setPreacherName] = useState("");
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -230,15 +231,22 @@ function InviteByEmail({
       let token = inviteLink ? inviteLink.split("/invite/")[1] : null;
 
       if (!token) {
+        const label = preacherName.trim();
+        // p_mentor_label is optional. Checkout will later pass the same
+        // value through Stripe session metadata into this column; it is
+        // not form-only.
         const { data, error: rpcError } = await supabase.rpc(
           "create_mentor_invite",
-          { p_seat_type: seatType },
+          {
+            p_seat_type: seatType,
+            p_mentor_label: label.length > 0 ? label : null,
+          },
         );
 
         if (rpcError) {
           setError(
             isSeatCapError(rpcError)
-              ? "That seat is already assigned or invited. Free one up, or add another seat below."
+              ? "That seat was taken while you were here. Close this and start again to add another."
               : rpcError.message.toLowerCase().includes("not authenticated")
                 ? "Sign in to create an invitation."
                 : "Could not create an invitation. Please try again.",
@@ -397,7 +405,7 @@ function InviteByEmail({
   return (
     <Panel
       title="Invite a preacher"
-      lede="Enter their email address and we’ll send them an invitation to join your mentoring relationship."
+      lede="Name the man you’re developing, then send the invitation to his email."
       onClose={onClose}
     >
       {seatTypes.length > 1 ? (
@@ -448,7 +456,21 @@ function InviteByEmail({
 
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
 
-      <div className="mt-4 max-w-sm">
+      <div className="mt-4 max-w-sm space-y-5">
+        <AuthField
+          id="invite-preacher-name"
+          label="The preacher’s name (optional)"
+          inputProps={{
+            name: "invite-preacher-name",
+            type: "text",
+            autoComplete: "name",
+            maxLength: 80,
+            placeholder: "James",
+            value: preacherName,
+            disabled: sending,
+            onChange: (e) => setPreacherName(e.target.value),
+          }}
+        />
         <AuthField
           id="invite-recipient-email"
           label="Email address"
@@ -502,47 +524,73 @@ export function MentorInviteFlow({
   capacity,
   initialDisplayName,
   label = "Invite a preacher",
+  defaultOpen = false,
+  heading,
+  children,
 }: {
   capacity: MentorSeatCapacity;
   initialDisplayName: string | null;
   label?: string;
+  defaultOpen?: boolean;
+  heading?: ReactNode;
+  children?: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [displayName, setDisplayName] = useState(initialDisplayName);
 
   const available = availableSeatTypes(capacity);
   const hasSeat = available.length > 0;
 
-  if (!open) {
+  const trigger = open ? null : (
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      className="inline-flex w-full items-center justify-center gap-2 rounded border px-7 py-3.5 text-sm font-semibold tracking-wide transition-opacity hover:opacity-90 sm:w-auto"
+      style={{
+        ...uiFont,
+        background: "var(--sc-ink)",
+        color: "var(--sc-bg)",
+        borderColor: "var(--sc-ink)",
+        cursor: "pointer",
+      }}
+    >
+      <span aria-hidden="true">+</span>
+      {label}
+    </button>
+  );
+
+  const panel = open ? (
+    hasSeat ? (
+      <InviteByEmail
+        seatTypes={available}
+        displayName={displayName}
+        onDisplayNameSaved={setDisplayName}
+        onClose={() => setOpen(false)}
+      />
+    ) : (
+      <SeatChoice capacity={capacity} onClose={() => setOpen(false)} />
+    )
+  ) : null;
+
+  if (heading) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded border px-7 py-3.5 text-sm font-semibold tracking-wide transition-opacity hover:opacity-90"
-        style={{
-          ...uiFont,
-          background: "var(--sc-ink)",
-          color: "var(--sc-bg)",
-          borderColor: "var(--sc-ink)",
-          cursor: "pointer",
-        }}
-      >
-        <span aria-hidden="true">+</span>
-        {label}
-      </button>
+      <>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {heading}
+          {trigger}
+        </div>
+        {panel ? <div className="mt-7">{panel}</div> : null}
+        {children ? <div className="mt-7">{children}</div> : null}
+      </>
     );
   }
 
   // With a seat in hand, go straight to the email form. Without one, the seat
   // has to be bought first — no point collecting an address we cannot use yet.
-  return hasSeat ? (
-    <InviteByEmail
-      seatTypes={available}
-      displayName={displayName}
-      onDisplayNameSaved={setDisplayName}
-      onClose={() => setOpen(false)}
-    />
-  ) : (
-    <SeatChoice capacity={capacity} onClose={() => setOpen(false)} />
+  return (
+    <>
+      {trigger}
+      {panel}
+    </>
   );
 }

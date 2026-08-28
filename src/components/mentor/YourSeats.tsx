@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import type { MentorSeatCapacity } from "@/lib/mentor/capacity";
 import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import { seatAvailability } from "@/components/mentor/seat-availability";
-import { MentorSeatPicker } from "@/components/mentor/MentorSeatPicker";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -15,7 +13,6 @@ const serifFont = { fontFamily: "var(--font-serif)" };
  * above it, so this stays quiet: no card, no shadow, one hairline rule.
  */
 export function YourSeats({ capacity }: { capacity: MentorSeatCapacity }) {
-  const [adding, setAdding] = useState(false);
   const rows = seatAvailability(capacity);
 
   return (
@@ -45,7 +42,7 @@ export function YourSeats({ capacity }: { capacity: MentorSeatCapacity }) {
               className="text-[13px] leading-relaxed"
               style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
             >
-              {row.used} used
+              {row.used} in use
               <span aria-hidden="true"> · </span>
               <span
                 style={{
@@ -56,29 +53,14 @@ export function YourSeats({ capacity }: { capacity: MentorSeatCapacity }) {
                   fontWeight: row.available > 0 ? 600 : 400,
                 }}
               >
-                {row.available} available
+                {row.available === 0
+                  ? "0 more available"
+                  : `${row.available} available`}
               </span>
             </p>
           </div>
         ))}
       </div>
-
-      {!adding ? (
-        <div className="mt-5">
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            className="border-0 bg-transparent p-0 text-[13px] font-medium underline-offset-4 hover:underline"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)", cursor: "pointer" }}
-          >
-            <span aria-hidden="true">+ </span>Add a seat
-          </button>
-        </div>
-      ) : (
-        <div className="mt-6">
-          <MentorSeatPicker onClose={() => setAdding(false)} />
-        </div>
-      )}
 
       <p
         className="mt-6 text-[13px] leading-relaxed"

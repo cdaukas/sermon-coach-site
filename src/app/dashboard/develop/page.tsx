@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MentorInviteFlow } from "@/components/mentor/MentorInviteFlow";
-import { MentoringPlans } from "@/components/mentor/MentoringPlans";
 import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
 import { PreacherList } from "@/components/mentor/PreacherList";
 import { YourSeats } from "@/components/mentor/YourSeats";
@@ -13,7 +12,7 @@ import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Mentoring",
+  title: "Develop others",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -74,7 +73,7 @@ export default async function DevelopPage() {
           className="text-[11px] font-semibold uppercase tracking-[0.18em]"
           style={{ ...uiFont, color: "var(--sc-accent)" }}
         >
-          Mentoring
+          Develop others
         </p>
         <h1
           className="mt-4 max-w-2xl text-[34px] font-semibold leading-[1.15] tracking-tight sm:text-[42px]"
@@ -90,15 +89,40 @@ export default async function DevelopPage() {
           Coach, you review the evaluation, and you decide when to release
           their score.
         </p>
-        <div className="mt-8">
+      </header>
+
+      {capacity ? <YourSeats capacity={capacity} /> : null}
+
+      {capacity || hasPreachers ? (
+        <section
+          aria-labelledby="preachers-heading"
+          className="border-t pt-12 sm:pt-14"
+          style={{ borderColor: "var(--sc-rule)" }}
+        >
           {capacity ? (
             <MentorInviteFlow
               capacity={capacity}
               initialDisplayName={initialDisplayName}
-            />
-          ) : null}
-        </div>
-      </header>
+              heading={
+                <SectionHeading id="preachers-heading">
+                  Your Preachers
+                </SectionHeading>
+              }
+            >
+              <PreacherList cards={preachers} />
+            </MentorInviteFlow>
+          ) : (
+            <>
+              <SectionHeading id="preachers-heading">
+                Your Preachers
+              </SectionHeading>
+              <div className="mt-7">
+                <PreacherList cards={preachers} />
+              </div>
+            </>
+          )}
+        </section>
+      ) : null}
 
       {/* Your Team — render only when the pastor holds a Teams subscription. */}
       {/*
@@ -112,50 +136,7 @@ export default async function DevelopPage() {
 
       {/* Your Class — render only when the pastor holds a hand-provisioned Classroom. */}
 
-      {hasPreachers ? (
-        <section
-          aria-labelledby="preachers-heading"
-          className="border-t pt-12 sm:pt-14"
-          style={{ borderColor: "var(--sc-rule)" }}
-        >
-          <SectionHeading id="preachers-heading">Your Preachers</SectionHeading>
-          <div className="mt-7 space-y-5">
-            <PreacherList
-              cards={preachers}
-              inviteAction={
-                capacity ? (
-                  <MentorInviteFlow
-                    capacity={capacity}
-                    initialDisplayName={initialDisplayName}
-                  />
-                ) : null
-              }
-            />
-          </div>
-        </section>
-      ) : null}
-
       <PendingInvitesList invites={seats.pending} />
-
-      <section
-        aria-labelledby="add-someone-heading"
-        className="mt-16 border-t pt-12 sm:mt-20 sm:pt-14"
-        style={{ borderColor: "var(--sc-rule)" }}
-      >
-        <SectionHeading id="add-someone-heading">Add someone</SectionHeading>
-        <div className="mt-7">
-          <MentoringPlans />
-        </div>
-      </section>
-
-      {capacity ? (
-        <div
-          className="mt-16 border-t pt-10 sm:mt-20"
-          style={{ borderColor: "var(--sc-rule)" }}
-        >
-          <YourSeats capacity={capacity} />
-        </div>
-      ) : null}
     </main>
   );
 }

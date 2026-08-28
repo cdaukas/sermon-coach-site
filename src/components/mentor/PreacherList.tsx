@@ -501,29 +501,41 @@ function PreacherCardView({
   const [showAll, setShowAll] = useState(false);
 
   const [latest, ...earlier] = card.submissions;
-  const title =
-    card.menteeEmail && card.menteeEmail.length > 0
-      ? card.menteeEmail
-      : "Preacher";
+  const label =
+    card.mentorLabel && card.mentorLabel.length > 0 ? card.mentorLabel : null;
+  const email =
+    card.menteeEmail && card.menteeEmail.length > 0 ? card.menteeEmail : null;
+  const heading = label ?? email ?? "Preacher";
 
   return (
     <article
-      className="rounded px-6 py-6 sm:px-8 sm:py-8"
+      className="overflow-hidden rounded"
       style={{
         background: "var(--sc-panel)",
         border: "1px solid var(--sc-rule)",
       }}
     >
-      <header>
+      <header
+        className="px-6 py-6 sm:px-8 sm:py-8"
+        style={{ background: "var(--sc-accent)" }}
+      >
         <h3
           className="text-[22px] font-semibold leading-snug tracking-tight break-words"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
+          style={{ ...serifFont, color: "var(--sc-bg)" }}
         >
-          {title}
+          {heading}
         </h3>
+        {label && email ? (
+          <p
+            className="mt-1.5 text-[13px] leading-relaxed break-words"
+            style={{ ...uiFont, color: "var(--sc-bg)" }}
+          >
+            {email}
+          </p>
+        ) : null}
         <p
           className="mt-1.5 text-[13px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          style={{ ...uiFont, color: "var(--sc-bg)" }}
         >
           {mentorSeatDisplayName(card.seatType)}
           <span aria-hidden="true"> · </span>
@@ -532,60 +544,57 @@ function PreacherCardView({
         </p>
       </header>
 
-      {latest ? (
-        <>
-          <div
-            className="mt-6 border-t pt-6"
-            style={{ borderColor: "var(--sc-rule)" }}
-          >
+      <div className="px-6 py-6 sm:px-8 sm:py-8">
+        {latest ? (
+          <>
             <SubmissionBlock
               item={latest}
               label="Latest sermon"
               onReleased={onReleased}
             />
-          </div>
 
-          {earlier.length > 0 ? (
-            <div
-              className="mt-6 border-t pt-5"
-              style={{ borderColor: "var(--sc-rule)" }}
-            >
-              {!showAll ? (
-                <QuietAction onClick={() => setShowAll(true)}>
-                  Show {earlier.length} earlier sermon
-                  {earlier.length === 1 ? "" : "s"}
-                </QuietAction>
-              ) : (
-                <div className="space-y-6">
-                  {earlier.map((item) => (
-                    <SubmissionBlock
-                      key={item.evaluationId}
-                      item={item}
-                      onReleased={onReleased}
-                    />
-                  ))}
-                  <QuietAction onClick={() => setShowAll(false)}>
-                    Hide earlier sermons
+            {earlier.length > 0 ? (
+              <div
+                className="mt-6 border-t pt-5"
+                style={{ borderColor: "var(--sc-rule)" }}
+              >
+                {!showAll ? (
+                  <QuietAction onClick={() => setShowAll(true)}>
+                    Show {earlier.length} earlier sermon
+                    {earlier.length === 1 ? "" : "s"}
                   </QuietAction>
-                </div>
-              )}
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <p
-          className="mt-5 text-[14px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          No sermons yet. When they submit one, the evaluation appears here.
-        </p>
-      )}
+                ) : (
+                  <div className="space-y-6">
+                    {earlier.map((item) => (
+                      <SubmissionBlock
+                        key={item.evaluationId}
+                        item={item}
+                        onReleased={onReleased}
+                      />
+                    ))}
+                    <QuietAction onClick={() => setShowAll(false)}>
+                      Hide earlier sermons
+                    </QuietAction>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <p
+            className="text-[14px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+          >
+            No sermons yet. When they submit one, the evaluation appears here.
+          </p>
+        )}
 
-      <div
-        className="mt-6 border-t pt-5"
-        style={{ borderColor: "var(--sc-rule)" }}
-      >
-        <EndMentoring relationshipId={card.relationshipId} onEnded={onEnded} />
+        <div
+          className="mt-6 border-t pt-5"
+          style={{ borderColor: "var(--sc-rule)" }}
+        >
+          <EndMentoring relationshipId={card.relationshipId} onEnded={onEnded} />
+        </div>
       </div>
     </article>
   );
@@ -595,10 +604,8 @@ function PreacherCardView({
 
 export function PreacherList({
   cards: initialCards,
-  inviteAction,
 }: {
   cards: PreacherCard[];
-  inviteAction: ReactNode;
 }) {
   const [cards, setCards] = useState(initialCards);
 
@@ -643,7 +650,6 @@ export function PreacherList({
           Invite someone you&rsquo;re developing and begin walking with them
           sermon by sermon.
         </p>
-        <div className="mt-7 flex justify-center">{inviteAction}</div>
       </div>
     );
   }
