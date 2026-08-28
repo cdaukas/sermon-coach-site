@@ -125,6 +125,23 @@ describe("Spanish display maps", () => {
     const copy = evaluationReportCopy("en");
     assert.equal(copy.whereItsStrong, "Where It's Strong");
     assert.equal(copy.eyebrow, "Evaluation");
+    assert.equal(copy.whatTheScoresMean, "What the scores mean");
+    assert.equal(
+      copy.criterionScaleLead,
+      "Each of the eleven criteria is scored 1 to 5.",
+    );
+    assert.equal(
+      copy.criterionScaleClose,
+      "A 3 is not a failing mark. Most faithful weekly preaching lands at 3 on several criteria, and a sermon built of 3s and 4s is doing the work. A 4 asks for something beyond competence, and a 5 is worth studying, not flawless.",
+    );
+    assert.deepEqual(
+      copy.criterionScoreMeanings.map((row) => row.score),
+      [5, 4, 3, 2, 1],
+    );
+    assert.equal(
+      copy.criterionScoreMeanings[0].meaning,
+      "Excellent. Nothing this criterion asks for is missing, and another preacher could learn from how it was done.",
+    );
     assert.equal(copy.melodicLineTitle, "The text");
     assert.equal(copy.melodicLinePassage, "This passage");
     assert.equal(copy.melodicLineReading, "Melodic line");
@@ -144,6 +161,8 @@ describe("Spanish display maps", () => {
       "el tema al que vuelve todo el libro",
     );
     assert.equal(copy.howItPreaches, "Cómo predica");
+    assert.equal(copy.whatTheScoresMean, "Qué significan las puntuaciones");
+    assert.equal(copy.criterionScaleLead, "Cada uno de los once criterios se puntúa del 1 al 5.");
     assert.equal(copy.backToLibrary, "Volver a la biblioteca");
     assert.equal(copy.printSavePdf, "Imprimir / Guardar como PDF");
     assert.equal(copy.whereItsStrong, "Dónde está fuerte");
