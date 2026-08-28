@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { parseEvaluationCardLabels } from "@/lib/evaluation/display-score";
+import { sermonHidesUnevaluatedBand } from "@/lib/mentor/mentee-reads";
 import type { DashboardSermonRow } from "@/lib/sermons/types";
 
 export const EXCLUSION_HELP_TEXT =
@@ -26,13 +27,27 @@ type SermonListProps = {
   onToggleExclude: (sermonId: string, excluded: boolean) => void;
   onRequestDelete: (sermon: DashboardSermonRow) => void;
   hideUnevaluatedBand?: boolean;
+  debriefVisibleSince?: string | null;
   busySermonId?: string | null;
 };
+
+function hideNotRun(
+  sermon: DashboardSermonRow,
+  hideUnevaluatedBand: boolean,
+  debriefVisibleSince: string | null,
+): boolean {
+  return sermonHidesUnevaluatedBand(
+    hideUnevaluatedBand,
+    debriefVisibleSince,
+    sermon.created_at,
+  );
+}
 
 function buildMobileMeta(
   sermon: DashboardSermonRow,
   growthAllowed: boolean,
   hideUnevaluatedBand: boolean,
+  debriefVisibleSince: string | null,
 ): string {
   const segments: string[] = [];
   const passage = sermon.primary_passage?.trim() || null;
@@ -42,7 +57,7 @@ function buildMobileMeta(
   segments.push(formatSavedDate(sermon.created_at));
   if (sermon.latestEvaluation) {
     segments.push(bandLabel(sermon.latestEvaluation.score_band));
-  } else if (!hideUnevaluatedBand) {
+  } else if (!hideNotRun(sermon, hideUnevaluatedBand, debriefVisibleSince)) {
     segments.push("Not run");
   }
   if (sermon.completeEvaluationCount > 1) {
@@ -150,6 +165,7 @@ function SermonRow({
   busy,
   growthAllowed,
   hideUnevaluatedBand,
+  debriefVisibleSince,
   onToggleExclude,
   onRequestDelete,
 }: {
@@ -157,6 +173,7 @@ function SermonRow({
   busy: boolean;
   growthAllowed: boolean;
   hideUnevaluatedBand: boolean;
+  debriefVisibleSince: string | null;
   onToggleExclude: (sermonId: string, excluded: boolean) => void;
   onRequestDelete: (sermon: DashboardSermonRow) => void;
 }) {
@@ -173,7 +190,7 @@ function SermonRow({
       : null;
   const bandText = evaluated
     ? bandLabel(sermon.latestEvaluation!.score_band)
-    : hideUnevaluatedBand
+    : hideNotRun(sermon, hideUnevaluatedBand, debriefVisibleSince)
       ? ""
       : "Not run";
 
@@ -198,7 +215,12 @@ function SermonRow({
             {bandText}
           </span>
           <span className="dashboard-sermon-row-mobile-meta">
-            {buildMobileMeta(sermon, growthAllowed, hideUnevaluatedBand)}
+            {buildMobileMeta(
+              sermon,
+              growthAllowed,
+              hideUnevaluatedBand,
+              debriefVisibleSince,
+            )}
           </span>
         </Link>
         <SermonRowMenu
@@ -218,6 +240,7 @@ export function SermonList({
   header,
   growthAllowed,
   hideUnevaluatedBand = false,
+  debriefVisibleSince = null,
   onToggleExclude,
   onRequestDelete,
   busySermonId = null,
@@ -237,6 +260,7 @@ export function SermonList({
             busy={busySermonId === sermon.id}
             growthAllowed={growthAllowed}
             hideUnevaluatedBand={hideUnevaluatedBand}
+            debriefVisibleSince={debriefVisibleSince}
             onToggleExclude={onToggleExclude}
             onRequestDelete={onRequestDelete}
           />

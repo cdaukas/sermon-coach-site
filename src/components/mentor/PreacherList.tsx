@@ -9,7 +9,15 @@ import {
   type ReleaseMentoredEvaluationResult,
 } from "@/lib/mentor/release";
 import { endMentorRelationshipAction } from "@/lib/mentor/actions";
-import { endMentorRelationshipErrorMessage } from "@/lib/mentor/relationships";
+import {
+  enableDebriefConfirmBody,
+  evaluationIsDarkForMentee,
+} from "@/lib/mentor/mentee-reads";
+import {
+  enableMenteeDebriefErrorMessage,
+  endMentorRelationshipErrorMessage,
+  type EnableMenteeDebriefResult,
+} from "@/lib/mentor/relationships";
 import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import type { MentoredSubmissionListItem } from "@/lib/mentor/submissions";
 import { createClient } from "@/lib/supabase/client";
@@ -397,6 +405,17 @@ function SubmissionBlock({
 
 /* -------------------------------------------------------------------- card */
 
+function preacherOfferRelease(
+  card: PreacherCard,
+  item: MentoredSubmissionListItem,
+): boolean {
+  return !evaluationIsDarkForMentee(
+    card.menteeReads,
+    card.debriefVisibleSince,
+    item.createdAt,
+  );
+}
+
 function EndMentoring({
   relationshipId,
   onEnded,
@@ -480,14 +499,124 @@ function EndMentoring({
   );
 }
 
+function EnableDebrief({
+  relationshipId,
+  preacherName,
+  onEnabled,
+}: {
+  relationshipId: string;
+  preacherName: string;
+  onEnabled: (debriefVisibleSince: string) => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
+  const actionLabel = `Let ${preacherName} read the coaching debrief`;
+
+  async function handleEnable() {
+    if (inFlightRef.current) {
+      return;
+    }
+    inFlightRef.current = true;
+    setError(null);
+    setSaving(true);
+
+    try {
+      const supabase = createClient();
+      const { data, error: rpcError } = await supabase.rpc(
+        "enable_mentee_debrief",
+        { p_relationship_id: relationshipId },
+      );
+
+      if (rpcError) {
+        setError(enableMenteeDebriefErrorMessage(null));
+        return;
+      }
+
+      const result = data as EnableMenteeDebriefResult | null;
+
+      if (
+        result?.ok === true &&
+        typeof result.debrief_visible_since === "string"
+      ) {
+        onEnabled(result.debrief_visible_since);
+        setConfirming(false);
+        return;
+      }
+
+      setError(
+        enableMenteeDebriefErrorMessage(
+          result && "error_code" in result ? result.error_code : null,
+        ),
+      );
+    } catch {
+      setError(enableMenteeDebriefErrorMessage(null));
+    } finally {
+      inFlightRef.current = false;
+      setSaving(false);
+    }
+  }
+
+  if (!confirming) {
+    return (
+      <div className="space-y-2">
+        {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
+        <QuietAction
+          onClick={() => {
+            setError(null);
+            setConfirming(true);
+          }}
+        >
+          {actionLabel}
+        </QuietAction>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="space-y-3 rounded px-4 py-4"
+      style={{ background: "var(--sc-bg)", border: "1px solid var(--sc-rule)" }}
+    >
+      <p
+        className="text-[13px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+      >
+        {enableDebriefConfirmBody(preacherName)}
+      </p>
+      {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
+      <div className="flex flex-wrap gap-4">
+        <QuietAction disabled={saving} onClick={() => void handleEnable()}>
+          {saving ? "Updating…" : actionLabel}
+        </QuietAction>
+        <QuietAction
+          disabled={saving}
+          onClick={() => {
+            setConfirming(false);
+            setError(null);
+          }}
+        >
+          Cancel
+        </QuietAction>
+      </div>
+    </div>
+  );
+}
+
 function PreacherCardView({
   card,
   onReleased,
   onEnded,
+  onDebriefEnabled,
 }: {
   card: PreacherCard;
   onReleased: (evaluationId: string, releasedAt: string) => void;
   onEnded: (relationshipId: string) => void;
+  onDebriefEnabled: (
+    relationshipId: string,
+    debriefVisibleSince: string,
+  ) => void;
 }) {
   const [showAll, setShowAll] = useState(false);
 
@@ -541,7 +670,7 @@ function PreacherCardView({
             <SubmissionBlock
               item={latest}
               label="Latest sermon"
-              offerRelease={card.menteeReads !== "none"}
+              offerRelease={preacherOfferRelease(card, latest)}
               onReleased={onReleased}
             />
 
@@ -561,7 +690,7 @@ function PreacherCardView({
                       <SubmissionBlock
                         key={item.evaluationId}
                         item={item}
-                        offerRelease={card.menteeReads !== "none"}
+                        offerRelease={preacherOfferRelease(card, item)}
                         onReleased={onReleased}
                       />
                     ))}
@@ -583,9 +712,18 @@ function PreacherCardView({
         )}
 
         <div
-          className="mt-6 border-t pt-5"
+          className="mt-6 space-y-4 border-t pt-5"
           style={{ borderColor: "var(--sc-rule)" }}
         >
+          {card.menteeReads === "none" ? (
+            <EnableDebrief
+              relationshipId={card.relationshipId}
+              preacherName={heading}
+              onEnabled={(since) =>
+                onDebriefEnabled(card.relationshipId, since)
+              }
+            />
+          ) : null}
           <EndMentoring relationshipId={card.relationshipId} onEnded={onEnded} />
         </div>
       </div>
@@ -612,6 +750,23 @@ export function PreacherList({
             : row,
         ),
       })),
+    );
+  }
+
+  function handleDebriefEnabled(
+    relationshipId: string,
+    debriefVisibleSince: string,
+  ) {
+    setCards((prev) =>
+      prev.map((card) =>
+        card.relationshipId === relationshipId
+          ? {
+              ...card,
+              menteeReads: "debrief",
+              debriefVisibleSince,
+            }
+          : card,
+      ),
     );
   }
 
@@ -655,6 +810,7 @@ export function PreacherList({
           card={card}
           onReleased={handleReleased}
           onEnded={handleEnded}
+          onDebriefEnabled={handleDebriefEnabled}
         />
       ))}
     </div>
