@@ -157,10 +157,8 @@ function ActiveMenteeRow({
               className="text-[13px] leading-relaxed"
               style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
             >
-              This ends the mentoring relationship. Any held evaluations will
-              be released to the mentee. They will see every scored evaluation
-              that was closed to them for this seat, and you cannot take that
-              back.
+              Ending this releases every scored evaluation you are still
+              holding. Continue?
             </p>
             {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
             <div className="flex flex-wrap gap-3">

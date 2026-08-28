@@ -14,13 +14,13 @@ export type RevokeExcessPendingOptions = {
 };
 
 /**
- * After capacity is known (usually right after a purchased-seat write), revoke
- * excess pending invites of that seat type. Active relationships are never
- * touched (product decision still open).
+ * After capacity is known (usually right after a purchased-seat write), bring
+ * used (pending + active) down to capacity for that seat type.
  *
- * Capacity = purchased(+comp for debrief). Active rows reserve capacity first;
- * leftover slots keep the newest pending invites; excess pending are revoked
- * oldest first. Comp is never written here.
+ * Capacity = purchased(+comp for debrief). Close order: unaccepted invitations
+ * first (oldest pending revoked), then the oldest active relationship until
+ * used <= capacity. Comp is never written here. Held evaluations are not
+ * released on an active close (unlike end_mentor_relationship).
  */
 export async function revokeExcessPendingMentorInvites(
   supabase: SupabaseClient,
@@ -95,33 +95,55 @@ export async function revokeExcessPendingMentorInvites(
   }
 
   const list = rows ?? [];
-  const activeCount = list.filter((r) => r.status === "active").length;
+  const active = list.filter((r) => r.status === "active");
   const pending = list.filter((r) => r.status === "pending");
-  const keepPending = Math.max(0, capacity - activeCount);
+  const keepPending = Math.max(0, capacity - active.length);
   const revokeCount = Math.max(0, pending.length - keepPending);
-  if (revokeCount === 0) {
+  const endedAt = new Date().toISOString();
+
+  if (revokeCount > 0) {
+    // pending is oldest-first; revoke the oldest excess.
+    const ids = pending.slice(0, revokeCount).map((r) => r.id);
+    const { error: updateError } = await supabase
+      .from("mentor_relationships")
+      .update({ status: "revoked", ended_at: endedAt })
+      .in("id", ids)
+      .eq("status", "pending");
+
+    if (updateError) {
+      throw new Error(
+        `revokeExcessPendingMentorInvites: update failed: ${updateError.message}`,
+      );
+    }
+  }
+
+  const endCount = Math.max(0, active.length - capacity);
+  if (endCount === 0) {
     return;
   }
 
-  // pending is oldest-first; revoke the oldest excess.
-  const ids = pending.slice(0, revokeCount).map((r) => r.id);
-  const endedAt = new Date().toISOString();
-  const { error: updateError } = await supabase
+  const endIds = active.slice(0, endCount).map((r) => r.id);
+  const { error: endError } = await supabase
     .from("mentor_relationships")
-    .update({ status: "revoked", ended_at: endedAt })
-    .in("id", ids)
-    .eq("status", "pending");
+    // Deliberately does not release held evaluations. end_mentor_relationship
+    // does, because a manual end is a considered act. A cancel can be an
+    // expired card, and releasing a man's held scores on a failed payment
+    // would be wrong. Do not "fix" this into parity with the RPC.
+    .update({ status: "ended", ended_at: endedAt })
+    .in("id", endIds)
+    .eq("status", "active");
 
-  if (updateError) {
+  if (endError) {
     throw new Error(
-      `revokeExcessPendingMentorInvites: update failed: ${updateError.message}`,
+      `revokeExcessPendingMentorInvites: end failed: ${endError.message}`,
     );
   }
 }
 
 /**
- * Recompute excess pending for every seat type against current capacity.
- * Call after any path that can move seat counters for a mentor.
+ * Recompute excess pending and active relationships for every seat type
+ * against current capacity. Call after any path that can move seat counters
+ * for a mentor.
  */
 export async function revokeExcessPendingForMentor(
   supabase: SupabaseClient,

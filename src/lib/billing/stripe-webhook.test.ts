@@ -451,6 +451,9 @@ describe("mentor seat subscription lifecycle", () => {
           u.values.subscription_status === undefined,
       ),
     );
+    assert.ok(
+      updates.every((u) => u.values.comp_debrief_seats === undefined),
+    );
   });
 
   it("revokes excess pending invites when mentor seat subscription is deleted", async () => {
@@ -515,7 +518,7 @@ describe("mentor seat subscription lifecycle", () => {
           u.id === "user-mentor" && u.values.purchased_debrief_seats === 0,
       ),
     );
-    // Capacity 0 + 2 actives → all pending of debrief are revoked.
+    // Capacity 0: pending revoked first, then both actives end oldest-first.
     assert.ok(
       relationshipUpdates.some(
         (u) =>
@@ -525,11 +528,15 @@ describe("mentor seat subscription lifecycle", () => {
       ),
       `expected pending revoke, got ${JSON.stringify(relationshipUpdates)}`,
     );
-    // Active ids must not be in a revoke batch.
     assert.ok(
-      relationshipUpdates.every(
-        (u) => !u.ids.includes("active-1") && !u.ids.includes("active-2"),
+      relationshipUpdates.some(
+        (u) =>
+          u.values.status === "ended" &&
+          typeof u.values.ended_at === "string" &&
+          u.ids.includes("active-1") &&
+          u.ids.includes("active-2"),
       ),
+      `expected active relationships to end, got ${JSON.stringify(relationshipUpdates)}`,
     );
   });
 });
