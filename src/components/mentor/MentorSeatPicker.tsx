@@ -9,28 +9,31 @@ import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
+const UPGRADE_LINE =
+  "You can move someone from Apprentice to Colleague later. Moving up releases everything being held.";
+
 type SeatOption = {
   value: MentorSeatType;
-  price: string;
   audience: string;
+  cadence: string;
   detail: string;
+  price: string;
 };
 
 export const SEAT_OPTIONS: SeatOption[] = [
   {
     value: "debrief",
+    audience: "For developing preachers",
+    cadence: "2 sermons / month",
+    detail: "You receive the coaching debrief and How It Preaches.",
     price: "$12/month",
-    audience: "For someone in their first few years of preaching.",
-    detail:
-      "2 sermons per month. They receive the coaching debrief and How It Preaches. Their score is held until you release it.",
   },
   {
     value: "evaluation",
+    audience: "For experienced preachers",
+    cadence: "4 sermons / month",
+    detail: "You receive the full evaluation and score.",
     price: "$25/month",
-    audience:
-      "For an experienced preacher who is ready to be measured against the rubric.",
-    detail:
-      "4 sermons per month. They see the complete evaluation, including their score.",
   },
 ];
 
@@ -50,7 +53,7 @@ export function MentorSeatPicker({
   return (
     <div>
       <div
-        className="grid gap-4 sm:grid-cols-2"
+        className="grid gap-5 sm:grid-cols-2"
         role="radiogroup"
         aria-label="Seat type"
       >
@@ -65,60 +68,79 @@ export function MentorSeatPicker({
               role="radio"
               aria-checked={isSelected}
               onClick={() => setSelected(option.value)}
-              className="flex flex-col rounded border px-6 py-6 text-left transition-colors"
+              className="relative flex flex-col rounded px-6 py-7 text-left transition-colors sm:px-8 sm:py-8"
               style={{
                 background: isSelected
                   ? "var(--sc-accent-pale)"
                   : "var(--sc-panel)",
-                borderColor: isSelected ? "var(--sc-accent)" : "var(--sc-rule)",
+                border: isSelected
+                  ? "1px solid var(--sc-accent)"
+                  : "1px solid var(--sc-rule)",
                 cursor: "pointer",
               }}
             >
-              <span className="flex items-baseline justify-between gap-3">
-                <span
-                  className="text-[11px] font-semibold uppercase tracking-[0.16em]"
-                  style={{ ...uiFont, color: "var(--sc-accent)" }}
-                >
-                  {name}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="flex h-4 w-4 shrink-0 rounded-full border"
-                  style={{
-                    borderColor: isSelected
-                      ? "var(--sc-accent)"
-                      : "var(--sc-rule)",
-                    background: isSelected ? "var(--sc-accent)" : "transparent",
-                    boxShadow: isSelected
-                      ? "inset 0 0 0 2px var(--sc-panel)"
-                      : "none",
-                  }}
-                />
-              </span>
+              <span
+                aria-hidden="true"
+                className="absolute top-6 right-6 flex h-4 w-4 shrink-0 rounded-full border sm:top-8 sm:right-8"
+                style={{
+                  borderColor: isSelected
+                    ? "var(--sc-accent)"
+                    : "var(--sc-rule)",
+                  background: isSelected ? "var(--sc-accent)" : "transparent",
+                  boxShadow: isSelected
+                    ? "inset 0 0 0 2px var(--sc-panel)"
+                    : "none",
+                }}
+              />
 
               <span
-                className="mt-4 block text-[22px] font-semibold leading-tight tracking-tight"
-                style={{ ...serifFont, color: "var(--sc-ink)" }}
+                className="pr-8 text-[11px] font-semibold uppercase tracking-[0.16em]"
+                style={{ ...uiFont, color: "var(--sc-accent)" }}
               >
-                {option.price}
+                {name}
               </span>
-
               <span
-                className="mt-3 block text-[15px] leading-relaxed"
-                style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+                className="mt-2 block text-[15px] leading-relaxed"
+                style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
               >
                 {option.audience}
               </span>
+
               <span
-                className="mt-3 block text-[14px] leading-relaxed"
-                style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                className="mt-6 block text-[26px] font-semibold leading-tight tracking-tight"
+                style={{ ...serifFont, color: "var(--sc-ink)" }}
+              >
+                {option.cadence}
+              </span>
+              <span
+                className="mt-3 mb-6 block max-w-sm text-[15px] leading-relaxed"
+                style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
               >
                 {option.detail}
+              </span>
+
+              <span
+                className="mt-auto block border-t pt-5"
+                style={{ borderColor: "var(--sc-rule)" }}
+              >
+                <span
+                  className="text-[17px] font-semibold tracking-tight"
+                  style={{ ...serifFont, color: "var(--sc-ink)" }}
+                >
+                  {option.price}
+                </span>
               </span>
             </button>
           );
         })}
       </div>
+
+      <p
+        className="mt-5 text-[13px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
+        {UPGRADE_LINE}
+      </p>
 
       <div className="mt-7 flex flex-wrap items-center gap-6">
         {selected ? (

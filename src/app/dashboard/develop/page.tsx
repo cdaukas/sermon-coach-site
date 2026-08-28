@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MentorInviteFlow } from "@/components/mentor/MentorInviteFlow";
-import { MentoringPlans } from "@/components/mentor/MentoringPlans";
 import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
 import { PreacherList } from "@/components/mentor/PreacherList";
 import { YourSeats } from "@/components/mentor/YourSeats";
@@ -13,7 +12,7 @@ import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Mentoring",
+  title: "Develop others",
 };
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -74,7 +73,7 @@ export default async function DevelopPage() {
           className="text-[11px] font-semibold uppercase tracking-[0.18em]"
           style={{ ...uiFont, color: "var(--sc-accent)" }}
         >
-          Mentoring
+          Develop others
         </p>
         <h1
           className="mt-4 max-w-2xl text-[34px] font-semibold leading-[1.15] tracking-tight sm:text-[42px]"
@@ -90,27 +89,27 @@ export default async function DevelopPage() {
           Coach, you review the evaluation, and you decide when to release
           their score.
         </p>
-        <div className="mt-8">
-          {capacity ? (
-            <MentorInviteFlow
-              capacity={capacity}
-              initialDisplayName={initialDisplayName}
-            />
-          ) : null}
-        </div>
       </header>
 
-      {/* Your Team — render only when the pastor holds a Teams subscription. */}
-      {/*
-        Teams is dark. A team card shows names, submission counts, and dates.
-        Never sermon titles, never scores, never an Open evaluation link.
-        Only when Team Coaching is active does it look like a mentor card.
-        Copying the Your Preachers card here would break the privacy model.
-      */}
+      {capacity ? (
+        <div className="pb-12 sm:pb-16">
+          <YourSeats capacity={capacity} />
+        </div>
+      ) : null}
 
-      {/* Your Preaching Lab — render only when the pastor holds an active lab term. */}
-
-      {/* Your Class — render only when the pastor holds a hand-provisioned Classroom. */}
+      {capacity ? (
+        <section
+          aria-label="Who are you developing?"
+          className="border-t pt-12 sm:pt-14"
+          style={{ borderColor: "var(--sc-rule)" }}
+        >
+          <MentorInviteFlow
+            capacity={capacity}
+            initialDisplayName={initialDisplayName}
+            defaultOpen
+          />
+        </section>
+      ) : null}
 
       {hasPreachers ? (
         <section
@@ -135,27 +134,19 @@ export default async function DevelopPage() {
         </section>
       ) : null}
 
+      {/* Your Team — render only when the pastor holds a Teams subscription. */}
+      {/*
+        Teams is dark. A team card shows names, submission counts, and dates.
+        Never sermon titles, never scores, never an Open evaluation link.
+        Only when Team Coaching is active does it look like a mentor card.
+        Copying the Your Preachers card here would break the privacy model.
+      */}
+
+      {/* Your Preaching Lab — render only when the pastor holds an active lab term. */}
+
+      {/* Your Class — render only when the pastor holds a hand-provisioned Classroom. */}
+
       <PendingInvitesList invites={seats.pending} />
-
-      <section
-        aria-labelledby="add-someone-heading"
-        className="mt-16 border-t pt-12 sm:mt-20 sm:pt-14"
-        style={{ borderColor: "var(--sc-rule)" }}
-      >
-        <SectionHeading id="add-someone-heading">Add someone</SectionHeading>
-        <div className="mt-7">
-          <MentoringPlans />
-        </div>
-      </section>
-
-      {capacity ? (
-        <div
-          className="mt-16 border-t pt-10 sm:mt-20"
-          style={{ borderColor: "var(--sc-rule)" }}
-        >
-          <YourSeats capacity={capacity} />
-        </div>
-      ) : null}
     </main>
   );
 }

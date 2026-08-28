@@ -502,12 +502,14 @@ export function MentorInviteFlow({
   capacity,
   initialDisplayName,
   label = "Invite a preacher",
+  defaultOpen = false,
 }: {
   capacity: MentorSeatCapacity;
   initialDisplayName: string | null;
   label?: string;
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [displayName, setDisplayName] = useState(initialDisplayName);
 
   const available = availableSeatTypes(capacity);

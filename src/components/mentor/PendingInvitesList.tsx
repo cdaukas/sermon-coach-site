@@ -242,7 +242,7 @@ export function PendingInvitesList({
 
   return (
     <section
-      className="rounded px-6 py-6 sm:px-8"
+      className="mt-12 rounded px-6 py-6 sm:mt-14 sm:px-8"
       style={{
         background: "var(--sc-panel)",
         border: "1px solid var(--sc-rule)",
@@ -254,7 +254,7 @@ export function PendingInvitesList({
         className="text-[17px] font-semibold leading-snug tracking-tight"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Awaiting acceptance
+        Pending invitations
       </h3>
       <p
         className="mt-1.5 text-[13px] leading-relaxed"

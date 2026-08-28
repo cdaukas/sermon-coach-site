@@ -1,6 +1,6 @@
 # Develop-others lane, canon
 
-**Last updated: 2026-08-27**
+**Last updated: 2026-08-28**
 
 This file is the current shape of the develop-others lane. It supersedes every
 earlier document, chat, brief, and Asana note by definition. If something
@@ -13,11 +13,11 @@ date under it inherits the file date.
 Do not delete superseded entries silently. Move them to the Retired section so
 the next person can see what changed and stop resurrecting it.
 
-The **user-facing product name is Mentoring** on the dashboard page heading
-and the pricing section. The rail item is **Develop others**, under a
-Developing others group, because Teams, Preaching Lab, and Classroom will
-share that one nav item. Do not rename this file or database identifiers to
-match the rail string.
+The **user-facing product name is Mentoring** on the pricing section. The
+rail item and the `/dashboard/develop` page eyebrow are **Develop others**,
+under a Developing others group, because Teams, Preaching Lab, and Classroom
+will share that one nav item. Do not rename this file or database identifiers
+to match the rail string.
 
 Canonical dashboard route is `/dashboard/develop`. `/dashboard/mentoring`
 permanently redirects to it. Do not delete the mentoring route.
