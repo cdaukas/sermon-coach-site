@@ -16,6 +16,7 @@ export type PreacherCard = {
   relationshipId: string;
   seatType: MentorSeatType;
   menteeEmail: string | null;
+  mentorLabel: string | null;
   acceptedAt: string | null;
   submissionsUsed: number;
   submissionsLimit: number;
@@ -49,6 +50,7 @@ export function buildPreacherCards(
     relationshipId: mentee.relationshipId,
     seatType: mentee.seatType,
     menteeEmail: mentee.menteeEmail,
+    mentorLabel: mentee.mentorLabel,
     acceptedAt: mentee.acceptedAt,
     submissionsUsed: mentee.submissionsUsed,
     submissionsLimit: mentee.submissionsLimit,

@@ -91,46 +91,36 @@ export default async function DevelopPage() {
         </p>
       </header>
 
-      {capacity ? (
-        <div className="pb-12 sm:pb-16">
-          <YourSeats capacity={capacity} />
-        </div>
-      ) : null}
+      {capacity ? <YourSeats capacity={capacity} /> : null}
 
-      {capacity ? (
-        <section
-          aria-label="Who are you developing?"
-          className="border-t pt-12 sm:pt-14"
-          style={{ borderColor: "var(--sc-rule)" }}
-        >
-          <MentorInviteFlow
-            capacity={capacity}
-            initialDisplayName={initialDisplayName}
-            defaultOpen
-          />
-        </section>
-      ) : null}
-
-      {hasPreachers ? (
+      {capacity || hasPreachers ? (
         <section
           aria-labelledby="preachers-heading"
           className="border-t pt-12 sm:pt-14"
           style={{ borderColor: "var(--sc-rule)" }}
         >
-          <SectionHeading id="preachers-heading">Your Preachers</SectionHeading>
-          <div className="mt-7 space-y-5">
-            <PreacherList
-              cards={preachers}
-              inviteAction={
-                capacity ? (
-                  <MentorInviteFlow
-                    capacity={capacity}
-                    initialDisplayName={initialDisplayName}
-                  />
-                ) : null
+          {capacity ? (
+            <MentorInviteFlow
+              capacity={capacity}
+              initialDisplayName={initialDisplayName}
+              heading={
+                <SectionHeading id="preachers-heading">
+                  Your Preachers
+                </SectionHeading>
               }
-            />
-          </div>
+            >
+              <PreacherList cards={preachers} />
+            </MentorInviteFlow>
+          ) : (
+            <>
+              <SectionHeading id="preachers-heading">
+                Your Preachers
+              </SectionHeading>
+              <div className="mt-7">
+                <PreacherList cards={preachers} />
+              </div>
+            </>
+          )}
         </section>
       ) : null}
 

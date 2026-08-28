@@ -18,7 +18,16 @@ type RelationshipRow = {
   accepted_at: string | null;
   invite_email_to: string | null;
   invite_email_sent_at: string | null;
+  mentor_label: string | null;
 };
+
+function asMentorLabel(value: string | null): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
 
 function asSeatType(value: string): MentorSeatType | null {
   if (value === "debrief" || value === "evaluation") {
@@ -72,7 +81,7 @@ export async function listMentorSeatsForMentor(): Promise<{
   const { data, error } = await supabase
     .from("mentor_relationships")
     .select(
-      "id, status, seat_type, invite_token, mentee_id, created_at, accepted_at, invite_email_to, invite_email_sent_at",
+      "id, status, seat_type, invite_token, mentee_id, created_at, accepted_at, invite_email_to, invite_email_sent_at, mentor_label",
     )
     .in("status", ["pending", "active"])
     .order("created_at", { ascending: false });
@@ -119,6 +128,7 @@ export async function listMentorSeatsForMentor(): Promise<{
         relationshipId: row.id,
         seatType,
         menteeId: row.mentee_id,
+        mentorLabel: asMentorLabel(row.mentor_label),
         acceptedAt:
           typeof row.accepted_at === "string" ? row.accepted_at : null,
       });

@@ -154,11 +154,15 @@ see the open gap under Seats for what the RPC actually enforces today.
 
 All functions are SECURITY DEFINER.
 
-- `create_mentor_invite(p_seat_type text) -> text`. Requires `debrief` or
-  `evaluation`. Caps at 4 seats across pending + active. Raises on violation with
-  a bare `raise exception`, no `USING ERRCODE`, so PostgREST returns SQLSTATE
-  `P0001` and the message `seat limit reached: a mentor may hold at most 4
-  seats`. Callers must catch the exception and match on that text. The zero-arg
+- `create_mentor_invite(p_seat_type text, p_mentor_label text default null) -> text`.
+  Requires `debrief` or `evaluation`. Optional `p_mentor_label` is the mentor's
+  name for this preacher, stored on `mentor_relationships.mentor_label`; blank
+  stores null. One-arg `{ p_seat_type }` still works via the default. Do not
+  leave a parallel one-arg overload (PostgREST treats that as ambiguous). Caps
+  at 4 seats across pending + active. Raises on violation with a bare
+  `raise exception`, no `USING ERRCODE`, so PostgREST returns SQLSTATE `P0001`
+  and the message `seat limit reached: a mentor may hold at most 4 seats`.
+  Callers must catch the exception and match on that text. The zero-arg
   overload is gone; calling without `p_seat_type` returns `PGRST202`.
 - `accept_mentor_invite(p_token text) -> jsonb`. Error codes:
   `not_authenticated`, `invalid_or_used`, `self_invite`, `already_mentored`.
@@ -170,8 +174,10 @@ All functions are SECURITY DEFINER.
 - `is_mentor_of_relationship(uuid) -> boolean`
 - `relationship_holds_evaluations(uuid) -> boolean`
 
-Tables: `mentor_relationships`, `profiles.display_name`,
-`sermon_evaluations.released_to_mentee_at`. All writes go through the RPCs.
+Tables: `mentor_relationships` (`mentor_label` is the mentor's optional label
+for the preacher on that seat, never `profiles.display_name`),
+`profiles.display_name`, `sermon_evaluations.released_to_mentee_at`. All writes
+go through the RPCs.
 
 ## Build order
 

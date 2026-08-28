@@ -68,7 +68,7 @@ export function MentorSeatPicker({
               role="radio"
               aria-checked={isSelected}
               onClick={() => setSelected(option.value)}
-              className="relative flex flex-col rounded px-6 py-7 text-left transition-colors sm:px-8 sm:py-8"
+              className="flex flex-col rounded px-6 py-7 text-left transition-colors sm:px-8 sm:py-8"
               style={{
                 background: isSelected
                   ? "var(--sc-accent-pale)"
@@ -79,25 +79,26 @@ export function MentorSeatPicker({
                 cursor: "pointer",
               }}
             >
-              <span
-                aria-hidden="true"
-                className="absolute top-6 right-6 flex h-4 w-4 shrink-0 rounded-full border sm:top-8 sm:right-8"
-                style={{
-                  borderColor: isSelected
-                    ? "var(--sc-accent)"
-                    : "var(--sc-rule)",
-                  background: isSelected ? "var(--sc-accent)" : "transparent",
-                  boxShadow: isSelected
-                    ? "inset 0 0 0 2px var(--sc-panel)"
-                    : "none",
-                }}
-              />
-
-              <span
-                className="pr-8 text-[11px] font-semibold uppercase tracking-[0.16em]"
-                style={{ ...uiFont, color: "var(--sc-accent)" }}
-              >
-                {name}
+              <span className="flex items-center justify-between gap-3">
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+                  style={{ ...uiFont, color: "var(--sc-accent)" }}
+                >
+                  {name}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="flex h-4 w-4 shrink-0 rounded-full border"
+                  style={{
+                    borderColor: isSelected
+                      ? "var(--sc-accent)"
+                      : "var(--sc-rule)",
+                    background: isSelected ? "var(--sc-accent)" : "transparent",
+                    boxShadow: isSelected
+                      ? "inset 0 0 0 2px var(--sc-panel)"
+                      : "none",
+                  }}
+                />
               </span>
               <span
                 className="mt-2 block text-[15px] leading-relaxed"

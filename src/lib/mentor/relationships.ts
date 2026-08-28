@@ -14,6 +14,11 @@ export type ActiveMentorMentee = {
   seatType: MentorSeatType;
   menteeId: string;
   menteeEmail: string | null;
+  /**
+   * Mentor's label for this preacher (`mentor_relationships.mentor_label`).
+   * Not the mentee's `profiles.display_name`. Null on older rows.
+   */
+  mentorLabel: string | null;
   acceptedAt: string | null;
   /** Diagnostic submissions this calendar month vs seat allotment. */
   submissionsUsed: number;
