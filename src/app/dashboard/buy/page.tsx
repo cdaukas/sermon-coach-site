@@ -130,12 +130,12 @@ export default async function BuyPage() {
       ) : null}
 
       {stripModel ? (
-        <CreditStrip model={stripModel} showAddCreditsLink={false} />
+        <CreditStrip model={stripModel} showAddCreditsLink={false} variant="plain" />
       ) : null}
 
       {subscriberDepleted ? (
         <p
-          className="mt-6 max-w-3xl text-[14px] leading-relaxed"
+          className="mb-4 max-w-3xl text-[14px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           role="status"
         >
@@ -143,7 +143,7 @@ export default async function BuyPage() {
         </p>
       ) : null}
 
-      <div className="mt-6 max-w-3xl">
+      <div className="max-w-3xl">
         <BuyPackCards />
       </div>
     </main>

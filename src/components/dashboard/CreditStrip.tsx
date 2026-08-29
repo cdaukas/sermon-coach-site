@@ -11,12 +11,15 @@ type CreditStripProps = {
   showAddCreditsLink?: boolean;
   /** Optional right-side action (e.g. Manage subscription). Wins over Add credits. */
   action?: ReactNode;
+  /** Card is the default panel. Plain is text only, used on /dashboard/buy. */
+  variant?: "card" | "plain";
 };
 
 export function CreditStrip({
   model,
   showAddCreditsLink = true,
   action,
+  variant = "card",
 }: CreditStripProps) {
   const parts: ReactNode[] = [];
 
@@ -103,17 +106,23 @@ export function CreditStrip({
     return null;
   }
 
+  const isPlain = variant === "plain";
+
   return (
     <div
-      className="mb-6 flex flex-wrap items-center justify-between gap-3"
-      style={{
-        background: "#ffffff",
-        border: "1px solid #d4cfc1",
-        borderLeft: "3px solid #c9a55c",
-        borderRadius: 4,
-        boxShadow: "var(--sc-shadow)",
-        padding: "15px 20px",
-      }}
+      className={`flex flex-wrap items-center justify-between gap-3 ${isPlain ? "mb-4" : "mb-6"}`}
+      style={
+        isPlain
+          ? undefined
+          : {
+              background: "#ffffff",
+              border: "1px solid #d4cfc1",
+              borderLeft: "3px solid #c9a55c",
+              borderRadius: 4,
+              boxShadow: "var(--sc-shadow)",
+              padding: "15px 20px",
+            }
+      }
     >
       <p className="m-0 min-w-0 leading-relaxed">
         {parts.map((part, index) => (
