@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
-import { CreditStrip } from "@/components/dashboard/CreditStrip";
+import { BillingSection } from "@/components/dashboard/BillingCard";
+import { SermonEvaluationsCard } from "@/components/dashboard/SermonEvaluationsCard";
 import {
   DevelopingOthersCard,
   PlanCard,
@@ -8,7 +9,9 @@ import {
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import {
   developingOthersCopy,
+  mentorSeatBreakdown,
   resolvePlanCopy,
+  type MentorSeatBreakdown,
 } from "@/lib/billing/plan-summary";
 import { buildCreditStripModel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
@@ -74,6 +77,9 @@ export default async function BuyPage() {
         : null;
   }
 
+  const packsCollapsedByDefault =
+    isComped || subscriptionStatus === "active";
+
   const packSummary = user ? await getPackCredits() : null;
   const packRemaining =
     entitlement?.packRemaining ?? packSummary?.totalRemaining ?? 0;
@@ -94,20 +100,44 @@ export default async function BuyPage() {
     : null;
 
   let developingOthers: string | null = null;
+  let seatBreakdown: MentorSeatBreakdown | null = null;
   if (user) {
     try {
       const seats = await listMentorSeatsForMentor();
-      developingOthers = developingOthersCopy({
+      const seatInput = {
         activeSeatTypes: seats.active.map((row) => row.seatType),
         pendingSeatTypes: seats.pending.map((row) => row.seatType),
-      });
+      };
+      developingOthers = developingOthersCopy(seatInput);
+      seatBreakdown = mentorSeatBreakdown(seatInput);
     } catch {
       developingOthers = null;
+      seatBreakdown = null;
     }
   }
 
+  const packSection = (
+    <>
+      {subscriberDepleted ? (
+        <p
+          className="mb-4 max-w-3xl text-[14px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          role="status"
+        >
+          Out of credits until next month? A pack carries you through. Credits stack on top of your subscription, get used only after your monthly ten, and stay good for 18 months. Nothing you buy goes to waste.
+        </p>
+      ) : null}
+
+      <div className="max-w-3xl">
+        <BuyPackCards />
+      </div>
+    </>
+  );
+
+  const planEyebrow = isComped ? "Account" : "Coach";
+
   return (
-    <main>
+    <main className="billing-page">
       <div className="mb-8">
         <p
           className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
@@ -123,29 +153,29 @@ export default async function BuyPage() {
         </h1>
       </div>
 
-      {planCopy ? <PlanCard copy={planCopy} /> : null}
-
-      {developingOthers ? (
-        <DevelopingOthersCard text={developingOthers} />
+      {planCopy ? (
+        <BillingSection eyebrow={planEyebrow}>
+          <PlanCard copy={planCopy} />
+        </BillingSection>
       ) : null}
 
-      {stripModel ? (
-        <CreditStrip model={stripModel} showAddCreditsLink={false} variant="plain" />
-      ) : null}
-
-      {subscriberDepleted ? (
-        <p
-          className="mb-4 max-w-3xl text-[14px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          role="status"
+      <BillingSection eyebrow="Sermon evaluations">
+        <SermonEvaluationsCard
+          model={stripModel}
+          defaultOpen={!packsCollapsedByDefault}
         >
-          Out of credits until next month? A pack carries you through. Credits stack on top of your subscription, get used only after your monthly ten, and stay good for 18 months. Nothing you buy goes to waste.
-        </p>
-      ) : null}
+          {packSection}
+        </SermonEvaluationsCard>
+      </BillingSection>
 
-      <div className="max-w-3xl">
-        <BuyPackCards />
-      </div>
+      {developingOthers && seatBreakdown ? (
+        <BillingSection eyebrow="Developing others">
+          <DevelopingOthersCard
+            text={developingOthers}
+            breakdown={seatBreakdown}
+          />
+        </BillingSection>
+      ) : null}
     </main>
   );
 }

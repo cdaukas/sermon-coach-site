@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   developingOthersCopy,
   formatPlanDate,
+  mentorSeatBreakdown,
   resolvePlanCopy,
   type PlanProfileFields,
 } from "./plan-summary";
@@ -191,31 +192,69 @@ describe("resolvePlanCopy", () => {
 });
 
 describe("developingOthersCopy", () => {
-  it("counts only active people and prices paid seats including pending", () => {
+  it("counts only active people and appends the unaccepted-invites sentence", () => {
     const copy = developingOthersCopy({
       activeSeatTypes: ["debrief", "debrief"],
       pendingSeatTypes: ["debrief"],
     });
     assert.equal(
       copy,
-      "You're mentoring 2 people. Apprentice seats, $12 a month each. 1 invitation is still unaccepted and you're paying for those seats.",
+      "You're mentoring 2 people. 1 invitation is still unaccepted and you're paying for those seats.",
     );
   });
 
-  it("mixes types and totals monthly spend", () => {
+  it("uses the singular person sentence", () => {
+    const copy = developingOthersCopy({
+      activeSeatTypes: ["debrief"],
+      pendingSeatTypes: [],
+    });
+    assert.equal(copy, "You're mentoring 1 person.");
+  });
+
+  it("does not put seat type or price in the sentence", () => {
     const copy = developingOthersCopy({
       activeSeatTypes: ["debrief", "evaluation"],
       pendingSeatTypes: [],
     });
-    assert.equal(
-      copy,
-      "You're mentoring 2 people. 1 Apprentice seats at $12, 1 Colleague seats at $25. $37 a month.",
-    );
+    assert.equal(copy, "You're mentoring 2 people.");
   });
 
   it("returns null when the mentor has no seats", () => {
     assert.equal(
       developingOthersCopy({ activeSeatTypes: [], pendingSeatTypes: [] }),
+      null,
+    );
+  });
+});
+
+describe("mentorSeatBreakdown", () => {
+  it("prices apprentice seats at $12 and totals the month", () => {
+    const breakdown = mentorSeatBreakdown({
+      activeSeatTypes: ["debrief", "debrief"],
+      pendingSeatTypes: ["debrief"],
+    });
+    assert.deepEqual(breakdown, {
+      apprentice: 3,
+      colleague: 0,
+      monthlyTotal: 36,
+    });
+  });
+
+  it("shows one monthly total across mixed seat types", () => {
+    const breakdown = mentorSeatBreakdown({
+      activeSeatTypes: ["debrief", "evaluation"],
+      pendingSeatTypes: [],
+    });
+    assert.deepEqual(breakdown, {
+      apprentice: 1,
+      colleague: 1,
+      monthlyTotal: 37,
+    });
+  });
+
+  it("returns null when the mentor has no seats", () => {
+    assert.equal(
+      mentorSeatBreakdown({ activeSeatTypes: [], pendingSeatTypes: [] }),
       null,
     );
   });

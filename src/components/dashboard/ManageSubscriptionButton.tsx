@@ -63,6 +63,7 @@ export function ManageSubscriptionButton({
         }}
       >
         {pending ? "Opening…" : label}
+        {pending ? null : <span aria-hidden="true"> →</span>}
       </button>
       {error ? (
         <span

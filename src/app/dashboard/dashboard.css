@@ -1057,6 +1057,29 @@
   }
 }
 
+/* Buy page only: page tint. Card chrome must not live here. */
+.billing-page {
+  background: var(--sc-bg);
+}
+
+.billing-eval-split {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+  min-width: 0;
+}
+
+.billing-eval-half {
+  flex: 1 1 0px;
+  min-width: 0;
+}
+
+.billing-eval-half + .billing-eval-half {
+  border-left: 1px solid var(--sc-rule);
+  padding-left: 32px;
+}
+
 @media (max-width: 859px) {
   .dashboard-root {
     overflow-x: clip;
@@ -1185,5 +1208,15 @@
 
   .dashboard-shell h1 {
     font-size: 30px;
+  }
+
+  .billing-eval-split {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .billing-eval-half + .billing-eval-half {
+    border-left: none;
+    padding-left: 0;
   }
 }

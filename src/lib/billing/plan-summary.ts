@@ -1,4 +1,3 @@
-import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import type { MentorSeatType } from "@/lib/mentor/relationships";
 
 export type PlanProfileFields = {
@@ -146,41 +145,57 @@ export type DevelopingOthersInput = {
   pendingSeatTypes: MentorSeatType[];
 };
 
+export const MENTOR_SEAT_MONTHLY_USD = {
+  debrief: 12,
+  evaluation: 25,
+} as const;
+
+export type MentorSeatBreakdown = {
+  apprentice: number;
+  colleague: number;
+  monthlyTotal: number;
+};
+
+export function mentorSeatBreakdown(
+  input: DevelopingOthersInput,
+): MentorSeatBreakdown | null {
+  const paidTypes = [...input.activeSeatTypes, ...input.pendingSeatTypes];
+  if (paidTypes.length === 0) {
+    return null;
+  }
+
+  const apprentice = paidTypes.filter((type) => type === "debrief").length;
+  const colleague = paidTypes.filter((type) => type === "evaluation").length;
+
+  return {
+    apprentice,
+    colleague,
+    monthlyTotal:
+      apprentice * MENTOR_SEAT_MONTHLY_USD.debrief +
+      colleague * MENTOR_SEAT_MONTHLY_USD.evaluation,
+  };
+}
+
 export function developingOthersCopy(
   input: DevelopingOthersInput,
 ): string | null {
   const { activeSeatTypes, pendingSeatTypes } = input;
   const n = activeSeatTypes.length;
   const p = pendingSeatTypes.length;
-  if (n === 0 && p === 0) {
+  if (!mentorSeatBreakdown(input)) {
     return null;
   }
 
-  const paidTypes = [...activeSeatTypes, ...pendingSeatTypes];
-  const apprentice = paidTypes.filter((type) => type === "debrief").length;
-  const colleague = paidTypes.filter((type) => type === "evaluation").length;
-
   const people =
     n === 1 ? "You're mentoring 1 person." : `You're mentoring ${n} people.`;
-
-  let body: string;
-  if (apprentice > 0 && colleague > 0) {
-    const total = apprentice * 12 + colleague * 25;
-    body = `${people} ${apprentice} Apprentice seats at $12, ${colleague} Colleague seats at $25. $${total} a month.`;
-  } else {
-    const seatType: MentorSeatType = apprentice > 0 ? "debrief" : "evaluation";
-    const name = mentorSeatDisplayName(seatType);
-    const price = seatType === "debrief" ? 12 : 25;
-    body = `${people} ${name} seats, $${price} a month each.`;
-  }
 
   if (p > 0) {
     const pendingLine =
       p === 1
         ? "1 invitation is still unaccepted and you're paying for those seats."
         : `${p} invitations are still unaccepted and you're paying for those seats.`;
-    return `${body} ${pendingLine}`;
+    return `${people} ${pendingLine}`;
   }
 
-  return body;
+  return people;
 }
