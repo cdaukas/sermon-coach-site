@@ -1,5 +1,9 @@
 > Historical. Written during Step 6, before Cohort was replaced by Classroom.
-> Not maintained. For current product shape see docs/develop-others-canon.md.
+> Not maintained. The ledger is not in this repo. It lives in Chris's Claude
+> project and is not readable from here. If you need current state, ask him
+> rather than guessing or reading a stale doc. See
+> docs/develop-others-canon.md for Mentoring lane shape, terminology, routing,
+> and schema.
 
 # Step 6 Plan: Sermon Evaluation Pipeline
 

@@ -1,6 +1,10 @@
 > Historical. Written May 2026 against branch build/product-layer, before
 > Classroom replaced Cohort and before Stripe shipped. Not maintained. For
-> current product shape see docs/develop-others-canon.md.
+> current state, what is open, decided, and closed: the ledger is not in
+> this repo. It lives in Chris's Claude project and is not readable from
+> here. If you need current state, ask him rather than guessing or reading
+> a stale doc. For the shape of the Mentoring lane, terminology, routing,
+> and schema, see docs/develop-others-canon.md.
 
 # The Sermon Coach — Build Plan
 

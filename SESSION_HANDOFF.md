@@ -1,5 +1,8 @@
 > Historical. Written during Step 6, before Cohort was replaced by Classroom.
-> Not maintained. For current product shape see docs/develop-others-canon.md.
+> Not maintained. Current state is the ledger, which is not in this repo.
+> That document lives in Chris's Claude project and is not readable from
+> here. Ask him rather than guessing or reading a stale doc. Mentoring
+> shape, terminology, routing, and schema live in docs/develop-others-canon.md.
 
 # Session handoff — Step 6 (evaluation pipeline)
 

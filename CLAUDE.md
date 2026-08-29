@@ -222,15 +222,22 @@ are methodology decisions requiring explicit approval.
 
 ## 5. Mentoring / develop-others
 
-**Authoritative doc:** `docs/develop-others-canon.md`. It states that it
-supersedes every earlier document, chat, brief, and Asana note by definition. If
-anything conflicts with it, it wins. Read it before doing Mentoring work.
+Current state is the ledger: what is open, decided, and closed. The ledger
+is not in this repo. It lives in Chris's Claude project and is not readable
+from here. If you need current state, ask him rather than guessing or
+reading a stale doc.
 
-Key points from that canon:
+`docs/develop-others-canon.md` is reference: the shape of the Mentoring
+lane, terminology, routing, schema. It does not track state.
 
-- User-facing product name is **Mentoring**. "Develop others" is an internal lane
-  name only — do not rename the file, the `/dashboard/develop` route, or database
-  identifiers to match display copy.
+Key points from that reference:
+
+- User-facing product name and rail item are **Mentoring**, under a
+  Developing others group. Teams, Preaching Lab, and Classroom become their
+  own rail items under that header, not tabs on one page. "Develop others"
+  is an internal lane name only. Do not rename the file, the
+  `/dashboard/develop` route, or database identifiers to match display
+  copy. Do not rename the rail item back to Develop others.
 - Mentors self-serve; mentees are invited and never self-serve.
 - Seat display names and database values differ. `seat_type` stays `debrief` or
   `evaluation`; UI copy uses **Apprentice** and **Colleague**. The single mapping
@@ -309,7 +316,12 @@ Rules:
 ## 8. Documentation map
 
 **Authoritative**
-- `docs/develop-others-canon.md` — Mentoring lane; supersedes all conflicting docs
+- The ledger — current Mentoring state: what is open, decided, and closed.
+  Not in this repo. It lives in Chris's Claude project and is not readable
+  from here. If you need current state, ask him rather than guessing or
+  reading a stale doc.
+- `docs/develop-others-canon.md` — Mentoring lane reference: seats, the hold,
+  terminology, routing, schema. It does not track state.
 - `SYNC.md` — rubric source-of-truth rule
 - `SCHEMA_SPEC.md` — production evaluation schema
 - `.claude/skills/sermon-coach/SKILL.md` — the rubric itself
