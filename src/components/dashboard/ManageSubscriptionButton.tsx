@@ -4,7 +4,11 @@ import { useState } from "react";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
-export function ManageSubscriptionButton() {
+export function ManageSubscriptionButton({
+  label = "Manage subscription",
+}: {
+  label?: string;
+}) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +62,7 @@ export function ManageSubscriptionButton() {
           color: "#a67c2e",
         }}
       >
-        {pending ? "Opening…" : "Manage subscription"}
+        {pending ? "Opening…" : label}
       </button>
       {error ? (
         <span

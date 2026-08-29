@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
-import { AnnualUpgradePrompt } from "@/components/dashboard/AnnualUpgradePrompt";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { CreditStrip } from "@/components/dashboard/CreditStrip";
-import { DashboardSubscribeCTA } from "@/components/dashboard/DashboardSubscribeCTA";
-import { ManageSubscriptionButton } from "@/components/dashboard/ManageSubscriptionButton";
+import {
+  DevelopingOthersCard,
+  PlanCard,
+} from "@/components/dashboard/PlanCard";
+import { getPackCredits } from "@/lib/billing/pack-credits";
+import {
+  developingOthersCopy,
+  resolvePlanCopy,
+} from "@/lib/billing/plan-summary";
 import { buildCreditStripModel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
+import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -31,37 +38,73 @@ export default async function BuyPage() {
   const subscriberDepleted =
     hasActiveSubscription && usage !== null && usage.used >= usage.limit;
 
-  let stripeCustomerId: string | null = null;
-  let planTier: string | null = null;
+  let isComped = false;
+  let discountNote: string | null = null;
   let subscriptionInterval: string | null = null;
-  if (user && hasActiveSubscription) {
+  let currentPeriodEnd: string | null = null;
+  let subscriptionStatus: string | null = null;
+
+  if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("stripe_customer_id, plan_tier, subscription_interval")
+      .select(
+        "stripe_customer_id, plan_tier, subscription_interval, is_comped, discount_note, current_period_end, subscription_status",
+      )
       .eq("id", user.id)
       .maybeSingle();
-    const raw = profile?.stripe_customer_id;
-    stripeCustomerId =
-      typeof raw === "string" && raw.trim() ? raw.trim() : null;
-    planTier =
-      typeof profile?.plan_tier === "string" ? profile.plan_tier : null;
+
+    isComped = profile?.is_comped === true;
+    if (typeof profile?.discount_note === "string") {
+      const trimmed = profile.discount_note.trim();
+      discountNote = trimmed.length > 0 ? trimmed : null;
+    }
     subscriptionInterval =
       typeof profile?.subscription_interval === "string"
         ? profile.subscription_interval
         : null;
+    currentPeriodEnd =
+      typeof profile?.current_period_end === "string"
+        ? profile.current_period_end
+        : profile?.current_period_end instanceof Date
+          ? profile.current_period_end.toISOString()
+          : null;
+    subscriptionStatus =
+      typeof profile?.subscription_status === "string"
+        ? profile.subscription_status
+        : null;
   }
 
-  const showManageSubscription =
-    hasActiveSubscription && Boolean(stripeCustomerId);
+  const packSummary = user ? await getPackCredits() : null;
+  const packRemaining =
+    entitlement?.packRemaining ?? packSummary?.totalRemaining ?? 0;
+  const planCopy = user
+    ? resolvePlanCopy(
+        {
+          isComped,
+          subscriptionActive: subscriptionStatus === "active",
+          discountNote,
+          subscriptionInterval,
+          currentPeriodEnd,
+        },
+        {
+          remaining: packRemaining,
+          expiryIso: packSummary?.soonestExpiry ?? null,
+        },
+      )
+    : null;
 
-  // Monthly Coach only. A null interval means comped, webhook-incomplete, or
-  // otherwise unknown cadence — render nothing rather than pitch annual to
-  // someone who already has it.
-  const showAnnualUpgrade =
-    hasActiveSubscription &&
-    Boolean(stripeCustomerId) &&
-    planTier === "coach" &&
-    subscriptionInterval === "month";
+  let developingOthers: string | null = null;
+  if (user) {
+    try {
+      const seats = await listMentorSeatsForMentor();
+      developingOthers = developingOthersCopy({
+        activeSeatTypes: seats.active.map((row) => row.seatType),
+        pendingSeatTypes: seats.pending.map((row) => row.seatType),
+      });
+    } catch {
+      developingOthers = null;
+    }
+  }
 
   return (
     <main>
@@ -80,29 +123,14 @@ export default async function BuyPage() {
         </h1>
       </div>
 
+      {planCopy ? <PlanCard copy={planCopy} /> : null}
+
+      {developingOthers ? (
+        <DevelopingOthersCard text={developingOthers} />
+      ) : null}
+
       {stripModel ? (
-        <CreditStrip
-          model={stripModel}
-          showAddCreditsLink={false}
-          action={
-            showManageSubscription ? <ManageSubscriptionButton /> : undefined
-          }
-        />
-      ) : null}
-
-      {showAnnualUpgrade ? (
-        <div className="mb-6 max-w-3xl">
-          <AnnualUpgradePrompt />
-        </div>
-      ) : null}
-
-      {!hasActiveSubscription ? (
-        <div className="max-w-md">
-          <DashboardSubscribeCTA
-            hasActiveSubscription={hasActiveSubscription}
-            surface="buy"
-          />
-        </div>
+        <CreditStrip model={stripModel} showAddCreditsLink={false} />
       ) : null}
 
       {subscriberDepleted ? (
