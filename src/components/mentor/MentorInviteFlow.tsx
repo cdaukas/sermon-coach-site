@@ -221,11 +221,13 @@ function InviteByEmail({
   displayName,
   onDisplayNameSaved,
   onClose,
+  isTeamAccount = false,
 }: {
   seatTypes: MentorSeatType[];
   displayName: string | null;
   onDisplayNameSaved: (name: string) => void;
   onClose: () => void;
+  isTeamAccount?: boolean;
 }) {
   const [seatType, setSeatType] = useState<MentorSeatType>(seatTypes[0]);
   const [menteeReads, setMenteeReads] = useState<"debrief" | "none">("debrief");
@@ -390,7 +392,9 @@ function InviteByEmail({
           className="mt-5 text-[14px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
         >
-          They will appear under Your Preachers once they create an account.
+          {isTeamAccount
+            ? "They will appear under Your preachers once they create an account."
+            : "They will appear under Your Preachers once they create an account."}
           Church spam filters can be slow — if they do not see it in a few
           minutes, send them the link directly.
         </p>
@@ -620,6 +624,7 @@ export function MentorInviteFlow({
   defaultOpen = false,
   heading,
   children,
+  isTeamAccount = false,
 }: {
   capacity: MentorSeatCapacity;
   initialDisplayName: string | null;
@@ -627,6 +632,7 @@ export function MentorInviteFlow({
   defaultOpen?: boolean;
   heading?: ReactNode;
   children?: ReactNode;
+  isTeamAccount?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [displayName, setDisplayName] = useState(initialDisplayName);
@@ -659,6 +665,7 @@ export function MentorInviteFlow({
         displayName={displayName}
         onDisplayNameSaved={setDisplayName}
         onClose={() => setOpen(false)}
+        isTeamAccount={isTeamAccount}
       />
     ) : (
       <SeatChoice capacity={capacity} onClose={() => setOpen(false)} />

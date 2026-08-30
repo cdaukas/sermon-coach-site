@@ -425,9 +425,11 @@ function preacherOfferRelease(
 function EndMentoring({
   relationshipId,
   onEnded,
+  isTeamAccount = false,
 }: {
   relationshipId: string;
   onEnded: (relationshipId: string) => void;
+  isTeamAccount?: boolean;
 }) {
   const [confirming, setConfirming] = useState(false);
   const [ending, setEnding] = useState(false);
@@ -469,7 +471,7 @@ function EndMentoring({
             setConfirming(true);
           }}
         >
-          End mentoring
+          {isTeamAccount ? "Remove from team" : "End mentoring"}
         </QuietAction>
       </div>
     );
@@ -489,7 +491,13 @@ function EndMentoring({
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
       <div className="flex flex-wrap gap-4">
         <QuietAction disabled={ending} onClick={() => void handleEnd()}>
-          {ending ? "Ending…" : "End mentoring"}
+          {ending
+            ? isTeamAccount
+              ? "Removing…"
+              : "Ending…"
+            : isTeamAccount
+              ? "Remove from team"
+              : "End mentoring"}
         </QuietAction>
         <QuietAction
           disabled={ending}
@@ -616,6 +624,7 @@ function PreacherCardView({
   onReleased,
   onEnded,
   onDebriefEnabled,
+  isTeamAccount = false,
 }: {
   card: PreacherCard;
   onReleased: (evaluationId: string, releasedAt: string) => void;
@@ -624,6 +633,7 @@ function PreacherCardView({
     relationshipId: string,
     debriefVisibleSince: string,
   ) => void;
+  isTeamAccount?: boolean;
 }) {
   const [showAll, setShowAll] = useState(false);
 
@@ -664,8 +674,12 @@ function PreacherCardView({
           className="mt-1.5 text-[13px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-bg)" }}
         >
-          {mentorSeatDisplayName(card.seatType)}
-          <span aria-hidden="true"> · </span>
+          {isTeamAccount ? null : (
+            <>
+              {mentorSeatDisplayName(card.seatType)}
+              <span aria-hidden="true"> · </span>
+            </>
+          )}
           {card.submissionsUsed} of {card.submissionsLimit} sermon
           {card.submissionsLimit === 1 ? "" : "s"} this month
         </p>
@@ -733,7 +747,11 @@ function PreacherCardView({
           className="mt-6 border-t pt-5"
           style={{ borderColor: "var(--sc-rule)" }}
         >
-          <EndMentoring relationshipId={card.relationshipId} onEnded={onEnded} />
+          <EndMentoring
+            relationshipId={card.relationshipId}
+            onEnded={onEnded}
+            isTeamAccount={isTeamAccount}
+          />
         </div>
       </div>
     </article>
@@ -744,8 +762,10 @@ function PreacherCardView({
 
 export function PreacherList({
   cards: initialCards,
+  isTeamAccount = false,
 }: {
   cards: PreacherCard[];
+  isTeamAccount?: boolean;
 }) {
   const [cards, setCards] = useState(initialCards);
 
@@ -804,8 +824,14 @@ export function PreacherList({
           className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed"
           style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
         >
-          Invite someone you&rsquo;re developing and begin walking with them
-          sermon by sermon.
+          {isTeamAccount ? (
+            <>Add someone on staff who preaches.</>
+          ) : (
+            <>
+              Invite someone you&rsquo;re developing and begin walking with
+              them sermon by sermon.
+            </>
+          )}
         </p>
       </div>
     );
@@ -820,6 +846,7 @@ export function PreacherList({
           onReleased={handleReleased}
           onEnded={handleEnded}
           onDebriefEnabled={handleDebriefEnabled}
+          isTeamAccount={isTeamAccount}
         />
       ))}
     </div>

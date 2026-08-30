@@ -11,11 +11,17 @@ import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
 import { mentoringDevelopSurface } from "@/lib/mentor/develop-surface";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
+import { profileIsTeamAccount } from "@/lib/mentor/team-account";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: "Mentoring",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const teamAccount = user ? await profileIsTeamAccount(user.id) : false;
+  return { title: teamAccount ? "Team" : "Mentoring" };
+}
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -38,28 +44,39 @@ function SectionHeading({
   );
 }
 
-function PageHeader() {
+function PageHeader({ isTeamAccount }: { isTeamAccount: boolean }) {
   return (
     <header className="pt-2 pb-12 sm:pb-16">
       <p
         className="text-[11px] font-semibold uppercase tracking-[0.18em]"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
       >
-        Develop others
+        {isTeamAccount ? "Your team" : "Develop others"}
       </p>
       <h1
         className="mt-4 max-w-2xl text-[34px] font-semibold leading-[1.15] tracking-tight sm:text-[42px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Develop a preacher, one sermon at a time.
+        {isTeamAccount
+          ? "Read what your team is preaching."
+          : "Develop a preacher, one sermon at a time."}
       </h1>
       <p
         className="mt-5 max-w-xl text-[16px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
       >
-        Invite someone you&rsquo;re mentoring. They submit sermons to Sermon
-        Coach, you review the evaluation, and you decide when to release
-        their score.
+        {isTeamAccount ? (
+          <>
+            Everyone on staff who preaches gets their own account and their
+            own library. You see every evaluation.
+          </>
+        ) : (
+          <>
+            Invite someone you&rsquo;re mentoring. They submit sermons to
+            Sermon Coach, you review the evaluation, and you decide when to
+            release their score.
+          </>
+        )}
       </p>
     </header>
   );
@@ -123,13 +140,16 @@ export default async function DevelopPage() {
     notFound();
   }
 
-  const capacity = await getMentorSeatCapacity();
+  const [capacity, isTeamAccount] = await Promise.all([
+    getMentorSeatCapacity(),
+    profileIsTeamAccount(user.id),
+  ]);
   const surface = mentoringDevelopSurface(capacity);
 
   if (surface === "error") {
     return (
       <main className="mx-auto w-full max-w-3xl px-1 pb-20">
-        <PageHeader />
+        <PageHeader isTeamAccount={isTeamAccount} />
         <CapacityError />
       </main>
     );
@@ -138,7 +158,7 @@ export default async function DevelopPage() {
   if (surface === "purchase") {
     return (
       <main className="mx-auto w-full max-w-3xl px-1 pb-20">
-        <PageHeader />
+        <PageHeader isTeamAccount={isTeamAccount} />
         <MentorSeatPurchaseOptions />
       </main>
     );
@@ -169,9 +189,9 @@ export default async function DevelopPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-1 pb-20">
-      <PageHeader />
+      <PageHeader isTeamAccount={isTeamAccount} />
 
-      <YourSeats capacity={capacity} />
+      {isTeamAccount ? null : <YourSeats capacity={capacity} />}
 
       {hasPreachers || capacity ? (
         <section
@@ -182,13 +202,15 @@ export default async function DevelopPage() {
           <MentorInviteFlow
             capacity={capacity}
             initialDisplayName={initialDisplayName}
+            isTeamAccount={isTeamAccount}
+            label={isTeamAccount ? "Add a preacher" : "Invite a preacher"}
             heading={
               <SectionHeading id="preachers-heading">
                 Your Preachers
               </SectionHeading>
             }
           >
-            <PreacherList cards={preachers} />
+            <PreacherList cards={preachers} isTeamAccount={isTeamAccount} />
           </MentorInviteFlow>
         </section>
       ) : null}
