@@ -4,6 +4,7 @@ import { DashboardRail } from "./DashboardRail";
 import { formatCreditChipLabel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { profileHasGrowthAccess } from "@/lib/growth/access";
+import { profileIsTeamAccount } from "@/lib/mentor/team-account";
 import { createClient } from "@/lib/supabase/server";
 
 type DashboardShellProps = {
@@ -41,12 +42,14 @@ export async function DashboardShell({ children }: DashboardShellProps) {
 
   const chip = formatCreditChipLabel(entitlement);
   const growthAllowed = user ? await profileHasGrowthAccess(user.id) : false;
+  const teamAccount = user ? await profileIsTeamAccount(user.id) : false;
 
   return (
     <div className="dashboard-shell">
       <DashboardRail
         creditChipLabel={chip}
         growthAllowed={growthAllowed}
+        teamAccount={teamAccount}
       />
       <div className="dashboard-content">{children}</div>
     </div>

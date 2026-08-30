@@ -64,6 +64,7 @@ const ACCOUNT_ITEMS: NavItem[] = [
 type DashboardRailProps = {
   creditChipLabel: string;
   growthAllowed: boolean;
+  teamAccount?: boolean;
 };
 
 function NavItemBadges({ item }: { item: NavItem }) {
@@ -122,16 +123,18 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
 export function DashboardRail({
   creditChipLabel,
   growthAllowed,
+  teamAccount = false,
 }: DashboardRailProps) {
   const pathname = usePathname();
   const primaryItems = PRIMARY_ITEMS.filter(
     (item) => item.href !== "/dashboard/growth" || growthAllowed,
   );
 
+  const developLabel = teamAccount ? "Team" : "Mentoring";
   const developOthersItem: NavItem = {
     href: "/dashboard/develop",
-    label: "Mentoring",
-    shortLabel: "Mentoring",
+    label: developLabel,
+    shortLabel: developLabel,
     isActive: (path) =>
       path.startsWith("/dashboard/develop") ||
       path.startsWith("/dashboard/mentoring"),
