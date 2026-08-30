@@ -63,7 +63,6 @@ const ACCOUNT_ITEMS: NavItem[] = [
 
 type DashboardRailProps = {
   creditChipLabel: string;
-  mentoringUiAllowed: boolean;
   growthAllowed: boolean;
 };
 
@@ -122,7 +121,6 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
 
 export function DashboardRail({
   creditChipLabel,
-  mentoringUiAllowed,
   growthAllowed,
 }: DashboardRailProps) {
   const pathname = usePathname();
@@ -134,7 +132,6 @@ export function DashboardRail({
     href: "/dashboard/develop",
     label: "Mentoring",
     shortLabel: "Mentoring",
-    locked: !mentoringUiAllowed,
     isActive: (path) =>
       path.startsWith("/dashboard/develop") ||
       path.startsWith("/dashboard/mentoring"),

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MentorInviteFlow } from "@/components/mentor/MentorInviteFlow";
+import { MentorSeatPurchaseOptions } from "@/components/mentor/MentorSeatPurchaseOptions";
 import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
 import { PreacherList } from "@/components/mentor/PreacherList";
 import { YourSeats } from "@/components/mentor/YourSeats";
 import { buildPreacherCards } from "@/components/mentor/mentoring-model";
 import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
+import { mentoringDevelopSurface } from "@/lib/mentor/develop-surface";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
-import { canAccessMentoringUi } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -36,6 +38,81 @@ function SectionHeading({
   );
 }
 
+function PageHeader() {
+  return (
+    <header className="pt-2 pb-12 sm:pb-16">
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+        style={{ ...uiFont, color: "var(--sc-accent)" }}
+      >
+        Develop others
+      </p>
+      <h1
+        className="mt-4 max-w-2xl text-[34px] font-semibold leading-[1.15] tracking-tight sm:text-[42px]"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
+      >
+        Develop a preacher, one sermon at a time.
+      </h1>
+      <p
+        className="mt-5 max-w-xl text-[16px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+      >
+        Invite someone you&rsquo;re mentoring. They submit sermons to Sermon
+        Coach, you review the evaluation, and you decide when to release
+        their score.
+      </p>
+    </header>
+  );
+}
+
+function CapacityError() {
+  return (
+    <div
+      role="alert"
+      className="rounded px-7 py-6"
+      style={{
+        background: "#ffffff",
+        boxShadow: "var(--sc-shadow)",
+        borderRadius: 4,
+        borderLeft: "3px solid #a04848",
+      }}
+    >
+      <h2
+        className="text-[25px] font-semibold leading-tight"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
+      >
+        Your seats could not be reached
+      </h2>
+      <p
+        className="mt-3 max-w-md text-[14px] leading-relaxed"
+        style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+      >
+        Nothing has been lost. Try again, and if it keeps happening, email{" "}
+        <a
+          href="mailto:chris@sermoncoach.com"
+          className="underline"
+          style={{ color: "var(--sc-accent)" }}
+        >
+          chris@sermoncoach.com
+        </a>{" "}
+        and I will look at it personally.
+      </p>
+      <Link
+        href="/dashboard/develop"
+        className="mt-6 inline-flex rounded border px-5 py-2.5 text-[13px] font-semibold tracking-wide no-underline"
+        style={{
+          ...uiFont,
+          background: "var(--sc-ink)",
+          color: "var(--sc-bg)",
+          borderColor: "var(--sc-ink)",
+        }}
+      >
+        Try again
+      </Link>
+    </div>
+  );
+}
+
 export default async function DevelopPage() {
   const supabase = await createClient();
   const {
@@ -47,7 +124,27 @@ export default async function DevelopPage() {
   }
 
   const capacity = await getMentorSeatCapacity();
-  if (!canAccessMentoringUi(user.id, capacity)) {
+  const surface = mentoringDevelopSurface(capacity);
+
+  if (surface === "error") {
+    return (
+      <main className="mx-auto w-full max-w-3xl px-1 pb-20">
+        <PageHeader />
+        <CapacityError />
+      </main>
+    );
+  }
+
+  if (surface === "purchase") {
+    return (
+      <main className="mx-auto w-full max-w-3xl px-1 pb-20">
+        <PageHeader />
+        <MentorSeatPurchaseOptions />
+      </main>
+    );
+  }
+
+  if (!capacity) {
     notFound();
   }
 
@@ -72,59 +169,27 @@ export default async function DevelopPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-1 pb-20">
-      <header className="pt-2 pb-12 sm:pb-16">
-        <p
-          className="text-[11px] font-semibold uppercase tracking-[0.18em]"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
-        >
-          Develop others
-        </p>
-        <h1
-          className="mt-4 max-w-2xl text-[34px] font-semibold leading-[1.15] tracking-tight sm:text-[42px]"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          Develop a preacher, one sermon at a time.
-        </h1>
-        <p
-          className="mt-5 max-w-xl text-[16px] leading-relaxed"
-          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-        >
-          Invite someone you&rsquo;re mentoring. They submit sermons to Sermon
-          Coach, you review the evaluation, and you decide when to release
-          their score.
-        </p>
-      </header>
+      <PageHeader />
 
-      {capacity ? <YourSeats capacity={capacity} /> : null}
+      <YourSeats capacity={capacity} />
 
-      {capacity || hasPreachers ? (
+      {hasPreachers || capacity ? (
         <section
           aria-labelledby="preachers-heading"
           className="border-t pt-12 sm:pt-14"
           style={{ borderColor: "var(--sc-rule)" }}
         >
-          {capacity ? (
-            <MentorInviteFlow
-              capacity={capacity}
-              initialDisplayName={initialDisplayName}
-              heading={
-                <SectionHeading id="preachers-heading">
-                  Your Preachers
-                </SectionHeading>
-              }
-            >
-              <PreacherList cards={preachers} />
-            </MentorInviteFlow>
-          ) : (
-            <>
+          <MentorInviteFlow
+            capacity={capacity}
+            initialDisplayName={initialDisplayName}
+            heading={
               <SectionHeading id="preachers-heading">
                 Your Preachers
               </SectionHeading>
-              <div className="mt-7">
-                <PreacherList cards={preachers} />
-              </div>
-            </>
-          )}
+            }
+          >
+            <PreacherList cards={preachers} />
+          </MentorInviteFlow>
         </section>
       ) : null}
 
