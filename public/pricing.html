@@ -173,6 +173,46 @@
   }
   .frame strong { color: var(--ink); font-weight: 600; }
 
+  /* ---------- ORIENTATION LIST ---------- */
+  .orient {
+    max-width: 560px;
+    margin: 8px auto 40px;
+    padding: 0 24px;
+    text-align: left;
+  }
+  .orient-group + .orient-group {
+    margin-top: 22px;
+  }
+  .orient-heading {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+  .orient ul {
+    list-style: none;
+  }
+  .orient li {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-mid);
+    margin: 0 0 6px;
+  }
+  .orient a {
+    color: var(--ink);
+    text-underline-offset: 3px;
+  }
+  .orient a:hover {
+    color: var(--accent);
+  }
+  .orient-soon {
+    color: var(--ink-soft);
+    font-weight: 400;
+  }
+
   /* ---------- SECTION HEADERS ---------- */
   .section-header {
     max-width: 1100px;
@@ -973,6 +1013,26 @@
   <h1>The path to a better sermon starts here.</h1>
 </header>
 
+<nav class="orient" aria-label="Find the right product">
+  <div class="orient-group">
+    <h2 class="orient-heading">For your own preaching</h2>
+    <ul>
+      <li>Preaching a couple of times this year, get <a href="#packs"><strong>a pack</strong></a></li>
+      <li>Preaching most Sundays, get <a href="#coach"><strong>Coach</strong></a></li>
+    </ul>
+  </div>
+  <div class="orient-group">
+    <h2 class="orient-heading">For preachers you are developing</h2>
+    <ul>
+      <li>For your preaching staff, get <a href="#teams"><strong>Teams</strong></a></li>
+      <li>For a younger preacher you are bringing along, get <a href="#mentoring"><strong>an Apprentice seat</strong></a></li>
+      <li>For a peer whose preaching you are reading, get <a href="#mentoring"><strong>a Colleague seat</strong></a></li>
+      <li>For a cohort you are leading, get <strong>Preaching Lab</strong> <span class="orient-soon">(coming soon)</span></li>
+      <li>For a seminary or a training program, get <a href="#classroom"><strong>Classroom</strong></a></li>
+    </ul>
+  </div>
+</nav>
+
 <!-- FRAMING -->
 <div class="frame">
   <p>Subscriptions are for preachers in the pulpit most weeks who want a standing rhythm of preparation. Packs are for milestone preaching — a new series, a high-stakes guest slot, the occasional pulpit supply. Same rubric. Same evaluation. Different rhythm.</p>
@@ -995,7 +1055,7 @@
 </div>
 
 <!-- COACH (solo full-width) -->
-<section class="subs subs-solo">
+<section class="subs subs-solo" id="coach">
 
   <div class="tier featured">
     <div class="tier-best-for">Most Preachers</div>
@@ -1098,7 +1158,7 @@
 
 <section class="subs develop-others">
 
-  <div class="tier">
+  <div class="tier" id="teams">
     <div class="tier-name">Teams</div>
     <div class="tier-tagline">For the church where several people preach, each to a different room.</div>
     <div class="price-row">
@@ -1115,7 +1175,7 @@
     <a href="https://tally.so/r/xX5kJJ" class="tier-cta">Request a team</a>
   </div>
 
-  <div class="tier">
+  <div class="tier" id="classroom">
     <div class="tier-name">Classroom</div>
     <div class="tier-tagline">For institutions training preachers, a seminary course, a church planting cohort, a denominational track.</div>
     <div class="price-row">
