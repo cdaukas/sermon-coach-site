@@ -1,3 +1,5 @@
+import type { MentorSeatCapacity } from "@/lib/mentor/capacity";
+
 function parseAllowlist(raw: string | undefined): string[] {
   if (!raw?.trim()) {
     return [];
@@ -17,6 +19,28 @@ function parseAllowlist(raw: string | undefined): string[] {
  */
 export function isMentoringUiAllowed(userId: string): boolean {
   return parseAllowlist(process.env.MENTORING_UI_ALLOWLIST).includes(userId);
+}
+
+/** Either seat type held (purchased + comp). Null capacity is no capacity. */
+export function hasMentorSeatCapacity(
+  capacity: MentorSeatCapacity | null,
+): boolean {
+  if (!capacity) {
+    return false;
+  }
+  return capacity.debrief.capacity > 0 || capacity.evaluation.capacity > 0;
+}
+
+/**
+ * /dashboard/develop and the Mentoring rail.
+ * Allowlisted mentors stay in. A purchased or comped seat is the other door.
+ * Does not read MENTORING_DEBRIEF_ALLOWLIST.
+ */
+export function canAccessMentoringUi(
+  userId: string,
+  capacity: MentorSeatCapacity | null,
+): boolean {
+  return isMentoringUiAllowed(userId) || hasMentorSeatCapacity(capacity);
 }
 
 /**

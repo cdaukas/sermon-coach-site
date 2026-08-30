@@ -7,6 +7,7 @@ import {
   buildPackCheckoutPath,
   COACH_STRIPE_PRICE_IDS,
   getCoachPriceId,
+  getMentorSeatPriceId,
   getPackPriceId,
   PACK_STRIPE_PRICE_IDS,
   parseCoachCheckoutParams,
@@ -118,6 +119,28 @@ describe("checkout params", () => {
       ),
       null,
     );
+  });
+
+  it("prefers mentor seat price ids from env", () => {
+    const prevDebrief = process.env.STRIPE_PRICE_MENTOR_DEBRIEF;
+    const prevEval = process.env.STRIPE_PRICE_MENTOR_EVALUATION;
+    process.env.STRIPE_PRICE_MENTOR_DEBRIEF = "price_env_debrief";
+    process.env.STRIPE_PRICE_MENTOR_EVALUATION = "price_env_eval";
+    try {
+      assert.equal(getMentorSeatPriceId("debrief"), "price_env_debrief");
+      assert.equal(getMentorSeatPriceId("evaluation"), "price_env_eval");
+    } finally {
+      if (prevDebrief === undefined) {
+        delete process.env.STRIPE_PRICE_MENTOR_DEBRIEF;
+      } else {
+        process.env.STRIPE_PRICE_MENTOR_DEBRIEF = prevDebrief;
+      }
+      if (prevEval === undefined) {
+        delete process.env.STRIPE_PRICE_MENTOR_EVALUATION;
+      } else {
+        process.env.STRIPE_PRICE_MENTOR_EVALUATION = prevEval;
+      }
+    }
   });
 
   it("builds mentor seat checkout path", () => {

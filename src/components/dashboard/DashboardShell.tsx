@@ -4,7 +4,8 @@ import { DashboardRail } from "./DashboardRail";
 import { formatCreditChipLabel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { profileHasGrowthAccess } from "@/lib/growth/access";
-import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
+import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
+import { canAccessMentoringUi } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 type DashboardShellProps = {
@@ -41,7 +42,10 @@ export async function DashboardShell({ children }: DashboardShellProps) {
     : null;
 
   const chip = formatCreditChipLabel(entitlement);
-  const mentoringUiAllowed = user ? isMentoringUiAllowed(user.id) : false;
+  const mentoringCapacity = user ? await getMentorSeatCapacity() : null;
+  const mentoringUiAllowed = user
+    ? canAccessMentoringUi(user.id, mentoringCapacity)
+    : false;
   const growthAllowed = user ? await profileHasGrowthAccess(user.id) : false;
 
   return (

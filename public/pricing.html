@@ -286,6 +286,10 @@
     outline-offset: -2px;
     z-index: 1;
   }
+  .mentor-seat-control {
+    grid-template-columns: 1fr 1fr;
+    max-width: 360px;
+  }
 
   /* ---------- SUBSCRIPTION TIERS ---------- */
   .subs {
@@ -1066,41 +1070,33 @@
   <p>A seat gives another preacher their own account, their own submissions, and a library you can read.</p>
 </div>
 
-<section class="subs develop-others">
+<div class="pack-size-wrap">
+  <div class="pack-size-control mentor-seat-control" role="radiogroup" aria-label="Mentoring seat">
+    <button type="button" class="pack-size-option" role="radio" aria-checked="true" data-mentor-seat="debrief">Apprentice</button>
+    <button type="button" class="pack-size-option" role="radio" aria-checked="false" data-mentor-seat="evaluation">Colleague</button>
+  </div>
+</div>
 
-  <div class="tier start-here">
-    <div class="pack-best-value">Start Here</div>
-    <div class="tier-name">Apprentice</div>
-    <div class="tier-tagline">For the associate, the lay preacher, the church planter you are bringing along.</div>
+<section class="subs subs-solo" id="mentoring">
+  <div class="tier" data-mentor-card>
+    <div class="tier-name">Mentoring</div>
+    <div class="tier-tagline" data-mentor-tagline>For the associate, the lay preacher, the church planter you are bringing along.</div>
     <div class="price-row">
-      <span class="price-now"><span class="currency">$</span>12</span>
+      <span class="price-now"><span class="currency">$</span><span data-mentor-price>12</span></span>
       <span class="price-period">/mo</span>
     </div>
     <div class="price-note">Per seat, billed monthly.</div>
-    <ul class="tier-features">
+    <ul class="tier-features" data-mentor-features>
       <li>Two submissions a month, drawn from the seat and not from their credits</li>
       <li>They read the coaching debrief and How It Preaches</li>
       <li>The scored evaluation is generated and held until you release it</li>
       <li>Their own account and their own library, which you can read</li>
     </ul>
-    <a href="mailto:chris@sermoncoach.com?subject=Mentoring%20seat" class="tier-cta">Tell us who you're developing</a>
+    <a href="/checkout?seat=debrief" class="tier-cta" data-mentor-cta>Add a seat</a>
   </div>
+</section>
 
-  <div class="tier">
-    <div class="tier-name">Colleague</div>
-    <div class="tier-tagline">For the peer you are reading, and who is ready to see everything.</div>
-    <div class="price-row">
-      <span class="price-now"><span class="currency">$</span>25</span>
-      <span class="price-period">/mo</span>
-    </div>
-    <div class="price-note">Per seat, billed monthly.</div>
-    <ul class="tier-features">
-      <li>Four submissions a month, drawn from the seat</li>
-      <li>They read everything the moment it is ready, including the score</li>
-      <li>Their own account and their own library, which you can read</li>
-    </ul>
-    <a href="mailto:chris@sermoncoach.com?subject=Mentoring%20seat" class="tier-cta">Tell us who you're developing</a>
-  </div>
+<section class="subs develop-others">
 
   <div class="tier">
     <div class="tier-name">Teams</div>
@@ -1413,6 +1409,81 @@
       next.click();
     });
   });
+</script>
+
+<script>
+  const MENTOR_SEATS = {
+    debrief: {
+      price: '12',
+      tagline: 'For the associate, the lay preacher, the church planter you are bringing along.',
+      features: [
+        'Two submissions a month, drawn from the seat and not from their credits',
+        'They read the coaching debrief and How It Preaches',
+        'The scored evaluation is generated and held until you release it',
+        'Their own account and their own library, which you can read',
+      ],
+      href: '/checkout?seat=debrief',
+    },
+    evaluation: {
+      price: '25',
+      tagline: 'For the peer you are reading, and who is ready to see everything.',
+      features: [
+        'Four submissions a month, drawn from the seat',
+        'They read everything the moment it is ready, including the score',
+        'Their own account and their own library, which you can read',
+      ],
+      href: '/checkout?seat=evaluation',
+    },
+  };
+
+  function applyMentorSeat(seat) {
+    const data = MENTOR_SEATS[seat];
+    if (!data) return;
+    const card = document.querySelector('[data-mentor-card]');
+    if (!card) return;
+
+    const taglineEl = card.querySelector('[data-mentor-tagline]');
+    const priceEl = card.querySelector('[data-mentor-price]');
+    const featuresEl = card.querySelector('[data-mentor-features]');
+    const ctaEl = card.querySelector('[data-mentor-cta]');
+
+    if (taglineEl) taglineEl.textContent = data.tagline;
+    if (priceEl) priceEl.textContent = data.price;
+    if (featuresEl) {
+      featuresEl.replaceChildren();
+      data.features.forEach((line) => {
+        const item = document.createElement('li');
+        item.textContent = line;
+        featuresEl.appendChild(item);
+      });
+    }
+    if (ctaEl) {
+      ctaEl.textContent = 'Add a seat';
+      ctaEl.setAttribute('href', data.href);
+    }
+  }
+
+  const mentorSeatButtons = Array.from(document.querySelectorAll('[data-mentor-seat]'));
+  mentorSeatButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const seat = btn.getAttribute('data-mentor-seat');
+      mentorSeatButtons.forEach((b) => {
+        b.setAttribute('aria-checked', b === btn ? 'true' : 'false');
+      });
+      applyMentorSeat(seat);
+    });
+    btn.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      const index = mentorSeatButtons.indexOf(btn);
+      const delta = event.key === 'ArrowRight' ? 1 : -1;
+      const next = mentorSeatButtons[(index + delta + mentorSeatButtons.length) % mentorSeatButtons.length];
+      next.focus();
+      next.click();
+    });
+  });
+
+  applyMentorSeat('debrief');
 </script>
 
 
