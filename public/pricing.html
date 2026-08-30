@@ -156,29 +156,13 @@
     font-style: italic;
   }
 
-  /* ---------- THE FRAMING SENTENCE ---------- */
-  .frame {
-    max-width: 760px;
-    margin: 0 auto 56px;
-    padding: 24px 32px;
-    background: var(--accent-pale);
-    border-left: 3px solid var(--accent);
-    border-radius: 4px;
-  }
-  .frame p {
-    font-size: 16px;
-    line-height: 1.65;
-    color: var(--ink-mid);
-    margin: 0;
-  }
-  .frame strong { color: var(--ink); font-weight: 600; }
-
-  /* ---------- ORIENTATION LIST ---------- */
+  /* ---------- ORIENTATION LINKS ---------- */
   .orient {
-    max-width: 560px;
+    max-width: 800px;
     margin: 8px auto 40px;
-    padding: 0 24px;
+    padding: 0 24px 0 32px;
     text-align: left;
+    border-left: 3px solid var(--accent);
   }
   .orient-group + .orient-group {
     margin-top: 22px;
@@ -190,27 +174,66 @@
     letter-spacing: 0.04em;
     color: var(--ink-soft);
     margin: 0 0 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
   }
-  .orient ul {
-    list-style: none;
+  .orient-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
-  .orient li {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--ink-mid);
-    margin: 0 0 6px;
+  .orient-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 15px 18px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 180ms ease, transform 180ms ease;
   }
-  .orient a {
+  .orient-card:hover {
+    border-color: var(--ink-soft);
+    transform: translateY(-1px);
+  }
+  .orient-card:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .orient-card-copy {
+    flex: 1;
+    min-width: 0;
+  }
+  .orient-card-title {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--ink);
-    text-underline-offset: 3px;
+    margin-bottom: 4px;
   }
-  .orient a:hover {
-    color: var(--accent);
-  }
-  .orient-soon {
+  .orient-card-desc {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
     color: var(--ink-soft);
-    font-weight: 400;
+  }
+  .orient-card-arrow {
+    flex-shrink: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--ink-soft);
+    transition: transform 180ms ease;
+  }
+  .orient-card:hover .orient-card-arrow {
+    transform: translateX(3px);
+  }
+  @media (max-width: 560px) {
+    .orient-links { grid-template-columns: 1fr; }
   }
 
   /* ---------- SECTION HEADERS ---------- */
@@ -351,28 +374,6 @@
   }
   .subs.subs-solo .tier-tagline {
     min-height: 0;
-  }
-  /* Plain page copy under a solo tier — no card/panel treatment. */
-  .prose-block {
-    max-width: 640px;
-    margin: 8px auto 40px;
-    padding: 0 24px;
-  }
-  .prose-block h2 {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-    margin: 0 0 16px;
-  }
-  .prose-block p {
-    font-size: 16px;
-    line-height: 1.65;
-    color: var(--ink-mid);
-    margin: 0 0 14px;
-  }
-  .prose-block p:last-child {
-    margin-bottom: 0;
   }
   .subs.develop-others {
     grid-template-columns: repeat(2, 1fr);
@@ -718,6 +719,8 @@
     font-style: italic;
     color: var(--ink-soft);
     margin-bottom: 16px;
+  }
+  .pack-tagline[data-pack-tagline] {
     min-height: 6.6em;
   }
   .pack-price {
@@ -980,8 +983,6 @@
     .explainer { padding: 40px 24px; }
     .faq-title h2 { font-size: 26px; }
     .section-header h2 { font-size: 24px; }
-    .frame { padding: 20px 22px; }
-    .frame p { font-size: 15px; }
   }
 </style>
 </head>
@@ -1016,26 +1017,62 @@
 <nav class="orient" aria-label="Find the right product">
   <div class="orient-group">
     <h2 class="orient-heading">For your own preaching</h2>
-    <ul>
-      <li>Preaching a couple of times this year, get <a href="#packs"><strong>a pack</strong></a></li>
-      <li>Preaching most Sundays, get <a href="#coach"><strong>Coach</strong></a></li>
-    </ul>
+    <div class="orient-links">
+      <a class="orient-card" href="#coach">
+        <span class="orient-card-copy">
+          <span class="orient-card-title">Coach</span>
+          <span class="orient-card-desc">Preaching most weeks.</span>
+        </span>
+        <span class="orient-card-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="orient-card" href="#packs">
+        <span class="orient-card-copy">
+          <span class="orient-card-title">Pack</span>
+          <span class="orient-card-desc">Occasional and milestone preaching.</span>
+        </span>
+        <span class="orient-card-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
   </div>
   <div class="orient-group">
-    <h2 class="orient-heading">For preachers you are developing</h2>
-    <ul>
-      <li>For your preaching staff, get <a href="#teams"><strong>Teams</strong></a></li>
-      <li>For a preacher you are developing, get <a href="#mentoring"><strong>a Mentoring seat</strong></a></li>
-      <li>For a cohort you are leading, get <strong>Preaching Lab</strong> <span class="orient-soon">(coming soon)</span></li>
-      <li>For a seminary or a training program, get <a href="#classroom"><strong>Classroom</strong></a></li>
-    </ul>
+    <h2 class="orient-heading">For developing preachers</h2>
+    <div class="orient-links">
+      <a class="orient-card" href="#mentoring">
+        <span class="orient-card-copy">
+          <span class="orient-card-title">Apprentice</span>
+          <span class="orient-card-desc">For a younger preacher you're developing.</span>
+        </span>
+        <span class="orient-card-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="orient-card" href="#mentoring">
+        <span class="orient-card-copy">
+          <span class="orient-card-title">Colleague</span>
+          <span class="orient-card-desc">For a peer whose preaching you're helping develop.</span>
+        </span>
+        <span class="orient-card-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+  <div class="orient-group">
+    <h2 class="orient-heading">For churches and institutions</h2>
+    <div class="orient-links">
+      <a class="orient-card" href="#teams">
+        <span class="orient-card-copy">
+          <span class="orient-card-title">Teams</span>
+          <span class="orient-card-desc">For your preaching staff.</span>
+        </span>
+        <span class="orient-card-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="orient-card" href="#classroom">
+        <span class="orient-card-copy">
+          <span class="orient-card-title">Classroom</span>
+          <span class="orient-card-desc">For a seminary, cohort, or training program.</span>
+        </span>
+        <span class="orient-card-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
   </div>
 </nav>
-
-<!-- FRAMING -->
-<div class="frame">
-  <p>Subscriptions are for preachers in the pulpit most weeks who want a standing rhythm of preparation. Packs are for milestone preaching — a new series, a high-stakes guest slot, the occasional pulpit supply. Same rubric. Same evaluation. Different rhythm.</p>
-</div>
 
 <!-- SECTION 1: YOUR OWN PREACHING -->
 <div id="choose" class="section-header" style="margin-top: 56px;">
@@ -1080,13 +1117,6 @@
 
 </section>
 
-<section class="prose-block" aria-labelledby="plan-limit-heading">
-  <h2 id="plan-limit-heading">Why the plan has a limit</h2>
-  <p>Ten evaluations a month is one to two runs a week with room to move. It covers a manuscript run before the sermon and a transcript run after it, every Sunday, with margin for the weeks you preach twice.</p>
-  <p>An unlimited plan sounds like more, but what it invites is running one sermon through the rubric six times, watching the number inch up, and calling that progress. Too much attention on the tool crowds out the mind and the Spirit, and a sermon does not get better that way. It gets better when you take an honest read, prayerfully weigh what is true in it, and go rewrite the sections that need it.</p>
-  <p>If you preach more than ten times in a month, or you want extra reads for a series, buy a pack. Credits last eighteen months.</p>
-</section>
-
 <!-- PACKS -->
 <!-- Pack Stripe Payment Links (inactive on pricing page until in-dashboard purchase):
   Guest Preacher (2): https://buy.stripe.com/00w28kcWm4m2fl26ZL04804
@@ -1112,6 +1142,7 @@
     <div class="pack-price"><span class="currency">$</span><span data-pack-price>69</span></div>
     <div class="pack-per" data-pack-per>$11.50 per credit</div>
     <div class="pack-save" data-pack-save>Saves $18 against the 2-pack rate.</div>
+    <div class="pack-tagline">The same rubric and the same evaluation. You just buy them as you need them.</div>
     <div class="pack-tagline" data-pack-tagline>For supply preachers, interim pastors, and anyone in the pulpit most months.</div>
     <ul class="pack-features">
       <li data-pack-credits>Six full credits</li>
@@ -1138,7 +1169,7 @@
 
 <section class="subs subs-solo" id="mentoring">
   <div class="tier" data-mentor-card>
-    <div class="tier-name">Mentoring</div>
+    <div class="tier-name" data-mentor-name>Apprentice</div>
     <div class="tier-tagline" data-mentor-tagline>For the associate, the lay preacher, the church planter you are bringing along.</div>
     <div class="price-row">
       <span class="price-now"><span class="currency">$</span><span data-mentor-price>12</span></span>
@@ -1154,6 +1185,11 @@
     <a href="/checkout?seat=debrief" class="tier-cta" data-mentor-cta>Add a seat</a>
   </div>
 </section>
+
+<div class="section-header mentoring-header" style="margin-top: 56px;">
+  <h2>Churches and Institutions</h2>
+  <p>For a staff or a classroom, where one person is responsible for several preachers.</p>
+</div>
 
 <section class="subs develop-others">
 
@@ -1473,6 +1509,7 @@
 <script>
   const MENTOR_SEATS = {
     debrief: {
+      name: 'Apprentice',
       price: '12',
       tagline: 'For the associate, the lay preacher, the church planter you are bringing along.',
       features: [
@@ -1484,6 +1521,7 @@
       href: '/checkout?seat=debrief',
     },
     evaluation: {
+      name: 'Colleague',
       price: '25',
       tagline: 'For the peer you are reading, and who is ready to see everything.',
       features: [
@@ -1501,11 +1539,13 @@
     const card = document.querySelector('[data-mentor-card]');
     if (!card) return;
 
+    const nameEl = card.querySelector('[data-mentor-name]');
     const taglineEl = card.querySelector('[data-mentor-tagline]');
     const priceEl = card.querySelector('[data-mentor-price]');
     const featuresEl = card.querySelector('[data-mentor-features]');
     const ctaEl = card.querySelector('[data-mentor-cta]');
 
+    if (nameEl) nameEl.textContent = data.name;
     if (taglineEl) taglineEl.textContent = data.tagline;
     if (priceEl) priceEl.textContent = data.price;
     if (featuresEl) {
