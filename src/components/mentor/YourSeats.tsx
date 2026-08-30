@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { MentorSeatCapacity } from "@/lib/mentor/capacity";
 import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import { seatAvailability } from "@/components/mentor/seat-availability";
+import { MentorSeatPurchaseOptions } from "@/components/mentor/MentorSeatPurchaseOptions";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -13,6 +15,7 @@ const serifFont = { fontFamily: "var(--font-serif)" };
  * above it, so this stays quiet: no card, no shadow, one hairline rule.
  */
 export function YourSeats({ capacity }: { capacity: MentorSeatCapacity }) {
+  const [addingSeat, setAddingSeat] = useState(false);
   const rows = seatAvailability(capacity);
 
   return (
@@ -74,7 +77,27 @@ export function YourSeats({ capacity }: { capacity: MentorSeatCapacity }) {
         >
           Manage billing
         </Link>
+        <span aria-hidden="true"> · </span>
+        <button
+          type="button"
+          onClick={() => setAddingSeat((open) => !open)}
+          aria-expanded={addingSeat}
+          className="border-0 bg-transparent p-0 font-medium underline-offset-4 hover:underline"
+          style={{
+            ...uiFont,
+            color: "var(--sc-ink-soft)",
+            cursor: "pointer",
+          }}
+        >
+          Add a seat
+        </button>
       </p>
+
+      {addingSeat ? (
+        <div className="mt-8">
+          <MentorSeatPurchaseOptions />
+        </div>
+      ) : null}
     </section>
   );
 }
