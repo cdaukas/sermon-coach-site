@@ -8,7 +8,7 @@ import { buildPreacherCards } from "@/components/mentor/mentoring-model";
 import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
-import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
+import { canAccessMentoringUi } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -42,7 +42,12 @@ export default async function DevelopPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !isMentoringUiAllowed(user.id)) {
+  if (!user) {
+    notFound();
+  }
+
+  const capacity = await getMentorSeatCapacity();
+  if (!canAccessMentoringUi(user.id, capacity)) {
     notFound();
   }
 
@@ -57,10 +62,9 @@ export default async function DevelopPage() {
   initialDisplayName =
     typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
 
-  const [submissions, seats, capacity] = await Promise.all([
+  const [submissions, seats] = await Promise.all([
     listMentoredEvaluationsForMentor(),
     listMentorSeatsForMentor(),
-    getMentorSeatCapacity(),
   ]);
 
   const preachers = buildPreacherCards(seats.active, submissions);

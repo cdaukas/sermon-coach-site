@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import { isMentoringUiAllowed } from "@/lib/mentor/uiAccess";
+import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
+import { canAccessMentoringUi } from "@/lib/mentor/uiAccess";
 import { createClient } from "@/lib/supabase/server";
 
 /** Invite creation now lives at /dashboard/develop. */
@@ -9,7 +10,12 @@ export default async function MentorInvitePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !isMentoringUiAllowed(user.id)) {
+  if (!user) {
+    notFound();
+  }
+
+  const capacity = await getMentorSeatCapacity();
+  if (!canAccessMentoringUi(user.id, capacity)) {
     notFound();
   }
 
