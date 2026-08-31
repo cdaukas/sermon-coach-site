@@ -52,7 +52,7 @@ type InviteAcceptPanelProps = {
   loggedIn: boolean;
 };
 
-type AcceptErrorView = "self_invite" | "already_mentored";
+type AcceptErrorView = "self_invite" | "already_mentored" | "email_mismatch";
 
 type Step = { title: string; body: string };
 
@@ -302,6 +302,11 @@ export function InviteAcceptPanel({
       return;
     }
 
+    if (code === "email_mismatch") {
+      setAcceptErrorView("email_mismatch");
+      return;
+    }
+
     if (code === "no_seat_capacity") {
       await clearInviteCookie();
       setGenericError(messageForAcceptError("no_seat_capacity"));
@@ -335,6 +340,15 @@ export function InviteAcceptPanel({
       <Notice title="You already have a mentor">
         Someone is already reading your work here. One mentor at a time, so this
         invitation can&rsquo;t be accepted until that relationship ends.
+      </Notice>
+    );
+  }
+
+  if (acceptErrorView === "email_mismatch") {
+    return (
+      <Notice title="This invitation was sent to a different email address">
+        Sign in with the address your mentor used, or ask them to send a new
+        invitation to the address you use here.
       </Notice>
     );
   }
