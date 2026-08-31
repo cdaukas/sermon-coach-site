@@ -1,6 +1,6 @@
 import { renderInviteEmailHtml } from "@/lib/email/invite-email-template";
 
-const INVITE_EMAIL_FROM_ADDRESS = "chris@sermoncoach.online";
+const INVITE_EMAIL_FROM_ADDRESS = "chris@sermoncoach.com";
 const RESEND_API_URL = "https://api.resend.com/emails";
 
 export type SendMentorInviteEmailParams = {
