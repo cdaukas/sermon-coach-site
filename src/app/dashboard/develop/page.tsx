@@ -7,6 +7,7 @@ import { PendingInvitesList } from "@/components/mentor/PendingInvitesList";
 import { PreacherList } from "@/components/mentor/PreacherList";
 import { YourSeats } from "@/components/mentor/YourSeats";
 import { buildPreacherCards } from "@/components/mentor/mentoring-model";
+import { SeatPurchasePending } from "@/components/mentor/SeatPurchasePending";
 import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
 import { mentoringDevelopSurface } from "@/lib/mentor/develop-surface";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
@@ -130,7 +131,11 @@ function CapacityError() {
   );
 }
 
-export default async function DevelopPage() {
+type DevelopPageProps = {
+  searchParams: Promise<{ purchased?: string | string[] }>;
+};
+
+export default async function DevelopPage({ searchParams }: DevelopPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -139,6 +144,12 @@ export default async function DevelopPage() {
   if (!user) {
     notFound();
   }
+
+  const params = await searchParams;
+  const purchasedParam = Array.isArray(params.purchased)
+    ? params.purchased[0]
+    : params.purchased;
+  const purchasedReturn = purchasedParam === "1";
 
   const [capacity, isTeamAccount] = await Promise.all([
     getMentorSeatCapacity(),
@@ -159,7 +170,11 @@ export default async function DevelopPage() {
     return (
       <main className="mx-auto w-full max-w-3xl px-1 pb-20">
         <PageHeader isTeamAccount={isTeamAccount} />
-        <MentorSeatPurchaseOptions />
+        {purchasedReturn ? (
+          <SeatPurchasePending />
+        ) : (
+          <MentorSeatPurchaseOptions />
+        )}
       </main>
     );
   }
