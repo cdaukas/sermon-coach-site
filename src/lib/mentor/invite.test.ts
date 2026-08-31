@@ -68,6 +68,10 @@ describe("messageForAcceptError", () => {
       messageForAcceptError("no_seat_capacity"),
       "This invitation is no longer active. The mentor does not have an open seat for it.",
     );
+    assert.equal(
+      messageForAcceptError("email_mismatch"),
+      "This invitation was sent to a different email address. Sign in with the address your mentor used, or ask them to send a new invitation to the address you use here.",
+    );
   });
 });
 

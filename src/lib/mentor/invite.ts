@@ -29,7 +29,8 @@ export type AcceptMentorInviteErrorCode =
   | "invalid_or_used"
   | "self_invite"
   | "already_mentored"
-  | "no_seat_capacity";
+  | "no_seat_capacity"
+  | "email_mismatch";
 
 export type AcceptMentorInviteResult = {
   ok: boolean;
@@ -128,6 +129,8 @@ export function messageForAcceptError(
       return "Sign in to accept this invitation.";
     case "no_seat_capacity":
       return "This invitation is no longer active. The mentor does not have an open seat for it.";
+    case "email_mismatch":
+      return "This invitation was sent to a different email address. Sign in with the address your mentor used, or ask them to send a new invitation to the address you use here.";
     default:
       return "Something went wrong. Please try again.";
   }
