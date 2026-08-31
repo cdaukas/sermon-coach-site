@@ -26,7 +26,7 @@ describe("mentorInviteEmailFromHeader", () => {
   it("wraps display name in via The Sermon Coach", () => {
     assert.equal(
       mentorInviteEmailFromHeader("Chris"),
-      '"Chris via The Sermon Coach" <chris@sermoncoach.online>',
+      '"Chris via The Sermon Coach" <chris@sermoncoach.com>',
     );
   });
 });
