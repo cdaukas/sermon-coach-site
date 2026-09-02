@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { renderBlogEmailHtml } from "./blog-email-template";
+import {
+  renderBlogEmailHtml,
+  renderUpdateEmailHtml,
+} from "./blog-email-template";
 import { BLOG_EMAIL_CTA_URL, BLOG_EMAIL_MAILING_ADDRESS } from "./constants";
 import { buildUnsubscribeUrl, signUnsubscribeToken, verifyUnsubscribeToken } from "./unsubscribe";
 
@@ -27,7 +30,37 @@ describe("blog email template", () => {
     assert.match(html, new RegExp(BLOG_EMAIL_MAILING_ADDRESS.replaceAll(".", "\\.")));
     assert.match(html, /Read the full post/);
     assert.match(html, /Unsubscribe/);
+    assert.match(html, /from these emails/);
+    assert.doesNotMatch(html, /from weekly blog emails/);
     assert.match(html, /\/unsubscribe\?token=/);
+  });
+});
+
+describe("update email template", () => {
+  it("reuses the shell without teaser chrome", () => {
+    process.env.EMAIL_UNSUBSCRIBE_SECRET = "test-secret";
+    const unsubscribeUrl = buildUnsubscribeUrl("reader@example.com");
+
+    const html = renderUpdateEmailHtml({
+      title: "Improvements to The Sermon Coach",
+      headline: "What changed",
+      bodyHtml:
+        '<p>Intro.</p><p><a href="https://sermoncoach.com/start">Start</a></p><p><a href="https://sermoncoach.com/pricing.html">Pricing</a></p><p><a href="https://sermoncoach.com/how-its-scored.html">How it\'s scored</a></p><p><a href="https://sermoncoach.com/sample-evaluation">Sample evaluation</a></p><p><a href="https://sermoncoach.com/sample-sketch">Sample sketch</a></p>',
+      unsubscribeUrl,
+    });
+
+    assert.match(html, /What changed/);
+    assert.match(html, /The Sermon <span style="color:#a67c2e;">Coach<\/span>™/);
+    assert.match(html, /from these emails/);
+    assert.match(html, /\/unsubscribe\?token=/);
+    assert.match(html, /https:\/\/sermoncoach\.com\/start/);
+    assert.match(html, /https:\/\/sermoncoach\.com\/pricing\.html/);
+    assert.match(html, /https:\/\/sermoncoach\.com\/how-its-scored\.html/);
+    assert.match(html, /https:\/\/sermoncoach\.com\/sample-evaluation/);
+    assert.match(html, /https:\/\/sermoncoach\.com\/sample-sketch/);
+    assert.doesNotMatch(html, /This week on the blog/);
+    assert.doesNotMatch(html, /Read the full post/);
+    assert.doesNotMatch(html, /Run an evaluation/);
   });
 });
 
