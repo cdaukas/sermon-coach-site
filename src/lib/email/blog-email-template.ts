@@ -12,6 +12,19 @@ export type RenderBlogEmailParams = {
   unsubscribeUrl: string;
 };
 
+export type RenderEmailShellParams = {
+  title: string;
+  bodyHtml: string;
+  unsubscribeUrl: string;
+};
+
+export type RenderUpdateEmailParams = {
+  title: string;
+  headline: string;
+  bodyHtml: string;
+  unsubscribeUrl: string;
+};
+
 function escapeHtml(text: string): string {
   return text
     .replaceAll("&", "&amp;")
@@ -20,23 +33,24 @@ function escapeHtml(text: string): string {
     .replaceAll('"', "&quot;");
 }
 
-export function renderBlogEmailHtml(params: RenderBlogEmailParams): string {
-  const { content, unsubscribeUrl } = params;
-  const headline = escapeHtml(content.headline);
-  const blogUrl = escapeHtml(content.blogUrl);
-  const ctaUrl = escapeHtml(BLOG_EMAIL_CTA_URL);
-  const ctaParagraph = escapeHtml(BLOG_EMAIL_CTA_PARAGRAPH);
-  const ctaButtonLabel = escapeHtml(BLOG_EMAIL_CTA_BUTTON_LABEL);
+/**
+ * Branded chrome: outer table, card, wordmark, footer.
+ * bodyHtml is interpolated raw and continues the wordmark cell,
+ * so callers that need byte-identical teaser HTML close that td
+ * themselves (see renderBlogEmailHtml).
+ */
+export function renderEmailShell(params: RenderEmailShellParams): string {
+  const title = escapeHtml(params.title);
+  const unsubscribe = escapeHtml(params.unsubscribeUrl);
   const footerLine1 = escapeHtml(BLOG_EMAIL_FOOTER_LINE_1);
   const mailingAddress = escapeHtml(BLOG_EMAIL_MAILING_ADDRESS);
-  const unsubscribe = escapeHtml(unsubscribeUrl);
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${headline}</title>
+<title>${title}</title>
 </head>
 <body style="margin:0;padding:0;background:#faf8f3;">
   <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#faf8f3;">
@@ -48,7 +62,33 @@ export function renderBlogEmailHtml(params: RenderBlogEmailParams): string {
               <p style="margin:0 0 24px;font-size:20px;font-weight:600;color:#1a2332;letter-spacing:-0.01em;">
                 The Sermon <span style="color:#a67c2e;">Coach</span>™
               </p>
-              <p style="margin:0 0 12px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#a67c2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${params.bodyHtml}          <tr>
+            <td style="padding:20px 32px 28px;border-top:1px solid #d4cfc1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;line-height:1.6;color:#4a5568;">
+              <p style="margin:0 0 8px;">${footerLine1}</p>
+              <p style="margin:0 0 8px;">${mailingAddress}</p>
+              <p style="margin:0;">
+                <a href="${unsubscribe}" style="color:#4a5568;text-decoration:underline;">Unsubscribe</a>
+                from these emails.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+export function renderBlogEmailHtml(params: RenderBlogEmailParams): string {
+  const { content, unsubscribeUrl } = params;
+  const headline = escapeHtml(content.headline);
+  const blogUrl = escapeHtml(content.blogUrl);
+  const ctaUrl = escapeHtml(BLOG_EMAIL_CTA_URL);
+  const ctaParagraph = escapeHtml(BLOG_EMAIL_CTA_PARAGRAPH);
+  const ctaButtonLabel = escapeHtml(BLOG_EMAIL_CTA_BUTTON_LABEL);
+
+  const bodyHtml = `              <p style="margin:0 0 12px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#a67c2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
                 This week on the blog
               </p>
               <h1 style="margin:0 0 20px;font-size:28px;line-height:1.25;font-weight:600;color:#1a2332;">
@@ -82,20 +122,33 @@ export function renderBlogEmailHtml(params: RenderBlogEmailParams): string {
               </p>
             </td>
           </tr>
-          <tr>
-            <td style="padding:20px 32px 28px;border-top:1px solid #d4cfc1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;line-height:1.6;color:#4a5568;">
-              <p style="margin:0 0 8px;">${footerLine1}</p>
-              <p style="margin:0 0 8px;">${mailingAddress}</p>
-              <p style="margin:0;">
-                <a href="${unsubscribe}" style="color:#4a5568;text-decoration:underline;">Unsubscribe</a>
-                from weekly blog emails.
-              </p>
+`;
+
+  return renderEmailShell({
+    title: content.headline,
+    bodyHtml,
+    unsubscribeUrl,
+  });
+}
+
+export function renderUpdateEmailHtml(params: RenderUpdateEmailParams): string {
+  const headline = escapeHtml(params.headline);
+
+  const bodyHtml = `              <h1 style="margin:0 0 20px;font-size:28px;line-height:1.25;font-weight:600;color:#1a2332;">
+                ${headline}
+              </h1>
             </td>
           </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+          <tr>
+            <td style="padding:0 32px 28px;font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.65;color:#2a3447;">
+              ${params.bodyHtml}
+            </td>
+          </tr>
+`;
+
+  return renderEmailShell({
+    title: params.title,
+    bodyHtml,
+    unsubscribeUrl: params.unsubscribeUrl,
+  });
 }

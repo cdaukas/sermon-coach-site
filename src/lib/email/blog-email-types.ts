@@ -1,4 +1,6 @@
 export type BlogEmailWeekContent = {
+  /** Absent means "teaser". */
+  kind?: "teaser";
   week: number;
   subject: string;
   headline: string;
@@ -7,3 +9,12 @@ export type BlogEmailWeekContent = {
   /** Full blog post URL for the "Read the post →" link. */
   blogUrl: string;
 };
+
+export type UpdateEmailContent = {
+  kind: "update";
+  subject: string;
+  headline: string;
+  bodyHtml: string;
+};
+
+export type EmailContent = BlogEmailWeekContent | UpdateEmailContent;
