@@ -5,6 +5,7 @@
  *   RESEND_MODE=test RESEND_TEST_TO=you@example.com npm run blog:send -- --week=1
  *   RESEND_MODE=dryrun npm run blog:send -- --week=1
  *   RESEND_MODE=send npm run blog:send -- --week=1
+ *   RESEND_MODE=dryrun npm run blog:send -- --file=update.json
  *
  * Modes:
  *   test   — sends to RESEND_TEST_TO only (never a real list)
@@ -16,8 +17,15 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolveEligibleBlogRecipients } from "../src/lib/email/blog-recipients";
-import { renderBlogEmailHtml } from "../src/lib/email/blog-email-template";
-import type { BlogEmailWeekContent } from "../src/lib/email/blog-email-types";
+import {
+  renderBlogEmailHtml,
+  renderUpdateEmailHtml,
+} from "../src/lib/email/blog-email-template";
+import type {
+  BlogEmailWeekContent,
+  EmailContent,
+  UpdateEmailContent,
+} from "../src/lib/email/blog-email-types";
 import { BLOG_EMAIL_FROM } from "../src/lib/email/constants";
 import { sendResendEmail } from "../src/lib/email/resend-send";
 import { buildUnsubscribeUrl } from "../src/lib/email/unsubscribe";
@@ -87,6 +95,48 @@ function parseWeekArg(): number {
   );
 }
 
+function hasArgPrefix(prefix: "--week" | "--file"): boolean {
+  return process.argv.slice(2).some(
+    (arg) => arg === prefix || arg.startsWith(`${prefix}=`),
+  );
+}
+
+function parseFileArg(): string {
+  for (const arg of process.argv.slice(2)) {
+    if (arg.startsWith("--file=")) {
+      const value = arg.slice("--file=".length);
+      if (!value) {
+        throw new Error("Missing value for --file. Use --file=name.json.");
+      }
+      return value;
+    }
+    if (arg === "--file") {
+      throw new Error("Missing value for --file. Use --file=name.json.");
+    }
+  }
+
+  throw new Error("Missing --file path.\nUsage: npm run blog:send -- --file=name.json");
+}
+
+type ContentSelector =
+  | { source: "week"; week: number }
+  | { source: "file"; relativePath: string };
+
+function parseContentSelector(): ContentSelector {
+  const hasWeek = hasArgPrefix("--week");
+  const hasFile = hasArgPrefix("--file");
+
+  if (hasWeek && hasFile) {
+    throw new Error("--week and --file are mutually exclusive.");
+  }
+
+  if (hasFile) {
+    return { source: "file", relativePath: parseFileArg() };
+  }
+
+  return { source: "week", week: parseWeekArg() };
+}
+
 function parseModeArg(): ResendMode | null {
   for (const arg of process.argv.slice(2)) {
     if (arg.startsWith("--mode=")) {
@@ -148,6 +198,43 @@ function assertBlogEmailWeekContent(
   };
 }
 
+function assertUpdateEmailContent(value: unknown): UpdateEmailContent {
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Invalid update content: expected an object.");
+  }
+
+  const record = value as Record<string, unknown>;
+  if (record.kind !== "update") {
+    throw new Error('Invalid update content: kind must be "update".');
+  }
+
+  const required = ["subject", "headline", "bodyHtml"] as const;
+  for (const key of required) {
+    if (typeof record[key] !== "string") {
+      throw new Error(`Invalid update content: missing or invalid "${key}".`);
+    }
+  }
+
+  return {
+    kind: "update",
+    subject: record.subject as string,
+    headline: record.headline as string,
+    bodyHtml: record.bodyHtml as string,
+  };
+}
+
+function resolveInsideContentDir(relativePath: string): string {
+  const root = path.resolve(CONTENT_DIR);
+  const resolved = path.resolve(root, relativePath);
+  const rel = path.relative(root, resolved);
+  if (rel === "" || rel.startsWith("..") || path.isAbsolute(rel)) {
+    throw new Error(
+      `Content path must resolve inside content/blog-email: ${relativePath}`,
+    );
+  }
+  return resolved;
+}
+
 async function loadWeekContent(week: number): Promise<BlogEmailWeekContent> {
   const filePath = path.join(CONTENT_DIR, `week-${week}.json`);
   let raw: string;
@@ -158,6 +245,70 @@ async function loadWeekContent(week: number): Promise<BlogEmailWeekContent> {
   }
 
   return assertBlogEmailWeekContent(JSON.parse(raw) as unknown, week);
+}
+
+async function loadFileContent(relativePath: string): Promise<EmailContent> {
+  const filePath = resolveInsideContentDir(relativePath);
+  let raw: string;
+  try {
+    raw = await fs.readFile(filePath, "utf8");
+  } catch {
+    throw new Error(`No content file at content/blog-email/${relativePath}`);
+  }
+
+  const value = JSON.parse(raw) as unknown;
+  const kind =
+    typeof value === "object" &&
+    value !== null &&
+    (value as Record<string, unknown>).kind === "update"
+      ? "update"
+      : "teaser";
+
+  if (kind === "update") {
+    return assertUpdateEmailContent(value);
+  }
+
+  const record =
+    typeof value === "object" && value !== null
+      ? (value as Record<string, unknown>)
+      : {};
+  const week =
+    typeof record.week === "string" || typeof record.week === "number"
+      ? Number(record.week)
+      : Number.NaN;
+  return assertBlogEmailWeekContent(value, week);
+}
+
+async function loadEmailContent(selector: ContentSelector): Promise<EmailContent> {
+  if (selector.source === "week") {
+    return loadWeekContent(selector.week);
+  }
+  return loadFileContent(selector.relativePath);
+}
+
+function previewFileName(selector: ContentSelector): string {
+  if (selector.source === "week") {
+    return `week-${selector.week}-rendered.html`;
+  }
+  const base = path.basename(selector.relativePath);
+  const ext = path.extname(base);
+  const stem = ext ? base.slice(0, -ext.length) : base;
+  return `${stem}-rendered.html`;
+}
+
+function renderContentHtml(
+  content: EmailContent,
+  unsubscribeUrl: string,
+): string {
+  if (content.kind === "update") {
+    return renderUpdateEmailHtml({
+      title: content.subject,
+      headline: content.headline,
+      bodyHtml: content.bodyHtml,
+      unsubscribeUrl,
+    });
+  }
+  return renderBlogEmailHtml({ content, unsubscribeUrl });
 }
 
 async function resolveRecipients(
@@ -275,9 +426,9 @@ function sleep(ms: number): Promise<void> {
 async function main(): Promise<void> {
   await loadEnvLocal();
 
-  const week = parseWeekArg();
+  const selector = parseContentSelector();
   const mode = parseMode();
-  const content = await loadWeekContent(week);
+  const content = await loadEmailContent(selector);
   const {
     emails,
     totalUniqueRecipients,
@@ -288,13 +439,13 @@ async function main(): Promise<void> {
   } = await resolveRecipients(mode);
 
   const previewRecipient = emails[0] ?? process.env.RESEND_TEST_TO ?? "preview@example.com";
-  const previewHtml = renderBlogEmailHtml({
+  const previewHtml = renderContentHtml(
     content,
-    unsubscribeUrl: buildUnsubscribeUrl(previewRecipient),
-  });
+    buildUnsubscribeUrl(previewRecipient),
+  );
 
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
-  const previewPath = path.join(OUTPUT_DIR, `week-${week}-rendered.html`);
+  const previewPath = path.join(OUTPUT_DIR, previewFileName(selector));
   await fs.writeFile(previewPath, previewHtml, "utf8");
 
   if (process.platform === "darwin") {
@@ -303,7 +454,11 @@ async function main(): Promise<void> {
 
   console.log(`Rendered preview: ${previewPath}`);
   console.log(`Mode: ${mode}`);
-  console.log(`Week: ${week}`);
+  if (selector.source === "week") {
+    console.log(`Week: ${selector.week}`);
+  } else {
+    console.log(`File: ${selector.relativePath}`);
+  }
   console.log(`Subject: ${content.subject}`);
 
   if (mode === "dryrun") {
@@ -357,10 +512,7 @@ async function main(): Promise<void> {
   let failed = 0;
 
   for (const email of emails) {
-    const html = renderBlogEmailHtml({
-      content,
-      unsubscribeUrl: buildUnsubscribeUrl(email),
-    });
+    const html = renderContentHtml(content, buildUnsubscribeUrl(email));
 
     const sendResult = await sendResendEmail({
       apiKey,
