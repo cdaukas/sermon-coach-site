@@ -13,6 +13,7 @@ import {
 } from "./tuesday-nudge-recipients";
 import {
   renderTuesdayNudgeHtml,
+  renderTuesdayNudgeText,
   TUESDAY_NUDGE_DASHBOARD_URL,
   TUESDAY_NUDGE_FROM,
   TUESDAY_NUDGE_REPLY_TO,
@@ -52,10 +53,11 @@ describe("tuesday nudge unsubscribe tokens", () => {
 });
 
 describe("tuesday nudge template", () => {
+  const unsubscribeUrl =
+    "https://sermoncoach.com/unsubscribe/tuesday-nudge?token=abc";
+
   it("uses the locked copy with dashboard, sketch, and unsubscribe links", () => {
-    const html = renderTuesdayNudgeHtml({
-      unsubscribeUrl: "https://sermoncoach.com/unsubscribe/tuesday-nudge?token=abc",
-    });
+    const html = renderTuesdayNudgeHtml({ unsubscribeUrl });
 
     assert.equal(TUESDAY_NUDGE_SUBJECT, "The Tuesday Nudge");
     assert.equal(TUESDAY_NUDGE_FROM, "The Sermon Coach <chris@sermoncoach.online>");
@@ -64,21 +66,35 @@ describe("tuesday nudge template", () => {
     assert.equal(TUESDAY_NUDGE_SKETCH_URL, "https://sermoncoach.com/dashboard/sketch");
     assert.match(
       html,
-      /<a href="https:\/\/sermoncoach\.com\/dashboard">Review your sermon from Sunday<\/a>/,
+      /<a href="https:\/\/sermoncoach\.com\/dashboard" style="color:#a67c2e;text-decoration:underline;">Review your sermon from Sunday<\/a>/,
     );
     assert.match(
       html,
-      /<a href="https:\/\/sermoncoach\.com\/dashboard\/sketch">The Sketch<\/a>/,
+      /<a href="https:\/\/sermoncoach\.com\/dashboard\/sketch" style="color:#a67c2e;text-decoration:underline;">The Sketch<\/a>/,
     );
     assert.match(
       html,
-      /If this isn't helpful, <a href="https:\/\/sermoncoach\.com\/unsubscribe\/tuesday-nudge\?token=abc">click here<\/a> to unsubscribe/,
+      /If this isn't helpful, <a href="https:\/\/sermoncoach\.com\/unsubscribe\/tuesday-nudge\?token=abc" style="color:#a67c2e;text-decoration:underline;">click here<\/a> to unsubscribe/,
     );
-    assert.match(html, /^<p>Here is your Tuesday nudge\./);
-    assert.match(html, />Chris<\/p>/);
+    assert.match(html, /Here is your Tuesday nudge\./);
+    assert.match(html, /Chris<br>The Sermon Coach/);
+    assert.match(html, /The Sermon <span style="color:#a67c2e;">Coach<\/span>/);
+    assert.doesNotMatch(html, /<style[\s>]/i);
+    assert.doesNotMatch(html, /<img[\s>]/i);
     assert.doesNotMatch(html, /Hi /);
     assert.doesNotMatch(html, /Open your dashboard/);
     assert.doesNotMatch(html, /You asked for a nudge/);
+  });
+
+  it("renders a plain-text part with the same copy and bare URLs", () => {
+    const text = renderTuesdayNudgeText({ unsubscribeUrl });
+    assert.match(text, /Here is your Tuesday nudge\./);
+    assert.match(text, /https:\/\/sermoncoach\.com\/dashboard/);
+    assert.match(text, /https:\/\/sermoncoach\.com\/dashboard\/sketch/);
+    assert.match(text, /Chris\nThe Sermon Coach/);
+    assert.match(text, /P\.S\. If this isn't helpful, click here to unsubscribe\./);
+    assert.equal(text.includes(unsubscribeUrl), true);
+    assert.doesNotMatch(text, /</);
   });
 });
 

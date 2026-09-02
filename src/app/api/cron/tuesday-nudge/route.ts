@@ -8,6 +8,7 @@ import {
 import { sendTuesdayNudgeEmail } from "@/lib/email/tuesday-nudge-send";
 import {
   renderTuesdayNudgeHtml,
+  renderTuesdayNudgeText,
   TUESDAY_NUDGE_SUBJECT,
 } from "@/lib/email/tuesday-nudge-template";
 import { buildTuesdayNudgeUnsubscribeUrl } from "@/lib/email/tuesday-nudge-unsubscribe";
@@ -51,13 +52,13 @@ async function sendOneTuesdayNudge(params: {
   email: string;
 }) {
   const unsubscribeUrl = buildTuesdayNudgeUnsubscribeUrl(params.email);
-  const html = renderTuesdayNudgeHtml({
-    unsubscribeUrl,
-  });
+  const html = renderTuesdayNudgeHtml({ unsubscribeUrl });
+  const text = renderTuesdayNudgeText({ unsubscribeUrl });
   return sendTuesdayNudgeEmail({
     apiKey: params.apiKey,
     to: params.email,
     html,
+    text,
     unsubscribeUrl,
   });
 }
