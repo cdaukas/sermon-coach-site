@@ -64,13 +64,14 @@ describe("tuesday nudge template", () => {
     assert.equal(TUESDAY_NUDGE_REPLY_TO, "chris@sermoncoach.com");
     assert.equal(TUESDAY_NUDGE_DASHBOARD_URL, "https://sermoncoach.com/dashboard");
     assert.equal(TUESDAY_NUDGE_SKETCH_URL, "https://sermoncoach.com/dashboard/sketch");
+    assert.match(html, /<p style="margin:0 0 16px;[^"]*">Here is your Tuesday nudge\.<\/p>/);
     assert.match(
       html,
-      /<a href="https:\/\/sermoncoach\.com\/dashboard" style="color:#a67c2e;text-decoration:underline;">Review your sermon from Sunday<\/a>/,
+      /<p style="margin:0 0 16px;[^"]*"><a href="https:\/\/sermoncoach\.com\/dashboard" style="color:#a67c2e;text-decoration:underline;">Review your sermon from Sunday<\/a> to celebrate the wins and lock in the areas for growth\.<\/p>/,
     );
     assert.match(
       html,
-      /<a href="https:\/\/sermoncoach\.com\/dashboard\/sketch" style="color:#a67c2e;text-decoration:underline;">The Sketch<\/a>/,
+      /<p style="margin:0 0 16px;[^"]*">If you are preaching this Sunday, use <a href="https:\/\/sermoncoach\.com\/dashboard\/sketch" style="color:#a67c2e;text-decoration:underline;">The Sketch<\/a> to test your outline for alignment before you write the manuscript\.<\/p>/,
     );
     assert.match(
       html,
@@ -88,7 +89,10 @@ describe("tuesday nudge template", () => {
 
   it("renders a plain-text part with the same copy and bare URLs", () => {
     const text = renderTuesdayNudgeText({ unsubscribeUrl });
-    assert.match(text, /Here is your Tuesday nudge\./);
+    assert.match(
+      text,
+      /Here is your Tuesday nudge\.\n\nReview your sermon from Sunday to celebrate the wins and lock in the areas for growth\.\n\nIf you are preaching this Sunday, use The Sketch to test your outline for alignment before you write the manuscript\./,
+    );
     assert.match(text, /https:\/\/sermoncoach\.com\/dashboard/);
     assert.match(text, /https:\/\/sermoncoach\.com\/dashboard\/sketch/);
     assert.match(text, /Chris\nThe Sermon Coach/);
