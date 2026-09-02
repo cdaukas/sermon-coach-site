@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/purge-unverified-users",
       "schedule": "0 14 * * 1"
+    },
+    {
+      "path": "/api/cron/tuesday-nudge",
+      "schedule": "0 13 * * 2"
     }
   ]
 }
