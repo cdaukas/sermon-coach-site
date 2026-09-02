@@ -19,6 +19,7 @@ export const TUESDAY_NUDGE_FROM = `The Sermon Coach <${mailboxFromFromHeader(RES
 
 const SERIF_STACK = "Georgia,'Times New Roman',serif";
 const LINK_STYLE = "color:#a67c2e;text-decoration:underline;";
+const BODY_P_STYLE = `margin:0 0 16px;font-family:${SERIF_STACK};font-size:16px;line-height:1.6;color:#2a3447;`;
 
 function escapeHtml(text: string): string {
   return text
@@ -46,7 +47,11 @@ export function renderTuesdayNudgeText(params: {
   unsubscribeUrl: string;
 }): string {
   return [
-    "Here is your Tuesday nudge. Review your sermon from Sunday to celebrate the wins and lock in the areas for growth. If you are preaching this Sunday, use The Sketch to test your outline for alignment before you write the manuscript.",
+    "Here is your Tuesday nudge.",
+    "",
+    "Review your sermon from Sunday to celebrate the wins and lock in the areas for growth.",
+    "",
+    "If you are preaching this Sunday, use The Sketch to test your outline for alignment before you write the manuscript.",
     "",
     TUESDAY_NUDGE_DASHBOARD_URL,
     TUESDAY_NUDGE_SKETCH_URL,
@@ -83,7 +88,9 @@ export function renderTuesdayNudgeHtml(params: {
             <td style="padding:32px;font-family:${SERIF_STACK};">
               <p style="margin:0;font-family:${SERIF_STACK};font-size:18px;line-height:1.4;color:#1a2332;">The Sermon <span style="color:#a67c2e;">Coach</span></p>
               ${rule}
-              <p style="margin:0 0 16px;font-family:${SERIF_STACK};font-size:16px;line-height:1.6;color:#2a3447;">Here is your Tuesday nudge. <a href="${dashboardUrl}" style="${LINK_STYLE}">Review your sermon from Sunday</a> to celebrate the wins and lock in the areas for growth. If you are preaching this Sunday, use <a href="${sketchUrl}" style="${LINK_STYLE}">The Sketch</a> to test your outline for alignment before you write the manuscript.</p>
+              <p style="${BODY_P_STYLE}">Here is your Tuesday nudge.</p>
+              <p style="${BODY_P_STYLE}"><a href="${dashboardUrl}" style="${LINK_STYLE}">Review your sermon from Sunday</a> to celebrate the wins and lock in the areas for growth.</p>
+              <p style="${BODY_P_STYLE}">If you are preaching this Sunday, use <a href="${sketchUrl}" style="${LINK_STYLE}">The Sketch</a> to test your outline for alignment before you write the manuscript.</p>
               <p style="margin:0 0 16px;font-family:${SERIF_STACK};font-size:15px;line-height:1.6;color:#4a5568;">Chris<br>The Sermon Coach</p>
               <p style="margin:0;font-family:${SERIF_STACK};font-size:14px;line-height:1.6;color:#4a5568;">P.S. If this isn't helpful, <a href="${unsubscribeUrl}" style="${LINK_STYLE}">click here</a> to unsubscribe.</p>
               ${rule}
