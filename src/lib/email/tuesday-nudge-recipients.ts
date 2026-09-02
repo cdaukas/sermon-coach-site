@@ -1,5 +1,4 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { tuesdayNudgeFirstName } from "@/lib/email/tuesday-nudge-template";
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -29,7 +28,6 @@ export type TuesdayNudgeSkipReason =
 export type TuesdayNudgeCandidate = {
   id: string;
   email: string;
-  displayName: string | null;
   createdAt: string;
   lastSignInAt: string | null;
   lastEvaluationAt: string | null;
@@ -40,7 +38,7 @@ export type TuesdayNudgeCandidate = {
 };
 
 export type TuesdayNudgeDecision =
-  | { action: "send"; firstName: string | null }
+  | { action: "send" }
   | { action: "skip"; reason: TuesdayNudgeSkipReason };
 
 export function startOfUtcIsoWeek(now: Date): Date {
@@ -129,15 +127,11 @@ export function classifyTuesdayNudgeRecipient(
     return { action: "skip", reason: "empty_inactive" };
   }
 
-  return {
-    action: "send",
-    firstName: tuesdayNudgeFirstName(candidate.displayName),
-  };
+  return { action: "send" };
 }
 
 type ProfileRow = {
   id: string;
-  display_name: string | null;
   created_at: string;
   last_evaluation_at: string | null;
   tuesday_nudge_last_sent_at: string | null;
@@ -183,7 +177,7 @@ async function listAuthUsers(
 }
 
 export type TuesdayNudgePlan = {
-  send: Array<TuesdayNudgeCandidate & { firstName: string | null }>;
+  send: TuesdayNudgeCandidate[];
   skipped: Array<TuesdayNudgeCandidate & { reason: TuesdayNudgeSkipReason }>;
   emptyInactiveCaught: TuesdayNudgeCandidate[];
 };
@@ -194,9 +188,7 @@ export async function planTuesdayNudgeRecipients(
 ): Promise<TuesdayNudgePlan> {
   const withStamp = await supabase
     .from("profiles")
-    .select(
-      "id, display_name, created_at, last_evaluation_at, tuesday_nudge_last_sent_at",
-    )
+    .select("id, created_at, last_evaluation_at, tuesday_nudge_last_sent_at")
     .eq("tuesday_nudge_opted_in", true);
 
   let optedIn: ProfileRow[] = [];
@@ -204,7 +196,7 @@ export async function planTuesdayNudgeRecipients(
   if (withStamp.error?.message.includes("tuesday_nudge_last_sent_at")) {
     const withoutStamp = await supabase
       .from("profiles")
-      .select("id, display_name, created_at, last_evaluation_at")
+      .select("id, created_at, last_evaluation_at")
       .eq("tuesday_nudge_opted_in", true);
     if (withoutStamp.error) {
       throw new Error(`profiles query failed: ${withoutStamp.error.message}`);
@@ -308,7 +300,6 @@ export async function planTuesdayNudgeRecipients(
     const candidate: TuesdayNudgeCandidate = {
       id: profile.id,
       email,
-      displayName: profile.display_name,
       createdAt: profile.created_at,
       lastSignInAt: auth?.last_sign_in_at ?? null,
       lastEvaluationAt: profile.last_evaluation_at,
@@ -324,7 +315,7 @@ export async function planTuesdayNudgeRecipients(
 
     const decision = classifyTuesdayNudgeRecipient(candidate, now);
     if (decision.action === "send") {
-      send.push({ ...candidate, firstName: decision.firstName });
+      send.push(candidate);
     } else {
       skipped.push({ ...candidate, reason: decision.reason });
     }

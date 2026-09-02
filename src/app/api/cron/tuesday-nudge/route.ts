@@ -8,8 +8,6 @@ import {
 import { sendTuesdayNudgeEmail } from "@/lib/email/tuesday-nudge-send";
 import {
   renderTuesdayNudgeHtml,
-  tuesdayNudgeFirstName,
-  TUESDAY_NUDGE_DASHBOARD_URL,
   TUESDAY_NUDGE_SUBJECT,
 } from "@/lib/email/tuesday-nudge-template";
 import { buildTuesdayNudgeUnsubscribeUrl } from "@/lib/email/tuesday-nudge-unsubscribe";
@@ -51,12 +49,9 @@ function parseTestTo(request: Request): string | null {
 async function sendOneTuesdayNudge(params: {
   apiKey: string;
   email: string;
-  firstName: string | null;
 }) {
   const unsubscribeUrl = buildTuesdayNudgeUnsubscribeUrl(params.email);
   const html = renderTuesdayNudgeHtml({
-    firstName: params.firstName,
-    dashboardUrl: TUESDAY_NUDGE_DASHBOARD_URL,
     unsubscribeUrl,
   });
   return sendTuesdayNudgeEmail({
@@ -107,7 +102,7 @@ export async function GET(request: Request) {
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id, display_name")
+        .select("id")
         .eq("id", userId)
         .maybeSingle();
 
@@ -127,11 +122,9 @@ export async function GET(request: Request) {
         );
       }
 
-      const firstName = tuesdayNudgeFirstName(profile.display_name);
       const sendResult = await sendOneTuesdayNudge({
         apiKey,
         email,
-        firstName,
       });
 
       if (!sendResult.ok) {
@@ -149,8 +142,6 @@ export async function GET(request: Request) {
         tag: "tuesday_nudge",
         test: true,
         to: email,
-        greeting: firstName ? "name" : "omitted",
-        first_name: firstName,
         resend_id: sendResult.id,
         stamped: false,
       };
@@ -168,7 +159,6 @@ export async function GET(request: Request) {
         subject: TUESDAY_NUDGE_SUBJECT,
         send: plan.send.map((row) => ({
           email: row.email,
-          first_name: row.firstName,
           created_at: row.createdAt,
         })),
         skipped: plan.skipped.map((row) => ({
@@ -208,7 +198,6 @@ export async function GET(request: Request) {
       const sendResult = await sendOneTuesdayNudge({
         apiKey,
         email: recipient.email,
-        firstName: recipient.firstName,
       });
 
       if (!sendResult.ok) {

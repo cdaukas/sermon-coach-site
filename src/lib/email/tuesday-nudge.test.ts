@@ -13,7 +13,10 @@ import {
 } from "./tuesday-nudge-recipients";
 import {
   renderTuesdayNudgeHtml,
-  tuesdayNudgeFirstName,
+  TUESDAY_NUDGE_DASHBOARD_URL,
+  TUESDAY_NUDGE_FROM,
+  TUESDAY_NUDGE_REPLY_TO,
+  TUESDAY_NUDGE_SKETCH_URL,
   TUESDAY_NUDGE_SUBJECT,
 } from "./tuesday-nudge-template";
 
@@ -23,7 +26,6 @@ function candidate(
   return {
     id: "00000000-0000-0000-0000-000000000001",
     email: "pastor@example.com",
-    displayName: "Jordan Wells",
     createdAt: "2026-07-01T00:00:00.000Z",
     lastSignInAt: "2026-08-20T00:00:00.000Z",
     lastEvaluationAt: "2026-08-20T00:00:00.000Z",
@@ -50,33 +52,33 @@ describe("tuesday nudge unsubscribe tokens", () => {
 });
 
 describe("tuesday nudge template", () => {
-  it("uses the locked copy with name substitution only", () => {
+  it("uses the locked copy with dashboard, sketch, and unsubscribe links", () => {
     const html = renderTuesdayNudgeHtml({
-      firstName: "Jordan",
-      dashboardUrl: "https://sermoncoach.com/dashboard",
       unsubscribeUrl: "https://sermoncoach.com/unsubscribe/tuesday-nudge?token=abc",
     });
 
-    assert.equal(TUESDAY_NUDGE_SUBJECT, "Your Tuesday reminder");
-    assert.match(html, /Hi Jordan,/);
-    assert.match(html, /You asked for a nudge on Tuesdays, so here it is/);
-    assert.match(html, /https:\/\/sermoncoach\.com\/dashboard/);
-    assert.match(html, /unsubscribe\/tuesday-nudge/);
+    assert.equal(TUESDAY_NUDGE_SUBJECT, "The Tuesday Nudge");
+    assert.equal(TUESDAY_NUDGE_FROM, "The Sermon Coach <chris@sermoncoach.online>");
+    assert.equal(TUESDAY_NUDGE_REPLY_TO, "chris@sermoncoach.com");
+    assert.equal(TUESDAY_NUDGE_DASHBOARD_URL, "https://sermoncoach.com/dashboard");
+    assert.equal(TUESDAY_NUDGE_SKETCH_URL, "https://sermoncoach.com/dashboard/sketch");
+    assert.match(
+      html,
+      /<a href="https:\/\/sermoncoach\.com\/dashboard">Review your sermon from Sunday<\/a>/,
+    );
+    assert.match(
+      html,
+      /<a href="https:\/\/sermoncoach\.com\/dashboard\/sketch">The Sketch<\/a>/,
+    );
+    assert.match(
+      html,
+      /If this isn't helpful, <a href="https:\/\/sermoncoach\.com\/unsubscribe\/tuesday-nudge\?token=abc">click here<\/a> to unsubscribe/,
+    );
+    assert.match(html, /^<p>Here is your Tuesday nudge\./);
     assert.match(html, />Chris<\/p>/);
-    assert.doesNotMatch(html, /!/);
-    assert.doesNotMatch(html, /\u2014/);
-    assert.equal(tuesdayNudgeFirstName("Chris Daukas"), "Chris");
-    assert.equal(tuesdayNudgeFirstName(null), null);
-  });
-
-  it("omits the greeting line when there is no first name", () => {
-    const html = renderTuesdayNudgeHtml({
-      firstName: null,
-      dashboardUrl: "https://sermoncoach.com/dashboard",
-      unsubscribeUrl: "https://sermoncoach.com/unsubscribe/tuesday-nudge?token=abc",
-    });
     assert.doesNotMatch(html, /Hi /);
-    assert.match(html, /^<p>You asked for a nudge on Tuesdays/);
+    assert.doesNotMatch(html, /Open your dashboard/);
+    assert.doesNotMatch(html, /You asked for a nudge/);
   });
 });
 
@@ -85,7 +87,7 @@ describe("tuesday nudge recipient classification", () => {
 
   it("sends a qualifying opted-in preacher", () => {
     const decision = classifyTuesdayNudgeRecipient(candidate(), now);
-    assert.deepEqual(decision, { action: "send", firstName: "Jordan" });
+    assert.deepEqual(decision, { action: "send" });
   });
 
   it("hardcode-excludes notifications@korper.nl", () => {
@@ -126,7 +128,7 @@ describe("tuesday nudge recipient classification", () => {
       candidate({ lastSentAt: "2026-09-01T13:00:00.000Z" }),
       now,
     );
-    assert.deepEqual(decision, { action: "send", firstName: "Jordan" });
+    assert.deepEqual(decision, { action: "send" });
   });
 
   it("skips empty inactive accounts and keeps Chris's test account", () => {
@@ -147,7 +149,6 @@ describe("tuesday nudge recipient classification", () => {
 
     const testAccount = candidate({
       email: "cdaukas+sketchtest@gmail.com",
-      displayName: null,
       sermonCount: 0,
       evaluationCount: 0,
       lastEvaluationAt: null,
@@ -158,7 +159,6 @@ describe("tuesday nudge recipient classification", () => {
     assert.equal(isEmptyInactiveAccount(testAccount, now.getTime()), true);
     assert.deepEqual(classifyTuesdayNudgeRecipient(testAccount, now), {
       action: "send",
-      firstName: null,
     });
   });
 });
