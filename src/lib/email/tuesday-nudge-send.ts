@@ -9,6 +9,7 @@ export type SendTuesdayNudgeEmailParams = {
   apiKey: string;
   to: string;
   html: string;
+  text: string;
   unsubscribeUrl: string;
 };
 
@@ -31,6 +32,7 @@ export async function sendTuesdayNudgeEmail(
       reply_to: TUESDAY_NUDGE_REPLY_TO,
       subject: TUESDAY_NUDGE_SUBJECT,
       html: params.html,
+      text: params.text,
       headers: {
         "List-Unsubscribe": `<${params.unsubscribeUrl}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
