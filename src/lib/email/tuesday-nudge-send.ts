@@ -1,9 +1,9 @@
+import { RESEND_API_URL } from "@/lib/email/constants";
 import {
-  RESEND_API_URL,
-  RESEND_FROM,
-  RESEND_REPLY_TO,
-} from "@/lib/email/constants";
-import { TUESDAY_NUDGE_SUBJECT } from "@/lib/email/tuesday-nudge-template";
+  TUESDAY_NUDGE_FROM,
+  TUESDAY_NUDGE_REPLY_TO,
+  TUESDAY_NUDGE_SUBJECT,
+} from "@/lib/email/tuesday-nudge-template";
 
 export type SendTuesdayNudgeEmailParams = {
   apiKey: string;
@@ -26,9 +26,9 @@ export async function sendTuesdayNudgeEmail(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: RESEND_FROM,
+      from: TUESDAY_NUDGE_FROM,
       to: [params.to],
-      reply_to: RESEND_REPLY_TO,
+      reply_to: TUESDAY_NUDGE_REPLY_TO,
       subject: TUESDAY_NUDGE_SUBJECT,
       html: params.html,
       headers: {
