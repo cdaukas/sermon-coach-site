@@ -68,7 +68,7 @@ export function AccountReportPreferencesForm({
             className="block font-medium"
             style={{ color: "var(--sc-ink)" }}
           >
-            Include score and methodology in reports
+            Include score summary and methodology in reports
           </span>
           <span
             className="mt-1 block text-[13px] leading-relaxed"
