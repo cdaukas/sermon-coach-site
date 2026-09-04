@@ -3,6 +3,7 @@
 import { EvaluationAccessGate } from "@/components/evaluation/EvaluationAccessGate";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import type { OutputLanguage } from "@/lib/evaluation/output-language";
+import type { MentorSeatType } from "@/lib/mentor/relationships";
 import { SermonForm } from "./SermonForm";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -12,6 +13,10 @@ type NewSermonWorkspaceProps = {
   entitlement: EvaluationEntitlement | null;
   isMentoredMentee?: boolean;
   menteeReadsNone?: boolean;
+  mentorName?: string;
+  seatType?: MentorSeatType | null;
+  submissionsUsed?: number | null;
+  submissionsLimit?: number | null;
   churchName?: string | null;
   reportLanguage?: OutputLanguage;
 };
@@ -20,6 +25,10 @@ export function NewSermonWorkspace({
   entitlement,
   isMentoredMentee = false,
   menteeReadsNone = false,
+  mentorName = "your mentor",
+  seatType = null,
+  submissionsUsed = null,
+  submissionsLimit = null,
   churchName = null,
   reportLanguage = "en",
 }: NewSermonWorkspaceProps) {
@@ -52,6 +61,10 @@ export function NewSermonWorkspace({
           entitlement={entitlement}
           isMentoredMentee={isMentoredMentee}
           menteeReadsNone={menteeReadsNone}
+          mentorName={mentorName}
+          seatType={seatType}
+          submissionsUsed={submissionsUsed}
+          submissionsLimit={submissionsLimit}
           churchName={churchName}
           reportLanguage={reportLanguage}
         />

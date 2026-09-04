@@ -72,6 +72,10 @@ export default async function SermonDetailPage({
             menteeReadsNone: false,
             debriefVisibleSince: null,
             mentorName: "your mentor",
+            relationshipId: null,
+            seatType: null,
+            used: null,
+            cap: null,
           }),
       user ? menteeSermonShowsHandoff(id) : Promise.resolve(false),
     ]);

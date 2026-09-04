@@ -27,6 +27,10 @@ export default async function NewSermonPage() {
         menteeReadsNone: false,
         debriefVisibleSince: null,
         mentorName: "your mentor",
+        relationshipId: null,
+        seatType: null,
+        used: null,
+        cap: null,
       };
   const isMentoredMentee = coachingView.isMentoredMentee;
 
@@ -65,6 +69,10 @@ export default async function NewSermonPage() {
         entitlement={entitlement}
         isMentoredMentee={isMentoredMentee}
         menteeReadsNone={coachingView.menteeReadsNone}
+        mentorName={coachingView.mentorName}
+        seatType={coachingView.seatType}
+        submissionsUsed={coachingView.used}
+        submissionsLimit={coachingView.cap}
         churchName={churchName}
         reportLanguage={reportLanguage}
       />

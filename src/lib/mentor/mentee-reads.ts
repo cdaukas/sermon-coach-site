@@ -82,3 +82,45 @@ export function menteeHandoffSentences(
 export function darkInviteDebriefLine(mentorName: string): string {
   return `${mentorName} will read your sermons and talk with you about them. Everything comes through them.`;
 }
+
+function sentenceStartMentorName(name: string): string {
+  const normalized = menteeFacingMentorName(name);
+  if (normalized.length === 0) {
+    return normalized;
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+export type MenteeSubmitStandingInput = {
+  mentorName: string;
+  /** debrief = Apprentice (including dark); evaluation = Colleague. */
+  seatType: "debrief" | "evaluation";
+  menteeReadsNone: boolean;
+  used: number;
+  cap: number;
+};
+
+/**
+ * Standing line above the mentee submit control. Caller must only invoke
+ * when used and cap are known numbers. Digits for the allotment count.
+ */
+export function menteeSubmitStandingLine(
+  input: MenteeSubmitStandingInput,
+): string {
+  const mentor = menteeFacingMentorName(input.mentorName);
+  const mentorStart = sentenceStartMentorName(input.mentorName);
+
+  if (input.used >= input.cap) {
+    return `${input.cap} of ${input.cap} sermons with ${mentor} this month. You can submit again on the 1st.`;
+  }
+
+  if (input.seatType === "debrief" && input.menteeReadsNone) {
+    return `This sermon goes to ${mentor}. It will not appear in your account. ${mentorStart} will review it and reach out to you. ${input.used} of ${input.cap} this month.`;
+  }
+
+  if (input.seatType === "debrief") {
+    return `This sermon goes to ${mentor}. You will get the coaching debrief and How It Preaches. ${mentorStart} decides when to release your score. ${input.used} of ${input.cap} this month.`;
+  }
+
+  return `This sermon goes to ${mentor}. You see everything, including the score, as soon as it is ready. ${input.used} of ${input.cap} this month.`;
+}

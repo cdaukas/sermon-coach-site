@@ -41,6 +41,10 @@ export default async function DashboardPage() {
             menteeReadsNone: false,
             debriefVisibleSince: null,
             mentorName: "your mentor",
+            relationshipId: null,
+            seatType: null,
+            used: null,
+            cap: null,
           }),
     ]);
 

@@ -16,6 +16,8 @@ import { normalizeSermonContext, sermonContextStorageKey } from "@/lib/evaluatio
 import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-errors";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import type { OutputLanguage } from "@/lib/evaluation/output-language";
+import { menteeSubmitStandingLine } from "@/lib/mentor/mentee-reads";
+import type { MentorSeatType } from "@/lib/mentor/relationships";
 import { createSermon } from "@/lib/sermons/actions";
 import type { TranscriptErrorCode } from "@/lib/transcripts/types";
 import { isNonYoutubeHostUrl } from "@/lib/transcripts/youtube-url";
@@ -74,6 +76,10 @@ type SermonFormProps = {
   isMentoredMentee?: boolean;
   /** Dark Apprentice: skip the debrief poller and land on the handoff. */
   menteeReadsNone?: boolean;
+  mentorName?: string;
+  seatType?: MentorSeatType | null;
+  submissionsUsed?: number | null;
+  submissionsLimit?: number | null;
   /** Prefill only. Edits on the form never write back to profiles. */
   churchName?: string | null;
   /** Account report_language; stamped onto the evaluation row at creation. */
@@ -103,6 +109,10 @@ export function SermonForm({
   entitlement,
   isMentoredMentee = false,
   menteeReadsNone = false,
+  mentorName = "your mentor",
+  seatType = null,
+  submissionsUsed = null,
+  submissionsLimit = null,
   churchName = null,
   reportLanguage = "en",
 }: SermonFormProps) {
@@ -132,6 +142,22 @@ export function SermonForm({
 
   const canEvaluate = entitlement?.canEvaluate ?? false;
   const mayRunEvaluation = isMentoredMentee || canEvaluate;
+  const allotmentKnown =
+    typeof submissionsUsed === "number" &&
+    typeof submissionsLimit === "number" &&
+    seatType != null;
+  const atCap =
+    allotmentKnown && submissionsUsed >= submissionsLimit;
+  const standingLine =
+    isMentoredMentee && allotmentKnown
+      ? menteeSubmitStandingLine({
+          mentorName,
+          seatType,
+          menteeReadsNone,
+          used: submissionsUsed,
+          cap: submissionsLimit,
+        })
+      : null;
 
   const handleEvalComplete = useCallback(
     (evaluationId: string, sermonId: string) => {
@@ -335,7 +361,7 @@ export function SermonForm({
   }
 
   const formDisabled = saving || polling || youtubeFetching;
-  const primaryDisabled = formDisabled || !mayRunEvaluation;
+  const primaryDisabled = formDisabled || !mayRunEvaluation || atCap;
   const primaryLabel = saving ? "Saving…" : "Run The Evaluation";
 
   return (
@@ -661,6 +687,13 @@ export function SermonForm({
             entitlement={entitlement}
             className="mb-4 text-[13px] leading-relaxed"
           />
+        ) : standingLine ? (
+          <p
+            className="mb-4 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            {standingLine}
+          </p>
         ) : null}
 
         {!polling ? (

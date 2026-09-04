@@ -3,6 +3,8 @@ import {
   menteeFacingMentorName,
   parseMenteeReads,
 } from "@/lib/mentor/mentee-reads";
+import { mentoredMonthlySubmissionLimit } from "@/lib/mentor/allotment";
+import type { MentorSeatType } from "@/lib/mentor/relationships";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,9 +19,39 @@ export type MenteeCoachingView = {
   debriefVisibleSince: string | null;
   /** Mentor's display name for handoff copy. */
   mentorName: string;
+  /** Active relationship id when mentored; null otherwise. */
+  relationshipId: string | null;
+  seatType: MentorSeatType | null;
+  /**
+   * Calendar-month diagnostic submissions used. Null when unknown,
+   * unauthorized, or the counter RPC fails — never invent a zero.
+   */
+  used: number | null;
+  /** Monthly allotment for seatType. Null when seatType is unknown. */
+  cap: number | null;
 };
 
 export { FALLBACK_MENTOR_NAME, menteeFacingMentorName } from "@/lib/mentor/mentee-reads";
+
+function asSeatType(value: unknown): MentorSeatType | null {
+  if (value === "debrief" || value === "evaluation") {
+    return value;
+  }
+  return null;
+}
+
+function asNonNegInt(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
+    return Math.floor(value);
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const n = Number(value);
+    if (Number.isFinite(n) && n >= 0) {
+      return Math.floor(n);
+    }
+  }
+  return null;
+}
 
 /**
  * True when the signed-in user is the mentee on an ACTIVE mentor relationship.
@@ -55,18 +87,39 @@ export async function getMenteeCoachingView(
     menteeReadsNone: false,
     debriefVisibleSince: null,
     mentorName: FALLBACK_MENTOR_NAME,
+    relationshipId: null,
+    seatType: null,
+    used: null,
+    cap: null,
   };
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("mentor_relationships")
-    .select("id, mentor_id, mentee_reads, debrief_visible_since")
+    .select("id, mentor_id, seat_type, mentee_reads, debrief_visible_since")
     .eq("mentee_id", userId)
     .eq("status", "active")
     .maybeSingle();
 
   if (error || data == null) {
     return empty;
+  }
+
+  const relationshipId =
+    typeof data.id === "string" && data.id.length > 0 ? data.id : null;
+  const seatType = asSeatType(data.seat_type);
+  const cap =
+    seatType != null ? mentoredMonthlySubmissionLimit(seatType) : null;
+
+  let used: number | null = null;
+  if (relationshipId != null) {
+    const { data: usedRaw, error: usedError } = await supabase.rpc(
+      "mentored_submissions_this_month",
+      { p_relationship_id: relationshipId },
+    );
+    if (!usedError) {
+      used = asNonNegInt(usedRaw);
+    }
   }
 
   const mentorName = menteeFacingMentorName(
@@ -82,6 +135,10 @@ export async function getMenteeCoachingView(
     menteeReadsNone: parseMenteeReads(data.mentee_reads) === "none",
     debriefVisibleSince: stamp,
     mentorName,
+    relationshipId,
+    seatType,
+    used,
+    cap,
   };
 }
 

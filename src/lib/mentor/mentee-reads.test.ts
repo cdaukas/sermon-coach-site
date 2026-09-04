@@ -7,6 +7,7 @@ import {
   FALLBACK_MENTOR_NAME,
   menteeFacingMentorName,
   menteeHandoffSentences,
+  menteeSubmitStandingLine,
   parseMenteeReads,
   sermonHidesUnevaluatedBand,
 } from "./mentee-reads";
@@ -51,6 +52,73 @@ describe("handoff and invite copy", () => {
     assert.equal(
       darkInviteDebriefLine("Tyler James"),
       "Tyler James will read your sermons and talk with you about them. Everything comes through them.",
+    );
+  });
+});
+
+describe("menteeSubmitStandingLine", () => {
+  it("renders Apprentice under cap with digits and repeated mentor name", () => {
+    assert.equal(
+      menteeSubmitStandingLine({
+        mentorName: "Tyler James",
+        seatType: "debrief",
+        menteeReadsNone: false,
+        used: 1,
+        cap: 2,
+      }),
+      "This sermon goes to Tyler James. You will get the coaching debrief and How It Preaches. Tyler James decides when to release your score. 1 of 2 this month.",
+    );
+  });
+
+  it("renders dark Apprentice under cap", () => {
+    assert.equal(
+      menteeSubmitStandingLine({
+        mentorName: "Tyler James",
+        seatType: "debrief",
+        menteeReadsNone: true,
+        used: 0,
+        cap: 2,
+      }),
+      "This sermon goes to Tyler James. It will not appear in your account. Tyler James will review it and reach out to you. 0 of 2 this month.",
+    );
+  });
+
+  it("renders Colleague under cap", () => {
+    assert.equal(
+      menteeSubmitStandingLine({
+        mentorName: "Tyler James",
+        seatType: "evaluation",
+        menteeReadsNone: false,
+        used: 3,
+        cap: 4,
+      }),
+      "This sermon goes to Tyler James. You see everything, including the score, as soon as it is ready. 3 of 4 this month.",
+    );
+  });
+
+  it("renders the at-cap wall for any seat type", () => {
+    assert.equal(
+      menteeSubmitStandingLine({
+        mentorName: "Tyler James",
+        seatType: "debrief",
+        menteeReadsNone: false,
+        used: 2,
+        cap: 2,
+      }),
+      "2 of 2 sermons with Tyler James this month. You can submit again on the 1st.",
+    );
+  });
+
+  it("capitalizes the your mentor fallback at sentence start only", () => {
+    assert.equal(
+      menteeSubmitStandingLine({
+        mentorName: "your mentor",
+        seatType: "debrief",
+        menteeReadsNone: false,
+        used: 1,
+        cap: 2,
+      }),
+      "This sermon goes to your mentor. You will get the coaching debrief and How It Preaches. Your mentor decides when to release your score. 1 of 2 this month.",
     );
   });
 });
