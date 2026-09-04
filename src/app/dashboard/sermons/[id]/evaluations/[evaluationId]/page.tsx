@@ -14,6 +14,7 @@ import { EarlierEvaluations } from "@/components/evaluation/EarlierEvaluations";
 import { ReportEvaluationRerun } from "@/components/evaluation/ReportEvaluationRerun";
 import { ReportManuscriptDisclosure } from "@/components/evaluation/ReportManuscriptDisclosure";
 import { TuesdayNudgeOffer } from "@/components/evaluation/TuesdayNudgeOffer";
+import { viewerIncludesMethodologyInReports } from "@/lib/auth/report-preferences";
 import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
 import {
   getEvaluation,
@@ -134,6 +135,10 @@ export default async function EvaluationPage({
   const { evaluation, sermon, manuscriptContent, resolvedVia } = data;
   const outputLanguage = parseOutputLanguage(evaluation.output_language);
   const reportCopy = evaluationReportCopy(outputLanguage);
+  // Live read of the viewer's own preference. Deliberately not stored on the
+  // evaluation row: the flag governs presentation at render time only, so the
+  // scored payload is byte-identical whichever way it is set.
+  const showMethodology = await viewerIncludesMethodologyInReports();
   const backHref =
     resolvedVia === "owner" ? "/dashboard" : "/dashboard/develop";
   const backLabel =
@@ -338,6 +343,7 @@ export default async function EvaluationPage({
           showPrintActions={!pdfCapture}
           howItPreaches={evaluation.how_it_preaches}
           outputLanguage={outputLanguage}
+          showMethodology={showMethodology}
           criterion2Wording={criterion2Wording}
           criterion2SwitcherHrefs={
             pdfCapture || outputLanguage !== "es"
