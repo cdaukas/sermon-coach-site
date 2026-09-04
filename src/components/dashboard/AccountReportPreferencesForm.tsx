@@ -75,7 +75,7 @@ export function AccountReportPreferencesForm({
             style={{ color: "var(--sc-ink-soft)" }}
           >
             Adds a short section at the end of each report naming the rubric and
-            its sources. Turn it off if you already know it.
+            its sources. Turn it off if you&apos;d prefer.
           </span>
         </span>
       </label>
