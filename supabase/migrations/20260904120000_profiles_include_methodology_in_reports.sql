@@ -6,14 +6,21 @@
 -- touches scoring, the rubric, or the sermon_evaluations schema. The flag is
 -- read live at render time; it is never written onto an evaluation row.
 
+-- Added nullable first so the backfill below actually writes every existing
+-- row. Adding it as `not null default true` in one step would let Postgres
+-- fill those rows itself and reduce the backfill to a no-op.
 alter table public.profiles
-  add column if not exists include_methodology_in_reports boolean not null default true;
+  add column if not exists include_methodology_in_reports boolean;
 
--- Existing rows are backfilled explicitly rather than relying on the column
--- default, so evaluations created before this migration keep the block on.
 update public.profiles
 set include_methodology_in_reports = true
-where include_methodology_in_reports is distinct from true;
+where include_methodology_in_reports is null;
+
+alter table public.profiles
+  alter column include_methodology_in_reports set default true;
+
+alter table public.profiles
+  alter column include_methodology_in_reports set not null;
 
 comment on column public.profiles.include_methodology_in_reports is
   'Account setting for the Methodology section at the end of the evaluation report and eval PDF. True by default and backfilled true. Read live at render time from the viewer''s own profile; never stamped onto sermon_evaluations. Presentation only; does not affect scoring.';
