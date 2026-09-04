@@ -10,12 +10,18 @@ type HeadlineLockupProps = {
   scoring: EvaluationResultStrict["scoring"];
   verdict: EvaluationResultStrict["verdict"];
   outputLanguage?: OutputLanguage;
+  /**
+   * "See methodology for score" points at the Methodology block. When that
+   * block is hidden the note would point at nothing, so it hides with it.
+   */
+  showMethodologyNote?: boolean;
 };
 
 export function HeadlineLockup({
   scoring,
   verdict,
   outputLanguage = "en",
+  showMethodologyNote = true,
 }: HeadlineLockupProps) {
   const copy = evaluationReportCopy(outputLanguage);
   const { opener, body } = splitVerdictImprovement(
@@ -45,12 +51,14 @@ export function HeadlineLockup({
           {displayScoreBand(scoring.band, outputLanguage)}
         </p>
         <p className="evaluation-score-panel-label">{copy.summary}</p>
-        <p
-          className="evaluation-score-method-note text-[10px] tracking-[0.1em] uppercase"
-          style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
-        >
-          {copy.seeMethodology}
-        </p>
+        {showMethodologyNote ? (
+          <p
+            className="evaluation-score-method-note text-[10px] tracking-[0.1em] uppercase"
+            style={{ ...uiFont, color: "rgba(250,248,243,0.55)" }}
+          >
+            {copy.seeMethodology}
+          </p>
+        ) : null}
       </div>
       <div
         className="evaluation-verdict-panel flex flex-col justify-center border-l-[3px] px-8 py-9"

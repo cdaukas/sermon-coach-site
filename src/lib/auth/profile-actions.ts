@@ -104,3 +104,30 @@ export async function markTuesdayNudgeOfferSeen(): Promise<ProfileActionResult> 
 
   return { ok: true };
 }
+
+export async function saveReportPreferences(
+  includeMethodology: boolean,
+): Promise<ProfileActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "You must be signed in." };
+  }
+
+  const { error } = await supabase.rpc("set_report_preferences", {
+    p_include_methodology: includeMethodology,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      error: "Could not update report preferences. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard/account");
+  return { ok: true };
+}

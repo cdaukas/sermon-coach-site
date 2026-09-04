@@ -33,6 +33,13 @@ type EvaluationDashboardProps = {
   outputLanguage?: OutputLanguage;
   criterion2Wording?: Criterion2Wording;
   criterion2SwitcherHrefs?: Record<Criterion2Wording, string>;
+  /**
+   * Per-account visibility of the Methodology block (profiles
+   * .include_methodology_in_reports), read live at render time. Presentation
+   * only — the scored payload is identical either way. Defaults to true so
+   * the public sample and the stub smoke test keep the block.
+   */
+  showMethodology?: boolean;
 };
 
 export function EvaluationDashboard({
@@ -45,6 +52,7 @@ export function EvaluationDashboard({
   outputLanguage = "en",
   criterion2Wording = "default",
   criterion2SwitcherHrefs,
+  showMethodology = true,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const copy = evaluationReportCopy(outputLanguage);
@@ -113,6 +121,7 @@ export function EvaluationDashboard({
         scoring={result.scoring}
         verdict={result.verdict}
         outputLanguage={outputLanguage}
+        showMethodologyNote={showMethodology}
       />
 
       {result.melodic_line_and_big_idea ? (
@@ -196,11 +205,13 @@ export function EvaluationDashboard({
 
       <RewritesSection rewrites={result.rewrites} outputLanguage={outputLanguage} />
 
-      <MethodologySection
-        scoring={result.scoring}
-        categories={result.categories}
-        outputLanguage={outputLanguage}
-      />
+      {showMethodology ? (
+        <MethodologySection
+          scoring={result.scoring}
+          categories={result.categories}
+          outputLanguage={outputLanguage}
+        />
+      ) : null}
     </article>
   );
 }
