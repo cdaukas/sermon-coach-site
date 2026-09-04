@@ -16,7 +16,6 @@ import { normalizeSermonContext, sermonContextStorageKey } from "@/lib/evaluatio
 import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-errors";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import type { OutputLanguage } from "@/lib/evaluation/output-language";
-import { parseOutputLanguage } from "@/lib/evaluation/output-language";
 import { createSermon } from "@/lib/sermons/actions";
 import type { TranscriptErrorCode } from "@/lib/transcripts/types";
 import { isNonYoutubeHostUrl } from "@/lib/transcripts/youtube-url";
@@ -77,7 +76,8 @@ type SermonFormProps = {
   menteeReadsNone?: boolean;
   /** Prefill only. Edits on the form never write back to profiles. */
   churchName?: string | null;
-  spanishEnabled?: boolean;
+  /** Account report_language; stamped onto the evaluation row at creation. */
+  reportLanguage?: OutputLanguage;
 };
 
 function countWords(text: string): number {
@@ -104,7 +104,7 @@ export function SermonForm({
   isMentoredMentee = false,
   menteeReadsNone = false,
   churchName = null,
-  spanishEnabled = false,
+  reportLanguage = "en",
 }: SermonFormProps) {
   const router = useRouter();
   const savedSermonIdRef = useRef<string | null>(null);
@@ -129,7 +129,6 @@ export function SermonForm({
   const [transcriptHelpOpen, setTranscriptHelpOpen] = useState(false);
   const [transcriptHelpTab, setTranscriptHelpTab] =
     useState<TranscriptHelpTabId>("youtube-captions");
-  const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>("en");
 
   const canEvaluate = entitlement?.canEvaluate ?? false;
   const mayRunEvaluation = isMentoredMentee || canEvaluate;
@@ -304,7 +303,7 @@ export function SermonForm({
         result.sermonId,
         context,
         "diagnostic",
-        outputLanguage,
+        reportLanguage,
       );
 
       if (!evalResult.ok) {
@@ -644,50 +643,18 @@ export function SermonForm({
         </div>
         </details>
 
-      {spanishEnabled && !isMentoredMentee ? (
-        <fieldset className="flex flex-col gap-2 border-0 p-0">
-          <legend
-            className="mb-1 text-[13px] font-medium tracking-wide"
-            style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
-          >
-            Evaluation language
-          </legend>
-          <div className="flex flex-wrap gap-4">
-            {(
-              [
-                { value: "en", label: "English" },
-                { value: "es", label: "Español" },
-              ] as const
-            ).map((option) => (
-              <label
-                key={option.value}
-                className="flex cursor-pointer items-center gap-2 text-[14px]"
-                style={{ ...uiFont, color: "var(--sc-ink)" }}
-              >
-                <input
-                  type="radio"
-                  name="evaluation-language"
-                  value={option.value}
-                  checked={outputLanguage === option.value}
-                  disabled={formDisabled}
-                  onChange={(event) =>
-                    setOutputLanguage(parseOutputLanguage(event.target.value))
-                  }
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      ) : null}
-
       <div
         style={{
           borderTop: "1px solid #d4cfc1",
           paddingTop: 20,
         }}
       >
-        {polling ? <EvaluationPollingStatus elapsed={elapsed} /> : null}
+        {polling ? (
+          <EvaluationPollingStatus
+            elapsed={elapsed}
+            outputLanguage={reportLanguage}
+          />
+        ) : null}
 
         {!isMentoredMentee ? (
           <EvaluationCreditLine

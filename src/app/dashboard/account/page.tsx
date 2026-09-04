@@ -29,12 +29,13 @@ export default async function AccountPage() {
   let newsletterOptedIn = false;
   let tuesdayNudgeOptedIn = false;
   let includeMethodologyInReports = true;
+  let reportLanguage: "en" | "es" = "en";
 
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select(
-        "display_name, church_name, newsletter_opted_in, tuesday_nudge_opted_in, include_methodology_in_reports",
+        "display_name, church_name, newsletter_opted_in, tuesday_nudge_opted_in, include_methodology_in_reports, report_language",
       )
       .eq("id", user.id)
       .maybeSingle();
@@ -45,6 +46,7 @@ export default async function AccountPage() {
     tuesdayNudgeOptedIn = profile?.tuesday_nudge_opted_in === true;
     includeMethodologyInReports =
       profile?.include_methodology_in_reports !== false;
+    reportLanguage = profile?.report_language === "es" ? "es" : "en";
   }
 
   return (
@@ -98,6 +100,7 @@ export default async function AccountPage() {
           >
             <AccountReportPreferencesForm
               initialIncludeMethodology={includeMethodologyInReports}
+              initialReportLanguage={reportLanguage}
             />
           </div>
           <p className="mt-10">

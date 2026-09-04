@@ -131,3 +131,31 @@ export async function saveReportPreferences(
   revalidatePath("/dashboard/account");
   return { ok: true };
 }
+
+export async function saveReportLanguage(
+  reportLanguage: "en" | "es",
+): Promise<ProfileActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "You must be signed in." };
+  }
+
+  const { error } = await supabase.rpc("set_report_language", {
+    p_report_language: reportLanguage,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      error: "Could not update report language. Please try again.",
+    };
+  }
+
+  revalidatePath("/dashboard/account");
+  revalidatePath("/dashboard/sermons/new");
+  return { ok: true };
+}

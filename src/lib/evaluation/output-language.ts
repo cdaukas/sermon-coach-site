@@ -19,11 +19,7 @@ export function parseOutputLanguage(value: unknown): OutputLanguage {
 
 export function resolveRequestedOutputLanguage(
   requested: unknown,
-  spanishEnabled: boolean,
 ): OutputLanguage {
-  if (!spanishEnabled) {
-    return "en";
-  }
   return parseOutputLanguage(requested);
 }
 

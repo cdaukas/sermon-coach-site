@@ -4,6 +4,7 @@ import { NewSermonWorkspace } from "@/components/dashboard/NewSermonWorkspace";
 import { createClient } from "@/lib/supabase/server";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { getMenteeCoachingView } from "@/lib/mentor/relationship";
+import { parseOutputLanguage } from "@/lib/evaluation/output-language";
 
 export const metadata: Metadata = {
   title: "New evaluation",
@@ -30,23 +31,17 @@ export default async function NewSermonPage() {
   const isMentoredMentee = coachingView.isMentoredMentee;
 
   let churchName: string | null = null;
-  let spanishEnabled = false;
+  let reportLanguage = parseOutputLanguage("en");
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("church_name")
+      .select("church_name, report_language")
       .eq("id", user.id)
       .maybeSingle();
     const raw = profile?.church_name;
     churchName =
       typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
-
-    const { data: spanishRow } = await supabase
-      .from("profiles")
-      .select("spanish_enabled")
-      .eq("id", user.id)
-      .maybeSingle();
-    spanishEnabled = spanishRow?.spanish_enabled === true;
+    reportLanguage = parseOutputLanguage(profile?.report_language);
   }
 
   return (
@@ -71,7 +66,7 @@ export default async function NewSermonPage() {
         isMentoredMentee={isMentoredMentee}
         menteeReadsNone={coachingView.menteeReadsNone}
         churchName={churchName}
-        spanishEnabled={spanishEnabled}
+        reportLanguage={reportLanguage}
       />
     </main>
   );
