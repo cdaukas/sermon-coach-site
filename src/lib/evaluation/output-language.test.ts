@@ -13,7 +13,7 @@ import {
   SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
 } from "./output-language";
 
-describe("output language gating", () => {
+describe("output language", () => {
   it("treats anything except es as English", () => {
     assert.equal(parseOutputLanguage("es"), "es");
     assert.equal(parseOutputLanguage("en"), "en");
@@ -22,10 +22,11 @@ describe("output language gating", () => {
     assert.equal(parseOutputLanguage(true), "en");
   });
 
-  it("ignores a Spanish request unless the account is flagged", () => {
-    assert.equal(resolveRequestedOutputLanguage("es", false), "en");
-    assert.equal(resolveRequestedOutputLanguage("es", true), "es");
-    assert.equal(resolveRequestedOutputLanguage("en", true), "en");
+  it("accepts the requested report language without an admin gate", () => {
+    assert.equal(resolveRequestedOutputLanguage("es"), "es");
+    assert.equal(resolveRequestedOutputLanguage("en"), "en");
+    assert.equal(resolveRequestedOutputLanguage("fr"), "en");
+    assert.equal(resolveRequestedOutputLanguage(undefined), "en");
   });
 });
 

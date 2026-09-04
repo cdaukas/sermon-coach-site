@@ -26,7 +26,6 @@ import {
 import type { ReportMode, RequestEvaluationResult } from "./types";
 import { isMentoringDebriefAllowed } from "@/lib/mentor/uiAccess";
 import {
-  parseOutputLanguage,
   resolveRequestedOutputLanguage,
   type OutputLanguage,
 } from "./output-language";
@@ -228,19 +227,14 @@ export async function requestEvaluation(
     return { ok: false, error: DEBRIEF_NOT_ALLOWED };
   }
 
-  const requestedLanguage = parseOutputLanguage(outputLanguage);
-  let resolvedLanguage: OutputLanguage = "en";
-  if (requestedLanguage === "es") {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("spanish_enabled")
-      .eq("id", user.id)
-      .maybeSingle();
-    resolvedLanguage = resolveRequestedOutputLanguage(
-      requestedLanguage,
-      profile?.spanish_enabled === true,
-    );
-  }
+  const { data: languageProfile } = await supabase
+    .from("profiles")
+    .select("report_language")
+    .eq("id", user.id)
+    .maybeSingle();
+  const resolvedLanguage = resolveRequestedOutputLanguage(
+    languageProfile?.report_language ?? outputLanguage,
+  );
 
   const eligibility = await checkEvaluationEligibility(user.id);
   if (!eligibility.ok) {

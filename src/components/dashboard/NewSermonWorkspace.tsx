@@ -2,6 +2,7 @@
 
 import { EvaluationAccessGate } from "@/components/evaluation/EvaluationAccessGate";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
+import type { OutputLanguage } from "@/lib/evaluation/output-language";
 import { SermonForm } from "./SermonForm";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -12,7 +13,7 @@ type NewSermonWorkspaceProps = {
   isMentoredMentee?: boolean;
   menteeReadsNone?: boolean;
   churchName?: string | null;
-  spanishEnabled?: boolean;
+  reportLanguage?: OutputLanguage;
 };
 
 export function NewSermonWorkspace({
@@ -20,7 +21,7 @@ export function NewSermonWorkspace({
   isMentoredMentee = false,
   menteeReadsNone = false,
   churchName = null,
-  spanishEnabled = false,
+  reportLanguage = "en",
 }: NewSermonWorkspaceProps) {
   const canEvaluate = entitlement?.canEvaluate ?? true;
   const showForm = isMentoredMentee || canEvaluate;
@@ -52,7 +53,7 @@ export function NewSermonWorkspace({
           isMentoredMentee={isMentoredMentee}
           menteeReadsNone={menteeReadsNone}
           churchName={churchName}
-          spanishEnabled={spanishEnabled}
+          reportLanguage={reportLanguage}
         />
       ) : null}
     </>
