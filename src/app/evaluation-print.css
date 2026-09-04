@@ -562,6 +562,12 @@
     page-break-after: avoid;
   }
 
+  /* Keep the note with the first rewrite card rather than stranding it. */
+  .evaluation-rewrites-note {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
   .evaluation-working-card {
     break-inside: avoid;
     page-break-inside: avoid;

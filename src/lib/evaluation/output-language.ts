@@ -312,7 +312,8 @@ export type EvaluationReportCopy = {
   inOrder: string;
   practicalStep: string;
   whatImprovementLooksLike: string;
-  suggestedRewrite: (index: number) => string;
+  rewritesNote: string;
+  exampleRewrite: (index: number) => string;
   whyThisWorks: string;
   original: string;
   improved: string;
@@ -409,7 +410,8 @@ const ENGLISH_COPY: EvaluationReportCopy = {
   inOrder: "In order: highest leverage first",
   practicalStep: "Practical step",
   whatImprovementLooksLike: "What Improvement Looks Like",
-  suggestedRewrite: (index) => `Suggested rewrite · Moment ${index}`,
+  rewritesNote: "Intended to model and illustrate, not to copy and paste.",
+  exampleRewrite: (index) => `Example rewrite · Moment ${index}`,
   whyThisWorks: "Why this works",
   original: "Original",
   improved: "Improved",
@@ -552,7 +554,9 @@ const SPANISH_COPY: EvaluationReportCopy = {
   inOrder: "En orden: el de mayor peso primero",
   practicalStep: "Paso práctico",
   whatImprovementLooksLike: "Cómo se ve la mejora",
-  suggestedRewrite: (index) => `Reescritura sugerida · Momento ${index}`,
+  rewritesNote:
+    "Pensadas para modelar e ilustrar, no para copiar y pegar.",
+  exampleRewrite: (index) => `Reescritura de ejemplo · Momento ${index}`,
   whyThisWorks: "Por qué funciona",
   original: "Original",
   improved: "Mejorado",

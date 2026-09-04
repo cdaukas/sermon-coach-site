@@ -16,6 +16,12 @@ export function RewritesSection({
   return (
     <section className="mb-7">
       <SectionTitle>{copy.whatImprovementLooksLike}</SectionTitle>
+      <p
+        className="evaluation-rewrites-note -mt-5 mb-7 text-[14px] leading-relaxed"
+        style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+      >
+        {copy.rewritesNote}
+      </p>
       <div className="space-y-4">
         {rewrites.map((rewrite, index) => (
           <details
@@ -49,7 +55,7 @@ export function RewritesSection({
                     className="mt-2 text-[10px] font-semibold uppercase tracking-[0.12em]"
                     style={{ ...uiFont, color: "var(--sc-amber)" }}
                   >
-                    {copy.suggestedRewrite(index + 1)}
+                    {copy.exampleRewrite(index + 1)}
                   </p>
                 </div>
               </div>
