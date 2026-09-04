@@ -680,8 +680,9 @@ function PreacherCardView({
               <span aria-hidden="true"> · </span>
             </>
           )}
-          {card.submissionsUsed} of {card.submissionsLimit} sermon
-          {card.submissionsLimit === 1 ? "" : "s"} this month
+          {card.submissionsUsed >= card.submissionsLimit
+            ? `${card.submissionsLimit} of ${card.submissionsLimit} this month. Anything further is blocked until the 1st.`
+            : `${card.submissionsUsed} of ${card.submissionsLimit} sermon${card.submissionsLimit === 1 ? "" : "s"} this month`}
         </p>
         {card.menteeReads === "none" ? (
           <div className="mt-3">

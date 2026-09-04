@@ -13,6 +13,7 @@ import {
 } from "@/lib/mentor/invite";
 import {
   darkInviteDebriefLine,
+  menteeFacingMentorName,
   type MenteeReads,
 } from "@/lib/mentor/mentee-reads";
 import type { MentorSeatType } from "@/lib/mentor/relationships";
@@ -21,6 +22,28 @@ import { CANONICAL_SITE_ORIGIN } from "@/lib/site-origin";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
+
+/** Capitalize for sentence start (e.g. "your mentor" → "Your mentor"). */
+function sentenceStartName(name: string): string {
+  const normalized = menteeFacingMentorName(name);
+  if (normalized.length === 0) return normalized;
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function acceptSeatFirstLines(
+  seatType: MentorSeatType,
+  mentorName: string,
+  menteeReads: MenteeReads,
+): string {
+  const mentor = sentenceStartName(mentorName);
+  if (seatType === "debrief" && menteeReads === "none") {
+    return darkInviteDebriefLine(mentor);
+  }
+  if (seatType === "debrief") {
+    return `${mentor} is mentoring you. Your first two sermons each month go there. You get the coaching debrief and How It Preaches, and ${menteeFacingMentorName(mentorName)} decides when to release your score.`;
+  }
+  return `${mentor} is mentoring you. Your first four sermons each month go to ${menteeFacingMentorName(mentorName)}. You see everything, including the score, as soon as it is ready.`;
+}
 
 const primaryLinkClass =
   "block w-full rounded border px-7 py-4 text-center text-sm font-semibold tracking-wide no-underline transition-opacity hover:opacity-90";
@@ -83,7 +106,7 @@ function stepsFor(
         },
         {
           title: "Talk it through",
-          body: darkInviteDebriefLine(mentorName),
+          body: darkInviteDebriefLine(sentenceStartName(mentorName)),
         },
       ];
     }
@@ -98,7 +121,7 @@ function stepsFor(
       },
       {
         title: "Get honest feedback",
-        body: `${mentorName} evaluates your preaching against the Sermon Coach rubric.`,
+        body: `${sentenceStartName(mentorName)} evaluates your preaching against the Sermon Coach rubric.`,
       },
       {
         title: "Talk it through",
@@ -122,7 +145,7 @@ function stepsFor(
     },
     {
       title: "Get honest feedback",
-      body: `${mentorName} evaluates your preaching against the Sermon Coach rubric.`,
+      body: `${sentenceStartName(mentorName)} evaluates your preaching against the Sermon Coach rubric.`,
     },
     {
       title: "See everything",
@@ -259,6 +282,7 @@ export function InviteAcceptPanel({
   menteeReads,
   loggedIn,
 }: InviteAcceptPanelProps) {
+  const displayMentorName = menteeFacingMentorName(mentorName);
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [acceptErrorView, setAcceptErrorView] =
@@ -356,10 +380,10 @@ export function InviteAcceptPanel({
   if (accepted) {
     const successBody =
       menteeReads === "none"
-        ? darkInviteDebriefLine(mentorName)
+        ? darkInviteDebriefLine(sentenceStartName(displayMentorName))
         : seatType === "debrief"
-          ? `You are connected. Submit sermons the way you normally would. ${mentorName} reads every debrief, and your full evaluations stay private until they have had the chance to talk them through with you.`
-          : `You are connected. Submit sermons the way you normally would. ${mentorName} reads everything you read, at the same time you read it.`;
+          ? `You are connected. Submit sermons the way you normally would. ${displayMentorName} reads every debrief, and your full evaluations stay private until they have had the chance to talk them through with you.`
+          : `You are connected. Submit sermons the way you normally would. ${displayMentorName} reads everything you read, at the same time you read it.`;
 
     return (
       <div className="space-y-5 text-center">
@@ -409,24 +433,21 @@ export function InviteAcceptPanel({
         className="mt-2 text-[15px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        A personal coaching relationship with {mentorName}.
+        A personal coaching relationship with {displayMentorName}.
       </p>
 
       <h1
         className="mt-7 text-[28px] font-semibold leading-[1.2] tracking-tight sm:text-[32px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        {mentorName} is inviting you into Sermon Coaching
+        {sentenceStartName(displayMentorName)} is inviting you into Sermon
+        Coaching
       </h1>
       <p
         className="mt-4 text-[17px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
       >
-        {seatType === "debrief"
-          ? menteeReads === "none"
-            ? darkInviteDebriefLine(mentorName)
-            : `${mentorName} will read your sermons, give you honest feedback, and help you become a stronger preacher.`
-          : `${mentorName} will read your sermons alongside you, give you honest feedback, and help you become a stronger preacher.`}
+        {acceptSeatFirstLines(seatType, displayMentorName, menteeReads)}
       </p>
 
       <section
@@ -441,12 +462,12 @@ export function InviteAcceptPanel({
         >
           Here&rsquo;s what happens
         </h2>
-        <StepList steps={stepsFor(seatType, mentorName, menteeReads)} />
+        <StepList steps={stepsFor(seatType, displayMentorName, menteeReads)} />
       </section>
 
       <Callout
         seatType={seatType}
-        mentorName={mentorName}
+        mentorName={displayMentorName}
         menteeReads={menteeReads}
       />
 
@@ -454,7 +475,7 @@ export function InviteAcceptPanel({
         className="mt-8 text-[14px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        Your {seatName} seat is provided by {mentorName}.
+        Your {seatName} seat is provided by {displayMentorName}.
         <br />
         There is nothing for you to purchase.
       </p>

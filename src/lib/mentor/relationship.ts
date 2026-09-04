@@ -1,4 +1,8 @@
-import { parseMenteeReads } from "@/lib/mentor/mentee-reads";
+import {
+  FALLBACK_MENTOR_NAME,
+  menteeFacingMentorName,
+  parseMenteeReads,
+} from "@/lib/mentor/mentee-reads";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,7 +19,7 @@ export type MenteeCoachingView = {
   mentorName: string;
 };
 
-const FALLBACK_MENTOR_NAME = "a preacher you know";
+export { FALLBACK_MENTOR_NAME, menteeFacingMentorName } from "@/lib/mentor/mentee-reads";
 
 /**
  * True when the signed-in user is the mentee on an ACTIVE mentor relationship.
@@ -65,7 +69,9 @@ export async function getMenteeCoachingView(
     return empty;
   }
 
-  const mentorName = await mentorDisplayName(data.mentor_id as string);
+  const mentorName = menteeFacingMentorName(
+    await mentorDisplayName(data.mentor_id as string),
+  );
   const stamp =
     typeof data.debrief_visible_since === "string"
       ? data.debrief_visible_since
@@ -109,7 +115,7 @@ async function mentorDisplayName(mentorId: string): Promise<string> {
       .maybeSingle();
     const name =
       typeof data?.display_name === "string" ? data.display_name.trim() : "";
-    return name.length > 0 ? name : FALLBACK_MENTOR_NAME;
+    return menteeFacingMentorName(name);
   } catch {
     return FALLBACK_MENTOR_NAME;
   }

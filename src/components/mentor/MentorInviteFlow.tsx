@@ -427,7 +427,7 @@ function InviteByEmail({
     return (
       <Panel
         title="What should your preacher see?"
-        lede="Your invitation carries your name. Without one it reads “a preacher you know,” which is vaguer than you want when asking someone to hand over a sermon."
+        lede="Your invitation carries your name. Without one it reads “your mentor,” which is vaguer than you want when asking someone to hand over a sermon."
         onClose={onClose}
       >
         {nameError ? <AuthMessage variant="error">{nameError}</AuthMessage> : null}

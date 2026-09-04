@@ -4,6 +4,8 @@ import {
   darkInviteDebriefLine,
   enableDebriefConfirmBody,
   evaluationIsDarkForMentee,
+  FALLBACK_MENTOR_NAME,
+  menteeFacingMentorName,
   menteeHandoffSentences,
   parseMenteeReads,
   sermonHidesUnevaluatedBand,
@@ -21,11 +23,27 @@ describe("parseMenteeReads", () => {
   });
 });
 
+describe("menteeFacingMentorName", () => {
+  it("returns your mentor for blank and the legacy fallback", () => {
+    assert.equal(menteeFacingMentorName(""), FALLBACK_MENTOR_NAME);
+    assert.equal(menteeFacingMentorName(null), FALLBACK_MENTOR_NAME);
+    assert.equal(
+      menteeFacingMentorName("a preacher you know"),
+      FALLBACK_MENTOR_NAME,
+    );
+  });
+
+  it("passes through a real display name", () => {
+    assert.equal(menteeFacingMentorName("Chris Daukas"), "Chris Daukas");
+  });
+});
+
 describe("handoff and invite copy", () => {
-  it("returns the two handoff sentences with the mentor name", () => {
+  it("returns the three handoff sentences with the mentor name", () => {
     assert.deepEqual(menteeHandoffSentences("Tyler James"), [
-      "Your sermon went to Tyler James.",
-      "You'll hear from them about it.",
+      "Sent to Tyler James.",
+      "Tyler James will review it and reach out to you.",
+      "It will not appear in your account.",
     ]);
   });
 
