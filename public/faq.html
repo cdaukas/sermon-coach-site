@@ -33,95 +33,6 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ---------- NAV ---------- */
-  .nav {
-    height: 78px;
-    padding: 0 28px;
-    max-width: 1160px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .wordmark {
-    font-family: 'Iowan Old Style', Georgia, serif;
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    color: var(--ink);
-  }
-  .wordmark-accent { color: var(--accent); }
-
-
-  .nav-toggle {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  .nav-toggle:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-  .nav-toggle-bar {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--ink);
-    border-radius: 1px;
-    transition: transform 0.15s ease, opacity 0.15s ease;
-  }
-  .nav.is-open .nav-toggle-bar:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-  }
-  .nav.is-open .nav-toggle-bar:nth-child(2) {
-    opacity: 0;
-  }
-  .nav.is-open .nav-toggle-bar:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-  }
-  .nav-links {
-    display: flex;
-    gap: 26px;
-    align-items: center;
-  }
-  .nav-link {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--ink-soft);
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-  .nav-link:hover { color: var(--ink); text-decoration: underline; }
-  .nav-start {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    background: var(--ink);
-    color: var(--bg);
-    text-decoration: none;
-    padding: 13px 18px;
-    border-radius: 4px;
-    border: 1px solid var(--ink);
-    transition: all 0.15s ease;
-    letter-spacing: 0.02em;
-  }
-  .nav-start:hover {
-    background: var(--ink-mid);
-    border-color: var(--ink-mid);
-  }
-
   /* ---------- HERO ---------- */
   .hero {
     max-width: 800px;
@@ -300,71 +211,7 @@
   }
 
   /* ---------- RESPONSIVE ---------- */
-  @media (max-width: 720px) {
-    .nav {
-      position: relative;
-      padding: 0 20px;
-      gap: 12px;
-    }
-    .wordmark {
-      flex: 1;
-      min-width: 0;
-      white-space: nowrap;
-      font-size: clamp(13px, 4.1vw, 20px);
-    }
-    .nav-toggle {
-      display: flex;
-      flex-direction: column;
-    }
-    .nav-links {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0;
-      margin: 0;
-      padding: 8px 20px 20px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--rule);
-      box-shadow: var(--shadow-lift);
-    }
-    .nav.is-open .nav-links {
-      display: flex;
-    }
-    .nav-link {
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      padding: 0 4px;
-      font-size: 15px;
-      border-bottom: 1px solid var(--rule);
-    }
-    .nav-link:last-of-type {
-      border-bottom: none;
-    }
-    .nav-start {
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 12px;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: 600;
-      background: var(--ink);
-      color: var(--bg);
-      border-color: var(--ink);
-    }
-    .nav-start:hover {
-      background: var(--ink-mid);
-      color: var(--bg);
-      border-color: var(--ink-mid);
-    }
-  }
+  
 
   @media (max-width: 640px) {
     h1 { font-size: 32px; }
@@ -387,6 +234,7 @@
     text-align: center;
   }
 </style>
+<link rel="stylesheet" href="/site-nav.css">
 </head>
 <body>
 
@@ -399,14 +247,18 @@
     <span class="nav-toggle-bar"></span>
   </button>
   <div class="nav-links" id="nav-menu">
-    <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
-    <a href="/sketch" class="nav-link">Free Outline Check</a>
-    <a href="/blog" class="nav-link">Blog</a>
-    <a href="./pricing.html" class="nav-link">Pricing</a>
-    <a href="./faq.html" class="nav-link">FAQ</a>
-    <a href="./story.html" class="nav-link">Story</a>
-    <a href="/login" class="nav-link">Log in</a>
-    <a href="/start" class="nav-start">Start free</a>
+    <div class="nav-group">
+      <a href="./how-its-scored.html" class="nav-link">How It's Scored</a>
+      <a href="/sketch" class="nav-link">Free Outline Check</a>
+      <a href="/blog" class="nav-link">Blog</a>
+      <a href="./pricing.html" class="nav-link">Pricing</a>
+      <a href="./faq.html" class="nav-link">FAQ</a>
+      <a href="./story.html" class="nav-link">Story</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="nav-link">Log in</a>
+      <a href="/start" class="nav-start">Start free</a>
+    </div>
   </div>
 </nav>
 
