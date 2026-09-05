@@ -711,9 +711,15 @@
     border-bottom: 1px solid var(--accent-soft);
     padding-bottom: 1px;
     display: inline-block;
-    margin-top: 14px;
   }
   .credits-note a:hover { border-bottom-color: var(--accent); }
+  .credits-note-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 28px;
+    margin-top: 14px;
+  }
   .pack-note {
     max-width: 600px;
     margin: 24px auto 0;
@@ -962,8 +968,11 @@
 -->
 <div class="credits-note">
   <h3>Preaching a few times a year?</h3>
-  <p>Buy credits instead of subscribing. Two for $29, six for $69. Same rubric, same evaluation, valid 18 months, and they keep working if you subscribe later.</p>
-  <a href="/checkout?pack=pack_6">Buy credits</a>
+  <p>Buy credits instead of subscribing. Same rubric, same evaluation, valid 18 months, and they keep working if you subscribe later.</p>
+  <div class="credits-note-links">
+    <a href="/checkout?pack=pack_2">2 credits · $29</a>
+    <a href="/checkout?pack=pack_6">6 credits · $69</a>
+  </div>
 </div>
 
 <!-- SECTION 2: MENTORING -->
