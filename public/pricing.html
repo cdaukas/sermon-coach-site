@@ -297,6 +297,12 @@
   .tier-span {
     grid-column: 1 / -1;
   }
+  .subs.develop-others .tier.tier-solo {
+    grid-column: 1 / -1;
+    max-width: 620px;
+    width: 100%;
+    justify-self: center;
+  }
   .tier.start-here {
     border-top: 3px solid var(--accent-soft);
     padding-top: 32px;
@@ -910,8 +916,8 @@
       </a>
       <a class="orient-card" href="#classroom">
         <span class="orient-card-copy">
-          <span class="orient-card-title">Classroom</span>
-          <span class="orient-card-desc">For a seminary, cohort, or training program.</span>
+          <span class="orient-card-title">Classroom or Preaching Lab</span>
+          <span class="orient-card-desc">For a seminary, a cohort, or the men your church is raising up.</span>
         </span>
         <span class="orient-card-arrow" aria-hidden="true">→</span>
       </a>
@@ -1031,39 +1037,23 @@
     <a href="https://tally.so/r/xX5kJJ" class="tier-cta">Request a Team</a>
   </div>
 
-  <div class="tier" id="classroom">
-    <div class="tier-name">Classroom</div>
-    <div class="tier-tagline">For institutions training preachers, a seminary course, a church planting cohort, a denominational track.</div>
+  <div class="tier tier-solo" id="classroom">
+    <span id="preaching-lab"></span>
+    <div class="tier-name">Classroom or Preaching Lab</div>
+    <div class="tier-tagline">For a seminary course, a church planting cohort, a denominational track, or the men your church is raising up.</div>
     <div class="price-row">
       <span class="price-now"><span class="currency">$</span><span data-price="cohort">12</span></span>
-      <span class="price-period" data-period="cohort">/student/mo</span>
+      <span class="price-period" data-period="cohort">/preacher/mo</span>
     </div>
-    <div class="price-note" data-note="cohort">Or $25 if students see their scores. Five-seat minimum, billed by the term.</div>
-    <ul class="tier-features">
-      <li><strong>You choose what each student sees.</strong> Coaching without the score at $12 with two sermons a month, or the full evaluation at $25 with four</li>
-      <li>The instructor seat is free</li>
-      <li>Each preacher keeps a private library, visible to the instructor, never to classmates</li>
-      <li>One invoice for the institution. We set up the class by hand before your term starts</li>
-    </ul>
-    <a href="https://tally.so/r/obj9k1" class="tier-cta" data-tier-cta="cohort">Register for Classroom</a>
-  </div>
-
-  <div class="tier" id="preaching-lab">
-    <div class="tier-name">Preaching Lab</div>
-    <div class="tier-tagline">For a church running a training lab. A preaching cohort in your church plant, a class in your association, the men your church is raising up.</div>
-    <div class="price-row">
-      <span class="price-now"><span class="currency">$</span>12</span>
-      <span class="price-period">/preacher/mo</span>
-    </div>
-    <div class="price-note">Or $25 for the ones who see their scores. Any size, any term, one invoice.</div>
+    <div class="price-note" data-note="cohort">Or $25 for the ones who see their scores. Any size, any term, one invoice.</div>
     <ul class="tier-features">
       <li><strong>You choose what each preacher sees</strong>, one at a time. Coaching without the score at $12 with two sermons a month, the full evaluation at $25 with four, or nothing but what comes through you</li>
       <li>Your own seat is free</li>
       <li>Each preacher keeps a private library, visible to you, never to the others</li>
-      <li>One invoice for the group. We set it up by hand before your term starts</li>
+      <li>One invoice. We set it up by hand before your term starts</li>
       <li>When the term ends, every preacher keeps their sermons and their coaching</li>
     </ul>
-    <a href="https://tally.so/r/obj9k1" class="tier-cta">Register a Preaching Lab</a>
+    <a href="https://tally.so/r/obj9k1" class="tier-cta" data-tier-cta="cohort">Register a class or a lab</a>
   </div>
 
 </section>
@@ -1197,8 +1187,8 @@
       },
       cohort: {
         price: '12',
-        period: '/student/mo',
-        note: 'Or $25 if students see their scores. Five-seat minimum, billed by the term.',
+        period: '/preacher/mo',
+        note: 'Or $25 for the ones who see their scores. Any size, any term, one invoice.',
         checkoutUrl: 'https://tally.so/r/obj9k1',
       },
     },
@@ -1210,8 +1200,8 @@
       },
       cohort: {
         price: '12',
-        period: '/student/mo',
-        note: 'Or $25 if students see their scores. Five-seat minimum, billed by the term.',
+        period: '/preacher/mo',
+        note: 'Or $25 for the ones who see their scores. Any size, any term, one invoice.',
         checkoutUrl: 'https://tally.so/r/obj9k1',
       },
     },
