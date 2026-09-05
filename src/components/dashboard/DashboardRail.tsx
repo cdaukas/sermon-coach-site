@@ -69,6 +69,7 @@ const ACCOUNT_ITEMS: NavItem[] = [
 type DashboardRailProps = {
   creditChipLabel: string;
   growthAllowed: boolean;
+  prepCardAllowed?: boolean;
   teamAccount?: boolean;
 };
 
@@ -128,11 +129,14 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
 export function DashboardRail({
   creditChipLabel,
   growthAllowed,
+  prepCardAllowed = false,
   teamAccount = false,
 }: DashboardRailProps) {
   const pathname = usePathname();
   const primaryItems = PRIMARY_ITEMS.filter(
-    (item) => item.href !== "/dashboard/growth" || growthAllowed,
+    (item) =>
+      (item.href !== "/dashboard/growth" || growthAllowed) &&
+      (item.href !== "/dashboard/prep-card" || prepCardAllowed),
   );
 
   const developLabel = teamAccount ? "Team" : "Mentoring";
