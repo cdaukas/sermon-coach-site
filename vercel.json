@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/tuesday-nudge",
       "schedule": "0 13 * * 2"
+    },
+    {
+      "path": "/api/cron/purge-sermons",
+      "schedule": "0 15 * * *"
     }
   ]
 }
