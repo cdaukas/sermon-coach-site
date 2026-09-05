@@ -95,6 +95,9 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
+  .orient-links .orient-card-span {
+    grid-column: 1 / -1;
+  }
   .orient-card {
     display: flex;
     align-items: center;
@@ -293,15 +296,6 @@
     max-width: 1100px;
     padding-top: 12px;
     overflow: visible;
-  }
-  .tier-span {
-    grid-column: 1 / -1;
-  }
-  .subs.develop-others .tier.tier-solo {
-    grid-column: 1 / -1;
-    max-width: 620px;
-    width: 100%;
-    justify-self: center;
   }
   .tier.start-here {
     border-top: 3px solid var(--accent-soft);
@@ -876,7 +870,7 @@
   <div class="orient-group">
     <h2 class="orient-heading">For your own preaching</h2>
     <div class="orient-links">
-      <a class="orient-card" href="#coach">
+      <a class="orient-card orient-card-span" href="#coach">
         <span class="orient-card-copy">
           <span class="orient-card-title">Coach</span>
           <span class="orient-card-desc">Preaching most weeks.</span>
@@ -1020,7 +1014,7 @@
 
 <section class="subs develop-others">
 
-  <div class="tier tier-span" id="teams">
+  <div class="tier" id="teams">
     <div class="tier-name">Pastoral Teams</div>
     <div class="tier-tagline">For the church where several people preach, each to a different room.</div>
     <div class="price-row">
@@ -1037,7 +1031,7 @@
     <a href="https://tally.so/r/xX5kJJ" class="tier-cta">Request a Team</a>
   </div>
 
-  <div class="tier tier-solo" id="classroom">
+  <div class="tier" id="classroom">
     <span id="preaching-lab"></span>
     <div class="tier-name">Classroom or Preaching Lab</div>
     <div class="tier-tagline">For a seminary course, a church planting cohort, a denominational track, or the men your church is raising up.</div>
