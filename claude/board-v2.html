@@ -69,7 +69,6 @@
   }
   .tag.date { background: var(--ink); }
   .tag.quick { background: #5c7a5c; }
-  .tag.done { background: #8a8a8a; }
   .tag.new { background: #8d3a3a; }
   li.item.is-done .title, li.item.is-done .why { opacity: .5; }
     .tag.size { background: transparent; border: 1px solid #cfc7b4; color: #7a7161; }
@@ -92,6 +91,11 @@
     font-size: 11px; font-weight: 700; color: var(--accent-soft);
   }
   .flat { counter-reset: mi 21; }
+
+  .flat.review { columns: 1; counter-reset: none; margin-top: 10px; }
+  .flat.review li { padding-left: 0; }
+  .flat.review li::before { content: none; }
+  .flat.review code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--accent); }
 
   .parked { margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--rule); }
   .parked p { font-size: 14px; color: var(--ink-soft); }
@@ -130,14 +134,10 @@
     <ol>
       <li class="item"><span class="num">21</span><span class="title">Read a prep card <span class="tag new">new</span></span>
         <p class="why">Merged 5 Sept on five measured disciplines. <strong>Nothing user-facing until <em>20260905190000_prep_cards.sql</em> is applied by hand</strong> in the SQL editor, then <em>migration repair</em>. Never <em>db push</em>. Read it against one question: does this tell me something I did not know, and would I do anything differently next Saturday? The Application deep dive got materially better three times because the output was read and corrected.</p></li>
-      <li class="item"><span class="num">22</span><span class="title">Criterion 1 does not discriminate <span class="tag new">confirmed</span></span>
-        <p class="why">Production scores textual fidelity a 4 on 137 of 172 sermons, an 80% mode. Two blind pre-registered hand-codings of the same corpus find a 40&ndash;59% mode with a real top and a real bottom. A pastor handling the text badly is told he is fine; one handling it beautifully gets no credit. Its standard deviation of 0.397, the lowest in the rubric, measures the collapse rather than the preacher, so <strong>its gate in the criterion table is wrong and must be recomputed after the bump.</strong> Feeds item 20.</p></li>
       <li class="item"><span class="num">23</span><span class="title">Hand-audit the correction move <span class="tag quick">30 min</span></span>
-        <p class="why">28 of 28 top-tier manuscripts contain it &mdash; the preacher names his own expectation and then surrenders it to the text &mdash; and no counter exists. Reading seventeen manuscripts produces the hand list a counter is validated against, exactly as the object marker went from 38 to 6. It is the fix for item 22 and the twelfth prep-card measure.</p></li>
+        <p class="why">28 of 28 top-tier manuscripts contain it &mdash; the preacher names his own expectation and then surrenders it to the text &mdash; and no counter exists. Reading seventeen manuscripts produces the hand list a counter is validated against, exactly as the object marker went from 38 to 6. It is the fix criterion 1 needs in item 20, and the twelfth prep-card measure.</p></li>
       <li class="item"><span class="num">24</span><span class="title">Six prep-card counters remain <span class="tag">multi</span></span>
         <p class="why">Five of twelve measures have counters. Measure 6 needs spaCy and a second deploy, correctly declined for now. Measures 1, 9, 10 and 11 need building. The card is real at five and it is a fifth of what the spec describes.</p></li>
-      <li class="item"><span class="num">25</span><span class="title">Watch the first purge run <span class="tag date">mid-Sept</span></span>
-        <p class="why">Built and merged behind the report-only flag. First soft-deleted rows become eligible mid-month. <strong>Report-only is mandatory for the first cycle.</strong> Read the output before the flag comes off. Unrecoverable if wrong.</p></li>
       <li class="item"><span class="num">26</span><span class="title">Series Prep in Stripe <span class="tag new">new</span></span>
         <p class="why">Retired from the site 5 Sept. <em>/checkout?pack=pack_12</em> still resolves to a live $109 price and the old Payment Link may still be active. Nobody holds unused credits. Either it stays honourable for anyone with an old link, or it is genuinely gone &mdash; and <strong>if the price is archived, pack_12 comes out of checkout.ts in the same pass</strong> rather than routing to a dead price.</p></li>
     </ol>
@@ -152,7 +152,7 @@
       <li class="item"><span class="num">1</span><span class="title">Payment path for the Lab <span class="tag size">multi</span></span>
         <p class="why">Stripe Payment Link or invoice, same pattern as the Intensive. No self-serve checkout, which is why Brief A no longer gates anything here. The $249 flat price this item used to name was retired 29 August as a 14 percent discount on parts that goes underwater at twelve participants. The Lab is priced at parts, Apprentice $12 and Colleague $25 per preacher per month, so the amount is computed per roster rather than fixed.</p></li>
       <li class="item"><span class="num">2</span><span class="title">Mentee-side paired sample and its public page <span class="tag build">build <span class="tag size">multi</span></span></span>
-        <p class="why">What a mentor sees before paying $12. The mentor side is already live and populated with a real mid-band sermon. More urgent now that the seat sells without a conversation.</p></li>
+        <p class="why">What a mentor sees before paying $12. The mentor side is already live and populated with a real mid-band sermon. More urgent now that the seat sells without a conversation, and more urgent again since 5 September: the new <em>Develop others</em> section on the homepage says "what he reads is a debrief, not a score" and there is nowhere on the site to see one. That is a claim with no proof behind it. When <code>/sample-debrief</code> returns 200, one small branch adds "Read a sample debrief" as that section's first CTA and Sample debrief to the footer Product column. <strong>Open decision belonging to this item:</strong> run the debrief on Hebrews 3:1-6, matching both existing public samples so a reader sees one sermon through three lenses and can see exactly what was withheld, or keep the 8.2 sermon already populated on the mentor side and save the re-population.</p></li>
       <li class="item"><span class="num">3</span><span class="title">File upload, .txt and .md <span class="tag build">build <span class="tag size">session</span></span></span>
         <p class="why">Nearly free. Lay men new to the product doing a lot of copy-paste, and a lay preacher writing in Word is likelier to have a file than a pastor who lives in his manuscript app.</p></li>
     </ol>
@@ -174,8 +174,6 @@
         <p class="why">Reproduced on production 4 September and reclassified from bug to design gap. Seat precedence is correct: accepting a mentoring relationship should outrank your own subscription. The submit line now discloses where a sermon is going, which was the sharp end of this. What remains is the decision about overflow: today allotment spent blocks, and the alternative is falling through to the mentee's own credits once the month's seat allotment is used. Open alongside it, and the reason to decide: what a mentee without a subscription sees at the wall, which is the most honest Coach upsell the product will ever have.</p></li>
       <li class="item"><span class="num">8</span><span class="title">The discovery block on Billing <span class="tag size">session</span></span>
         <p class="why">Three or four lines naming what else exists, with prices. A logged-in subscriber may never see the pricing page again after converting.</p></li>
-      <li class="item"><span class="num">9</span><span class="title">Collapse Packs, retire Series Prep <span class="tag done">done 5 Sept</span></span>
-        <p class="why">Packs becomes one line under Coach. Series Prep comes off the pricing page and off BuyPackCards and DashboardSubscribeCTA in the same commit so the two do not go dark separately. Leave checkout.ts, pack-credits.ts, and the migrations alone. Then archive price_1ThKUo2Ea1b3J5pTwjlOCQUm by hand.</p></li>
     </ol>
   </div>
 
@@ -212,8 +210,6 @@
         <p class="why">It covers 1 through 3 and 4. Three of eleven criteria currently get praise instead of an observation, because a perfect score has no next rung.</p></li>
       <li class="item"><span class="num">18</span><span class="title">Legal review, one pass <span class="tag size">multi</span></span>
         <p class="why">Terms, privacy, the &trade;, the authorship paragraph, the disclaimer on five blog posts, the competitive-use clause, and <strong>the corpus-norms question</strong> &mdash; privacy &sect;2 says sermon content is not analyzed beyond generating the evaluation, and terms &sect;6 licenses processing solely to provide the service to that user. Corpus-wide norms are not that. Add one more: privacy.html has no backup-and-operational-copies clause, while the delete dialog promises permanent deletion at 30 days. Supabase daily backups make that approximate no matter what the purge job does. The dialog is the wrong place to say so. One pass, not seven errands.</p></li>
-      <li class="item"><span class="num">19</span><span class="title">Move the ledger into the repo <span class="tag done">done</span></span>
-        <p class="why">It has forked twice, and the current storage arrangement guarantees a third. In the repo it gets a commit history, a diff on every change, and a merge conflict instead of a silent fork.</p></li>
     </ol>
   </div>
 
@@ -222,9 +218,41 @@
       <span class="group-name">Product quality</span>
     </div>
     <ol>
-      <li class="item"><span class="num">20</span><span class="title">4.1, the consolidated prompt edit <span class="tag size">multi</span></span>
-        <p class="why">Now clarity rather than calibration. Ladders, presumptions, the override boolean, three held caps, the growth-edge instruction, the criterion 8 slug. Edit SKILL.md, not the generated rubric.<br><br>
-        Three additions from the quote audit. <strong>Give the quote a criterion-specific job.</strong> Gospel clarity has an obvious quotable object and structure does not; what you quote for structure is a seam, for emotional arc a peak, for ecclesial faithfulness the line addressed to the body. Name the job for each of the eleven. <strong>Require a short reason when the quote is null.</strong> Today 1,862 of 2,376 slots omit the key entirely against only 18 explicit nulls, so the model is not declining, it is forgetting. A required reason makes skipping legible and shows which criteria genuinely have nothing to quote. <strong>Declare approximate_location display-only prose.</strong> Free text like "Point 3b" or "WE section" is more useful to a preacher than "middle," and 372 of 496 stated locations cannot be keyword-checked. Stop trying to verify it and say so in the field description.</p></li>
+      <li class="item"><span class="num">20</span><span class="title">4.1, the consolidated prompt edit <span class="tag">multi</span></span>
+        <p class="why">Now carries the corpus findings. <strong>One confirmed defect: criterion 1 does not discriminate.</strong> Production scores textual fidelity a 4 on 137 of 172 sermons, an 80% mode, while two blind pre-registered hand-codings of the same corpus find a 40&ndash;59% mode with a real top and a real bottom. A pastor handling the text badly is told he is fine; one handling it beautifully gets no credit. The fix is known and item 23 supplies it: all 28 top-tier manuscripts contain a correction move, where the preacher names his own expectation and then surrenders it to the text.</p>
+        <p class="why">Three suspected defects were checked 2 Sept and closed: no humor penalty anywhere in the scored path, criterion 3 is an outcome test with no surface signature, and criterion 7 does not credit concreteness at all &mdash; that is criterion 9, and the application findings have been re-filed. Twelve improvement clusters across all eleven criteria sit in the derivation document.</p>
+        <p class="why"><strong>A bump invalidates the eleven measured per-criterion standard deviations and requires double-scoring against the reference set. One bump, once.</strong> And criterion 1&rsquo;s 0.397, the tightest gate in the criterion table, measures the collapse rather than the preacher &mdash; <strong>recompute the constants after the bump</strong> or the table inherits the defect.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">Waiting on a date</span>
+      <span class="group-note">Nothing to do until the clock runs</span>
+    </div>
+    <ol>
+      <li class="item"><span class="num">25</span><span class="title">Watch the first purge run <span class="tag date">mid-Sept</span></span>
+        <p class="why">Built and merged behind the report-only flag. First soft-deleted rows become eligible mid-month. <strong>Report-only is mandatory for the first cycle.</strong> Read the output before the flag comes off. Unrecoverable if wrong.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">Shipped, to review</span>
+      <span class="group-note">Merged and live. Confirm before closing.</span>
+    </div>
+    <ol class="flat review">
+      <li>Collapse Packs, retire Series Prep &mdash; merged <code>61cb29f</code> 5 Sept. Live checks pass: Series Prep, the old payment-link comment and <code>data-pack-size</code> all return 0. Independently re-verified 5 Sept, and three checks beyond the brief: <code>applyBillingCadence</code> 3 and <code>data-mentor-seat</code> 4, so neither the Coach cadence toggle nor the mentoring seat toggle was collateral damage from surgery in a shared script block and a shared CSS class; <em>Occasional and milestone</em> 0, so Pack is gone from the orientation router, which was the highest-value deletion in the item. <strong>Still to confirm:</strong> <em>/dashboard/buy</em> shows two options, defaults to six, Best Pack Value on six, CTA reaches Stripe for $69.</li>
+      <li>Coach block after the Pack removal &mdash; #332 at <code>a8c6a3b</code>, verified live. Ribbon removed, <code>.subs-solo</code> 900px to 620px, cadence defaults to annual, price framed as <strong>$24.17 /mo</strong> with "2 months free. Billed annually at $290." on one line. Annual toggle reads BEST VALUE. <strong>Standing rule:</strong> that disclosure line is the only thing keeping the monthly framing honest and must never shrink, gray out, or move below the fold.</li>
+      <li>Credits block, two links &mdash; #333 at <code>a122444</code>, verified live. Fixes a bug I shipped in #331: collapsing the pack toggle removed the 2-pack's only entry point, so the block offered two prices with one reachable. Live <code>pack_2</code> confirmed at $29 and active in Stripe before shipping.</li>
+      <li>Classroom and Preaching Lab merged &mdash; #334 at <code>0c88f48</code>, verified live. Both CTAs already pointed at the same Tally form, so this was the leftover of the 30 Aug one-form decision. <strong>Closes item 15 completely</strong>: the merge superseded the briefed bullet rather than shipping it, since there is no separate Lab card to route smaller groups to. Raw-HTML checks confirm <code>PRICING.cohort</code> was synced, not just the markup.</li>
+      <li>Series Prep genuinely retired &mdash; item 26 closed. Stripe price archived and <code>pack_12</code> pulled from <code>checkout.ts</code> in the same pass, since archiving alone routes an old Payment Link to a dead price.</li>
+      <li>Homepage <em>Develop others</em> section &mdash; merged <code>71fc8a5</code> (#330) 5 Sept, verified live. Before it, visible homepage copy contained <em>mentor</em> 0, <em>debrief</em> 0, <em>Classroom</em> 0, <em>Preaching Lab</em> 0, <em>Pastoral Teams</em> 0. The dark <code>HomeV2Mentoring.tsx</code> was deleted in the same commit rather than revived: it is two seat cards, two prices and a mailto, and the <code>9393a9e</code> removal reason still holds. Production checks: <em>Develop others</em> 1, <em>debrief</em> 1, <em>one invoice</em> 1, <em>Apprentice</em> 0, em-dashes 6 unchanged.</li>
+      <li>Footer <em>Sample sketch</em> link &mdash; merged (#329) 5 Sept, verified live. Product column now reads Pricing, How It's Scored, Free Outline Check, Sample sketch, Sample evaluation. Sample debrief waits on item 2.</li>
+      <li>Prep card on five measures &mdash; merged 5 Sept. <strong>Not live:</strong> the migration is unapplied, so the route has no table. Reviewing it means applying the migration by hand. See item 21.</li>
+      <li>Move the ledger into the repo &mdash; committed <code>a973306</code>. <strong>Still to confirm:</strong> the committed copy is the current file, not an earlier paste.</li>
+      <li>Sermon purge job &mdash; merged <code>d30d86e</code> behind the report-only flag. First eligible rows mid-Sept. See item 25.</li>
+      <li>Growth chart rebuild, criterion 8 name drift, pack card unification &mdash; all merged and verified live earlier in the week.</li>
     </ol>
   </div>
 
@@ -241,7 +269,9 @@
     <li>Thirteen tsc errors on main, unchanged for at least a week</li>
     <li>Dead .packs and .pack-name CSS after the Series Prep retirement</li>
     <li>pricing.html promises with no code, the remainder after #285</li>
-    <li>Gold fails AA on cream sitewide at 3.57:1; scoped tokens already exist</li>
+    <li><strong>Open, not merged:</strong> pricing layout after the merges. <code>tier-solo</code> and <code>tier-span</code> are both still live on production, so Pastoral Teams is full width and the merged card sits centered below it instead of beside it. Same branch also spans the Coach entry in the orientation router, which has sat alone in a half-width cell since #331 deleted Pack from that group. Layout only, Step 0 approved, not shipped.</li>
+    <li><strong>Open, not merged:</strong> "Churches and institutions" copy. Neither card says what it is billed on, and Teams headlines a bundled $54 against a per-unit $12 so a reader concludes Teams costs four and a half times more. Brief written: group tagline becomes "For a staff that preaches every week, or a class that runs for a term," Teams moves to $25 /preacher/mo with the $29 Coach line in the note, and the merged card note gains "billed by the term." Blocked on a Step 0 answer: whether Teams carries cadence <code>data-*</code> attributes, which decides whether this stays copy or becomes JS.</li>
+    <li>Gold fails AA on cream sitewide at 3.57:1. Measured 5 Sep: <code>--sc-accent</code> #a67c2e on <code>--sc-bg</code> #faf8f3 = 3.57:1, carried by the <code>.eyebrow</code> and <code>.cardlink</code> rules. AA-safe on cream: <code>--sc-gold</code> #8a6624 at 4.94:1, <code>--sc-olive</code> 7.04, <code>--sc-ink-soft</code> 7.09, <code>--sc-ink</code> 14.87. Two class rules, one branch, twelve sections at once. <em>Develop others</em> deliberately inherited the defect rather than diverge in one section. <strong>When this ships, the "Billed annually at $290." line under the Coach price moves to <code>--sc-ink-soft</code>, not to a darker gold.</strong> It is currently the lowest-contrast text on the card and it is the line that keeps the $24.17 framing honest</li>
     <li>getEvaluationModel() should throw rather than fall back</li>
     <li>No comp path for evaluation seats</li>
     <li>Failed seat-end sends are invisible</li>
@@ -280,7 +310,13 @@
     &middot; <strong>Runtime is the judge.</strong> curl -sL, not curl -s. Webhooks fire on production only. Described is not shipped.<br>
     &middot; <strong>Never run supabase db push.</strong> Write the migration file, apply by hand in the SQL editor, repair after.<br>
     &middot; <strong>The mentee submits their own sermon.</strong> That is what a seat is. If the mentor submitted on their behalf there would be no account, no private library, and no seat to sell.<br>
-    &middot; <strong>Never key a write on normalized_email.</strong> It is not unique. Use explicit UUIDs.</p>
+    &middot; <strong>Never key a write on normalized_email.</strong> It is not unique. Use explicit UUIDs.
+    &middot; <strong>Homepage additions respect the <code>9393a9e</code> boundary.</strong> No prices, no seat cards, no mailto. A link out to pricing is fine. Anything failing that test belongs on the pricing page. The homepage is <code>src/app/page.tsx</code> composed from <code>src/components/home-v2/*</code>; only <code>public/*.html</code> is static.
+    &middot; <strong>Match the case flags between the count you reason from and the check you ship.</strong> An expected count derived with <code>grep -oi</code> then verified case-sensitively returned 1 against an expected 3 and looked like a failed deploy.
+    &middot; <strong>Two cards with different price grammar invite a false comparison.</strong> A bundled total beside a per-unit rate reads as a multiple. Both must headline the same unit before they sit side by side.
+    &middot; <strong>A retired checkout param cannot be verified logged out.</strong> <code>/checkout?pack=X</code> redirects to <code>/signup?pack=X</code> before validation runs, so a stale link walks a person through account creation before it fails. Verify logged in.
+    &middot; <strong>Dead components and dead JS get deleted, not left dark.</strong> An unimported component reads as parked rather than retired and gets revived by someone who does not know why it was pulled. Dead script also survives a <code>perl</code> check that strips <code>&lt;script&gt;</code> blocks, so verify retirements against raw HTML as well as visible copy.
+    &middot; <strong>A shared class name is not a shared JS hook, and the reverse.</strong> <code>.pack-size-*</code> CSS is shared with the mentoring seat toggle while <code>data-pack-size</code> is pack-only. Check both before deleting either.</p>
   </div>
 
   <div class="parked">
@@ -293,7 +329,7 @@
 
   <footer>
     The Sermon Coach&trade; &middot; Dr. Christopher M. Daukas &middot; Phoenix, Arizona<br>
-    Generated from the working ledger, 5 September 2026, evening. Merged with the corpus-derivation session: items 21 through 26 are new, items 9 and 19 are done. Numbering is otherwise unchanged, so nothing that references an item number goes stale.<br>
+    Generated from the working ledger, 5 September 2026, evening. Merged with the corpus-derivation session: items 21 and 23 through 26 are new; the criterion 1 finding folded into item 20 rather than standing alone. Completed items move to <em>Shipped, to review</em> above the maintenance line and leave the board once confirmed. Numbering is otherwise unchanged, so nothing that references an item number goes stale.<br>
     Closed 5 Sept: Series Prep retired and verified live, the prep card shipped on five measures, the ledger moved into the repo, three suspected rubric defects checked and closed.
   </footer>
 
