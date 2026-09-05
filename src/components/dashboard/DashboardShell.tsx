@@ -5,6 +5,7 @@ import { formatCreditChipLabel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { profileHasGrowthAccess } from "@/lib/growth/access";
 import { profileIsTeamAccount } from "@/lib/mentor/team-account";
+import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
 import { createClient } from "@/lib/supabase/server";
 
 type DashboardShellProps = {
@@ -42,6 +43,9 @@ export async function DashboardShell({ children }: DashboardShellProps) {
 
   const chip = formatCreditChipLabel(entitlement);
   const growthAllowed = user ? await profileHasGrowthAccess(user.id) : false;
+  const prepCardAllowed = user
+    ? await profileHasPrepCardAccess(user.id)
+    : false;
   const teamAccount = user ? await profileIsTeamAccount(user.id) : false;
 
   return (
@@ -49,6 +53,7 @@ export async function DashboardShell({ children }: DashboardShellProps) {
       <DashboardRail
         creditChipLabel={chip}
         growthAllowed={growthAllowed}
+        prepCardAllowed={prepCardAllowed}
         teamAccount={teamAccount}
       />
       <div className="dashboard-content">{children}</div>

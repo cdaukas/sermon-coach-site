@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { profileHasPrepCardAccess } from "./access";
 import { buildPrepCardSnapshot } from "./build";
 import { insertPrepCard, loadSermonsForPrepCard } from "./queries";
 
@@ -16,6 +17,10 @@ export async function generatePrepCardAction(): Promise<GeneratePrepCardResult> 
   } = await supabase.auth.getUser();
   if (!user) {
     return { ok: false, error: "You must be signed in." };
+  }
+
+  if (!(await profileHasPrepCardAccess(user.id))) {
+    return { ok: false, error: "Prep card is not available on this account." };
   }
 
   const sermons = await loadSermonsForPrepCard(user.id);

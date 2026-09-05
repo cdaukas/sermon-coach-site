@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { GeneratePrepCardButton } from "@/components/prep-card/GeneratePrepCardButton";
 import { PrepCardView } from "@/components/prep-card/PrepCardView";
+import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
 import { getLatestPrepCard } from "@/lib/prep-card/queries";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
+import { createClient } from "@/lib/supabase/server";
 import "./prep-card.css";
 
 export const metadata: Metadata = {
@@ -12,6 +15,15 @@ export const metadata: Metadata = {
 };
 
 export default async function PrepCardPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user || !(await profileHasPrepCardAccess(user.id))) {
+    notFound();
+  }
+
   const card = await getLatestPrepCard();
 
   return (
