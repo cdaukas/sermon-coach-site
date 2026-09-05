@@ -278,7 +278,7 @@
   }
   .subs.subs-solo {
     grid-template-columns: 1fr;
-    max-width: 900px;
+    max-width: 620px;
   }
   .subs.subs-solo .tier {
     width: 100%;
@@ -315,22 +315,6 @@
     box-shadow: var(--shadow-lift);
     border-top: 4px solid var(--accent);
     padding-top: 32px;
-  }
-  .tier-best-for {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: #fff;
-    padding: 5px 14px;
-    border-radius: 3px;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    white-space: nowrap;
   }
   .tier-name {
     font-size: 24px;
@@ -938,9 +922,9 @@
 <!-- BILLING TOGGLE -->
 <div class="billing-toggle">
   <div class="toggle-inner" role="tablist" aria-label="Billing cadence">
-    <button class="toggle-btn active" data-billing="monthly" type="button" role="tab" aria-selected="true">Monthly</button>
-    <button class="toggle-btn" data-billing="annual" type="button" role="tab" aria-selected="false">
-      Annual <span class="toggle-savings">2 MONTHS FREE</span>
+    <button class="toggle-btn" data-billing="monthly" type="button" role="tab" aria-selected="false">Monthly</button>
+    <button class="toggle-btn active" data-billing="annual" type="button" role="tab" aria-selected="true">
+      Annual <span class="toggle-savings">BEST VALUE</span>
     </button>
   </div>
 </div>
@@ -949,14 +933,13 @@
 <section class="subs subs-solo" id="coach">
 
   <div class="tier featured">
-    <div class="tier-best-for">Most Preachers</div>
     <div class="tier-name">Coach</div>
     <div class="tier-tagline">For the pastor in the pulpit most weeks.</div>
     <div class="price-row">
-      <span class="price-now"><span class="currency">$</span><span data-price="coach">29</span></span>
+      <span class="price-now"><span class="currency">$</span><span data-price="coach">24.17</span></span>
       <span class="price-period" data-period="coach">/mo</span>
     </div>
-    <div class="price-note" data-note="coach">Billed monthly.</div>
+    <div class="price-note" data-note="coach">2 months free. Billed annually at $290.</div>
     <div class="price-intro">Introductory pricing. Your rate stays locked for as long as your subscription stays active.</div>
     <ul class="tier-features">
       <li><strong>10 credits per month</strong> — room to run the full Thursday-and-Monday rhythm on every sermon you preach, even in a five-Sunday month</li>
@@ -967,7 +950,7 @@
       <li>Your top 3 priorities, with practical next steps</li>
       <li>A private library of every evaluation you run</li>
     </ul>
-    <a href="/checkout?plan=coach&cadence=monthly" class="tier-cta" data-tier-cta="coach">Start with Coach</a>
+    <a href="/checkout?plan=coach&cadence=annual" class="tier-cta" data-tier-cta="coach">Start with Coach</a>
   </div>
 
 </section>
@@ -1212,9 +1195,9 @@
     },
     annual: {
       coach: {
-        price: '290',
-        period: '/yr',
-        note: '2 months free',
+        price: '24.17',
+        period: '/mo',
+        note: '2 months free. Billed annually at $290.',
       },
       cohort: {
         price: '12',
@@ -1261,7 +1244,7 @@
     });
   });
 
-  applyBillingCadence('monthly');
+  applyBillingCadence('annual');
 </script>
 <script>
   const MENTOR_SEATS = {
