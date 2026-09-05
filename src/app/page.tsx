@@ -4,6 +4,7 @@ import { HomeV2PreachingRhythm } from "@/components/home-v2/HomeV2PreachingRhyth
 import { HomeV2FeedbackVacuum } from "@/components/home-v2/HomeV2FeedbackVacuum";
 import { HomeV2Footer } from "@/components/home-v2/HomeV2Footer";
 import { HomeV2Framework } from "@/components/home-v2/HomeV2Framework";
+import { HomeV2DevelopOthers } from "@/components/home-v2/HomeV2DevelopOthers";
 import { HomeV2GrowthProfile } from "@/components/home-v2/HomeV2GrowthProfile";
 import { HomeV2Header } from "@/components/home-v2/HomeV2Header";
 import { HomeV2Hero } from "@/components/home-v2/HomeV2Hero";
@@ -59,6 +60,7 @@ export default function HomePage() {
       <HomeV2PreachingRhythm />
       <HomeV2SampleSermon />
       <HomeV2GrowthProfile />
+      <HomeV2DevelopOthers />
       <HomeV2Proof />
       <HomeV2AiAndPreaching />
       <HomeV2StartFree />
