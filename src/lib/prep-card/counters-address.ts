@@ -23,6 +23,22 @@ const NON_CHRISTIAN_ADDRESS = [
 
 /** Measure 12 positive: sermon addresses someone outside the faith. */
 export function measure12AddressesNonChristian(raw: string): boolean {
+  return measure12AddressMatch(raw) != null;
+}
+
+/**
+ * First matching non-Christian address span, for strength evidence.
+ * Returns the raw match text from the cleaned manuscript.
+ */
+export function measure12AddressMatch(raw: string): string | null {
   const cleaned = cleanSermonText(raw);
-  return NON_CHRISTIAN_ADDRESS.some((re) => re.test(cleaned));
+  for (const re of NON_CHRISTIAN_ADDRESS) {
+    const flags = re.flags.includes("g") ? re.flags : `${re.flags}g`;
+    const global = new RegExp(re.source, flags);
+    const match = global.exec(cleaned);
+    if (match?.[0]) {
+      return match[0];
+    }
+  }
+  return null;
 }

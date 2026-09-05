@@ -25,7 +25,7 @@ describe("rankPrepCard", () => {
     ];
     const { strengths, focus } = rankPrepCard(counts, { sampleSize: 17 });
     assert.equal(strengths.length, 3);
-    // 9 (1.0), 2 (~0.88), 5 (~0.67) — 12 and 9 are strengths-only
+    // 9 (1.0), 2 (~0.88), 5 (~0.67) — all clear 50%; 4 (~0.59) is fourth
     assert.deepEqual(
       strengths.map((row) => row.id),
       [9, 2, 5],
@@ -43,11 +43,33 @@ describe("rankPrepCard", () => {
     );
   });
 
-  it("breaks rate ties by measure table order (lower id wins)", () => {
+  it("excludes strengths below the 50% rate floor", () => {
     const counts: PrepMeasureCount[] = [
       count(2, 5, 10),
       count(3, 5, 10),
       count(4, 1, 10),
+      count(7, 1, 10),
+    ];
+    const { strengths, focus, strengthFloorCleared, strengthTarget } =
+      rankPrepCard(counts, { sampleSize: 12 });
+    assert.equal(strengthTarget, 3);
+    assert.equal(strengthFloorCleared, 2);
+    assert.deepEqual(
+      strengths.map((row) => row.id),
+      [2, 3],
+    );
+    assert.ok(!strengths.some((row) => row.id === 4 || row.id === 7));
+    assert.deepEqual(
+      focus.map((row) => row.id),
+      [4, 7],
+    );
+  });
+
+  it("breaks rate ties by measure table order (lower id wins)", () => {
+    const counts: PrepMeasureCount[] = [
+      count(2, 8, 10),
+      count(3, 8, 10),
+      count(4, 7, 10),
       count(7, 1, 10),
     ];
     const { strengths, focus } = rankPrepCard(counts, { sampleSize: 12 });
@@ -75,6 +97,8 @@ describe("rankPrepCard", () => {
     assert.ok(!focus.some((row) => row.id === 6 || row.id === 1));
     assert.ok(!focus.some((row) => row.id === 12));
     assert.ok(focus.some((row) => row.id === 7));
+    // 3 at 0.30 and 12 at 0.20 are below the floor
+    assert.ok(!strengths.some((row) => row.id === 3 || row.id === 12));
   });
 
   it("names fewer than three when the sample is thin", () => {
@@ -91,5 +115,25 @@ describe("rankPrepCard", () => {
     for (const row of focus) {
       assert.equal(strengthIds.has(row.id), false);
     }
+  });
+
+  it("keeps focus at target even when the strength floor truncates", () => {
+    const counts: PrepMeasureCount[] = [
+      count(9, 20, 20),
+      count(2, 4, 20),
+      count(3, 3, 20),
+      count(4, 2, 10),
+      count(5, 2, 10),
+      count(7, 1, 20),
+    ];
+    const { strengths, focus, strengthFloorCleared } = rankPrepCard(counts, {
+      sampleSize: 20,
+    });
+    assert.equal(strengthFloorCleared, 1);
+    assert.deepEqual(
+      strengths.map((row) => row.id),
+      [9],
+    );
+    assert.equal(focus.length, 3);
   });
 });

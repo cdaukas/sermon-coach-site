@@ -1,6 +1,7 @@
 /**
  * Select one verified failing excerpt per focus measure for WAS/NOW.
  * Quotes that do not exact-match cleaned text are dropped, not repaired.
+ * No quote may appear under more than one focus item.
  */
 
 import type { SermonApplicationCoding } from "./counters-coding";
@@ -43,6 +44,11 @@ const RECIPROCAL =
 const IMPERATIVE_START =
   /(?:^|[.!?]\s+|\n)\s*((?:Go|Come|Give|Take|Make|Look|Listen|Stop|Start|Pray|Serve|Love|Bear|Speak|Tell|Ask|Call|Write|Turn|Consider|Remember|Trust|Believe|Rest|Confess|Forgive|Repent|Let|Do|Don't|Be|Seek|Hold|Encourage|Welcome|Invite|Show|Bring)\b[^.!?\n]{0,100})/g;
 
+/** Normalize for cross-measure dedupe. */
+export function quoteDedupeKey(quote: string): string {
+  return quote.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 function verifyOrDrop(
   raw: string,
   quote: string,
@@ -59,6 +65,7 @@ function pickAskFailure(
   measureId: 2 | 3,
   askCoding: SermonApplicationCoding[],
   sermons: SermonRef[],
+  usedQuotes: Set<string>,
 ): PrepFailureExample | null {
   const byId = new Map(sermons.map((s) => [s.id, s] as const));
   for (const row of askCoding) {
@@ -74,6 +81,10 @@ function pickAskFailure(
       }
       const verified = verifyOrDrop(sermon.content, ask.quote);
       if (!verified) {
+        continue;
+      }
+      const key = quoteDedupeKey(verified.quote);
+      if (usedQuotes.has(key)) {
         continue;
       }
       return {
@@ -112,7 +123,10 @@ function frameBreakPoint(points: string[]): string | null {
   return idx >= 0 ? points[idx]! : null;
 }
 
-function pickFrameBreakFailure(sermons: SermonRef[]): PrepFailureExample | null {
+function pickFrameBreakFailure(
+  sermons: SermonRef[],
+  usedQuotes: Set<string>,
+): PrepFailureExample | null {
   for (const sermon of sermons) {
     if (detectPrepSourceFormat(sermon.content, sermon.intakePath) !== "manuscript") {
       continue;
@@ -126,6 +140,10 @@ function pickFrameBreakFailure(sermons: SermonRef[]): PrepFailureExample | null 
     if (!verified) {
       continue;
     }
+    const key = quoteDedupeKey(verified.quote);
+    if (usedQuotes.has(key)) {
+      continue;
+    }
     return {
       measureId: 5,
       sermonId: sermon.id,
@@ -137,7 +155,10 @@ function pickFrameBreakFailure(sermons: SermonRef[]): PrepFailureExample | null 
   return null;
 }
 
-function pickConclusionFailure(sermons: SermonRef[]): PrepFailureExample | null {
+function pickConclusionFailure(
+  sermons: SermonRef[],
+  usedQuotes: Set<string>,
+): PrepFailureExample | null {
   for (const sermon of sermons) {
     if (detectPrepSourceFormat(sermon.content, sermon.intakePath) !== "manuscript") {
       continue;
@@ -157,6 +178,10 @@ function pickConclusionFailure(sermons: SermonRef[]): PrepFailureExample | null 
     if (!verified) {
       continue;
     }
+    const key = quoteDedupeKey(verified.quote);
+    if (usedQuotes.has(key)) {
+      continue;
+    }
     return {
       measureId: 4,
       sermonId: sermon.id,
@@ -168,7 +193,10 @@ function pickConclusionFailure(sermons: SermonRef[]): PrepFailureExample | null 
   return null;
 }
 
-function pickNonReciprocalAsk(sermons: SermonRef[]): PrepFailureExample | null {
+function pickNonReciprocalAsk(
+  sermons: SermonRef[],
+  usedQuotes: Set<string>,
+): PrepFailureExample | null {
   for (const sermon of sermons) {
     const cleaned = cleanSermonText(sermon.content);
     const re = new RegExp(IMPERATIVE_START.source, "g");
@@ -186,6 +214,10 @@ function pickNonReciprocalAsk(sermons: SermonRef[]): PrepFailureExample | null {
       if (!verified) {
         continue;
       }
+      const key = quoteDedupeKey(verified.quote);
+      if (usedQuotes.has(key)) {
+        continue;
+      }
       return {
         measureId: 7,
         sermonId: sermon.id,
@@ -201,6 +233,7 @@ function pickNonReciprocalAsk(sermons: SermonRef[]): PrepFailureExample | null {
 /**
  * One failure example per focus measure id, when a verified excerpt exists.
  * Missing measures simply omit WAS/NOW rather than inventing text.
+ * Quotes are unique across the returned set.
  */
 export function selectFocusFailureExamples(params: {
   focusIds: PrepMeasureId[];
@@ -208,20 +241,22 @@ export function selectFocusFailureExamples(params: {
   askCoding: SermonApplicationCoding[];
 }): PrepFailureExample[] {
   const out: PrepFailureExample[] = [];
+  const usedQuotes = new Set<string>();
   for (const id of params.focusIds) {
     let example: PrepFailureExample | null = null;
     if (id === 2) {
-      example = pickAskFailure(2, params.askCoding, params.sermons);
+      example = pickAskFailure(2, params.askCoding, params.sermons, usedQuotes);
     } else if (id === 3) {
-      example = pickAskFailure(3, params.askCoding, params.sermons);
+      example = pickAskFailure(3, params.askCoding, params.sermons, usedQuotes);
     } else if (id === 4) {
-      example = pickConclusionFailure(params.sermons);
+      example = pickConclusionFailure(params.sermons, usedQuotes);
     } else if (id === 5) {
-      example = pickFrameBreakFailure(params.sermons);
+      example = pickFrameBreakFailure(params.sermons, usedQuotes);
     } else if (id === 7) {
-      example = pickNonReciprocalAsk(params.sermons);
+      example = pickNonReciprocalAsk(params.sermons, usedQuotes);
     }
     if (example) {
+      usedQuotes.add(quoteDedupeKey(example.quote));
       out.push(example);
     }
   }

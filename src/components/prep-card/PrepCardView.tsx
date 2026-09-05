@@ -3,11 +3,13 @@ import {
   PREP_CARD_REVERENCE,
   PREP_CARD_STANDING_STRENGTH,
   PREP_MEASURE_COPY,
+  prepInterpretationParagraph,
 } from "@/lib/prep-card/copy";
 import type {
   PrepCardSnapshot,
   PrepFocusExample,
   PrepRankedMeasure,
+  PrepStrengthExample,
 } from "@/lib/prep-card/types";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
 
@@ -15,7 +17,72 @@ type PrepCardViewProps = {
   snapshot: PrepCardSnapshot;
 };
 
-function StrengthEntry({ row }: { row: PrepRankedMeasure }) {
+function InterpretationSlot({
+  measureId,
+  band,
+}: {
+  measureId: PrepRankedMeasure["id"];
+  band: "high" | "low";
+}) {
+  const text = prepInterpretationParagraph(measureId, band);
+  if (!text) {
+    return null;
+  }
+  return (
+    <p
+      className="prep-card-interpretation mt-3 max-w-[56ch] text-[15px] leading-relaxed"
+      style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+    >
+      {text}
+    </p>
+  );
+}
+
+function StrengthEvidence({ example }: { example: PrepStrengthExample }) {
+  return (
+    <div className="prep-card-strength-evidence mt-4">
+      {example.kind === "point_heads" && example.heads?.length ? (
+        <ul
+          className="m-0 list-none space-y-1 border-l-2 pl-[14px] text-[16px] leading-snug"
+          style={{
+            ...serifFont,
+            borderColor: "var(--sc-rule)",
+            color: "var(--sc-ink)",
+          }}
+        >
+          {example.heads.map((head) => (
+            <li key={head}>{head}</li>
+          ))}
+        </ul>
+      ) : (
+        <blockquote
+          className="m-0 border-l-2 pl-[14px] text-[16px] leading-snug"
+          style={{
+            ...serifFont,
+            borderColor: "var(--sc-rule)",
+            color: "var(--sc-ink)",
+          }}
+        >
+          “{example.quote}”
+        </blockquote>
+      )}
+      <p
+        className="mt-1.5 text-[13px]"
+        style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+      >
+        {example.sermonTitle}
+      </p>
+    </div>
+  );
+}
+
+function StrengthEntry({
+  row,
+  examples,
+}: {
+  row: PrepRankedMeasure;
+  examples: PrepStrengthExample[];
+}) {
   const copy = PREP_MEASURE_COPY[row.id];
   return (
     <article className="prep-card-entry mb-7 last:mb-0">
@@ -39,6 +106,13 @@ function StrengthEntry({ row }: { row: PrepRankedMeasure }) {
           {formatPrepCountCaption(row.hits, row.eligible, row.id)}
         </strong>
       </p>
+      <InterpretationSlot measureId={row.id} band="high" />
+      {examples.map((example) => (
+        <StrengthEvidence
+          key={`${example.sermonId}-${example.offset}`}
+          example={example}
+        />
+      ))}
     </article>
   );
 }
@@ -80,6 +154,8 @@ function FocusEntry({
             </strong>
             .
           </p>
+
+          <InterpretationSlot measureId={row.id} band="low" />
 
           {example ? (
             <div className="prep-card-was-now mt-4">
@@ -172,6 +248,13 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
   const exampleByMeasure = new Map(
     focusExamples.map((example) => [example.measureId, example] as const),
   );
+  const strengthExamples = snapshot.strengthExamples ?? [];
+  const strengthExamplesByMeasure = new Map<number, PrepStrengthExample[]>();
+  for (const example of strengthExamples) {
+    const list = strengthExamplesByMeasure.get(example.measureId) ?? [];
+    list.push(example);
+    strengthExamplesByMeasure.set(example.measureId, list);
+  }
   const focusTag =
     snapshot.focus.length === 1
       ? "One, this quarter"
@@ -230,12 +313,27 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
         <SectionHead title="What is working" tag="Don't trade it" />
         {snapshot.strengths.length === 0 ? (
           <p style={{ ...serifFont, color: "var(--sc-ink-soft)" }}>
-            Not enough measured signal yet for a strength column.
+            {snapshot.strengthsNote ??
+              "Not enough measured signal yet for a strength column."}
           </p>
         ) : (
-          snapshot.strengths.map((row) => (
-            <StrengthEntry key={`s-${row.id}`} row={row} />
-          ))
+          <>
+            {snapshot.strengths.map((row) => (
+              <StrengthEntry
+                key={`s-${row.id}`}
+                row={row}
+                examples={strengthExamplesByMeasure.get(row.id) ?? []}
+              />
+            ))}
+            {snapshot.strengthsNote ? (
+              <p
+                className="mt-4 max-w-[56ch] text-[14.5px] leading-relaxed"
+                style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+              >
+                {snapshot.strengthsNote}
+              </p>
+            ) : null}
+          </>
         )}
         <p
           className="mt-6 border-t pt-4 text-[16px]"

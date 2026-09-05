@@ -12,6 +12,9 @@ import type {
 const MIN_SERMONS_FOR_FULL_THREE = 10;
 const TARGET_EACH_END = 3;
 
+/** Absolute floor: a strength must hit at least half its eligible sample. */
+export const STRENGTH_RATE_FLOOR = 0.5;
+
 function rateOf(count: PrepMeasureCount): number | null {
   if (
     count.hits == null ||
@@ -56,21 +59,30 @@ export type RankPrepCardOptions = {
   sampleSize: number;
   targetEachEnd?: number;
   minSermonsForFullThree?: number;
+  strengthRateFloor?: number;
+};
+
+export type PrepCardRankResult = PrepCardSelection & {
+  /** Strength slots after thin-sample adjustment (before the rate floor). */
+  strengthTarget: number;
+  /** How many ranked measures cleared the strength rate floor. */
+  strengthFloorCleared: number;
 };
 
 /**
  * Rank a preacher against himself.
- * Strengths: top N from every countable measure in `counts`.
- * Focus: bottom N from actionable measures only.
+ * Strengths: top N from countable measures at or above the rate floor.
+ * Focus: bottom N from actionable measures only (not reduced by the floor).
  * Nothing at both ends: overlap stays a strength; next-lowest focus promoted.
  */
 export function rankPrepCard(
   counts: readonly PrepMeasureCount[],
   options: RankPrepCardOptions,
-): PrepCardSelection {
+): PrepCardRankResult {
   const target = options.targetEachEnd ?? TARGET_EACH_END;
   const minSermons =
     options.minSermonsForFullThree ?? MIN_SERMONS_FOR_FULL_THREE;
+  const floor = options.strengthRateFloor ?? STRENGTH_RATE_FLOOR;
 
   const rankedAll = counts
     .map(toRanked)
@@ -87,9 +99,16 @@ export function rankPrepCard(
       take = Math.min(take, 1);
     }
   }
-  take = Math.min(take, rankedAll.length, rankedActionable.length || rankedAll.length);
+  take = Math.min(
+    take,
+    rankedAll.length,
+    rankedActionable.length || rankedAll.length,
+  );
 
-  const strengths = [...rankedAll].sort(compareDescending).slice(0, take);
+  const strengthEligible = rankedAll.filter((row) => row.rate >= floor);
+  const strengths = [...strengthEligible]
+    .sort(compareDescending)
+    .slice(0, take);
   const strengthIds = new Set(strengths.map((row) => row.id));
 
   const focusOrdered = [...rankedActionable].sort(compareAscending);
@@ -104,7 +123,12 @@ export function rankPrepCard(
     focus.push(row);
   }
 
-  return { strengths, focus };
+  return {
+    strengths,
+    focus,
+    strengthTarget: take,
+    strengthFloorCleared: strengthEligible.length,
+  };
 }
 
 export function emptyCountsForIds(
