@@ -603,26 +603,6 @@
     margin-top: 16px;
     border-top: 3px solid transparent;
   }
-  .pack.featured {
-    box-shadow: var(--shadow-lift);
-    border-top-color: var(--accent-soft);
-  }
-  .pack-best-value {
-    position: absolute;
-    top: -11px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent-soft);
-    color: var(--ink);
-    padding: 4px 12px;
-    border-radius: 3px;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
   .pack-name {
     font-size: 22px;
     font-weight: 600;
@@ -704,8 +684,6 @@
     display: block;
   }
   .pack-cta:hover { background: #8a6624; border-color: #8a6624; }
-  .pack.featured .pack-cta { background: var(--accent); border-color: var(--accent); }
-  .pack.featured .pack-cta:hover { background: #8a6624; border-color: #8a6624; }
 
   .pack-cta-disabled {
     color: var(--ink-soft);
@@ -718,11 +696,6 @@
   .pack-cta-disabled:hover {
     background: transparent;
     color: var(--ink-soft);
-  }
-  .pack.featured .pack-cta-disabled {
-    background: transparent;
-    color: var(--ink-soft);
-    border-color: var(--rule);
   }
 
   .credits-note {
@@ -857,7 +830,7 @@
     .subs.subs-solo { max-width: 480px; }
     .subs.develop-others { grid-template-columns: 1fr; max-width: 480px; }
     .packs { max-width: 420px; }
-    .tier.featured, .pack.featured, .tier.start-here { margin-top: 16px; }
+    .tier.featured, .tier.start-here { margin-top: 16px; }
   }
   @media (max-width: 720px) {
     h1 { font-size: 34px; }
