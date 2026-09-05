@@ -29,9 +29,11 @@ export type PrepCardSnapshot = {
   sampleSize: number;
   generatedAt: string;
   sourceFormat: PrepSourceFormat;
+  manuscriptCount: number;
+  transcriptCount: number;
   /** How many measures entered the ranking pools. */
   rankedMeasureCount: number;
-  /** Plain note when the pool is not the full twelve. */
+  /** What was ranked, with format split and per-measure support. */
   poolNote: string;
   counts: PrepMeasureCount[];
   strengths: PrepRankedMeasure[];

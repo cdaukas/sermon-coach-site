@@ -2,13 +2,15 @@ import { prepCardPoolNote } from "./copy";
 import { measure12AddressesNonChristian } from "./counters-address";
 import { codeApplicationAsks } from "./counters-coding";
 import { measure5OutlineHomogeneous } from "./counters-frame";
+import { measure6ChristInPoint } from "./counters-measure6";
+import { codeLocalNamings } from "./counters-naming";
 import {
   measure4ConclusionFinished,
   measure7HasReciprocalAsk,
 } from "./counters-parser";
-import { measure6ChristInPoint } from "./counters-measure6";
 import {
   COMPUTED_MEASURE_IDS,
+  isActionableMeasure,
   PREP_MEASURE_IDS,
   type PrepMeasureId,
 } from "./measures";
@@ -43,6 +45,8 @@ function buildCounts(params: {
   m5Eligible: number;
   m7Hits: number;
   m7Eligible: number;
+  m9Hits: number;
+  m9Eligible: number;
   m12Hits: number;
   m12Eligible: number;
 }): PrepMeasureCount[] {
@@ -78,6 +82,7 @@ function buildCounts(params: {
   );
   set(6, null, null);
   set(7, params.m7Hits, params.m7Eligible);
+  set(9, params.m9Hits, params.m9Eligible);
   set(12, params.m12Hits, params.m12Eligible);
   void measure6ChristInPoint;
   return counts;
@@ -98,7 +103,8 @@ function aggregateSourceFormat(
 }
 
 /**
- * Run the six live counters (+ measure 6 stub) and rank a prep card.
+ * Run live counters (+ measure 6 stub) and rank a prep card.
+ * Actionable computed: 2, 3, 4, 5, 7. Strengths-only computed: 9, 12.
  */
 export async function buildPrepCardSnapshot(
   sermons: PrepSermonInput[],
@@ -150,17 +156,21 @@ export async function buildPrepCardSnapshot(
     }
   }
 
-  const coding = await codeApplicationAsks(
-    sermons.map((sermon) => ({
-      id: sermon.id,
-      title: sermon.title,
-      raw: sermon.content,
-    })),
-    { apiKey: options?.apiKey, model: options?.model },
-  );
+  const codingInputs = sermons.map((sermon) => ({
+    id: sermon.id,
+    title: sermon.title,
+    raw: sermon.content,
+  }));
+  const codingOpts = { apiKey: options?.apiKey, model: options?.model };
 
-  const m2Hits = coding.filter((row) => row.namedObject).length;
-  const m3Hits = coding.filter((row) => row.namedCost).length;
+  const [askCoding, namingCoding] = await Promise.all([
+    codeApplicationAsks(codingInputs, codingOpts),
+    codeLocalNamings(codingInputs, codingOpts),
+  ]);
+
+  const m2Hits = askCoding.filter((row) => row.namedObject).length;
+  const m3Hits = askCoding.filter((row) => row.namedCost).length;
+  const m9Hits = namingCoding.filter((row) => row.noFaultNaming).length;
   const codingEligible = sermons.length;
 
   const counts = buildCounts({
@@ -174,19 +184,37 @@ export async function buildPrepCardSnapshot(
     m5Eligible,
     m7Hits,
     m7Eligible: sampleSize,
+    m9Hits,
+    m9Eligible: codingEligible,
     m12Hits,
     m12Eligible: sampleSize,
   });
 
   const { strengths, focus } = rankPrepCard(counts, { sampleSize });
-  const rankedMeasureCount = counts.filter((c) => c.rate != null).length;
+  const ranked = counts
+    .filter((c) => c.rate != null && c.eligible != null && c.eligible > 0)
+    .map((c) => ({ id: c.id, eligible: c.eligible as number }));
+  const rankedMeasureCount = ranked.length;
+  const actionableRankedCount = ranked.filter((row) =>
+    isActionableMeasure(row.id),
+  ).length;
+  const manuscriptCount = formats.filter((f) => f === "manuscript").length;
+  const transcriptCount = formats.filter((f) => f === "transcript").length;
 
   return {
     sampleSize,
     generatedAt: now.toISOString(),
     sourceFormat: aggregateSourceFormat(formats),
+    manuscriptCount,
+    transcriptCount,
     rankedMeasureCount,
-    poolNote: prepCardPoolNote(rankedMeasureCount),
+    poolNote: prepCardPoolNote({
+      sampleSize,
+      manuscriptCount,
+      transcriptCount,
+      ranked,
+      actionableRankedCount,
+    }),
     counts,
     strengths,
     focus,

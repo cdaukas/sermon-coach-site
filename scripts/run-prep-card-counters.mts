@@ -1,5 +1,6 @@
 /**
- * Run prep-card counters 2, 3, 4, 5, 7, 12 on a user's recent sermons.
+ * Run prep-card counters on a user's recent sermons.
+ * Live: 2, 3, 4, 5, 7 (actionable) and 9, 12 (strengths-only).
  *
  * Usage:
  *   npx tsx scripts/run-prep-card-counters.mts [email]

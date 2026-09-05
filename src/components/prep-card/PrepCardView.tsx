@@ -11,7 +11,24 @@ type PrepCardViewProps = {
   snapshot: PrepCardSnapshot;
 };
 
-function StrengthEntry({ row }: { row: PrepRankedMeasure }) {
+function eligibleCaption(row: PrepRankedMeasure, sampleSize: number): string {
+  if (row.id === 4 || row.id === 5) {
+    return row.eligible === sampleSize
+      ? ` on ${row.eligible} manuscripts`
+      : ` on ${row.eligible} manuscripts of ${sampleSize} sermons`;
+  }
+  return row.eligible === sampleSize
+    ? ` of ${row.eligible} sermons`
+    : ` on ${row.eligible} eligible of ${sampleSize} sermons`;
+}
+
+function StrengthEntry({
+  row,
+  sampleSize,
+}: {
+  row: PrepRankedMeasure;
+  sampleSize: number;
+}) {
   const copy = PREP_MEASURE_COPY[row.id];
   return (
     <article className="prep-card-entry mb-7 last:mb-0">
@@ -35,15 +52,20 @@ function StrengthEntry({ row }: { row: PrepRankedMeasure }) {
           {formatPrepCount(row.hits, row.eligible)}
         </strong>
         <span style={{ color: "var(--sc-ink-faint, var(--sc-ink-soft))" }}>
-          {" "}
-          sermons
+          {eligibleCaption(row, sampleSize)}
         </span>
       </p>
     </article>
   );
 }
 
-function FocusEntry({ row }: { row: PrepRankedMeasure }) {
+function FocusEntry({
+  row,
+  sampleSize,
+}: {
+  row: PrepRankedMeasure;
+  sampleSize: number;
+}) {
   const copy = PREP_MEASURE_COPY[row.id];
   return (
     <article className="prep-card-entry mb-7 last:mb-0">
@@ -69,7 +91,9 @@ function FocusEntry({ row }: { row: PrepRankedMeasure }) {
         <strong style={{ fontWeight: 600 }}>
           {formatPrepCount(row.hits, row.eligible)}
         </strong>
-        <span style={{ color: "var(--sc-ink-soft)" }}> of your last sermons.</span>
+        <span style={{ color: "var(--sc-ink-soft)" }}>
+          {eligibleCaption(row, sampleSize)}.
+        </span>
       </p>
       {copy.ask ? (
         <p
@@ -94,6 +118,12 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
     month: "long",
     year: "numeric",
   });
+  const manuscriptCount = snapshot.manuscriptCount ?? 0;
+  const transcriptCount = snapshot.transcriptCount ?? 0;
+  const formatDetail =
+    manuscriptCount > 0 && transcriptCount > 0
+      ? `${manuscriptCount} manuscripts, ${transcriptCount} transcripts`
+      : snapshot.sourceFormat;
 
   return (
     <article
@@ -157,7 +187,11 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
           </p>
         ) : (
           snapshot.strengths.map((row) => (
-            <StrengthEntry key={`s-${row.id}`} row={row} />
+            <StrengthEntry
+              key={`s-${row.id}`}
+              row={row}
+              sampleSize={snapshot.sampleSize}
+            />
           ))
         )}
         <p
@@ -189,7 +223,11 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
           </p>
         ) : (
           snapshot.focus.map((row) => (
-            <FocusEntry key={`f-${row.id}`} row={row} />
+            <FocusEntry
+              key={`f-${row.id}`}
+              row={row}
+              sampleSize={snapshot.sampleSize}
+            />
           ))
         )}
       </section>
@@ -225,7 +263,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
         <span>
           Built from {snapshot.sampleSize} sermons, {dateLabel}.
         </span>
-        <span>Format: {snapshot.sourceFormat}</span>
+        <span>{formatDetail}</span>
       </footer>
     </article>
   );
