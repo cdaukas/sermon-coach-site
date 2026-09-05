@@ -1,4 +1,4 @@
-import { prepCardPoolNote } from "./copy";
+import { prepCardPoolNote, prepStrengthsFloorNote } from "./copy";
 import { measure12AddressesNonChristian } from "./counters-address";
 import { codeApplicationAsks } from "./counters-coding";
 import { measure5OutlineHomogeneous } from "./counters-frame";
@@ -15,12 +15,17 @@ import {
   type PrepMeasureId,
 } from "./measures";
 import { emptyCountsForIds, rankPrepCard } from "./ranking";
+import { rewriteFocusExamples } from "./rewrite-focus";
+import { selectFocusFailureExamples } from "./select-failure-examples";
+import { selectStrengthExamples } from "./select-strength-examples";
 import { detectPrepSourceFormat } from "./text";
 import type {
   PrepCardSnapshot,
+  PrepFocusExample,
   PrepMeasureCount,
   PrepSourceFormat,
 } from "./types";
+
 
 export type PrepSermonInput = {
   id: string;
@@ -190,7 +195,8 @@ export async function buildPrepCardSnapshot(
     m12Eligible: sampleSize,
   });
 
-  const { strengths, focus } = rankPrepCard(counts, { sampleSize });
+  const { strengths, focus, strengthTarget, strengthFloorCleared } =
+    rankPrepCard(counts, { sampleSize });
   const ranked = counts
     .filter((c) => c.rate != null && c.eligible != null && c.eligible > 0)
     .map((c) => ({ id: c.id, eligible: c.eligible as number }));
@@ -200,6 +206,45 @@ export async function buildPrepCardSnapshot(
   ).length;
   const manuscriptCount = formats.filter((f) => f === "manuscript").length;
   const transcriptCount = formats.filter((f) => f === "transcript").length;
+
+  const sermonRefs = sermons.map((sermon) => ({
+    id: sermon.id,
+    title: sermon.title,
+    content: sermon.content,
+    intakePath: sermon.intakePath,
+  }));
+
+  const strengthExamples = selectStrengthExamples({
+    strengthIds: strengths.map((row) => row.id),
+    sermons: sermonRefs,
+    askCoding,
+    namingCoding,
+  });
+
+  const failureExamples = selectFocusFailureExamples({
+    focusIds: focus.map((row) => row.id),
+    sermons: sermonRefs,
+    askCoding,
+  });
+
+  const rewriteResult = await rewriteFocusExamples(failureExamples, codingOpts);
+  const rewriteByMeasure = new Map(
+    rewriteResult.rewrites.map((row) => [row.measureId, row.rewrite] as const),
+  );
+  const focusExamples: PrepFocusExample[] = failureExamples.map((example) => ({
+    measureId: example.measureId,
+    sermonId: example.sermonId,
+    sermonTitle: example.sermonTitle,
+    quote: example.quote,
+    offset: example.offset,
+    rewrite: rewriteByMeasure.get(example.measureId) ?? null,
+  }));
+
+  if (rewriteResult.estimatedCostUsd != null) {
+    console.info(
+      `[prep_card] rewrite call model=${rewriteResult.model} cost_usd=${rewriteResult.estimatedCostUsd.toFixed(4)}`,
+    );
+  }
 
   return {
     sampleSize,
@@ -215,10 +260,19 @@ export async function buildPrepCardSnapshot(
       ranked,
       actionableRankedCount,
     }),
+    strengthsNote: prepStrengthsFloorNote({
+      shown: strengths.length,
+      target: strengthTarget,
+      clearedFloor: strengthFloorCleared,
+    }),
     counts,
     strengths,
     focus,
+    focusExamples,
+    strengthExamples,
     sermonIds: sermons.map((s) => s.id),
+    rewriteCostUsd: rewriteResult.estimatedCostUsd,
+    rewriteModel: rewriteResult.model || null,
   };
 }
 

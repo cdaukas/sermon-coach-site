@@ -73,8 +73,8 @@ export default async function PrepCardPage() {
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
             No prep card yet. Build one from your recent sermons. The card uses
-            four measured disciplines today (visible ask, cost, conclusion
-            finish, reciprocal ask). Christ-in-point waits on its spaCy counter.
+            measured disciplines that already run (visible ask, cost, conclusion
+            finish, frame, reciprocal ask, naming, address).
           </p>
         </div>
       )}

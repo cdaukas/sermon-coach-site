@@ -2,6 +2,72 @@
   background: var(--sc-bg);
 }
 
+.prep-card-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-top: 14px;
+  border-top: 3px solid var(--sc-ink);
+}
+
+.prep-card-section-head h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.prep-card-section-head span {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prep-card-focus-grid {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 8px 16px;
+  align-items: start;
+}
+
+.prep-card-focus-num {
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  padding-top: 2px;
+}
+
+.prep-card-was blockquote {
+  border-left: 2px solid var(--sc-rule);
+  padding-left: 14px;
+}
+
+@media (max-width: 640px) {
+  .prep-card-focus-grid {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 4px 12px;
+  }
+
+  .prep-card-focus-num {
+    font-size: 28px;
+  }
+
+  .prep-card-section-head {
+    flex-wrap: wrap;
+  }
+
+  .prep-card-section-head h2 {
+    font-size: 24px;
+  }
+}
+
 @media print {
   .prep-card-page {
     background: #fff;
