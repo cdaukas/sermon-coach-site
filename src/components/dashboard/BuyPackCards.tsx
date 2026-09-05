@@ -50,23 +50,11 @@ const BUY_PACK_CARDS: BuyPackCard[] = [
       "For supply preachers, interim pastors, and anyone in the pulpit most months.",
     features: ["Six full credits", "Valid 18 months"],
     ctaLabel: "Add 6 credits",
-  },
-  {
-    packKey: "pack_12",
-    sizeLabel: "12 credits",
-    name: "Series Prep",
-    price: "$109",
-    perEval: "$9.08 per credit",
-    save: "Saves $65 against the 2-pack rate.",
-    tagline:
-      "For running a full quarter of sermons through the rubric the week before you preach each one.",
-    features: ["Twelve full credits", "Valid 18 months"],
-    ctaLabel: "Add 12 credits",
     featured: true,
   },
 ];
 
-const PACK_ORDER: PackSku[] = ["pack_2", "pack_6", "pack_12"];
+const PACK_ORDER: PackSku[] = ["pack_2", "pack_6"];
 
 function cardFor(packKey: PackSku): BuyPackCard {
   const card = BUY_PACK_CARDS.find((entry) => entry.packKey === packKey);

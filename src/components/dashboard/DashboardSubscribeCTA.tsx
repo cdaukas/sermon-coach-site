@@ -41,7 +41,6 @@ const packButtonStyle = {
 const PACK_OFFERS: { pack: PackSku; label: string }[] = [
   { pack: "pack_2", label: "Guest Preacher · 2 for $29" },
   { pack: "pack_6", label: "Pulpit Supply · 6 for $69" },
-  { pack: "pack_12", label: "Series Prep · 12 for $109" },
 ];
 
 type DashboardSubscribeCTAProps = {
