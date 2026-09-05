@@ -1,0 +1,27 @@
+.prep-card-page {
+  background: var(--sc-bg);
+}
+
+@media print {
+  .prep-card-page {
+    background: #fff;
+    padding: 0 !important;
+  }
+
+  .prep-card-sheet {
+    border: none !important;
+    box-shadow: none !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  .prep-card-entry,
+  .prep-card-sheet section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
