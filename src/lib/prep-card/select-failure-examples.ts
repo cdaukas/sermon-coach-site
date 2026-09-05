@@ -19,10 +19,10 @@ import {
 } from "./counters-parser";
 import { verifyQuoteInText } from "./landing-zone";
 import type { PrepMeasureId } from "./measures";
+import { finalTwoSentences } from "./select-strength-examples";
 import {
   cleanSermonText,
   detectPrepSourceFormat,
-  sermonParagraphs,
 } from "./text";
 
 /** Ask-marker the rewrite must satisfy. */
@@ -207,6 +207,18 @@ function pickFrameBreakFailure(
   return null;
 }
 
+/**
+ * Measure 4 focus evidence: final two sentences of an unfinished
+ * conclusion. No rewrite — a conclusion is not a one-line fix.
+ * File headers and front-matter are never candidates.
+ */
+function looksLikeFileHeader(text: string): boolean {
+  return (
+    /\[DATE\]|\[SERVICE\]/i.test(text) ||
+    /Ground-up rebuild/i.test(text)
+  );
+}
+
 function pickConclusionFailure(
   sermons: SermonRef[],
   usedQuotes: Set<string>,
@@ -219,15 +231,17 @@ function pickConclusionFailure(
     if (terminalResidue(cleaned) === 0) {
       continue;
     }
-    const paras = sermonParagraphs(cleaned);
-    const candidate = [...paras]
-      .reverse()
-      .find((p) => p.trim().length >= 12 && p.trim().length <= 280);
-    if (!candidate) {
+    const closing = finalTwoSentences(cleaned);
+    if (!closing || looksLikeFileHeader(closing)) {
       continue;
     }
-    const verified = verifyOrDrop(sermon.content, candidate.trim());
+    const verified = verifyOrDrop(sermon.content, closing);
     if (!verified) {
+      continue;
+    }
+    // Must sit in the conclusion region, not the top of the file.
+    const end = verified.offset + verified.quote.length;
+    if (end < cleaned.length * 0.7) {
       continue;
     }
     const key = quoteDedupeKey(verified.quote);

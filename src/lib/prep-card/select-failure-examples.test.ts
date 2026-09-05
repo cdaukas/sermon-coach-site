@@ -161,4 +161,48 @@ describe("selectFocusFailureExamples dedupe", () => {
 
     assert.equal(examples.length, 0);
   });
+
+  it("measure 4 uses final two sentences, not a file header", () => {
+    const body = Array.from({ length: 40 }, (_, i) =>
+      `Paragraph ${i + 1} continues with a full sentence that lands somewhere.`,
+    ).join("\n\n");
+    const header =
+      "Hebrews 3:1–6 — “The House”\nTrinity Bible Church · [DATE] · [SERVICE]\nGround-up rebuild — v3";
+    const unfinished =
+      `${header}\n\n${body}\n\n` +
+      "ILLUSTRATION\nXXXX\nADD\n\nSo the church leaves unfinished.";
+    const sermons = [
+      { id: "h1", title: "Hebrews - Ground Up", content: unfinished },
+    ];
+
+    const examples = selectFocusFailureExamples({
+      focusIds: [4],
+      sermons,
+      askCoding: [],
+    });
+
+    assert.ok(examples.length <= 1);
+    if (examples.length === 1) {
+      assert.equal(examples[0]!.measureId, 4);
+      assert.equal(examples[0]!.marker, null);
+      assert.doesNotMatch(examples[0]!.quote, /\[DATE\]/);
+      assert.doesNotMatch(examples[0]!.quote, /Ground-up rebuild/);
+    }
+  });
+
+  it("measure 4 omits Was/Now when the only long span is a file header", () => {
+    const headerOnly =
+      "Hebrews 3:1–6 — “The House”\nTrinity Bible Church · [DATE] · [SERVICE]\nGround-up rebuild — v3\n\nXXXX\nADD\nILL";
+    const sermons = [
+      { id: "h2", title: "Header only", content: headerOnly },
+    ];
+
+    const examples = selectFocusFailureExamples({
+      focusIds: [4],
+      sermons,
+      askCoding: [],
+    });
+
+    assert.equal(examples.length, 0);
+  });
 });
