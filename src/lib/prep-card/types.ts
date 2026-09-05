@@ -20,6 +20,18 @@ export type PrepRankedMeasure = {
   eligible: number;
 };
 
+/** Verified failing excerpt + rewrite for one focus measure. */
+export type PrepFocusExample = {
+  measureId: PrepMeasureId;
+  sermonId: string;
+  sermonTitle: string;
+  /** Exact contiguous substring from the cleaned manuscript. */
+  quote: string;
+  offset: number;
+  /** Model rewrite of that quote only; absent if rewrite failed. */
+  rewrite: string | null;
+};
+
 export type PrepCardSelection = {
   strengths: PrepRankedMeasure[];
   focus: PrepRankedMeasure[];
@@ -38,8 +50,13 @@ export type PrepCardSnapshot = {
   counts: PrepMeasureCount[];
   strengths: PrepRankedMeasure[];
   focus: PrepRankedMeasure[];
+  /** WAS/NOW examples for focus measures that yielded a verified quote. */
+  focusExamples: PrepFocusExample[];
   /** Sermon ids used (for audit). */
   sermonIds: string[];
+  /** Optional rewrite-call cost audit (one call per card when examples exist). */
+  rewriteCostUsd?: number | null;
+  rewriteModel?: string | null;
 };
 
 export type PrepCardRow = {

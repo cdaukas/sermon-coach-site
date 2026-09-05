@@ -15,9 +15,12 @@ import {
   type PrepMeasureId,
 } from "./measures";
 import { emptyCountsForIds, rankPrepCard } from "./ranking";
+import { rewriteFocusExamples } from "./rewrite-focus";
+import { selectFocusFailureExamples } from "./select-failure-examples";
 import { detectPrepSourceFormat } from "./text";
 import type {
   PrepCardSnapshot,
+  PrepFocusExample,
   PrepMeasureCount,
   PrepSourceFormat,
 } from "./types";
@@ -201,6 +204,36 @@ export async function buildPrepCardSnapshot(
   const manuscriptCount = formats.filter((f) => f === "manuscript").length;
   const transcriptCount = formats.filter((f) => f === "transcript").length;
 
+  const failureExamples = selectFocusFailureExamples({
+    focusIds: focus.map((row) => row.id),
+    sermons: sermons.map((sermon) => ({
+      id: sermon.id,
+      title: sermon.title,
+      content: sermon.content,
+      intakePath: sermon.intakePath,
+    })),
+    askCoding,
+  });
+
+  const rewriteResult = await rewriteFocusExamples(failureExamples, codingOpts);
+  const rewriteByMeasure = new Map(
+    rewriteResult.rewrites.map((row) => [row.measureId, row.rewrite] as const),
+  );
+  const focusExamples: PrepFocusExample[] = failureExamples.map((example) => ({
+    measureId: example.measureId,
+    sermonId: example.sermonId,
+    sermonTitle: example.sermonTitle,
+    quote: example.quote,
+    offset: example.offset,
+    rewrite: rewriteByMeasure.get(example.measureId) ?? null,
+  }));
+
+  if (rewriteResult.estimatedCostUsd != null) {
+    console.info(
+      `[prep_card] rewrite call model=${rewriteResult.model} cost_usd=${rewriteResult.estimatedCostUsd.toFixed(4)}`,
+    );
+  }
+
   return {
     sampleSize,
     generatedAt: now.toISOString(),
@@ -218,7 +251,10 @@ export async function buildPrepCardSnapshot(
     counts,
     strengths,
     focus,
+    focusExamples,
     sermonIds: sermons.map((s) => s.id),
+    rewriteCostUsd: rewriteResult.estimatedCostUsd,
+    rewriteModel: rewriteResult.model || null,
   };
 }
 

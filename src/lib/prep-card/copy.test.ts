@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { prepCardPoolNote } from "./copy";
+import { formatPrepCountCaption, prepCardPoolNote } from "./copy";
+
+describe("formatPrepCountCaption", () => {
+  it("does not double the denominator on sermons", () => {
+    assert.equal(formatPrepCountCaption(24, 24, 2), "24 of 24 sermons");
+    assert.equal(formatPrepCountCaption(8, 24, 7), "8 of 24 sermons");
+  });
+
+  it("uses manuscripts phrasing for measures 4 and 5", () => {
+    assert.equal(formatPrepCountCaption(6, 18, 4), "6 of your 18 manuscripts");
+    assert.equal(formatPrepCountCaption(6, 18, 5), "6 of your 18 manuscripts");
+  });
+});
 
 describe("prepCardPoolNote", () => {
   it("names the format split and per-measure support on a mixed sample", () => {

@@ -246,6 +246,23 @@ export function prepCardPoolNote(input: PrepPoolNoteInput): string {
   return `${head} ${inventory} ${focusNote}`;
 }
 
+/**
+ * Single count caption. Do not append a second denominator.
+ * Manuscripts (4/5): "6 of your 18 manuscripts"
+ * Sermons: "8 of 24 sermons"
+ */
+export function formatPrepCountCaption(
+  hits: number,
+  eligible: number,
+  measureId: PrepMeasureId,
+): string {
+  if (measureId === 4 || measureId === 5) {
+    return `${hits} of your ${eligible} manuscripts`;
+  }
+  return `${hits} of ${eligible} sermons`;
+}
+
+/** @deprecated Prefer formatPrepCountCaption — kept for older call sites. */
 export function formatPrepCount(hits: number, eligible: number): string {
   return `${hits} of ${eligible}`;
 }
