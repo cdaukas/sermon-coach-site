@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sermon Coach · Open items by priority · 5 September 2026</title>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-mid: #2a3447;
+    --rule: #d4cfc1;
+    --panel: #ffffff;
+    --accent: #8d6927;
+    --accent-soft: #c9a55c;
+    --accent-pale: #faf6ed;
+    --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 56px 28px 80px; }
+
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 18px;
+  }
+  h1 { font-size: 38px; line-height: 1.14; font-weight: 600; letter-spacing: -.02em; }
+  .sub { font-size: 16px; color: var(--ink-soft); margin-top: 14px; max-width: 60ch; }
+
+  .group { margin-top: 52px; }
+  .group-head {
+    display: flex; align-items: baseline; gap: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--rule); margin-bottom: 6px;
+  }
+  .group-name {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: 700; color: var(--accent);
+  }
+  .group-note { font-size: 14px; color: var(--ink-soft); font-style: italic; }
+
+  ol { list-style: none; counter-reset: none; }
+  li.item {
+    display: grid; grid-template-columns: 42px 1fr; gap: 4px 14px;
+    padding: 16px 0; border-bottom: 1px solid var(--rule);
+  }
+  li.item:last-child { border-bottom: none; }
+  .num {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px; font-weight: 700; color: var(--accent-soft);
+    padding-top: 3px;
+  }
+  .title { font-size: 17px; font-weight: 600; line-height: 1.35; }
+  .why { grid-column: 2; font-size: 14.5px; color: var(--ink-mid); line-height: 1.65; }
+  .tag {
+    display: inline-block; margin-left: 8px; vertical-align: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 10px; letter-spacing: .09em; text-transform: uppercase;
+    font-weight: 700; color: #fff; background: var(--accent);
+    padding: 2px 7px; border-radius: 3px;
+  }
+  .tag.date { background: var(--ink); }
+  .tag.quick { background: #5c7a5c; }
+  .tag.done { background: #8a8a8a; }
+  .tag.new { background: #8d3a3a; }
+  li.item.is-done .title, li.item.is-done .why { opacity: .5; }
+    .tag.size { background: transparent; border: 1px solid #cfc7b4; color: #7a7161; }
+  .tag.build { background: #6b4a7a; }
+
+  .divider { margin: 66px 0 0; padding: 26px 28px; background: var(--accent-pale);
+    border-left: 3px solid var(--accent); border-radius: 4px; }
+  .divider p { font-size: 15.5px; color: var(--ink-mid); }
+  .divider strong { color: var(--ink); }
+
+  .flat { columns: 2; column-gap: 34px; margin-top: 8px; }
+  .flat li {
+    break-inside: avoid; font-size: 14.5px; color: var(--ink-mid);
+    padding: 7px 0 7px 20px; position: relative; line-height: 1.5;
+  }
+  .flat li::before {
+    content: counter(mi); counter-increment: mi;
+    position: absolute; left: 0; top: 7px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 11px; font-weight: 700; color: var(--accent-soft);
+  }
+  .flat { counter-reset: mi 21; }
+
+  .parked { margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--rule); }
+  .parked p { font-size: 14px; color: var(--ink-soft); }
+
+  footer {
+    margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--rule);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px; color: var(--ink-soft); line-height: 1.8;
+  }
+
+  @media print {
+    body { background: #fff; }
+    .wrap { padding: 0; max-width: none; }
+    .group { break-inside: avoid-page; }
+    li.item { break-inside: avoid; }
+  }
+  @media (max-width: 620px) {
+    h1 { font-size: 29px; }
+    .flat { columns: 1; }
+    li.item { grid-template-columns: 32px 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">The Sermon Coach · Working ledger</div>
+  <h1>Open items, highest priority first.</h1>
+  <p class="sub">Everything currently open, ranked. Maintenance and cleanup sit below the break. Parked items with triggers are listed last and are not open work. Size tags are rough buckets, not hours: &lt;1 hr, session, multi. <strong>Numbers are stable identifiers, not ranks &mdash; position is the rank.</strong> 5 September 2026, evening.</p>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">The corpus work, and what it produced</span>
+      <span class="group-note">Nobody has read a prep card yet</span>
+    </div>
+    <ol>
+      <li class="item"><span class="num">21</span><span class="title">Read a prep card <span class="tag new">new</span></span>
+        <p class="why">Merged 5 Sept on five measured disciplines. <strong>Nothing user-facing until <em>20260905190000_prep_cards.sql</em> is applied by hand</strong> in the SQL editor, then <em>migration repair</em>. Never <em>db push</em>. Read it against one question: does this tell me something I did not know, and would I do anything differently next Saturday? The Application deep dive got materially better three times because the output was read and corrected.</p></li>
+      <li class="item"><span class="num">22</span><span class="title">Criterion 1 does not discriminate <span class="tag new">confirmed</span></span>
+        <p class="why">Production scores textual fidelity a 4 on 137 of 172 sermons, an 80% mode. Two blind pre-registered hand-codings of the same corpus find a 40&ndash;59% mode with a real top and a real bottom. A pastor handling the text badly is told he is fine; one handling it beautifully gets no credit. Its standard deviation of 0.397, the lowest in the rubric, measures the collapse rather than the preacher, so <strong>its gate in the criterion table is wrong and must be recomputed after the bump.</strong> Feeds item 20.</p></li>
+      <li class="item"><span class="num">23</span><span class="title">Hand-audit the correction move <span class="tag quick">30 min</span></span>
+        <p class="why">28 of 28 top-tier manuscripts contain it &mdash; the preacher names his own expectation and then surrenders it to the text &mdash; and no counter exists. Reading seventeen manuscripts produces the hand list a counter is validated against, exactly as the object marker went from 38 to 6. It is the fix for item 22 and the twelfth prep-card measure.</p></li>
+      <li class="item"><span class="num">24</span><span class="title">Six prep-card counters remain <span class="tag">multi</span></span>
+        <p class="why">Five of twelve measures have counters. Measure 6 needs spaCy and a second deploy, correctly declined for now. Measures 1, 9, 10 and 11 need building. The card is real at five and it is a fifth of what the spec describes.</p></li>
+      <li class="item"><span class="num">25</span><span class="title">Watch the first purge run <span class="tag date">mid-Sept</span></span>
+        <p class="why">Built and merged behind the report-only flag. First soft-deleted rows become eligible mid-month. <strong>Report-only is mandatory for the first cycle.</strong> Read the output before the flag comes off. Unrecoverable if wrong.</p></li>
+      <li class="item"><span class="num">26</span><span class="title">Series Prep in Stripe <span class="tag new">new</span></span>
+        <p class="why">Retired from the site 5 Sept. <em>/checkout?pack=pack_12</em> still resolves to a live $109 price and the old Payment Link may still be active. Nobody holds unused credits. Either it stays honourable for anyone with an old link, or it is genuinely gone &mdash; and <strong>if the price is archived, pack_12 comes out of checkout.ts in the same pass</strong> rather than routing to a dead price.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">Preaching Lab</span>
+      <span class="group-note">Hand-run. Only two items here are code.</span>
+    </div>
+    <ol>
+      <li class="item"><span class="num">1</span><span class="title">Payment path for the Lab <span class="tag size">multi</span></span>
+        <p class="why">Stripe Payment Link or invoice, same pattern as the Intensive. No self-serve checkout, which is why Brief A no longer gates anything here. The $249 flat price this item used to name was retired 29 August as a 14 percent discount on parts that goes underwater at twelve participants. The Lab is priced at parts, Apprentice $12 and Colleague $25 per preacher per month, so the amount is computed per roster rather than fixed.</p></li>
+      <li class="item"><span class="num">2</span><span class="title">Mentee-side paired sample and its public page <span class="tag build">build <span class="tag size">multi</span></span></span>
+        <p class="why">What a mentor sees before paying $12. The mentor side is already live and populated with a real mid-band sermon. More urgent now that the seat sells without a conversation.</p></li>
+      <li class="item"><span class="num">3</span><span class="title">File upload, .txt and .md <span class="tag build">build <span class="tag size">session</span></span></span>
+        <p class="why">Nearly free. Lay men new to the product doing a lot of copy-paste, and a lay preacher writing in Word is likelier to have a file than a pastor who lives in his manuscript app.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">Revenue and reach</span>
+      <span class="group-note">Builds that move revenue</span>
+    </div>
+    <ol>
+      <li class="item"><span class="num">4</span><span class="title">Spanish, approved and unblocked <span class="tag build">build <span class="tag size">session</span></span></span>
+        <p class="why">The verification partnership is the thing the whole build rested on and it is now in place. Phases in order: glossary, eval engine calibration, minimal app slice, localized Stripe checkout, minimal marketing, QA. NBLA and LBLA as reference translations, USD pricing throughout, GTN pastors served by comps rather than discounts. Legal pages stay English pending attorney review. Ezequiel's 28, the lowest customer score in the corpus, is still unread.</p>
+      <li class="item"><span class="num">5</span><span class="title">Seat allotment counts per relationship, not per seat <span class="tag build">build <span class="tag size">multi</span></span></span>
+        <p class="why">Found 4 September while verifying the submit line. The mentee line read 0 of 2 on a seat that had already taken a submission this month, because mentored_submissions_this_month is scoped to a relationship id and ending and re-inviting produces a new row. So a mentor can reset a mentee's monthly allotment by ending the relationship and sending a fresh invite, two submissions at a time, on one paid seat. Not something a confused user stumbles into, and not urgent at current volume, but Classroom sells seats to institutions and this is the kind of hole that gets found once somebody has a reason to look. Decide whether the allotment keys on the seat and the calendar month rather than on the relationship.</p></li>
+      <li class="item"><span class="num">6</span><span class="title">Finish verifying the mentee submit line <span class="tag quick">quick <span class="tag size">&lt;1 hr</span></span></span>
+        <p class="why">Shipped and merged 4 September at d52bfad. The under-cap Apprentice line is verified on production and renders correctly with the count. Unverified: the at-cap wall, and whether the submit control is genuinely disabled rather than only computing disabled. Reaching the cap needs two submissions on a fresh relationship, roughly a dollar. MENTORED_ALLOTMENT_EXHAUSTED_ERROR is still the server-side backstop, so a wrong wall degrades rather than breaks. Dark Apprentice is unit-tested only; no dark relationship exists in production and one was deliberately not created. Assert the disabled attribute on the rendered button, not the boolean in the component.</p></li>
+      <li class="item"><span class="num">7</span><span class="title">Seat precedence needs a disclosure line <span class="tag build">build <span class="tag size">session</span></span></span>
+        <p class="why">Reproduced on production 4 September and reclassified from bug to design gap. Seat precedence is correct: accepting a mentoring relationship should outrank your own subscription. The submit line now discloses where a sermon is going, which was the sharp end of this. What remains is the decision about overflow: today allotment spent blocks, and the alternative is falling through to the mentee's own credits once the month's seat allotment is used. Open alongside it, and the reason to decide: what a mentee without a subscription sees at the wall, which is the most honest Coach upsell the product will ever have.</p></li>
+      <li class="item"><span class="num">8</span><span class="title">The discovery block on Billing <span class="tag size">session</span></span>
+        <p class="why">Three or four lines naming what else exists, with prices. A logged-in subscriber may never see the pricing page again after converting.</p></li>
+      <li class="item"><span class="num">9</span><span class="title">Collapse Packs, retire Series Prep <span class="tag done">done 5 Sept</span></span>
+        <p class="why">Packs becomes one line under Coach. Series Prep comes off the pricing page and off BuyPackCards and DashboardSubscribeCTA in the same commit so the two do not go dark separately. Leave checkout.ts, pack-credits.ts, and the migrations alone. Then archive price_1ThKUo2Ea1b3J5pTwjlOCQUm by hand.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">Site audit, 2 September</span>
+      <span class="group-note">Seven findings survived scrutiny. Most of it is one sitting.</span>
+    </div>
+    <ol>
+      <li class="item"><span class="num">10</span><span class="title">The metadata pass, three pages <span class="tag quick">1 hr <span class="tag size">&lt;1 hr</span></span></span>
+        <p class="why">The homepage meta description is 46 characters of the 155 available, and the og:description on the same page is already the copy that belongs in it. The pricing page has no meta description, no OG tags, and no Twitter card at all, so a pricing link pasted into a staff Slack or a pastors' group text renders as a bare URL. For a business that runs on warm referral that is a leak in the primary channel. how-its-scored has no meta description either. Nothing here depends on anyone else.</p></li>
+      <li class="item"><span class="num">11</span><span class="title">Data-handling sentence under both CTAs <span class="tag quick">quick <span class="tag size">&lt;1 hr</span></span></span>
+        <p class="why">Highest conversion-per-word item the audit found. Handing over an unpreached manuscript is the hesitation, and the AI ethics section answers what the tool will not do without ever saying what happens to the file. One sentence under the homepage footer CTA and on /start. It is a legal representation, so it has to match privacy.html and the upstream API terms exactly, and neither has been attorney-reviewed. Folds into item 20.</p></li>
+      <li class="item"><span class="num">12</span><span class="title">Organization, Product, and FAQPage JSON-LD, plus llms.txt <span class="tag build">build <span class="tag size">session</span></span></span>
+        <p class="why">No JSON-LD on any page. The pricing page has a visible nine-item FAQ and no FAQPage markup. llms.txt returns 404, which means it was requested. Pastors increasingly ask an assistant rather than a search box, and being citable is the cheapest distribution on this board.</p></li>
+      <li class="item"><span class="num">13</span><span class="title">/sample-evaluation responds in 1413ms <span class="tag build">build <span class="tag size">session</span></span></span>
+        <p class="why">Homepage is 700ms and pricing is 692ms, both comfortably under the 800ms bar. The slowest page on the site is the one the audit called genuinely impressive, the strongest asset the product has, and the page an outreach email points a pastor at. The audit surfaced this in its SEO detail and then left it off its own fix list.</p></li>
+      <li class="item"><span class="num">14</span><span class="title">/vs/chatgpt, one page <span class="tag build">build <span class="tag size">session</span></span></span>
+        <p class="why">The audit wanted three /vs pages. Build one. Competitor-name searches have no volume in this category yet; "why not just use ChatGPT" is the live objection in every conversation. This is objection handling that happens to live at a /vs URL. Spine is the existing AI and preaching position plus the framework sourcing: a fixed, published, criterion-anchored instrument against a fresh improvised answer every time. FAQPage schema, linked from the footer.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">Decisions that gate builds</span>
+      <span class="group-note">Judgment, not work</span>
+    </div>
+    <ol>
+      <li class="item"><span class="num">15</span><span class="title">Classroom card bullet, the floor now that it is resolved <span class="tag">quick</span> <span class="tag size">&lt;1 hr</span></span>
+        <p class="why">Decided 5 September. Five is the naming boundary between Classroom and Lab, not a purchase minimum. The three statements were never opposed: PR #310 kept the five-seat line on the reasoning that a four-man group is simply a Lab through the same form, which concedes that the floor rejects nobody. Rejected alternatives were dropping the figure, which leaves two cards priced identically at $12 and $25 differing only by tagline, and enforcing a real minimum, which either overcharges a four-student class by $48 across a four-month term ($240 against $192) or refuses a buyer worth taking. Both ledger rows and the open-item section are corrected. What remains is one bullet on pricing.html, replacing "Five-seat minimum, billed by the term" with "Five students or more, billed by the term. Smaller groups run as a Preaching Lab through the same form." Label text only, no data attribute and no href, so applyBillingCadence does not overwrite it on load or on the billing toggle. No longer judgment; sort it with the site-audit copy on the next regeneration.</p></li>
+      <li class="item"><span class="num">16</span><span class="title">Completeness versus doctrinal checklist <span class="tag size">session</span></span>
+        <p class="why">The diff says a criterion cannot reach 5 while a load-bearing element is absent. The ladders say do not penalize what the passage does not raise. Both defensible, and whichever wins is a scoring behavior.</p></li>
+      <li class="item"><span class="num">17</span><span class="title">The growth-edge instruction has no rule for 5s <span class="tag size">session</span></span>
+        <p class="why">It covers 1 through 3 and 4. Three of eleven criteria currently get praise instead of an observation, because a perfect score has no next rung.</p></li>
+      <li class="item"><span class="num">18</span><span class="title">Legal review, one pass <span class="tag size">multi</span></span>
+        <p class="why">Terms, privacy, the &trade;, the authorship paragraph, the disclaimer on five blog posts, the competitive-use clause, and <strong>the corpus-norms question</strong> &mdash; privacy &sect;2 says sermon content is not analyzed beyond generating the evaluation, and terms &sect;6 licenses processing solely to provide the service to that user. Corpus-wide norms are not that. Add one more: privacy.html has no backup-and-operational-copies clause, while the delete dialog promises permanent deletion at 30 days. Supabase daily backups make that approximate no matter what the purge job does. The dialog is the wrong place to say so. One pass, not seven errands.</p></li>
+      <li class="item"><span class="num">19</span><span class="title">Move the ledger into the repo <span class="tag done">done</span></span>
+        <p class="why">It has forked twice, and the current storage arrangement guarantees a third. In the repo it gets a commit history, a diff on every change, and a merge conflict instead of a silent fork.</p></li>
+    </ol>
+  </div>
+
+  <div class="group">
+    <div class="group-head">
+      <span class="group-name">Product quality</span>
+    </div>
+    <ol>
+      <li class="item"><span class="num">20</span><span class="title">4.1, the consolidated prompt edit <span class="tag size">multi</span></span>
+        <p class="why">Now clarity rather than calibration. Ladders, presumptions, the override boolean, three held caps, the growth-edge instruction, the criterion 8 slug. Edit SKILL.md, not the generated rubric.<br><br>
+        Three additions from the quote audit. <strong>Give the quote a criterion-specific job.</strong> Gospel clarity has an obvious quotable object and structure does not; what you quote for structure is a seam, for emotional arc a peak, for ecclesial faithfulness the line addressed to the body. Name the job for each of the eleven. <strong>Require a short reason when the quote is null.</strong> Today 1,862 of 2,376 slots omit the key entirely against only 18 explicit nulls, so the model is not declining, it is forgetting. A required reason makes skipping legible and shows which criteria genuinely have nothing to quote. <strong>Declare approximate_location display-only prose.</strong> Free text like "Point 3b" or "WE section" is more useful to a preacher than "middle," and 372 of 496 stated locations cannot be keyword-checked. Stop trying to verify it and say so in the field description.</p></li>
+    </ol>
+  </div>
+
+  <div class="divider">
+    <p><strong>Everything below this line is maintenance and cleanup.</strong> Real, worth doing, and none of it breaks anything or moves revenue if it waits.</p>
+  </div>
+
+  <ol class="flat">
+    <li><s>Classroom card states its price twice</s>; misdiagnosed. The two prices are the model, not a duplication bug. The real change is the floor bullet, now item 15</li>
+    <li>MENTORING_UI_ALLOWLIST is dead for the rail and page access, still live on /mentor/invite</li>
+    <li>excluded_from_growth exists in production with no migration in the repo</li>
+    <li>.env.vercel.prod is a stale snapshot and misled a diagnosis; treat it as unreadable</li>
+    <li>Five untracked Python files in scripts/ carrying the corpus parser work, unversioned across two sessions</li>
+    <li>Thirteen tsc errors on main, unchanged for at least a week</li>
+    <li>Dead .packs and .pack-name CSS after the Series Prep retirement</li>
+    <li>pricing.html promises with no code, the remainder after #285</li>
+    <li>Gold fails AA on cream sitewide at 3.57:1; scoped tokens already exist</li>
+    <li>getEvaluationModel() should throw rather than fall back</li>
+    <li>No comp path for evaluation seats</li>
+    <li>Failed seat-end sends are invisible</li>
+    <li>Seat-end email greeting falls back to "Hi there"</li>
+    <li>Split the prompt fragments out of output-language.ts before Spanish resumes</li>
+    <li>Preview deployments are public</li>
+    <li>/why-sermon-coach 404s without the .html, plus the rewrite-rule asymmetry behind it</li>
+    <li>Dead schema: period_days and period_started_at</li>
+    <li>Domain tidying: .online in terms and privacy, mixed CTA addresses, stale cookie doc</li>
+    <li>STEP_6_PLAN.md describes a retired product</li>
+    <li>faq.html still claims two homepage samples</li>
+    <li>Verdict lines backfill, score display cleanup, small copy fixes</li>
+    <li>Next.js middleware deprecation warning</li>
+    <li>Systematic FAQ rename, rubric to Framework</li>
+    <li>Re-derive the "56 unmerged branches" count; the method was wrong</li>
+    <li>cursor-brief-quote-audit.md does not exist on disk; audit other artifacts the ledger calls written</li>
+    <li>Debrief rows record no input_tokens or output_tokens; runCoachingNarrative consumes something and it is not instrumented</li>
+    <li>No founder photo in the "Built by a preacher" section; the bio copy already carries 25 years, 14 as lead pastor, and the GTN role, and there is no face next to it</li>
+    <li>No value anchor under the Coach price; neither competitor has one either, so it is a category-wide gap rather than a deficit. Do not use per-eval math that assumes all ten credits get used</li>
+    <li>No "not for you if" line on the pricing page; cheap, on-voice next to the existing "will not" list, and it reduces bad-fit signups that end in refunds</li>
+    <li>Tyler's testimonial has no last name; the other two are fully attributed</li>
+    <li>Twelve rows from the 18 August Tyler cleanup still sit in archive._admin_row_archive; the purge sweep is scoped to reason like 'purge %' and will never touch them. The 25 August incident write-up says drop them unless the cleanup still needs reversing, and it does not</li>
+  </ol>
+
+  <div class="parked">
+    <p><strong>Outreach, not build work.</strong> Tracked here so the clocks stay visible.</p>
+    <p style="margin-top:10px">&middot; <strong>Thurman Williams, October to November.</strong> Spring syllabi get decided then, and he directs homiletics at Covenant and teaches a DMin course on AI and preaching. No direct email published; the faculty inbox is shared. Better doors are New City Fellowship&ndash;West End, a PCA introduction, or Covenant's Lilly-funded Compelling Preaching Initiative. Ask for a free pilot term and his criticism, not a sale.<br>
+    &middot; <strong>Sell Teams by hand to the first church.</strong> Card is live, Tally form is live, seats sell themselves underneath it. Tyler or Adam, whoever has staff who actually preach. Watching one lead pastor read four associates answers the stewardship-versus-surveillance question by observation.<br>
+    &middot; <strong>Seminary outreach, the rest of it.</strong> Reps, not better feedback. A student preaches eight times across a degree, then forty-five times a year for thirty years. Throughput, not standards.</p>
+  </div>
+
+  <div class="parked">
+    <p><strong>Standing rules.</strong> Not tasks, and never completable. They hold whenever the condition applies.</p>
+    <p style="margin-top:10px">&middot; <strong>Never press release in a Preaching Lab.</strong> The control renders on an Apprentice seat and no code stops you. That discipline is what stands in for the build, and "held until you release it" is false copy in a Lab, so the page needs its own variant.<br>
+    &middot; <strong>One concern per branch.</strong> Step 0 read-only gate, explicit stop conditions, a do-not-touch list, and verification against the live deploy rather than a diff.<br>
+    &middot; <strong>Runtime is the judge.</strong> curl -sL, not curl -s. Webhooks fire on production only. Described is not shipped.<br>
+    &middot; <strong>Never run supabase db push.</strong> Write the migration file, apply by hand in the SQL editor, repair after.<br>
+    &middot; <strong>The mentee submits their own sermon.</strong> That is what a seat is. If the mentor submitted on their behalf there would be no account, no private library, and no seat to sell.<br>
+    &middot; <strong>Never key a write on normalized_email.</strong> It is not unique. Use explicit UUIDs.</p>
+  </div>
+
+  <div class="parked">
+    <p><strong>Parked with triggers, not open work.</strong> Corpus norms Part C, behind the privacy decision &middot; Measure 6 and its spaCy service, behind card demand &middot; The quarterly report, behind two unwritten copy libraries &middot; Watch the first real invite acceptance, when one is pending &middot; Growth contamination check, if a mentor Growth Report looks wrong or before the built Lab ships &middot; Screen the roster and provision Lab 1, both when a trainer signs up &middot; Evangelical Homiletics Society, not attending 2026; revisit when the 2027 venue posts &middot; The built Preaching Lab with its own tables, when a second trainer wants to run one &middot; Teams automation, at church three &middot; Coach to $39, at 25 paid subscribers &middot; Name-first checkout &middot; Self-serve Classroom &middot; Pooling &middot; Audio ingestion &middot; The trainer queue &middot; GTN partner codes &middot; Blog automation &middot; sermonrefinery.com &middot; Homepage quantity proof and the avatar grid, above roughly 100 pastors who have completed a first evaluation &middot; Third-party badge strip, G2 and Trustpilot and Product Hunt, wrong audience for a $29 pastor tool; revisit only on an institutional signal &middot; /vs/preach-better and /vs/sermon-forge, on competitor-name impressions in Search Console</p>
+  </div>
+
+  <div class="parked">
+    <p><strong>Closed since 29 August.</strong> Invite seam check &middot; Teams card live (#300, #302) &middot; Mentoring card and mentor seat checkout (#303) &middot; Mentoring empty state and rail unlock (#304) &middot; Four-Colleague-seat question, no cap exists &middot; Lab decided hand-run, the four-to-seven-day build parked &middot; Lab Tally form built &middot; normalized_email duplicates cleared, no others found &middot; Spanish approved and unblocked &middot; Who submits, answered: mentees submit their own &middot; Score 1 confirmed reachable: raw_total 11 of 55 on an all-1s evaluation &middot; Low-scoring pinned sermon dropped, nothing suitable to pin &middot; Quote audit run: zero fabrications in 496 quotes, follow-ups folded into 4.1 &middot; Null-result evaluations closed for good: all fifteen are debrief rows with narratives populated, which is correct behavior &middot; Classroom five-seat floor resolved 5 Sep: a naming boundary, not a purchase minimum; both Decided rows and the open-item section corrected in the ledger, card bullet pending at item 15 &middot; Preaching Lab $249 flat price confirmed retired, priced at parts &middot; <strong>Sermon delete purge job shipped and verified (#328)</strong>, both tests walked on production; three calendar dates remain, 18, 19 and 20 September</p>
+  </div>
+
+  <footer>
+    The Sermon Coach&trade; &middot; Dr. Christopher M. Daukas &middot; Phoenix, Arizona<br>
+    Generated from the working ledger, 5 September 2026, evening. Merged with the corpus-derivation session: items 21 through 26 are new, items 9 and 19 are done. Numbering is otherwise unchanged, so nothing that references an item number goes stale.<br>
+    Closed 5 Sept: Series Prep retired and verified live, the prep card shipped on five measures, the ledger moved into the repo, three suspected rubric defects checked and closed.
+  </footer>
+
+</div>
+</body>
+</html>
