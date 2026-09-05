@@ -44,6 +44,11 @@ const PRIMARY_ITEMS: NavItem[] = [
     label: "Growth",
     isActive: (pathname) => pathname.startsWith("/dashboard/growth"),
   },
+  {
+    href: "/dashboard/prep-card",
+    label: "Prep card",
+    isActive: (pathname) => pathname.startsWith("/dashboard/prep-card"),
+  },
 ];
 
 const ACCOUNT_ITEMS: NavItem[] = [
