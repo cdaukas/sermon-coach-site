@@ -99,4 +99,66 @@ describe("selectFocusFailureExamples dedupe", () => {
     assert.equal(examples[0]!.measureId, 3);
     assert.equal(examples[0]!.quote, SHARED);
   });
+
+  it("measure 7 only selects coded asks, never staging notes", () => {
+    const staging =
+      "Hold onto those pesos — they're coming back later in this sermon";
+    const privateAsk = "Confess your sin before God this week.";
+    const sermons = [
+      sermon("s1", "Acts", `${staging}\n\n${privateAsk}`),
+    ];
+    const askCoding: SermonApplicationCoding[] = [
+      {
+        sermonId: "s1",
+        namedObject: false,
+        namedCost: false,
+        asks: [
+          {
+            quote: privateAsk,
+            named_object: false,
+            named_cost: false,
+          },
+        ],
+      },
+    ];
+
+    const examples = selectFocusFailureExamples({
+      focusIds: [7],
+      sermons,
+      askCoding,
+    });
+
+    assert.equal(examples.length, 1);
+    assert.equal(examples[0]!.quote, privateAsk);
+    assert.equal(examples[0]!.marker, "reciprocal");
+    assert.notEqual(examples[0]!.quote, staging);
+  });
+
+  it("measure 7 omits Was/Now when no coded ask fails reciprocal", () => {
+    const reciprocalAsk =
+      "Confess that sin to your brother in this church before you leave.";
+    const sermons = [sermon("s1", "Acts", reciprocalAsk)];
+    const askCoding: SermonApplicationCoding[] = [
+      {
+        sermonId: "s1",
+        namedObject: true,
+        namedCost: false,
+        asks: [
+          {
+            quote: reciprocalAsk,
+            named_object: true,
+            named_cost: false,
+          },
+        ],
+      },
+    ];
+
+    const examples = selectFocusFailureExamples({
+      focusIds: [7],
+      sermons,
+      askCoding,
+    });
+
+    assert.equal(examples.length, 0);
+  });
 });
