@@ -72,6 +72,8 @@ async function resolveMenteeEmails(
 /**
  * Pending and active seats for the signed-in mentor.
  * Uses mentor SELECT under RLS; no list RPC.
+ * Explicit mentor_id filter so mentee-side rows (also readable under RLS)
+ * never appear under Your Preachers.
  * Active mentee emails come from auth admin (auth.users is not client-readable).
  * Submission used counts share the create_mentored_evaluation filter.
  * Server-only — do not import from client components.
@@ -81,11 +83,19 @@ export async function listMentorSeatsForMentor(): Promise<{
   active: ActiveMentorMentee[];
 }> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { pending: [], active: [] };
+  }
+
   const { data, error } = await supabase
     .from("mentor_relationships")
     .select(
       "id, status, seat_type, invite_token, mentee_id, created_at, accepted_at, invite_email_to, invite_email_sent_at, mentor_label, mentee_reads, debrief_visible_since",
     )
+    .eq("mentor_id", user.id)
     .in("status", ["pending", "active"])
     .order("created_at", { ascending: false });
 

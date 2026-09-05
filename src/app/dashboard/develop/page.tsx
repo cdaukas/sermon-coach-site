@@ -10,6 +10,11 @@ import { buildPreacherCards } from "@/components/mentor/mentoring-model";
 import { SeatPurchasePending } from "@/components/mentor/SeatPurchasePending";
 import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
 import { mentoringDevelopSurface } from "@/lib/mentor/develop-surface";
+import {
+  FALLBACK_MENTOR_NAME,
+  getMenteeCoachingView,
+  menteeFacingMentorName,
+} from "@/lib/mentor/relationship";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
 import { profileIsTeamAccount } from "@/lib/mentor/team-account";
@@ -26,6 +31,25 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
+
+function sentenceStartMentorName(name: string): string {
+  const normalized = menteeFacingMentorName(name);
+  if (normalized.length === 0) {
+    return FALLBACK_MENTOR_NAME.charAt(0).toUpperCase() + FALLBACK_MENTOR_NAME.slice(1);
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function MenteeMentoringLine({ mentorName }: { mentorName: string }) {
+  return (
+    <p
+      className="mb-8 text-[16px] leading-relaxed"
+      style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+    >
+      {sentenceStartMentorName(mentorName)} is mentoring you.
+    </p>
+  );
+}
 
 function SectionHeading({
   id,
@@ -194,19 +218,26 @@ export default async function DevelopPage({ searchParams }: DevelopPageProps) {
   initialDisplayName =
     typeof raw === "string" && raw.trim() !== "" ? raw.trim() : null;
 
-  const [submissions, seats] = await Promise.all([
+  const [submissions, seats, coachingView] = await Promise.all([
     listMentoredEvaluationsForMentor(),
     listMentorSeatsForMentor(),
+    getMenteeCoachingView(user.id),
   ]);
 
   const preachers = buildPreacherCards(seats.active, submissions);
   const hasPreachers = preachers.length > 0;
+  const menteeLine =
+    coachingView.isMentoredMentee ? (
+      <MenteeMentoringLine mentorName={coachingView.mentorName} />
+    ) : null;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-1 pb-20">
       <PageHeader isTeamAccount={isTeamAccount} />
 
       {isTeamAccount ? null : <YourSeats capacity={capacity} />}
+
+      {menteeLine}
 
       {hasPreachers || capacity ? (
         <section
