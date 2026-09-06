@@ -92,8 +92,9 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
     strengthHeadline: "The cross has a named object.",
     strengthLine:
       "When you name the cross you say what it dealt with — wrath, the curse, the debt, the grave — so people can tell you what happened rather than only that something did.",
-    focusHeadline: null,
-    focusLine: null,
+    focusHeadline: "Name what the cross dealt with.",
+    focusLine:
+      "Your cross sentences are mostly placeholders until they name a specific thing absorbed, paid, or broken.",
     ask: "At the cross he absorbed ___. Can I fill the blank from this passage?",
   },
   9: {
@@ -119,8 +120,9 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
     strengthHeadline: "The gospel is in your skeleton.",
     strengthLine:
       "A gospel word sits in a numbered main point, so the gospel carries the argument rather than warming it at the end.",
-    focusHeadline: null,
-    focusLine: null,
+    focusHeadline: "Put the gospel in a main point.",
+    focusLine:
+      "If every gospel sentence could be deleted and the argument still stood, the gospel is warming the sermon rather than holding it up.",
     ask: "Would this argument still stand if I deleted every gospel sentence?",
   },
   12: {
@@ -128,8 +130,9 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
     strengthHeadline: "You remember the person who does not yet believe",
     strengthLine:
       "Your preaching leaves room for the unbeliever. You address him rather than assuming everyone listening already believes.",
-    focusHeadline: null,
-    focusLine: null,
+    focusHeadline: "Speak to the person who has not decided.",
+    focusLine:
+      "Address him once, earlier than the last ninety seconds, and give him something to do.",
     ask: "What am I asking the person who does not yet believe?",
   },
 };
@@ -351,7 +354,8 @@ export const PREP_MEASURE_INTERPRETATION: Record<
   8: {
     high:
       "When you name the cross you say what it dealt with. Wrath, the curse, the debt, the grave. That specificity is what separates a gospel sentence from a gospel gesture, and it is why your people can tell you what happened rather than only that something did.",
-    low: null,
+    low:
+      "Your cross sentences are mostly \"for our sins\" with nothing put inside the phrase. It is true and it is a placeholder. The hearer supplies the content or he does not, and mostly he does not. Name the thing. Wrath absorbed, a debt paid, a curse taken, death broken. A cross with a named object is a cross a person can picture.",
   },
   9: {
     high:
@@ -365,13 +369,15 @@ export const PREP_MEASURE_INTERPRETATION: Record<
   },
   11: {
     high:
-      "The gospel is in your outline, not only in your prose. That is the clearest structural difference between a sermon where the gospel carries an argument and one where it is applied at the end like a coat of paint.",
-    low: null,
+      "The gospel is in your outline, not only in your prose. That is the clearest structural difference between a sermon where the gospel carries an argument and one where it is applied at the end like a coat of paint. Twenty of forty-one load-bearing sermons put a gospel word in a numbered point. One of fourteen removable ones did.",
+    low:
+      "Your gospel lives in the paragraphs and never in the frame. Delete every gospel sentence and the argument still stands, which means the gospel is warming the sermon rather than holding it up. Put a gospel word in one main point and you will find out quickly whether the rest of that point still works.",
   },
   12: {
     high:
       "You talk to the person who has not decided. Most sermons address the in-group by default and remember him in the last ninety seconds, if at all. Yours does not, and the people in your room who are still working it out know that.",
-    low: null,
+    low:
+      "Your preaching assumes everyone listening already believes. Across 443 sermons in this corpus the unbeliever is addressed in about one in five, at a median of ninety percent of the way through, and exactly one asks him to do anything physical. He is described his danger and given no verb. Speak to him once, in the first half, and give him something to do.",
   },
 };
 

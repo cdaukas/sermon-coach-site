@@ -95,26 +95,73 @@ export async function getLatestPrepCard(): Promise<PrepCardRow | null> {
     )
     .eq("user_id", user.id)
     .order("generated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(20);
 
   if (error) {
     throw new Error(error.message);
   }
-  if (!data) {
+
+  const row = (data ?? []).find((item) => {
+    const snapshot = item.snapshot as PrepCardSnapshot;
+    return snapshot.themeId !== "christ";
+  });
+  if (!row) {
     return null;
   }
 
   return {
-    id: data.id as string,
-    user_id: data.user_id as string,
-    generated_at: data.generated_at as string,
-    sample_size: data.sample_size as number,
-    source_format: data.source_format as PrepCardRow["source_format"],
-    ranked_measure_count: data.ranked_measure_count as number,
-    pool_note: data.pool_note as string,
-    snapshot: data.snapshot as PrepCardSnapshot,
-    created_at: data.created_at as string,
+    id: row.id as string,
+    user_id: row.user_id as string,
+    generated_at: row.generated_at as string,
+    sample_size: row.sample_size as number,
+    source_format: row.source_format as PrepCardRow["source_format"],
+    ranked_measure_count: row.ranked_measure_count as number,
+    pool_note: row.pool_note as string,
+    snapshot: row.snapshot as PrepCardSnapshot,
+    created_at: row.created_at as string,
+  };
+}
+
+export async function getLatestChristThemeReport(): Promise<PrepCardRow | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("prep_cards")
+    .select(
+      "id, user_id, generated_at, sample_size, source_format, ranked_measure_count, pool_note, snapshot, created_at",
+    )
+    .eq("user_id", user.id)
+    .order("generated_at", { ascending: false })
+    .limit(20);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const row = (data ?? []).find((item) => {
+    const snapshot = item.snapshot as PrepCardSnapshot;
+    return snapshot.themeId === "christ";
+  });
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id as string,
+    user_id: row.user_id as string,
+    generated_at: row.generated_at as string,
+    sample_size: row.sample_size as number,
+    source_format: row.source_format as PrepCardRow["source_format"],
+    ranked_measure_count: row.ranked_measure_count as number,
+    pool_note: row.pool_note as string,
+    snapshot: row.snapshot as PrepCardSnapshot,
+    created_at: row.created_at as string,
   };
 }
 

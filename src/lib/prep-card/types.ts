@@ -72,6 +72,11 @@ export type PrepCardSnapshot = {
   sourceFormat: PrepSourceFormat;
   manuscriptCount: number;
   transcriptCount: number;
+  /**
+   * Which theme this snapshot belongs to. Ask-theme prep cards omit this
+   * or use "ask". Christ theme reports set "christ".
+   */
+  themeId?: "ask" | "christ";
   /** How many measures entered the ranking pools. */
   rankedMeasureCount: number;
   /** What was ranked, with format split and per-measure support. */

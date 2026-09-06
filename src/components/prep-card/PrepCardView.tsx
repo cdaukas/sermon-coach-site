@@ -270,6 +270,7 @@ function SectionHead({
 }
 
 export function PrepCardView({ snapshot }: PrepCardViewProps) {
+  const isChristTheme = snapshot.themeId === "christ";
   const generated = new Date(snapshot.generatedAt);
   const dateLabel = generated.toLocaleDateString("en-US", {
     day: "numeric",
@@ -328,7 +329,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
         className="mb-2.5 text-[36px] font-normal leading-tight tracking-tight md:text-[40px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Before you preach
+        {isChristTheme ? "Christ in the sermon" : "Before you preach"}
       </h1>
       <p
         className="mb-6 text-[13.5px]"
@@ -391,16 +392,18 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
             ) : null}
           </>
         )}
-        <p
-          className="mt-6 border-t pt-4 text-[16px]"
-          style={{
-            ...serifFont,
-            borderColor: "var(--sc-rule)",
-            color: "var(--sc-ink-soft)",
-          }}
-        >
-          {PREP_CARD_STANDING_STRENGTH}
-        </p>
+        {!isChristTheme ? (
+          <p
+            className="mt-6 border-t pt-4 text-[16px]"
+            style={{
+              ...serifFont,
+              borderColor: "var(--sc-rule)",
+              color: "var(--sc-ink-soft)",
+            }}
+          >
+            {PREP_CARD_STANDING_STRENGTH}
+          </p>
+        ) : null}
       </section>
 
       <section className="mb-11">
@@ -421,29 +424,31 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
         )}
       </section>
 
-      <section
-        className="mb-10 px-7 py-6"
-        style={{ background: "var(--sc-gold-soft)" }}
-      >
-        <p
-          className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.13em]"
-          style={{ ...uiFont, color: "var(--sc-accent)" }}
+      {!isChristTheme ? (
+        <section
+          className="mb-10 px-7 py-6"
+          style={{ background: "var(--sc-gold-soft)" }}
         >
-          {PREP_CARD_REVERENCE.label}
-        </p>
-        <p
-          className="max-w-[52ch] text-[18px] leading-snug"
-          style={{ ...serifFont, color: "var(--sc-ink)" }}
-        >
-          {PREP_CARD_REVERENCE.body}
-        </p>
-        <p
-          className="mt-2.5 text-[16px]"
-          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
-        >
-          {PREP_CARD_REVERENCE.cut}
-        </p>
-      </section>
+          <p
+            className="mb-3 text-[11.5px] font-semibold uppercase tracking-[0.13em]"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            {PREP_CARD_REVERENCE.label}
+          </p>
+          <p
+            className="max-w-[52ch] text-[18px] leading-snug"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+          >
+            {PREP_CARD_REVERENCE.body}
+          </p>
+          <p
+            className="mt-2.5 text-[16px]"
+            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+          >
+            {PREP_CARD_REVERENCE.cut}
+          </p>
+        </section>
+      ) : null}
 
       <footer
         className="flex flex-wrap justify-between gap-4 border-t pt-4 text-[12.5px]"

@@ -36,10 +36,10 @@ describe("prepStrengthsFloorNote", () => {
 });
 
 describe("prepInterpretationParagraph", () => {
-  it("has high copy for every measure and low only for 1–7", () => {
+  it("has high copy for every measure; low for actionable and Christ-theme live measures", () => {
     for (const id of PREP_MEASURE_IDS) {
       assert.ok(prepInterpretationParagraph(id, "high"));
-      if (id <= 7) {
+      if (id <= 7 || id === 8 || id === 11 || id === 12) {
         assert.ok(prepInterpretationParagraph(id, "low"));
       } else {
         assert.equal(PREP_MEASURE_INTERPRETATION[id].low, null);
