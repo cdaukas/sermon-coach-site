@@ -1,5 +1,10 @@
 import { prepCardPoolNote, prepStrengthsFloorNote } from "./copy";
 import { measure12AddressesNonChristian } from "./counters-address";
+import {
+  codeCrossNamedObjects,
+  measureChristAgencyInProse,
+  measureGospelInSkeleton,
+} from "./counters-christ";
 import { codeApplicationAsks } from "./counters-coding";
 import { measure5OutlineHomogeneous } from "./counters-frame";
 import { measure6ChristInPoint } from "./counters-measure6";
@@ -8,6 +13,7 @@ import {
   measure4ConclusionFinished,
   measure7HasReciprocalAsk,
 } from "./counters-parser";
+import { prepGenreCaveat } from "./genre";
 import {
   COMPUTED_MEASURE_IDS,
   isActionableMeasure,
@@ -26,13 +32,14 @@ import type {
   PrepSourceFormat,
 } from "./types";
 
-
 export type PrepSermonInput = {
   id: string;
   title: string;
   content: string;
   /** Optional intake hint (e.g. youtube → transcript). */
   intakePath?: string | null;
+  /** Optional primary passage for genre caveat. */
+  primaryPassage?: string | null;
 };
 
 function rate(hits: number, eligible: number): number {
@@ -50,8 +57,12 @@ function buildCounts(params: {
   m5Eligible: number;
   m7Hits: number;
   m7Eligible: number;
+  m8Hits: number;
+  m8Eligible: number;
   m9Hits: number;
   m9Eligible: number;
+  m11Hits: number;
+  m11Eligible: number;
   m12Hits: number;
   m12Eligible: number;
 }): PrepMeasureCount[] {
@@ -85,11 +96,19 @@ function buildCounts(params: {
     params.m5Eligible > 0 ? params.m5Hits : null,
     params.m5Eligible > 0 ? params.m5Eligible : null,
   );
+  // C1 / C2 stubbed — spaCy. Excluded from ranking.
   set(6, null, null);
-  set(7, params.m7Hits, params.m7Eligible);
-  set(9, params.m9Hits, params.m9Eligible);
-  set(12, params.m12Hits, params.m12Eligible);
   void measure6ChristInPoint;
+  void measureChristAgencyInProse;
+  set(7, params.m7Hits, params.m7Eligible);
+  set(8, params.m8Hits, params.m8Eligible);
+  set(9, params.m9Hits, params.m9Eligible);
+  set(
+    11,
+    params.m11Eligible > 0 ? params.m11Hits : null,
+    params.m11Eligible > 0 ? params.m11Eligible : null,
+  );
+  set(12, params.m12Hits, params.m12Eligible);
   return counts;
 }
 
@@ -107,9 +126,26 @@ function aggregateSourceFormat(
   return hasMs ? "manuscript" : "transcript";
 }
 
+function unmeasuredOutlineNote(params: {
+  sampleSize: number;
+  manuscriptCount: number;
+  transcriptCount: number;
+}): string | null {
+  const { sampleSize, manuscriptCount, transcriptCount } = params;
+  if (transcriptCount === 0 || manuscriptCount === sampleSize) {
+    return null;
+  }
+  // C2 (measure 6) always unmeasured; C4 (11) only on manuscripts.
+  if (manuscriptCount === 0) {
+    return `Two of the Christ-theme outline measures need a written outline, and all ${sampleSize} came in as transcripts. Those measures did not run.`;
+  }
+  return `Christ-in-a-main-point is stubbed pending a dependency parse. Gospel-in-the-skeleton ran on your ${manuscriptCount} manuscripts only (${transcriptCount} transcripts had no outline to read).`;
+}
+
 /**
- * Run live counters (+ measure 6 stub) and rank a prep card.
- * Actionable computed: 2, 3, 4, 5, 7. Strengths-only computed: 9, 12.
+ * Run live counters (+ C1/C2 stubs) and rank a prep card.
+ * Actionable computed: 2, 3, 4, 5, 7.
+ * Strengths-only computed: 8 (C3), 9, 11 (C4), 12 (C5).
  */
 export async function buildPrepCardSnapshot(
   sermons: PrepSermonInput[],
@@ -123,6 +159,8 @@ export async function buildPrepCardSnapshot(
   let m5Hits = 0;
   let m5Eligible = 0;
   let m7Hits = 0;
+  let m11Hits = 0;
+  let m11Eligible = 0;
   let m12Hits = 0;
   const formats: Array<"manuscript" | "transcript"> = [];
 
@@ -156,6 +194,17 @@ export async function buildPrepCardSnapshot(
       m7Hits += 1;
     }
 
+    const gospelSkeleton = measureGospelInSkeleton(
+      sermon.content,
+      sermon.intakePath,
+    );
+    if (gospelSkeleton != null) {
+      m11Eligible += 1;
+      if (gospelSkeleton) {
+        m11Hits += 1;
+      }
+    }
+
     if (measure12AddressesNonChristian(sermon.content)) {
       m12Hits += 1;
     }
@@ -168,13 +217,15 @@ export async function buildPrepCardSnapshot(
   }));
   const codingOpts = { apiKey: options?.apiKey, model: options?.model };
 
-  const [askCoding, namingCoding] = await Promise.all([
+  const [askCoding, namingCoding, crossCoding] = await Promise.all([
     codeApplicationAsks(codingInputs, codingOpts),
     codeLocalNamings(codingInputs, codingOpts),
+    codeCrossNamedObjects(codingInputs, codingOpts),
   ]);
 
   const m2Hits = askCoding.filter((row) => row.namedObject).length;
   const m3Hits = askCoding.filter((row) => row.namedCost).length;
+  const m8Hits = crossCoding.filter((row) => row.namedObject).length;
   const m9Hits = namingCoding.filter((row) => row.noFaultNaming).length;
   const codingEligible = sermons.length;
 
@@ -189,8 +240,12 @@ export async function buildPrepCardSnapshot(
     m5Eligible,
     m7Hits,
     m7Eligible: sampleSize,
+    m8Hits,
+    m8Eligible: codingEligible,
     m9Hits,
     m9Eligible: codingEligible,
+    m11Hits,
+    m11Eligible,
     m12Hits,
     m12Eligible: sampleSize,
   });
@@ -268,6 +323,16 @@ export async function buildPrepCardSnapshot(
     );
   }
 
+  const genreCaveat = prepGenreCaveat({
+    passages: sermons.map((s) => s.primaryPassage ?? null),
+    sampleSize,
+  });
+  const unmeasuredNote = unmeasuredOutlineNote({
+    sampleSize,
+    manuscriptCount,
+    transcriptCount,
+  });
+
   return {
     sampleSize,
     generatedAt: now.toISOString(),
@@ -287,6 +352,8 @@ export async function buildPrepCardSnapshot(
       target: strengthTarget,
       clearedFloor: strengthFloorCleared,
     }),
+    genreCaveat,
+    unmeasuredNote,
     counts,
     strengths,
     focus,

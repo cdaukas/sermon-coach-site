@@ -15,9 +15,10 @@ describe("formatPrepCountCaption", () => {
     assert.equal(formatPrepCountCaption(8, 24, 7), "8 of 24 sermons");
   });
 
-  it("uses manuscripts phrasing for measures 4 and 5", () => {
+  it("uses manuscripts phrasing for measures 4, 5, and 11", () => {
     assert.equal(formatPrepCountCaption(6, 18, 4), "6 of your 18 manuscripts");
     assert.equal(formatPrepCountCaption(6, 18, 5), "6 of your 18 manuscripts");
+    assert.equal(formatPrepCountCaption(3, 10, 11), "3 of your 10 manuscripts");
   });
 });
 

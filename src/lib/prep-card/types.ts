@@ -81,6 +81,14 @@ export type PrepCardSnapshot = {
    * explains why. Null when the floor did not truncate.
    */
   strengthsNote: string | null;
+  /**
+   * Genre mix caveat for Christ-theme counts. Printed; never adjusts.
+   */
+  genreCaveat: string | null;
+  /**
+   * When outline measures could not run (transcripts), say so on the face.
+   */
+  unmeasuredNote: string | null;
   counts: PrepMeasureCount[];
   strengths: PrepRankedMeasure[];
   focus: PrepRankedMeasure[];

@@ -8,6 +8,7 @@ export type SermonForPrepCard = {
   id: string;
   title: string;
   content: string;
+  primaryPassage?: string | null;
 };
 
 /**
@@ -22,7 +23,7 @@ export async function loadSermonsForPrepCard(
 
   const { data: sermons, error: sermonsError } = await supabase
     .from("sermons")
-    .select("id, title")
+    .select("id, title, primary_passage")
     .eq("user_id", userId)
     .is("deleted_at", null)
     .eq("excluded_from_growth", false)
@@ -67,6 +68,10 @@ export async function loadSermonsForPrepCard(
       id: sermon.id,
       title: typeof sermon.title === "string" ? sermon.title : "Sermon",
       content,
+      primaryPassage:
+        typeof sermon.primary_passage === "string"
+          ? sermon.primary_passage
+          : null,
     });
   }
 

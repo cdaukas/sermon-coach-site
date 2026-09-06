@@ -89,12 +89,12 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
   },
   8: {
     id: 8,
-    strengthHeadline: "You always reach the gospel",
+    strengthHeadline: "The cross has a named object.",
     strengthLine:
-      "You do not leave the text stranded in its original setting. You show why this passage matters because of what God has done in Christ.",
+      "When you name the cross you say what it dealt with — wrath, the curse, the debt, the grave — so people can tell you what happened rather than only that something did.",
     focusHeadline: null,
     focusLine: null,
-    ask: null,
+    ask: "At the cross he absorbed ___. Can I fill the blank from this passage?",
   },
   9: {
     id: 9,
@@ -116,12 +116,12 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
   },
   11: {
     id: 11,
-    strengthHeadline: "Your delight has an object",
+    strengthHeadline: "The gospel is in your skeleton.",
     strengthLine:
-      "When you enjoy the text, people can tell what you are enjoying. Your affection is not generic; it points at something specific.",
+      "A gospel word sits in a numbered main point, so the gospel carries the argument rather than warming it at the end.",
     focusHeadline: null,
     focusLine: null,
-    ask: null,
+    ask: "Would this argument still stand if I deleted every gospel sentence?",
   },
   12: {
     id: 12,
@@ -130,7 +130,7 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
       "Your preaching leaves room for the unbeliever. You address him rather than assuming everyone listening already believes.",
     focusHeadline: null,
     focusLine: null,
-    ask: null,
+    ask: "What am I asking the person who does not yet believe?",
   },
 };
 
@@ -256,7 +256,7 @@ export function formatPrepCountCaption(
   eligible: number,
   measureId: PrepMeasureId,
 ): string {
-  if (measureId === 4 || measureId === 5) {
+  if (measureId === 4 || measureId === 5 || measureId === 11) {
     return `${hits} of your ${eligible} manuscripts`;
   }
   return `${hits} of ${eligible} sermons`;
@@ -350,7 +350,7 @@ export const PREP_MEASURE_INTERPRETATION: Record<
   },
   8: {
     high:
-      "No text stays landlocked. Whatever the passage is doing, you find the slope down to what God has done in Christ, and most weeks you find it without forcing the channel. That is a reflex you trained, not a technique you apply. Nobody goes home from your preaching with behavior modification and a smile.",
+      "When you name the cross you say what it dealt with. Wrath, the curse, the debt, the grave. That specificity is what separates a gospel sentence from a gospel gesture, and it is why your people can tell you what happened rather than only that something did.",
     low: null,
   },
   9: {
@@ -365,12 +365,12 @@ export const PREP_MEASURE_INTERPRETATION: Record<
   },
   11: {
     high:
-      "When you enjoy the text, people can tell what you are enjoying. A preacher can be visibly moved and never say what moved him, and the room learns to admire his warmth instead of the passage. You point at something. A word, a turn, a thing the text does that it did not have to do. Pointing is how people learn to find it themselves.",
+      "The gospel is in your outline, not only in your prose. That is the clearest structural difference between a sermon where the gospel carries an argument and one where it is applied at the end like a coat of paint.",
     low: null,
   },
   12: {
     high:
-      "Somebody outside the faith gets addressed in your preaching instead of assumed absent. Most sermons talk to the in-group by default and remember the unbeliever in the last ninety seconds, if at all. Yours does not. The people who have not decided yet know your room has room for them.",
+      "You talk to the person who has not decided. Most sermons address the in-group by default and remember him in the last ninety seconds, if at all. Yours does not, and the people in your room who are still working it out know that.",
     low: null,
   },
 };

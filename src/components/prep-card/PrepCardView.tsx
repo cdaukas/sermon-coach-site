@@ -337,7 +337,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
         Built from your last {snapshot.sampleSize} sermons.
       </p>
       <p
-        className="mb-11 max-w-[58ch] border-l-2 pl-[18px] text-[14.5px] leading-relaxed"
+        className="mb-4 max-w-[58ch] border-l-2 pl-[18px] text-[14.5px] leading-relaxed"
         style={{
           ...serifFont,
           borderColor: "var(--sc-accent-soft)",
@@ -346,6 +346,24 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
       >
         {snapshot.poolNote}
       </p>
+      {snapshot.unmeasuredNote ? (
+        <p
+          className="mb-4 max-w-[58ch] text-[14.5px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+        >
+          {snapshot.unmeasuredNote}
+        </p>
+      ) : null}
+      {snapshot.genreCaveat ? (
+        <p
+          className="mb-11 max-w-[58ch] text-[14.5px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+        >
+          {snapshot.genreCaveat}
+        </p>
+      ) : (
+        <div className="mb-11" />
+      )}
 
       <section className="mb-11">
         <SectionHead title="What is working" tag="Don't trade it" />

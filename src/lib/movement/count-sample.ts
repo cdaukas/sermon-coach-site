@@ -4,6 +4,10 @@
  */
 
 import { measure12AddressesNonChristian } from "@/lib/prep-card/counters-address";
+import {
+  codeCrossNamedObjects,
+  measureGospelInSkeleton,
+} from "@/lib/prep-card/counters-christ";
 import { codeApplicationAsks } from "@/lib/prep-card/counters-coding";
 import { measure5OutlineHomogeneous } from "@/lib/prep-card/counters-frame";
 import { codeLocalNamings } from "@/lib/prep-card/counters-naming";
@@ -23,12 +27,15 @@ export async function countMeasuresOnSample(
   const need = new Set(measureIds);
   const needsAsk = [...need].some((id) => id === 2 || id === 3);
   const needsNaming = need.has(9);
+  const needsCross = need.has(8);
 
   let m4Hits = 0;
   let m4Eligible = 0;
   let m5Hits = 0;
   let m5Eligible = 0;
   let m7Hits = 0;
+  let m11Hits = 0;
+  let m11Eligible = 0;
   let m12Hits = 0;
 
   for (const sermon of sermons) {
@@ -59,6 +66,18 @@ export async function countMeasuresOnSample(
     if (need.has(7) && measure7HasReciprocalAsk(sermon.content)) {
       m7Hits += 1;
     }
+    if (need.has(11)) {
+      const gospel = measureGospelInSkeleton(
+        sermon.content,
+        sermon.intakePath,
+      );
+      if (gospel != null) {
+        m11Eligible += 1;
+        if (gospel) {
+          m11Hits += 1;
+        }
+      }
+    }
     if (need.has(12) && measure12AddressesNonChristian(sermon.content)) {
       m12Hits += 1;
     }
@@ -73,11 +92,16 @@ export async function countMeasuresOnSample(
 
   let m2Hits = 0;
   let m3Hits = 0;
+  let m8Hits = 0;
   let m9Hits = 0;
   if (needsAsk && sermons.length > 0) {
     const askCoding = await codeApplicationAsks(codingInputs, codingOpts);
     m2Hits = askCoding.filter((row) => row.namedObject).length;
     m3Hits = askCoding.filter((row) => row.namedCost).length;
+  }
+  if (needsCross && sermons.length > 0) {
+    const crossCoding = await codeCrossNamedObjects(codingInputs, codingOpts);
+    m8Hits = crossCoding.filter((row) => row.namedObject).length;
   }
   if (needsNaming && sermons.length > 0) {
     const namingCoding = await codeLocalNamings(codingInputs, codingOpts);
@@ -92,21 +116,17 @@ export async function countMeasuresOnSample(
     } else if (id === 3) {
       out.push({ measureId: 3, hits: m3Hits, eligible: n });
     } else if (id === 4) {
-      out.push({
-        measureId: 4,
-        hits: m4Hits,
-        eligible: m4Eligible,
-      });
+      out.push({ measureId: 4, hits: m4Hits, eligible: m4Eligible });
     } else if (id === 5) {
-      out.push({
-        measureId: 5,
-        hits: m5Hits,
-        eligible: m5Eligible,
-      });
+      out.push({ measureId: 5, hits: m5Hits, eligible: m5Eligible });
     } else if (id === 7) {
       out.push({ measureId: 7, hits: m7Hits, eligible: n });
+    } else if (id === 8) {
+      out.push({ measureId: 8, hits: m8Hits, eligible: n });
     } else if (id === 9) {
       out.push({ measureId: 9, hits: m9Hits, eligible: n });
+    } else if (id === 11) {
+      out.push({ measureId: 11, hits: m11Hits, eligible: m11Eligible });
     } else if (id === 12) {
       out.push({ measureId: 12, hits: m12Hits, eligible: n });
     } else {

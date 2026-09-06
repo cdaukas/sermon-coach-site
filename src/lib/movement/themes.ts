@@ -18,7 +18,7 @@ export type MovementThemeId = (typeof MOVEMENT_THEME_IDS)[number];
 export const THEME_MEASURES: Record<MovementThemeId, PrepMeasureId[]> = {
   /** Named object, named cost, reciprocal, naming valence. */
   ask: [2, 3, 7, 9],
-  christ: [6],
+  christ: [6, 8, 11, 12],
   room: [12],
   delight: [],
 };
