@@ -13,6 +13,8 @@ import type { PrepMeasureId } from "@/lib/prep-card/measures";
 import type { PrepRewriteResult } from "@/lib/prep-card/rewrite-focus";
 
 export type ChristRewriteMarker =
+  | "christ_agent_prose"
+  | "christ_agent_point"
   | "cross_object"
   | "gospel_point"
   | "outsider_address";
@@ -53,6 +55,24 @@ const MARKER_RULES: Record<
   ChristRewriteMarker,
   { constraint: string; example: string | null }
 > = {
+  christ_agent_prose: {
+    constraint:
+      "The rewrite must make Christ (or Jesus / Messiah) the grammatical subject of a finite action verb. " +
+      "A warmer genitive ('the blood of Christ', 'the love of Christ') with Christ as a modifier is wrong.",
+    example:
+      'ORIGINAL: "The blood of Christ covers every sin you have committed."\n' +
+      'WRONG: "The precious blood of Christ covers every sin you have committed."\n' +
+      'RIGHT: "Christ carried every sin you have committed and did not set it down until it was finished."',
+  },
+  christ_agent_point: {
+    constraint:
+      "The rewrite must make Christ the subject of a verb in the numbered point head. " +
+      "A clearer topic head that still treats Christ as a modifier or destination is wrong.",
+    example:
+      'ORIGINAL: "3. Our hope in suffering"\n' +
+      'WRONG: "3. Our true hope in suffering"\n' +
+      'RIGHT: "3. Christ carried the suffering you cannot carry"',
+  },
   cross_object: {
     constraint:
       "The rewrite must name a specific thing the cross defeated, absorbed, purchased, or broke. " +

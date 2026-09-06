@@ -91,7 +91,8 @@ export type PrepCardSnapshot = {
    */
   genreCaveat: string | null;
   /**
-   * When outline measures could not run (transcripts), say so on the face.
+   * Method-footer detail: parser calibration (Christ) or outline-only
+   * manuscript note (ask). Null when there is nothing extra to say.
    */
   unmeasuredNote: string | null;
   counts: PrepMeasureCount[];

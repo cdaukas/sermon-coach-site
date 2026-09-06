@@ -13,9 +13,9 @@ import {
 describe("measureGospelInSkeleton (C4)", () => {
   it("hits when a numbered point carries a gospel word", () => {
     const body = [
-      "1. Trust God in the waiting",
+      "1. Trust God in the waiting season",
       "2. Freedom Christ bought, not freedom you earned",
-      "3. Praise God in the morning",
+      "3. Praise God in the morning light",
       "",
       "Closing prose continues with full sentences that end cleanly.",
     ].join("\n");
@@ -28,11 +28,25 @@ describe("measureGospelInSkeleton (C4)", () => {
 
   it("misses when points have no gospel word", () => {
     const body = [
-      "1. Trust God in the waiting",
-      "2. Obey God in the dark",
-      "3. Praise God in the morning",
+      "1. Trust God in the waiting season",
+      "2. Obey God in the darkest night",
+      "3. Praise God in the morning light",
     ].join("\n");
     assert.equal(measureGospelInSkeleton(body), false);
+  });
+
+  it("ignores template slot labels when matching gospel points", () => {
+    const body = [
+      "ME / INTRO",
+      "1. ME / INTRO",
+      "2. Living in freedom this week",
+      "3. Grace Christ bought for every sinner",
+    ].join("\n");
+    assert.equal(measureGospelInSkeleton(body), true);
+    assert.match(
+      measureGospelInSkeletonMatch(body) ?? "",
+      /Grace Christ bought/,
+    );
   });
 
   it("returns null on transcript-shaped text without outline markers", () => {

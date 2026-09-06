@@ -134,8 +134,18 @@ async function main() {
           measureId: ex.measureId,
           sermonTitle: ex.sermonTitle,
           hasRewrite: Boolean(ex.rewrite),
+          also: ex.also?.length ?? 0,
         })),
         strengthExamples: snapshot.strengthExamples?.length ?? 0,
+        strengthByMeasure: Object.fromEntries(
+          [...new Set((snapshot.strengthExamples ?? []).map((e) => e.measureId))].map(
+            (id) => [
+              id,
+              (snapshot.strengthExamples ?? []).filter((e) => e.measureId === id)
+                .length,
+            ],
+          ),
+        ),
       },
       null,
       2,

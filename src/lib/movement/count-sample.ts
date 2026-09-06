@@ -5,6 +5,10 @@
 
 import { measure12AddressesNonChristian } from "@/lib/prep-card/counters-address";
 import {
+  christAgencyDetail,
+  measure6ChristInPoint,
+} from "@/lib/prep-card/counters-agency";
+import {
   codeCrossNamedObjects,
   measureGospelInSkeleton,
 } from "@/lib/prep-card/counters-christ";
@@ -29,16 +33,25 @@ export async function countMeasuresOnSample(
   const needsNaming = need.has(9);
   const needsCross = need.has(8);
 
+  let m1Hits = 0;
+  let m1Eligible = 0;
   let m4Hits = 0;
   let m4Eligible = 0;
   let m5Hits = 0;
   let m5Eligible = 0;
+  let m6Hits = 0;
+  let m6Eligible = 0;
   let m7Hits = 0;
   let m11Hits = 0;
   let m11Eligible = 0;
   let m12Hits = 0;
 
   for (const sermon of sermons) {
+    if (need.has(1)) {
+      const agency = await christAgencyDetail(sermon.content);
+      m1Hits += agency.christSubj;
+      m1Eligible += agency.christMentions;
+    }
     if (need.has(4)) {
       const finished = measure4ConclusionFinished(
         sermon.content,
@@ -60,6 +73,18 @@ export async function countMeasuresOnSample(
         m5Eligible += 1;
         if (homogeneous) {
           m5Hits += 1;
+        }
+      }
+    }
+    if (need.has(6)) {
+      const point = await measure6ChristInPoint(
+        sermon.content,
+        sermon.intakePath,
+      );
+      if (point != null) {
+        m6Eligible += 1;
+        if (point) {
+          m6Hits += 1;
         }
       }
     }
@@ -111,7 +136,9 @@ export async function countMeasuresOnSample(
   const n = sermons.length;
   const out: MovementCount[] = [];
   for (const id of measureIds) {
-    if (id === 2) {
+    if (id === 1) {
+      out.push({ measureId: 1, hits: m1Hits, eligible: m1Eligible });
+    } else if (id === 2) {
       out.push({ measureId: 2, hits: m2Hits, eligible: n });
     } else if (id === 3) {
       out.push({ measureId: 3, hits: m3Hits, eligible: n });
@@ -119,6 +146,8 @@ export async function countMeasuresOnSample(
       out.push({ measureId: 4, hits: m4Hits, eligible: m4Eligible });
     } else if (id === 5) {
       out.push({ measureId: 5, hits: m5Hits, eligible: m5Eligible });
+    } else if (id === 6) {
+      out.push({ measureId: 6, hits: m6Hits, eligible: m6Eligible });
     } else if (id === 7) {
       out.push({ measureId: 7, hits: m7Hits, eligible: n });
     } else if (id === 8) {

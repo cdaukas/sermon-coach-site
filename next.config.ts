@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // UDPipe ships WASM + native model assets; keep it external to the bundle.
+  serverExternalPackages: ["udpipe-node"],
   async redirects() {
     return [
       {

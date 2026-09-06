@@ -1,13 +1,15 @@
 import { prepCardPoolNote, prepStrengthsFloorNote } from "./copy";
 import { measure12AddressesNonChristian } from "./counters-address";
 import {
+  christAgencyDetail,
+  measure6ChristInPoint,
+} from "./counters-agency";
+import {
   codeCrossNamedObjects,
-  measureChristAgencyInProse,
   measureGospelInSkeleton,
 } from "./counters-christ";
 import { codeApplicationAsks } from "./counters-coding";
 import { measure5OutlineHomogeneous } from "./counters-frame";
-import { measure6ChristInPoint } from "./counters-measure6";
 import { codeLocalNamings } from "./counters-naming";
 import {
   measure4ConclusionFinished,
@@ -47,6 +49,8 @@ function rate(hits: number, eligible: number): number {
 }
 
 function buildCounts(params: {
+  m1Hits: number;
+  m1Eligible: number;
   m2Hits: number;
   m2Eligible: number;
   m3Hits: number;
@@ -55,6 +59,8 @@ function buildCounts(params: {
   m4Eligible: number;
   m5Hits: number;
   m5Eligible: number;
+  m6Hits: number;
+  m6Eligible: number;
   m7Hits: number;
   m7Eligible: number;
   m8Hits: number;
@@ -84,6 +90,11 @@ function buildCounts(params: {
         : null;
   };
 
+  set(
+    1,
+    params.m1Eligible > 0 ? params.m1Hits : null,
+    params.m1Eligible > 0 ? params.m1Eligible : null,
+  );
   set(2, params.m2Hits, params.m2Eligible);
   set(3, params.m3Hits, params.m3Eligible);
   set(
@@ -96,10 +107,11 @@ function buildCounts(params: {
     params.m5Eligible > 0 ? params.m5Hits : null,
     params.m5Eligible > 0 ? params.m5Eligible : null,
   );
-  // C1 / C2 stubbed — spaCy. Excluded from ranking.
-  set(6, null, null);
-  void measure6ChristInPoint;
-  void measureChristAgencyInProse;
+  set(
+    6,
+    params.m6Eligible > 0 ? params.m6Hits : null,
+    params.m6Eligible > 0 ? params.m6Eligible : null,
+  );
   set(7, params.m7Hits, params.m7Eligible);
   set(8, params.m8Hits, params.m8Eligible);
   set(9, params.m9Hits, params.m9Eligible);
@@ -135,16 +147,15 @@ function unmeasuredOutlineNote(params: {
   if (transcriptCount === 0 || manuscriptCount === sampleSize) {
     return null;
   }
-  // C2 (measure 6) always unmeasured; C4 (11) only on manuscripts.
-  if (manuscriptCount === 0) {
-    return `Two of the Christ-theme outline measures need a written outline, and all ${sampleSize} came in as transcripts. Those measures did not run.`;
-  }
-  return `Christ-in-a-main-point is stubbed pending a dependency parse. Gospel-in-the-skeleton ran on your ${manuscriptCount} manuscripts only (${transcriptCount} transcripts had no outline to read).`;
+  return (
+    `Conclusion finish and frame-break ran on your ${manuscriptCount} manuscripts only ` +
+    `(${transcriptCount} transcripts had no outline to read).`
+  );
 }
 
 /**
- * Run live counters (+ C1/C2 stubs) and rank a prep card.
- * Actionable computed: 2, 3, 4, 5, 7.
+ * Run live counters and rank a prep card.
+ * Actionable computed: 1 (C1), 2, 3, 4, 5, 6 (C2), 7.
  * Strengths-only computed: 8 (C3), 9, 11 (C4), 12 (C5).
  */
 export async function buildPrepCardSnapshot(
@@ -154,10 +165,14 @@ export async function buildPrepCardSnapshot(
   const now = options?.now ?? new Date();
   const sampleSize = sermons.length;
 
+  let m1Hits = 0;
+  let m1Eligible = 0;
   let m4Hits = 0;
   let m4Eligible = 0;
   let m5Hits = 0;
   let m5Eligible = 0;
+  let m6Hits = 0;
+  let m6Eligible = 0;
   let m7Hits = 0;
   let m11Hits = 0;
   let m11Eligible = 0;
@@ -167,6 +182,10 @@ export async function buildPrepCardSnapshot(
   for (const sermon of sermons) {
     const format = detectPrepSourceFormat(sermon.content, sermon.intakePath);
     formats.push(format);
+
+    const agency = await christAgencyDetail(sermon.content);
+    m1Hits += agency.christSubj;
+    m1Eligible += agency.christMentions;
 
     const finished = measure4ConclusionFinished(
       sermon.content,
@@ -187,6 +206,17 @@ export async function buildPrepCardSnapshot(
       m5Eligible += 1;
       if (homogeneous) {
         m5Hits += 1;
+      }
+    }
+
+    const christPoint = await measure6ChristInPoint(
+      sermon.content,
+      sermon.intakePath,
+    );
+    if (christPoint != null) {
+      m6Eligible += 1;
+      if (christPoint) {
+        m6Hits += 1;
       }
     }
 
@@ -230,6 +260,8 @@ export async function buildPrepCardSnapshot(
   const codingEligible = sermons.length;
 
   const counts = buildCounts({
+    m1Hits,
+    m1Eligible,
     m2Hits,
     m2Eligible: codingEligible,
     m3Hits,
@@ -238,6 +270,8 @@ export async function buildPrepCardSnapshot(
     m4Eligible,
     m5Hits,
     m5Eligible,
+    m6Hits,
+    m6Eligible,
     m7Hits,
     m7Eligible: sampleSize,
     m8Hits,

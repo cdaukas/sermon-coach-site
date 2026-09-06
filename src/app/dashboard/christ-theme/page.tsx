@@ -73,9 +73,8 @@ export default async function ChristThemePage() {
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
             No Christ-theme report yet. Build one from your recent sermons. It
-            runs the cross named-object, gospel-in-skeleton, and outsider-address
-            measures. Agency-in-prose and agency-in-a-main-point stay off until
-            a dependency parse exists.
+            runs Christ-as-agent in prose and in a main point (UDPipe), plus
+            cross named-object, gospel-in-skeleton, and outsider-address.
           </p>
         </div>
       )}

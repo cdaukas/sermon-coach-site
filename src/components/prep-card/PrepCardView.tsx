@@ -1,8 +1,11 @@
 import {
   formatPrepCountCaption,
+  formatPrepDenominatorNote,
   PREP_CARD_REVERENCE,
   PREP_CARD_STANDING_STRENGTH,
   PREP_MEASURE_COPY,
+  PREP_THEME_QUESTION,
+  prepBuiltFromSummary,
   prepInterpretationParagraph,
 } from "@/lib/prep-card/copy";
 import type {
@@ -17,6 +20,23 @@ type PrepCardViewProps = {
   snapshot: PrepCardSnapshot;
 };
 
+function AttributionLabel({
+  children,
+  className = "mb-1",
+}: {
+  children: string;
+  className?: string;
+}) {
+  return (
+    <p
+      className={`${className} text-[11px] font-semibold uppercase tracking-[0.12em]`}
+      style={{ ...uiFont, color: "var(--sc-accent)" }}
+    >
+      {children}
+    </p>
+  );
+}
+
 function InterpretationSlot({
   measureId,
   band,
@@ -29,18 +49,27 @@ function InterpretationSlot({
     return null;
   }
   return (
-    <p
-      className="prep-card-interpretation mt-3 max-w-[56ch] text-[15px] leading-relaxed"
-      style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
-    >
-      {text}
-    </p>
+    <div className="prep-card-interpretation mt-3">
+      <AttributionLabel>Coach</AttributionLabel>
+      <p
+        className="m-0 max-w-[56ch] text-[15px] leading-relaxed"
+        style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+      >
+        {text}
+      </p>
+    </div>
   );
 }
 
-function StrengthEvidence({ example }: { example: PrepStrengthExample }) {
+function StrengthEvidence({
+  example,
+  className = "mt-4",
+}: {
+  example: PrepStrengthExample;
+  className?: string;
+}) {
   return (
-    <div className="prep-card-strength-evidence mt-4">
+    <div className={`prep-card-strength-evidence ${className}`}>
       {example.kind === "point_heads" && example.heads?.length ? (
         <ul
           className="m-0 list-none space-y-1 border-l-2 pl-[14px] text-[16px] leading-snug"
@@ -79,11 +108,18 @@ function StrengthEvidence({ example }: { example: PrepStrengthExample }) {
 function StrengthEntry({
   row,
   examples,
+  sampleSize,
 }: {
   row: PrepRankedMeasure;
   examples: PrepStrengthExample[];
+  sampleSize: number;
 }) {
   const copy = PREP_MEASURE_COPY[row.id];
+  const denominatorNote = formatPrepDenominatorNote(
+    row.eligible,
+    sampleSize,
+    row.id,
+  );
   return (
     <article className="prep-card-entry mb-7 last:mb-0">
       <h3
@@ -105,14 +141,26 @@ function StrengthEntry({
         <strong style={{ fontWeight: 600 }}>
           {formatPrepCountCaption(row.hits, row.eligible, row.id)}
         </strong>
+        {denominatorNote ? (
+          <span style={{ color: "var(--sc-ink-soft)" }}>
+            {" "}
+            {denominatorNote}
+          </span>
+        ) : null}
       </p>
       <InterpretationSlot measureId={row.id} band="high" />
-      {examples.map((example) => (
-        <StrengthEvidence
-          key={`${example.sermonId}-${example.offset}`}
-          example={example}
-        />
-      ))}
+      {examples.length > 0 ? (
+        <div className="mt-4">
+          <AttributionLabel>Your sermons</AttributionLabel>
+          {examples.map((example, exampleIndex) => (
+            <StrengthEvidence
+              key={`${example.sermonId}-${example.offset}`}
+              example={example}
+              className={exampleIndex === 0 ? "mt-1" : "mt-4"}
+            />
+          ))}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -121,12 +169,19 @@ function FocusEntry({
   row,
   index,
   example,
+  sampleSize,
 }: {
   row: PrepRankedMeasure;
   index: number;
   example: PrepFocusExample | undefined;
+  sampleSize: number;
 }) {
   const copy = PREP_MEASURE_COPY[row.id];
+  const denominatorNote = formatPrepDenominatorNote(
+    row.eligible,
+    sampleSize,
+    row.id,
+  );
   return (
     <article className="prep-card-focus-entry prep-card-entry mb-9 last:mb-0">
       <div className="prep-card-focus-grid">
@@ -153,6 +208,12 @@ function FocusEntry({
               {formatPrepCountCaption(row.hits, row.eligible, row.id)}
             </strong>
             .
+            {denominatorNote ? (
+              <span style={{ color: "var(--sc-ink-soft)" }}>
+                {" "}
+                {denominatorNote}
+              </span>
+            ) : null}
           </p>
 
           <InterpretationSlot measureId={row.id} band="low" />
@@ -160,12 +221,7 @@ function FocusEntry({
           {example ? (
             <div className="prep-card-was-now mt-4">
               <div className="prep-card-was">
-                <p
-                  className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                  style={{ ...uiFont, color: "var(--sc-accent)" }}
-                >
-                  Was
-                </p>
+                <AttributionLabel>Was</AttributionLabel>
                 <blockquote
                   className="m-0 text-[16px] leading-snug"
                   style={{ ...serifFont, color: "var(--sc-ink)" }}
@@ -181,36 +237,29 @@ function FocusEntry({
               </div>
               {example.rewrite ? (
                 <div className="prep-card-now mt-3">
-                  <p
-                    className="mb-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ ...uiFont, color: "var(--sc-accent)" }}
-                  >
-                    Now
-                  </p>
+                  <AttributionLabel>Now</AttributionLabel>
                   <p
                     className="m-0 text-[16px] leading-snug"
                     style={{ ...serifFont, color: "var(--sc-ink)" }}
                   >
                     {example.rewrite}
                   </p>
+                  <AttributionLabel className="mt-1.5 mb-0">
+                    Suggested
+                  </AttributionLabel>
                 </div>
               ) : null}
               {(example.also?.length ?? 0) > 0 ? (
                 <div className="prep-card-also mt-4">
-                  <p
-                    className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ ...uiFont, color: "var(--sc-accent)" }}
-                  >
-                    The same pattern
-                  </p>
+                  <AttributionLabel>The same pattern in your sermons</AttributionLabel>
                   <ul className="m-0 list-none space-y-3 p-0">
-                    {example.also.map((row) => (
-                      <li key={`${row.sermonId}:${row.offset}`}>
+                    {example.also.map((alsoRow) => (
+                      <li key={`${alsoRow.sermonId}:${alsoRow.offset}`}>
                         <blockquote
                           className="m-0 text-[15px] leading-snug"
                           style={{ ...serifFont, color: "var(--sc-ink)" }}
                         >
-                          “{row.quote}”
+                          “{alsoRow.quote}”
                         </blockquote>
                         <p
                           className="mt-1 text-[13px]"
@@ -219,7 +268,7 @@ function FocusEntry({
                             color: "var(--sc-ink-soft)",
                           }}
                         >
-                          {row.sermonTitle}
+                          {alsoRow.sermonTitle}
                         </p>
                       </li>
                     ))}
@@ -234,12 +283,9 @@ function FocusEntry({
               className="mt-4 px-4 py-3"
               style={{ background: "var(--sc-gold-soft)" }}
             >
-              <p
-                className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                style={{ ...uiFont, color: "var(--sc-accent)" }}
-              >
+              <AttributionLabel className="mb-1.5">
                 Growth question {index + 1}
-              </p>
+              </AttributionLabel>
               <p
                 className="m-0 text-[16.5px] italic leading-snug"
                 style={{ ...serifFont, color: "var(--sc-ink)" }}
@@ -313,7 +359,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
       }}
     >
       <p
-        className="mb-11 text-[20px]"
+        className="mb-6 text-[20px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
         The <span style={{ color: "var(--sc-accent)" }}>Sermon Coach</span>
@@ -332,39 +378,11 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
         {isChristTheme ? "Christ in the sermon" : "Before you preach"}
       </h1>
       <p
-        className="mb-6 text-[13.5px]"
-        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        className="mb-10 max-w-[42ch] text-[20px] leading-snug"
+        style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        Built from your last {snapshot.sampleSize} sermons.
+        {isChristTheme ? PREP_THEME_QUESTION.christ : PREP_THEME_QUESTION.ask}
       </p>
-      <p
-        className="mb-4 max-w-[58ch] border-l-2 pl-[18px] text-[14.5px] leading-relaxed"
-        style={{
-          ...serifFont,
-          borderColor: "var(--sc-accent-soft)",
-          color: "var(--sc-ink-soft)",
-        }}
-      >
-        {snapshot.poolNote}
-      </p>
-      {snapshot.unmeasuredNote ? (
-        <p
-          className="mb-4 max-w-[58ch] text-[14.5px] leading-relaxed"
-          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
-        >
-          {snapshot.unmeasuredNote}
-        </p>
-      ) : null}
-      {snapshot.genreCaveat ? (
-        <p
-          className="mb-11 max-w-[58ch] text-[14.5px] leading-relaxed"
-          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
-        >
-          {snapshot.genreCaveat}
-        </p>
-      ) : (
-        <div className="mb-11" />
-      )}
 
       <section className="mb-11">
         <SectionHead title="What is working" tag="Don't trade it" />
@@ -380,6 +398,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
                 key={`s-${row.id}`}
                 row={row}
                 examples={strengthExamplesByMeasure.get(row.id) ?? []}
+                sampleSize={snapshot.sampleSize}
               />
             ))}
             {snapshot.strengthsNote ? (
@@ -419,6 +438,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
               row={row}
               index={index}
               example={exampleByMeasure.get(row.id)}
+              sampleSize={snapshot.sampleSize}
             />
           ))
         )}
@@ -451,13 +471,38 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
       ) : null}
 
       <footer
-        className="flex flex-wrap justify-between gap-4 border-t pt-4 text-[12.5px]"
-        style={{ ...uiFont, borderColor: "var(--sc-rule)", color: "var(--sc-ink-soft)" }}
+        className="border-t pt-5"
+        style={{ borderColor: "var(--sc-rule)" }}
       >
-        <span>
-          Built from {snapshot.sampleSize} sermons, {dateLabel}.
-        </span>
-        <span>{formatDetail}</span>
+        <p
+          className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.12em]"
+          style={{ ...uiFont, color: "var(--sc-accent)" }}
+        >
+          How this was measured
+        </p>
+        <div
+          className="space-y-2 text-[12.5px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+        >
+          <p className="m-0">
+            {prepBuiltFromSummary({
+              rankedMeasureCount: snapshot.rankedMeasureCount,
+              sampleSize: snapshot.sampleSize,
+              manuscriptCount,
+              transcriptCount,
+            })}
+          </p>
+          {snapshot.unmeasuredNote ? (
+            <p className="m-0 max-w-[62ch]">{snapshot.unmeasuredNote}</p>
+          ) : null}
+          {snapshot.genreCaveat ? (
+            <p className="m-0 max-w-[62ch]">{snapshot.genreCaveat}</p>
+          ) : null}
+          <p className="m-0 pt-1">
+            Built from {snapshot.sampleSize} sermons, {dateLabel}
+            {formatDetail ? `. ${formatDetail}` : "."}
+          </p>
+        </div>
       </footer>
     </article>
   );

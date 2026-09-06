@@ -1,8 +1,7 @@
 /**
  * Theme 2 (Christ in the sermon) counters.
  *
- * C1 / C2 — stubbed. Need spaCy dependency parse. Return null; excluded
- * from ranking the same way measure 6 is.
+ * C1 / C2 — UDPipe dependency parse (counters-agency.ts).
  * C3 — cross has a named object (coding call).
  * C4 — gospel word in a numbered main point (manuscript-only parser).
  * C5 — non-Christian address (reuses measure 12).
@@ -10,21 +9,21 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { measure12AddressesNonChristian } from "./counters-address";
-import { outlinePoints } from "./counters-frame";
+import { quotableMainPoints } from "./counters-frame";
 import {
   cleanSermonText,
   detectPrepSourceFormat,
 } from "./text";
 
-/** C1: Christ as subject of a finite action verb in prose. Stub. */
-export function measureChristAgencyInProse(_raw: string): null {
-  return null;
-}
-
-/** C2: Christ as subject of an action verb in a main point. Stub (= measure 6). */
-export function measureChristAgencyInPoint(_raw: string): null {
-  return null;
-}
+export {
+  CHRIST_C1_MEASURE_ID,
+  CHRIST_C2_MEASURE_ID,
+  christAgencyDetail,
+  christAgencyInPointsDetail,
+  measureChristAgencyInPoint,
+  measureChristAgencyInProse,
+  measure6ChristInPoint,
+} from "./counters-agency";
 
 /** Prep measure id for C3 (cross named object). */
 export const CHRIST_C3_MEASURE_ID = 8 as const;
@@ -52,7 +51,7 @@ export function measureGospelInSkeleton(
     return null;
   }
   const cleaned = cleanSermonText(raw);
-  const points = outlinePoints(cleaned);
+  const points = quotableMainPoints(cleaned);
   if (points.length === 0) {
     return false;
   }
@@ -68,7 +67,7 @@ export function measureGospelInSkeletonMatch(
     return null;
   }
   const cleaned = cleanSermonText(raw);
-  for (const point of outlinePoints(cleaned)) {
+  for (const point of quotableMainPoints(cleaned)) {
     if (GOSPEL_WORD.test(point)) {
       return point;
     }

@@ -117,11 +117,11 @@ Same rules as `claude/prep-card-interpretation-copy.md`: one concrete anchor, va
 
 | measure | question |
 |---|---|
-| C1 | What is Christ doing in this text? |
-| C2 | Where does that belong in my outline? |
+| C1 | What is Christ doing in this week's text? |
+| C2 | Which point in this sermon could have Christ as its subject? |
 | C3 | At the cross he absorbed ___. Can I fill the blank from this passage? |
-| C4 | Would this argument still stand if I deleted every gospel sentence? |
-| C5 | What am I asking the person who does not yet believe? |
+| C4 | Would this sermon's argument still stand if I deleted every gospel sentence? |
+| C5 | In this sermon, what am I asking the person who does not yet believe? |
 
 **C3's question is a fill-in-the-blank on purpose.** If a preacher cannot complete it from the passage he is preaching, the gospel move in that sermon is a tag.
 

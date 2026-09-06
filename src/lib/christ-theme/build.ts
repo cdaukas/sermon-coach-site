@@ -1,41 +1,51 @@
 /**
  * Christ theme (Theme 2) report builder.
- * Uses the prep-card surface. Live measures: C3 (8), C4 (11), C5 (12).
- * C1 / C2 stay stubbed and excluded — the face note says so.
+ * Uses the prep-card surface. Live: C1 (1), C2 (6), C3 (8), C4 (11), C5 (12).
+ * C1/C2 via UDPipe — see christAgencyMethodNote.
  */
 
 import type { PrepSermonInput } from "@/lib/prep-card/build";
 import { measure12AddressMatch } from "@/lib/prep-card/counters-address";
 import {
+  christAgencyDetail,
+  christAgencyInPointsDetail,
+  type ChristAgencyResult,
+  type ChristPointAgency,
+} from "@/lib/prep-card/counters-agency";
+import {
   codeCrossNamedObjects,
-  measureChristAgencyInPoint,
-  measureChristAgencyInProse,
   measureGospelInSkeleton,
   measureGospelInSkeletonMatch,
   type SermonCrossCoding,
 } from "@/lib/prep-card/counters-christ";
-import { outlinePoints } from "@/lib/prep-card/counters-frame";
+import { quotableMainPoints } from "@/lib/prep-card/counters-frame";
 import { prepGenreCaveat } from "@/lib/prep-card/genre";
 import { verifyQuoteInText } from "@/lib/prep-card/landing-zone";
 import type { PrepMeasureId } from "@/lib/prep-card/measures";
 import { emptyCountsForIds, STRENGTH_RATE_FLOOR } from "@/lib/prep-card/ranking";
-import { quoteDedupeKey } from "@/lib/prep-card/select-failure-examples";
+import {
+  FOCUS_ALSO_CAP,
+  quoteDedupeKey,
+} from "@/lib/prep-card/select-failure-examples";
+import { STRENGTH_EVIDENCE_CAP } from "@/lib/prep-card/select-strength-examples";
 import {
   cleanSermonText,
   detectPrepSourceFormat,
 } from "@/lib/prep-card/text";
 import type {
   PrepCardSnapshot,
+  PrepFocusAlsoQuote,
   PrepFocusExample,
   PrepMeasureCount,
   PrepRankedMeasure,
   PrepSourceFormat,
   PrepStrengthExample,
 } from "@/lib/prep-card/types";
+import { christAgencyMethodNote } from "@/lib/prep-card/udpipe";
 import { rewriteChristFocusExamples } from "./rewrite";
 
 /** Live Christ-theme measure ids (prep-card numbering). */
-export const CHRIST_LIVE_MEASURE_IDS: PrepMeasureId[] = [8, 11, 12];
+export const CHRIST_LIVE_MEASURE_IDS: PrepMeasureId[] = [1, 6, 8, 11, 12];
 
 function rate(hits: number, eligible: number): number {
   return eligible > 0 ? hits / eligible : 0;
@@ -111,11 +121,200 @@ function verifyOrDrop(
   return { quote, offset };
 }
 
+type SermonAgency = {
+  sermon: PrepSermonInput;
+  prose: ChristAgencyResult;
+  points: ChristPointAgency | null;
+};
+
+function pickC1Strengths(
+  rows: SermonAgency[],
+  used: Set<string>,
+  limit = STRENGTH_EVIDENCE_CAP,
+): PrepStrengthExample[] {
+  const out: PrepStrengthExample[] = [];
+  for (const row of rows) {
+    if (out.length >= limit) {
+      break;
+    }
+    for (const mention of row.prose.mentions) {
+      if (out.length >= limit || !mention.agent || !mention.sentence) {
+        continue;
+      }
+      const verified = verifyOrDrop(row.sermon.content, mention.sentence);
+      if (!verified) {
+        continue;
+      }
+      const key = quoteDedupeKey(verified.quote);
+      if (used.has(key)) {
+        continue;
+      }
+      used.add(key);
+      out.push({
+        measureId: 1,
+        sermonId: row.sermon.id,
+        sermonTitle: row.sermon.title,
+        kind: "quote",
+        quote: verified.quote,
+        offset: verified.offset,
+      });
+    }
+  }
+  return out;
+}
+
+type FailureCandidate = {
+  sermonId: string;
+  sermonTitle: string;
+  quote: string;
+  offset: number;
+};
+
+function toFocusExample(
+  measureId: PrepMeasureId,
+  rows: FailureCandidate[],
+): PrepFocusExample | null {
+  if (rows.length === 0) {
+    return null;
+  }
+  const [primary, ...rest] = rows;
+  const also: PrepFocusAlsoQuote[] = rest.slice(0, FOCUS_ALSO_CAP).map((row) => ({
+    sermonId: row.sermonId,
+    sermonTitle: row.sermonTitle,
+    quote: row.quote,
+    offset: row.offset,
+  }));
+  return {
+    measureId,
+    sermonId: primary!.sermonId,
+    sermonTitle: primary!.sermonTitle,
+    quote: primary!.quote,
+    offset: primary!.offset,
+    rewrite: null,
+    also,
+  };
+}
+
+function claimVerified(
+  raw: string,
+  quote: string,
+  used: Set<string>,
+): { quote: string; offset: number } | null {
+  const verified = verifyOrDrop(raw, quote);
+  if (!verified) {
+    return null;
+  }
+  const key = quoteDedupeKey(verified.quote);
+  if (used.has(key)) {
+    return null;
+  }
+  used.add(key);
+  return verified;
+}
+
+function pickC1Failure(
+  rows: SermonAgency[],
+  used: Set<string>,
+): PrepFocusExample | null {
+  const limit = 1 + FOCUS_ALSO_CAP;
+  const candidates: FailureCandidate[] = [];
+  for (const row of rows) {
+    if (candidates.length >= limit) {
+      break;
+    }
+    for (const mention of row.prose.mentions) {
+      if (candidates.length >= limit || mention.agent || !mention.sentence) {
+        continue;
+      }
+      const verified = claimVerified(
+        row.sermon.content,
+        mention.sentence,
+        used,
+      );
+      if (!verified) {
+        continue;
+      }
+      candidates.push({
+        sermonId: row.sermon.id,
+        sermonTitle: row.sermon.title,
+        quote: verified.quote,
+        offset: verified.offset,
+      });
+    }
+  }
+  return toFocusExample(1, candidates);
+}
+
+function pickC2Strengths(
+  rows: SermonAgency[],
+  used: Set<string>,
+  limit = STRENGTH_EVIDENCE_CAP,
+): PrepStrengthExample[] {
+  const out: PrepStrengthExample[] = [];
+  for (const row of rows) {
+    if (out.length >= limit || !row.points) {
+      continue;
+    }
+    for (const point of row.points.agentPoints) {
+      if (out.length >= limit) {
+        break;
+      }
+      const verified = claimVerified(row.sermon.content, point, used);
+      if (!verified) {
+        continue;
+      }
+      out.push({
+        measureId: 6,
+        sermonId: row.sermon.id,
+        sermonTitle: row.sermon.title,
+        kind: "quote",
+        quote: verified.quote,
+        offset: verified.offset,
+      });
+    }
+  }
+  return out;
+}
+
+function pickC2Failure(
+  rows: SermonAgency[],
+  used: Set<string>,
+): PrepFocusExample | null {
+  const limit = 1 + FOCUS_ALSO_CAP;
+  const candidates: FailureCandidate[] = [];
+  for (const row of rows) {
+    if (candidates.length >= limit || !row.points) {
+      continue;
+    }
+    if (row.points.pointsChristAgent > 0) {
+      continue;
+    }
+    const point =
+      row.points.namingNonAgentPoints[0] ??
+      quotableMainPoints(cleanSermonText(row.sermon.content))[0] ??
+      null;
+    if (!point) {
+      continue;
+    }
+    const verified = claimVerified(row.sermon.content, point, used);
+    if (!verified) {
+      continue;
+    }
+    candidates.push({
+      sermonId: row.sermon.id,
+      sermonTitle: row.sermon.title,
+      quote: verified.quote,
+      offset: verified.offset,
+    });
+  }
+  return toFocusExample(6, candidates);
+}
+
 function pickC3Strengths(
   crossCoding: SermonCrossCoding[],
   sermons: PrepSermonInput[],
   used: Set<string>,
-  limit = 5,
+  limit = STRENGTH_EVIDENCE_CAP,
 ): PrepStrengthExample[] {
   const byId = new Map(sermons.map((s) => [s.id, s] as const));
   const out: PrepStrengthExample[] = [];
@@ -134,15 +333,10 @@ function pickC3Strengths(
       if (out.length >= limit || !span.named_object) {
         continue;
       }
-      const verified = verifyOrDrop(sermon.content, span.quote);
+      const verified = claimVerified(sermon.content, span.quote, used);
       if (!verified) {
         continue;
       }
-      const key = quoteDedupeKey(verified.quote);
-      if (used.has(key)) {
-        continue;
-      }
-      used.add(key);
       out.push({
         measureId: 8,
         sermonId: sermon.id,
@@ -159,7 +353,7 @@ function pickC3Strengths(
 function pickC4Strengths(
   sermons: PrepSermonInput[],
   used: Set<string>,
-  limit = 5,
+  limit = STRENGTH_EVIDENCE_CAP,
 ): PrepStrengthExample[] {
   const out: PrepStrengthExample[] = [];
   for (const sermon of sermons) {
@@ -173,15 +367,10 @@ function pickC4Strengths(
     if (!match) {
       continue;
     }
-    const verified = verifyOrDrop(sermon.content, match);
+    const verified = claimVerified(sermon.content, match, used);
     if (!verified) {
       continue;
     }
-    const key = quoteDedupeKey(verified.quote);
-    if (used.has(key)) {
-      continue;
-    }
-    used.add(key);
     out.push({
       measureId: 11,
       sermonId: sermon.id,
@@ -197,7 +386,7 @@ function pickC4Strengths(
 function pickC5Strengths(
   sermons: PrepSermonInput[],
   used: Set<string>,
-  limit = 5,
+  limit = STRENGTH_EVIDENCE_CAP,
 ): PrepStrengthExample[] {
   const out: PrepStrengthExample[] = [];
   for (const sermon of sermons) {
@@ -208,15 +397,10 @@ function pickC5Strengths(
     if (!match) {
       continue;
     }
-    const verified = verifyOrDrop(sermon.content, match);
+    const verified = claimVerified(sermon.content, match, used);
     if (!verified) {
       continue;
     }
-    const key = quoteDedupeKey(verified.quote);
-    if (used.has(key)) {
-      continue;
-    }
-    used.add(key);
     out.push({
       measureId: 12,
       sermonId: sermon.id,
@@ -235,43 +419,45 @@ function pickC3Failure(
   used: Set<string>,
 ): PrepFocusExample | null {
   const byId = new Map(sermons.map((s) => [s.id, s] as const));
+  const limit = 1 + FOCUS_ALSO_CAP;
+  const candidates: FailureCandidate[] = [];
   for (const row of crossCoding) {
+    if (candidates.length >= limit) {
+      break;
+    }
     const sermon = byId.get(row.sermonId);
     if (!sermon) {
       continue;
     }
     for (const span of row.spans) {
-      if (span.named_object) {
+      if (candidates.length >= limit || span.named_object) {
         continue;
       }
-      const verified = verifyOrDrop(sermon.content, span.quote);
+      const verified = claimVerified(sermon.content, span.quote, used);
       if (!verified) {
         continue;
       }
-      const key = quoteDedupeKey(verified.quote);
-      if (used.has(key)) {
-        continue;
-      }
-      used.add(key);
-      return {
-        measureId: 8,
+      candidates.push({
         sermonId: sermon.id,
         sermonTitle: sermon.title,
         quote: verified.quote,
         offset: verified.offset,
-        rewrite: null,
-        also: [],
-      };
+      });
     }
   }
-  return null;
+  return toFocusExample(8, candidates);
 }
 
 function pickC4Failure(
   sermons: PrepSermonInput[],
   used: Set<string>,
 ): PrepFocusExample | null {
+  const limit = 1 + FOCUS_ALSO_CAP;
+  const candidates: FailureCandidate[] = [];
   for (const sermon of sermons) {
+    if (candidates.length >= limit) {
+      break;
+    }
     if (detectPrepSourceFormat(sermon.content, sermon.intakePath) !== "manuscript") {
       continue;
     }
@@ -279,31 +465,22 @@ function pickC4Failure(
       continue;
     }
     const cleaned = cleanSermonText(sermon.content);
-    const points = outlinePoints(cleaned);
-    const point = points[0];
+    const point = quotableMainPoints(cleaned)[0];
     if (!point) {
       continue;
     }
-    const verified = verifyOrDrop(sermon.content, point);
+    const verified = claimVerified(sermon.content, point, used);
     if (!verified) {
       continue;
     }
-    const key = quoteDedupeKey(verified.quote);
-    if (used.has(key)) {
-      continue;
-    }
-    used.add(key);
-    return {
-      measureId: 11,
+    candidates.push({
       sermonId: sermon.id,
       sermonTitle: sermon.title,
       quote: verified.quote,
       offset: verified.offset,
-      rewrite: null,
-      also: [],
-    };
+    });
   }
-  return null;
+  return toFocusExample(11, candidates);
 }
 
 /**
@@ -313,15 +490,18 @@ export async function buildChristThemeSnapshot(
   sermons: PrepSermonInput[],
   options?: { apiKey?: string; model?: string; now?: Date },
 ): Promise<PrepCardSnapshot> {
-  void measureChristAgencyInProse;
-  void measureChristAgencyInPoint;
-
   const now = options?.now ?? new Date();
   const sampleSize = sermons.length;
   const formats: Array<"manuscript" | "transcript"> = [];
   let m11Hits = 0;
   let m11Eligible = 0;
   let m12Hits = 0;
+  let m1Subj = 0;
+  let m1Mentions = 0;
+  let m6Hits = 0;
+  let m6Eligible = 0;
+
+  const agencyRows: SermonAgency[] = [];
 
   for (const sermon of sermons) {
     formats.push(detectPrepSourceFormat(sermon.content, sermon.intakePath));
@@ -335,6 +515,21 @@ export async function buildChristThemeSnapshot(
     if (measure12AddressMatch(sermon.content)) {
       m12Hits += 1;
     }
+
+    const prose = await christAgencyDetail(sermon.content);
+    m1Subj += prose.christSubj;
+    m1Mentions += prose.christMentions;
+    const points = await christAgencyInPointsDetail(
+      sermon.content,
+      sermon.intakePath,
+    );
+    if (points != null) {
+      m6Eligible += 1;
+      if (points.pointsChristAgent > 0) {
+        m6Hits += 1;
+      }
+    }
+    agencyRows.push({ sermon, prose, points });
   }
 
   const codingOpts = { apiKey: options?.apiKey, model: options?.model };
@@ -344,7 +539,7 @@ export async function buildChristThemeSnapshot(
   );
   const m8Hits = crossCoding.filter((row) => row.namedObject).length;
 
-  const counts = emptyCountsForIds([8, 11, 12]);
+  const counts = emptyCountsForIds([1, 6, 8, 11, 12]);
   const set = (
     id: PrepMeasureId,
     hits: number | null,
@@ -361,6 +556,12 @@ export async function buildChristThemeSnapshot(
         ? rate(hits, eligible)
         : null;
   };
+  set(1, m1Mentions > 0 ? m1Subj : null, m1Mentions > 0 ? m1Mentions : null);
+  set(
+    6,
+    m6Eligible > 0 ? m6Hits : null,
+    m6Eligible > 0 ? m6Eligible : null,
+  );
   set(8, m8Hits, sampleSize);
   set(
     11,
@@ -374,28 +575,37 @@ export async function buildChristThemeSnapshot(
   const transcriptCount = formats.filter((f) => f === "transcript").length;
 
   const used = new Set<string>();
+  // Card-wide quote dedupe: focus Was/also first, then strengths.
+  const focusExamples: PrepFocusExample[] = [];
+  for (const row of focus) {
+    let example: PrepFocusExample | null = null;
+    if (row.id === 1) {
+      example = pickC1Failure(agencyRows, used);
+    } else if (row.id === 6) {
+      example = pickC2Failure(agencyRows, used);
+    } else if (row.id === 8) {
+      example = pickC3Failure(crossCoding, sermons, used);
+    } else if (row.id === 11) {
+      example = pickC4Failure(sermons, used);
+    }
+    // C5: no reliable failing span when the habit is absent — omit Was/Now/also.
+    if (example) {
+      focusExamples.push(example);
+    }
+  }
+
   const strengthExamples: PrepStrengthExample[] = [];
   for (const row of strengths) {
-    if (row.id === 8) {
+    if (row.id === 1) {
+      strengthExamples.push(...pickC1Strengths(agencyRows, used));
+    } else if (row.id === 6) {
+      strengthExamples.push(...pickC2Strengths(agencyRows, used));
+    } else if (row.id === 8) {
       strengthExamples.push(...pickC3Strengths(crossCoding, sermons, used));
     } else if (row.id === 11) {
       strengthExamples.push(...pickC4Strengths(sermons, used));
     } else if (row.id === 12) {
       strengthExamples.push(...pickC5Strengths(sermons, used));
-    }
-  }
-
-  const focusExamples: PrepFocusExample[] = [];
-  for (const row of focus) {
-    let example: PrepFocusExample | null = null;
-    if (row.id === 8) {
-      example = pickC3Failure(crossCoding, sermons, used);
-    } else if (row.id === 11) {
-      example = pickC4Failure(sermons, used);
-    }
-    // C5: no reliable failing span when the habit is absent — omit Was/Now.
-    if (example) {
-      focusExamples.push(example);
     }
   }
 
@@ -407,11 +617,15 @@ export async function buildChristThemeSnapshot(
       quote: ex.quote,
       offset: ex.offset,
       marker:
-        ex.measureId === 8
-          ? "cross_object"
-          : ex.measureId === 11
-            ? "gospel_point"
-            : "outsider_address",
+        ex.measureId === 1
+          ? "christ_agent_prose"
+          : ex.measureId === 6
+            ? "christ_agent_point"
+            : ex.measureId === 8
+              ? "cross_object"
+              : ex.measureId === 11
+                ? "gospel_point"
+                : "outsider_address",
     })),
     codingOpts,
   );
@@ -427,12 +641,11 @@ export async function buildChristThemeSnapshot(
     sampleSize,
   });
 
-  const unmeasuredNote =
-    `Christ-as-agent in prose and Christ-as-agent in a main point need a dependency parse and are not on this report. ` +
-    `This report ran on three measures` +
-    (m11Eligible < sampleSize
-      ? `; gospel-in-the-skeleton used your ${m11Eligible} manuscripts only (${sampleSize - m11Eligible} transcripts had no outline).`
-      : ".");
+  const unmeasuredNote = christAgencyMethodNote({
+    manuscriptEligible: m6Eligible,
+    sampleSize,
+    transcriptCount,
+  });
 
   const ranked = counts.filter(
     (c) => c.rate != null && c.eligible != null && c.eligible > 0,
@@ -447,9 +660,8 @@ export async function buildChristThemeSnapshot(
     themeId: "christ",
     rankedMeasureCount: ranked.length,
     poolNote:
-      `Christ in the sermon — built from ${ranked.length} live measures on your last ${sampleSize} sermons ` +
-      `(${manuscriptCount} manuscripts, ${transcriptCount} transcripts). ` +
-      `Does Christ act in this sermon, or is he its destination?`,
+      `Built from ${ranked.length} live measures on your last ${sampleSize} sermons ` +
+      `(${manuscriptCount} manuscripts, ${transcriptCount} transcripts).`,
     strengthsNote:
       strengths.length === 0
         ? "No Christ-theme measure cleared 50% of its eligible sample, so this report names no strengths rather than inventing them."
