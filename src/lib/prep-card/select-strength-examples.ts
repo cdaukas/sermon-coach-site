@@ -1,7 +1,8 @@
 /**
- * Two verified evidence excerpts per strength measure.
+ * Up to five verified evidence excerpts per strength measure.
  * Same quote discipline as focus: counter-selected, Unicode-folded exact
- * match, offset stored, non-matches dropped. No rewrite.
+ * match, offset stored, non-matches dropped. No rewrite. Fewer is fine;
+ * never pad or repeat.
  *
  * Measures 4 and 5 have no short quotable span:
  * - 4: final two sentences of a finished conclusion
@@ -94,20 +95,24 @@ function exampleKey(example: PrepStrengthExample): string {
 }
 
 /**
- * Prefer two different sermons; fall back to a second quote from the
- * same sermon only when the sample is thin.
+ * Prefer different sermons first; then fill from remaining unique quotes
+ * up to `limit`. Never pad or repeat.
  */
-function pickTwo(candidates: PrepStrengthExample[]): PrepStrengthExample[] {
+function pickUpTo(
+  candidates: PrepStrengthExample[],
+  limit: number,
+  usedQuotes: Set<string>,
+): PrepStrengthExample[] {
   const out: PrepStrengthExample[] = [];
   const usedKeys = new Set<string>();
   const usedSermons = new Set<string>();
 
   for (const candidate of candidates) {
-    if (out.length >= 2) {
+    if (out.length >= limit) {
       break;
     }
     const key = exampleKey(candidate);
-    if (usedKeys.has(key) || usedSermons.has(candidate.sermonId)) {
+    if (usedQuotes.has(key) || usedKeys.has(key) || usedSermons.has(candidate.sermonId)) {
       continue;
     }
     usedKeys.add(key);
@@ -115,13 +120,13 @@ function pickTwo(candidates: PrepStrengthExample[]): PrepStrengthExample[] {
     out.push(candidate);
   }
 
-  if (out.length < 2) {
+  if (out.length < limit) {
     for (const candidate of candidates) {
-      if (out.length >= 2) {
+      if (out.length >= limit) {
         break;
       }
       const key = exampleKey(candidate);
-      if (usedKeys.has(key)) {
+      if (usedQuotes.has(key) || usedKeys.has(key)) {
         continue;
       }
       usedKeys.add(key);
@@ -129,8 +134,14 @@ function pickTwo(candidates: PrepStrengthExample[]): PrepStrengthExample[] {
     }
   }
 
+  for (const row of out) {
+    usedQuotes.add(exampleKey(row));
+  }
   return out;
 }
+
+/** Cap on verified strength evidence quotes per measure. */
+export const STRENGTH_EVIDENCE_CAP = 5;
 
 function collectAskHits(
   measureId: 2 | 3,
@@ -324,15 +335,18 @@ function collectAddressHits(sermons: SermonRef[]): PrepStrengthExample[] {
 }
 
 /**
- * Up to two verified evidence items per strength measure.
+ * Up to five verified evidence items per strength measure.
  * Missing evidence omits the slot rather than inventing text.
+ * Quotes claimed here are added to `usedQuotes` for card-wide dedupe.
  */
 export function selectStrengthExamples(params: {
   strengthIds: PrepMeasureId[];
   sermons: SermonRef[];
   askCoding: SermonApplicationCoding[];
   namingCoding: SermonNamingCoding[];
+  usedQuotes?: Set<string>;
 }): PrepStrengthExample[] {
+  const usedQuotes = params.usedQuotes ?? new Set<string>();
   const out: PrepStrengthExample[] = [];
   for (const id of params.strengthIds) {
     let candidates: PrepStrengthExample[] = [];
@@ -351,7 +365,7 @@ export function selectStrengthExamples(params: {
     } else if (id === 12) {
       candidates = collectAddressHits(params.sermons);
     }
-    out.push(...pickTwo(candidates));
+    out.push(...pickUpTo(candidates, STRENGTH_EVIDENCE_CAP, usedQuotes));
   }
   return out;
 }

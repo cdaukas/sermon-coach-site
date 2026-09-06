@@ -1,10 +1,12 @@
 /**
- * Select one verified failing excerpt per focus measure for WAS/NOW.
+ * Select verified failing excerpts per focus measure for WAS/NOW (+ also).
  * Quotes that do not exact-match cleaned text are dropped, not repaired.
- * No quote may appear under more than one focus item.
+ * No quote may appear more than once on the card (caller shares usedQuotes).
  *
  * For ask-based measures (2, 3, 7): only spans the coding call marked as
- * asks. If no failing ask exists, omit Was/Now — do not reach for any quote.
+ * asks. Primary gets one rewrite; up to three additional failings are listed
+ * unrewritten. Measure 4 is conclusion evidence only — no rewrite, no list.
+ * If no valid span exists, omit the block.
  */
 
 import type { SermonApplicationCoding } from "./counters-coding";
@@ -39,6 +41,13 @@ export type PrepFailureExample = {
   marker: PrepAskMarker | null;
 };
 
+/** One Was primary plus optional unrewritten pattern list. */
+export type PrepFocusFailureBundle = {
+  primary: PrepFailureExample;
+  /** Additional verified failings; never rewritten. Empty when none. */
+  also: PrepFailureExample[];
+};
+
 type SermonRef = {
   id: string;
   title: string;
@@ -48,6 +57,9 @@ type SermonRef = {
 
 const RECIPROCAL =
   /\b(one another|each other|the body|your brother|your sister|someone in (?:the|this) church|fellow (?:believer|member)s?|the person next to you)\b/i;
+
+/** Cap on unrewritten pattern-list quotes beneath Was/Now. */
+export const FOCUS_ALSO_CAP = 3;
 
 /** Normalize for cross-measure dedupe. */
 export function quoteDedupeKey(quote: string): string {
@@ -70,20 +82,28 @@ function verifyOrDrop(
   return { quote, offset };
 }
 
-function pickAskFailure(
+function collectAskFailures(
   measureId: 2 | 3,
   askCoding: SermonApplicationCoding[],
   sermons: SermonRef[],
   usedQuotes: Set<string>,
-): PrepFailureExample | null {
+  limit: number,
+): PrepFailureExample[] {
   const marker: PrepAskMarker = measureId === 2 ? "visible" : "cost";
   const byId = new Map(sermons.map((s) => [s.id, s] as const));
+  const out: PrepFailureExample[] = [];
   for (const row of askCoding) {
+    if (out.length >= limit) {
+      break;
+    }
     const sermon = byId.get(row.sermonId);
     if (!sermon) {
       continue;
     }
     for (const ask of row.asks) {
+      if (out.length >= limit) {
+        break;
+      }
       const failed =
         measureId === 2 ? !ask.named_object : !ask.named_cost;
       if (!failed) {
@@ -97,35 +117,44 @@ function pickAskFailure(
       if (usedQuotes.has(key)) {
         continue;
       }
-      return {
+      usedQuotes.add(key);
+      out.push({
         measureId,
         sermonId: sermon.id,
         sermonTitle: sermon.title,
         quote: verified.quote,
         offset: verified.offset,
         marker,
-      };
+      });
     }
   }
-  return null;
+  return out;
 }
 
 /**
  * Measure 7: only coded asks that have no reciprocal person as object.
  * Staging notes and illustration cues are never candidates.
  */
-function pickNonReciprocalCodedAsk(
+function collectNonReciprocalCodedAsks(
   askCoding: SermonApplicationCoding[],
   sermons: SermonRef[],
   usedQuotes: Set<string>,
-): PrepFailureExample | null {
+  limit: number,
+): PrepFailureExample[] {
   const byId = new Map(sermons.map((s) => [s.id, s] as const));
+  const out: PrepFailureExample[] = [];
   for (const row of askCoding) {
+    if (out.length >= limit) {
+      break;
+    }
     const sermon = byId.get(row.sermonId);
     if (!sermon) {
       continue;
     }
     for (const ask of row.asks) {
+      if (out.length >= limit) {
+        break;
+      }
       if (!askFailsReciprocal(ask.quote)) {
         continue;
       }
@@ -137,17 +166,18 @@ function pickNonReciprocalCodedAsk(
       if (usedQuotes.has(key)) {
         continue;
       }
-      return {
+      usedQuotes.add(key);
+      out.push({
         measureId: 7,
         sermonId: sermon.id,
         sermonTitle: sermon.title,
         quote: verified.quote,
         offset: verified.offset,
         marker: "reciprocal",
-      };
+      });
     }
   }
-  return null;
+  return out;
 }
 
 function frameBreakPoint(points: string[]): string | null {
@@ -195,6 +225,7 @@ function pickFrameBreakFailure(
     if (usedQuotes.has(key)) {
       continue;
     }
+    usedQuotes.add(key);
     return {
       measureId: 5,
       sermonId: sermon.id,
@@ -209,8 +240,7 @@ function pickFrameBreakFailure(
 
 /**
  * Measure 4 focus evidence: final two sentences of an unfinished
- * conclusion. No rewrite — a conclusion is not a one-line fix.
- * File headers and front-matter are never candidates.
+ * conclusion. No rewrite, no pattern list.
  */
 function looksLikeFileHeader(text: string): boolean {
   return (
@@ -239,7 +269,6 @@ function pickConclusionFailure(
     if (!verified) {
       continue;
     }
-    // Must sit in the conclusion region, not the top of the file.
     const end = verified.offset + verified.quote.length;
     if (end < cleaned.length * 0.7) {
       continue;
@@ -248,6 +277,7 @@ function pickConclusionFailure(
     if (usedQuotes.has(key)) {
       continue;
     }
+    usedQuotes.add(key);
     return {
       measureId: 4,
       sermonId: sermon.id,
@@ -260,38 +290,66 @@ function pickConclusionFailure(
   return null;
 }
 
+function toBundle(
+  rows: PrepFailureExample[],
+  allowAlso: boolean,
+): PrepFocusFailureBundle | null {
+  if (rows.length === 0) {
+    return null;
+  }
+  const [primary, ...rest] = rows;
+  return {
+    primary: primary!,
+    also: allowAlso ? rest.slice(0, FOCUS_ALSO_CAP) : [],
+  };
+}
+
 /**
- * One failure example per focus measure id, when a verified excerpt exists.
- * Missing measures simply omit WAS/NOW rather than inventing text.
- * Quotes are unique across the returned set.
+ * One failure bundle per focus measure id when a verified excerpt exists.
+ * Ask measures may include an unrewritten pattern list (up to three).
+ * Quotes claimed here are added to `usedQuotes`.
  */
 export function selectFocusFailureExamples(params: {
   focusIds: PrepMeasureId[];
   sermons: SermonRef[];
   askCoding: SermonApplicationCoding[];
-}): PrepFailureExample[] {
-  const out: PrepFailureExample[] = [];
-  const usedQuotes = new Set<string>();
+  usedQuotes?: Set<string>;
+}): PrepFocusFailureBundle[] {
+  const usedQuotes = params.usedQuotes ?? new Set<string>();
+  const out: PrepFocusFailureBundle[] = [];
+  const askLimit = 1 + FOCUS_ALSO_CAP;
+
   for (const id of params.focusIds) {
-    let example: PrepFailureExample | null = null;
+    let bundle: PrepFocusFailureBundle | null = null;
     if (id === 2) {
-      example = pickAskFailure(2, params.askCoding, params.sermons, usedQuotes);
+      bundle = toBundle(
+        collectAskFailures(2, params.askCoding, params.sermons, usedQuotes, askLimit),
+        true,
+      );
     } else if (id === 3) {
-      example = pickAskFailure(3, params.askCoding, params.sermons, usedQuotes);
+      bundle = toBundle(
+        collectAskFailures(3, params.askCoding, params.sermons, usedQuotes, askLimit),
+        true,
+      );
     } else if (id === 4) {
-      example = pickConclusionFailure(params.sermons, usedQuotes);
+      const primary = pickConclusionFailure(params.sermons, usedQuotes);
+      bundle = primary ? { primary, also: [] } : null;
     } else if (id === 5) {
-      example = pickFrameBreakFailure(params.sermons, usedQuotes);
+      const primary = pickFrameBreakFailure(params.sermons, usedQuotes);
+      bundle = primary ? { primary, also: [] } : null;
     } else if (id === 7) {
-      example = pickNonReciprocalCodedAsk(
-        params.askCoding,
-        params.sermons,
-        usedQuotes,
+      bundle = toBundle(
+        collectNonReciprocalCodedAsks(
+          params.askCoding,
+          params.sermons,
+          usedQuotes,
+          askLimit,
+        ),
+        true,
       );
     }
-    if (example) {
-      usedQuotes.add(quoteDedupeKey(example.quote));
-      out.push(example);
+    if (bundle) {
+      out.push(bundle);
     }
   }
   return out;

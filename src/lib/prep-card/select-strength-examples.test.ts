@@ -19,7 +19,48 @@ describe("finalTwoSentences", () => {
 });
 
 describe("selectStrengthExamples", () => {
-  it("returns two verified ask hits for measure 2 from different sermons", () => {
+  it("returns up to five verified ask hits for measure 2", () => {
+    const quotes = [
+      "Write one name and call them before Friday.",
+      "Move from once a month to twice a month.",
+      "Text your small group before the meeting starts.",
+      "Put the first gift in the plate before you sit down.",
+      "Invite one neighbor to dinner this Saturday.",
+      "Leave a note of thanks on the elder's desk.",
+    ];
+    const sermons = quotes.map((quote, i) => ({
+      id: `s${i}`,
+      title: `Sermon ${i + 1}`,
+      content: `APPLICATION\n\n${quote} Amen.`,
+    }));
+    const askCoding: SermonApplicationCoding[] = quotes.map((quote, i) => ({
+      sermonId: `s${i}`,
+      namedObject: true,
+      namedCost: false,
+      asks: [
+        {
+          quote,
+          named_object: true,
+          named_cost: false,
+        },
+      ],
+    }));
+    const namingCoding: SermonNamingCoding[] = [];
+
+    const examples = selectStrengthExamples({
+      strengthIds: [2],
+      sermons,
+      askCoding,
+      namingCoding,
+    });
+
+    assert.equal(examples.length, 5);
+    assert.equal(examples[0]!.measureId, 2);
+    assert.equal(examples[0]!.kind, "quote");
+    assert.equal(new Set(examples.map((row) => row.sermonId)).size, 5);
+  });
+
+  it("shows two when only two exist", () => {
     const sermons = [
       {
         id: "a",
@@ -60,19 +101,15 @@ describe("selectStrengthExamples", () => {
         ],
       },
     ];
-    const namingCoding: SermonNamingCoding[] = [];
 
     const examples = selectStrengthExamples({
       strengthIds: [2],
       sermons,
       askCoding,
-      namingCoding,
+      namingCoding: [],
     });
 
     assert.equal(examples.length, 2);
-    assert.equal(examples[0]!.measureId, 2);
-    assert.equal(examples[0]!.kind, "quote");
-    assert.notEqual(examples[0]!.sermonId, examples[1]!.sermonId);
   });
 
   it("stores point heads for measure 5 strengths", () => {

@@ -195,6 +195,37 @@ function FocusEntry({
                   </p>
                 </div>
               ) : null}
+              {(example.also?.length ?? 0) > 0 ? (
+                <div className="prep-card-also mt-4">
+                  <p
+                    className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                    style={{ ...uiFont, color: "var(--sc-accent)" }}
+                  >
+                    The same pattern
+                  </p>
+                  <ul className="m-0 list-none space-y-3 p-0">
+                    {example.also.map((row) => (
+                      <li key={`${row.sermonId}:${row.offset}`}>
+                        <blockquote
+                          className="m-0 text-[15px] leading-snug"
+                          style={{ ...serifFont, color: "var(--sc-ink)" }}
+                        >
+                          “{row.quote}”
+                        </blockquote>
+                        <p
+                          className="mt-1 text-[13px]"
+                          style={{
+                            ...serifFont,
+                            color: "var(--sc-ink-soft)",
+                          }}
+                        >
+                          {row.sermonTitle}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           ) : null}
 

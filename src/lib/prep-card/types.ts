@@ -20,6 +20,14 @@ export type PrepRankedMeasure = {
   eligible: number;
 };
 
+/** Unrewritten additional failing quote beneath Was/Now. */
+export type PrepFocusAlsoQuote = {
+  sermonId: string;
+  sermonTitle: string;
+  quote: string;
+  offset: number;
+};
+
 /** Verified failing excerpt + rewrite for one focus measure. */
 export type PrepFocusExample = {
   measureId: PrepMeasureId;
@@ -30,6 +38,11 @@ export type PrepFocusExample = {
   offset: number;
   /** Model rewrite of that quote only; absent if rewrite failed. */
   rewrite: string | null;
+  /**
+   * Up to three more verified failings for the same pattern.
+   * Quotes only — never rewritten. Empty when none exist.
+   */
+  also: PrepFocusAlsoQuote[];
 };
 
 /**
@@ -73,7 +86,7 @@ export type PrepCardSnapshot = {
   focus: PrepRankedMeasure[];
   /** WAS/NOW examples for focus measures that yielded a verified quote. */
   focusExamples: PrepFocusExample[];
-  /** Up to two verified evidence items per strength measure. */
+  /** Up to five verified evidence items per strength measure. */
   strengthExamples: PrepStrengthExample[];
   /** Sermon ids used (for audit). */
   sermonIds: string[];

@@ -214,39 +214,53 @@ export async function buildPrepCardSnapshot(
     intakePath: sermon.intakePath,
   }));
 
+  // Card-wide quote dedupe: focus Was/also first, then strengths.
+  const usedQuotes = new Set<string>();
+
+  const failureBundles = selectFocusFailureExamples({
+    focusIds: focus.map((row) => row.id),
+    sermons: sermonRefs,
+    askCoding,
+    usedQuotes,
+  });
+
   const strengthExamples = selectStrengthExamples({
     strengthIds: strengths.map((row) => row.id),
     sermons: sermonRefs,
     askCoding,
     namingCoding,
+    usedQuotes,
   });
 
-  const failureExamples = selectFocusFailureExamples({
-    focusIds: focus.map((row) => row.id),
-    sermons: sermonRefs,
-    askCoding,
-  });
-
-  // Ask markers (2, 3, 7) get one rewrite call. Measures 4 and 5 are
-  // evidence only — a conclusion or point head is not rewritten in one line.
-  const rewriteInputs = failureExamples.filter(
-    (example) => example.measureId !== 4 && example.measureId !== 5,
-  );
+  // One rewrite per ask-marker Was only. Measures 4 and 5 are evidence
+  // only — a conclusion or point head is not rewritten in one line.
+  // Pattern-list quotes are never rewritten.
+  const rewriteInputs = failureBundles
+    .map((bundle) => bundle.primary)
+    .filter((example) => example.measureId !== 4 && example.measureId !== 5);
   const rewriteResult = await rewriteFocusExamples(rewriteInputs, codingOpts);
   const rewriteByMeasure = new Map(
     rewriteResult.rewrites.map((row) => [row.measureId, row.rewrite] as const),
   );
-  const focusExamples: PrepFocusExample[] = failureExamples.map((example) => ({
-    measureId: example.measureId,
-    sermonId: example.sermonId,
-    sermonTitle: example.sermonTitle,
-    quote: example.quote,
-    offset: example.offset,
-    rewrite:
-      example.measureId === 4 || example.measureId === 5
-        ? null
-        : (rewriteByMeasure.get(example.measureId) ?? null),
-  }));
+  const focusExamples: PrepFocusExample[] = failureBundles.map(
+    ({ primary, also }) => ({
+      measureId: primary.measureId,
+      sermonId: primary.sermonId,
+      sermonTitle: primary.sermonTitle,
+      quote: primary.quote,
+      offset: primary.offset,
+      rewrite:
+        primary.measureId === 4 || primary.measureId === 5
+          ? null
+          : (rewriteByMeasure.get(primary.measureId) ?? null),
+      also: also.map((row) => ({
+        sermonId: row.sermonId,
+        sermonTitle: row.sermonTitle,
+        quote: row.quote,
+        offset: row.offset,
+      })),
+    }),
+  );
 
   if (rewriteResult.estimatedCostUsd != null) {
     console.info(

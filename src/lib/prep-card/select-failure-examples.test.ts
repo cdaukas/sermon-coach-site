@@ -62,13 +62,13 @@ describe("selectFocusFailureExamples dedupe", () => {
     });
 
     assert.equal(examples.length, 2);
-    assert.equal(examples[0]!.measureId, 3);
-    assert.equal(examples[0]!.quote, SHARED);
-    assert.equal(examples[1]!.measureId, 2);
-    assert.equal(examples[1]!.quote, DISTINCT_OBJECT);
+    assert.equal(examples[0]!.primary.measureId, 3);
+    assert.equal(examples[0]!.primary.quote, SHARED);
+    assert.equal(examples[1]!.primary.measureId, 2);
+    assert.equal(examples[1]!.primary.quote, DISTINCT_OBJECT);
     assert.notEqual(
-      quoteDedupeKey(examples[0]!.quote),
-      quoteDedupeKey(examples[1]!.quote),
+      quoteDedupeKey(examples[0]!.primary.quote),
+      quoteDedupeKey(examples[1]!.primary.quote),
     );
   });
 
@@ -96,8 +96,9 @@ describe("selectFocusFailureExamples dedupe", () => {
     });
 
     assert.equal(examples.length, 1);
-    assert.equal(examples[0]!.measureId, 3);
-    assert.equal(examples[0]!.quote, SHARED);
+    assert.equal(examples[0]!.primary.measureId, 3);
+    assert.equal(examples[0]!.primary.quote, SHARED);
+    assert.equal(examples[0]!.also.length, 0);
   });
 
   it("measure 7 only selects coded asks, never staging notes", () => {
@@ -129,9 +130,10 @@ describe("selectFocusFailureExamples dedupe", () => {
     });
 
     assert.equal(examples.length, 1);
-    assert.equal(examples[0]!.quote, privateAsk);
-    assert.equal(examples[0]!.marker, "reciprocal");
-    assert.notEqual(examples[0]!.quote, staging);
+    assert.equal(examples[0]!.primary.quote, privateAsk);
+    assert.equal(examples[0]!.primary.marker, "reciprocal");
+    assert.equal(examples[0]!.also.length, 0);
+    assert.notEqual(examples[0]!.primary.quote, staging);
   });
 
   it("measure 7 omits Was/Now when no coded ask fails reciprocal", () => {
@@ -162,7 +164,53 @@ describe("selectFocusFailureExamples dedupe", () => {
     assert.equal(examples.length, 0);
   });
 
-  it("measure 4 uses final two sentences, not a file header", () => {
+  it("ask measure keeps one primary and up to three also quotes", () => {
+    const asks = [
+      "Trust God more this week with your schedule.",
+      "Believe harder when the week feels thin.",
+      "Remember that God is with you on Monday.",
+      "Lean on grace when the inbox piles up.",
+      "Rest in the promise without naming a cost.",
+    ];
+    const sermons = [
+      sermon("s1", "One", asks[0]!),
+      sermon("s2", "Two", asks[1]!),
+      sermon("s3", "Three", asks[2]!),
+      sermon("s4", "Four", asks[3]!),
+      sermon("s5", "Five", asks[4]!),
+    ];
+    const askCoding: SermonApplicationCoding[] = sermons.map((row, i) => ({
+      sermonId: row.id,
+      namedObject: false,
+      namedCost: false,
+      asks: [
+        {
+          quote: asks[i]!,
+          named_object: true,
+          named_cost: false,
+        },
+      ],
+    }));
+
+    const examples = selectFocusFailureExamples({
+      focusIds: [3],
+      sermons,
+      askCoding,
+    });
+
+    assert.equal(examples.length, 1);
+    assert.equal(examples[0]!.primary.quote, asks[0]);
+    assert.equal(examples[0]!.also.length, 3);
+    assert.deepEqual(
+      examples[0]!.also.map((row) => row.quote),
+      asks.slice(1, 4),
+    );
+    const all = [examples[0]!.primary, ...examples[0]!.also];
+    const keys = all.map((row) => quoteDedupeKey(row.quote));
+    assert.equal(new Set(keys).size, keys.length);
+  });
+
+  it("measure 4 uses final two sentences, not a file header, and has no also list", () => {
     const body = Array.from({ length: 40 }, (_, i) =>
       `Paragraph ${i + 1} continues with a full sentence that lands somewhere.`,
     ).join("\n\n");
@@ -183,10 +231,11 @@ describe("selectFocusFailureExamples dedupe", () => {
 
     assert.ok(examples.length <= 1);
     if (examples.length === 1) {
-      assert.equal(examples[0]!.measureId, 4);
-      assert.equal(examples[0]!.marker, null);
-      assert.doesNotMatch(examples[0]!.quote, /\[DATE\]/);
-      assert.doesNotMatch(examples[0]!.quote, /Ground-up rebuild/);
+      assert.equal(examples[0]!.primary.measureId, 4);
+      assert.equal(examples[0]!.primary.marker, null);
+      assert.equal(examples[0]!.also.length, 0);
+      assert.doesNotMatch(examples[0]!.primary.quote, /\[DATE\]/);
+      assert.doesNotMatch(examples[0]!.primary.quote, /Ground-up rebuild/);
     }
   });
 
