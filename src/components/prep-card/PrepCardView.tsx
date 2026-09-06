@@ -199,16 +199,23 @@ function FocusEntry({
           ) : null}
 
           {copy.ask ? (
-            <p
-              className="mt-4 px-4 py-3 text-[16.5px] italic leading-snug"
-              style={{
-                ...serifFont,
-                background: "var(--sc-gold-soft)",
-                color: "var(--sc-ink)",
-              }}
+            <div
+              className="mt-4 px-4 py-3"
+              style={{ background: "var(--sc-gold-soft)" }}
             >
-              {copy.ask}
-            </p>
+              <p
+                className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                style={{ ...uiFont, color: "var(--sc-accent)" }}
+              >
+                Growth question {index + 1}
+              </p>
+              <p
+                className="m-0 text-[16.5px] italic leading-snug"
+                style={{ ...serifFont, color: "var(--sc-ink)" }}
+              >
+                {copy.ask}
+              </p>
+            </div>
           ) : null}
         </div>
       </div>

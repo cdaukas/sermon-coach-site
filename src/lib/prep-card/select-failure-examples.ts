@@ -2,6 +2,9 @@
  * Select one verified failing excerpt per focus measure for WAS/NOW.
  * Quotes that do not exact-match cleaned text are dropped, not repaired.
  * No quote may appear under more than one focus item.
+ *
+ * For ask-based measures (2, 3, 7): only spans the coding call marked as
+ * asks. If no failing ask exists, omit Was/Now — do not reach for any quote.
  */
 
 import type { SermonApplicationCoding } from "./counters-coding";
@@ -16,11 +19,14 @@ import {
 } from "./counters-parser";
 import { verifyQuoteInText } from "./landing-zone";
 import type { PrepMeasureId } from "./measures";
+import { finalTwoSentences } from "./select-strength-examples";
 import {
   cleanSermonText,
   detectPrepSourceFormat,
-  sermonParagraphs,
 } from "./text";
+
+/** Ask-marker the rewrite must satisfy. */
+export type PrepAskMarker = "cost" | "visible" | "reciprocal";
 
 export type PrepFailureExample = {
   measureId: PrepMeasureId;
@@ -29,6 +35,8 @@ export type PrepFailureExample = {
   quote: string;
   /** Offset into cleaned manuscript; stored for audit. */
   offset: number;
+  /** Present when the Was quote is a coded ask that failed this marker. */
+  marker: PrepAskMarker | null;
 };
 
 type SermonRef = {
@@ -41,12 +49,13 @@ type SermonRef = {
 const RECIPROCAL =
   /\b(one another|each other|the body|your brother|your sister|someone in (?:the|this) church|fellow (?:believer|member)s?|the person next to you)\b/i;
 
-const IMPERATIVE_START =
-  /(?:^|[.!?]\s+|\n)\s*((?:Go|Come|Give|Take|Make|Look|Listen|Stop|Start|Pray|Serve|Love|Bear|Speak|Tell|Ask|Call|Write|Turn|Consider|Remember|Trust|Believe|Rest|Confess|Forgive|Repent|Let|Do|Don't|Be|Seek|Hold|Encourage|Welcome|Invite|Show|Bring)\b[^.!?\n]{0,100})/g;
-
 /** Normalize for cross-measure dedupe. */
 export function quoteDedupeKey(quote: string): string {
   return quote.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+export function askFailsReciprocal(quote: string): boolean {
+  return !RECIPROCAL.test(quote);
 }
 
 function verifyOrDrop(
@@ -67,6 +76,7 @@ function pickAskFailure(
   sermons: SermonRef[],
   usedQuotes: Set<string>,
 ): PrepFailureExample | null {
+  const marker: PrepAskMarker = measureId === 2 ? "visible" : "cost";
   const byId = new Map(sermons.map((s) => [s.id, s] as const));
   for (const row of askCoding) {
     const sermon = byId.get(row.sermonId);
@@ -93,6 +103,47 @@ function pickAskFailure(
         sermonTitle: sermon.title,
         quote: verified.quote,
         offset: verified.offset,
+        marker,
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * Measure 7: only coded asks that have no reciprocal person as object.
+ * Staging notes and illustration cues are never candidates.
+ */
+function pickNonReciprocalCodedAsk(
+  askCoding: SermonApplicationCoding[],
+  sermons: SermonRef[],
+  usedQuotes: Set<string>,
+): PrepFailureExample | null {
+  const byId = new Map(sermons.map((s) => [s.id, s] as const));
+  for (const row of askCoding) {
+    const sermon = byId.get(row.sermonId);
+    if (!sermon) {
+      continue;
+    }
+    for (const ask of row.asks) {
+      if (!askFailsReciprocal(ask.quote)) {
+        continue;
+      }
+      const verified = verifyOrDrop(sermon.content, ask.quote);
+      if (!verified) {
+        continue;
+      }
+      const key = quoteDedupeKey(verified.quote);
+      if (usedQuotes.has(key)) {
+        continue;
+      }
+      return {
+        measureId: 7,
+        sermonId: sermon.id,
+        sermonTitle: sermon.title,
+        quote: verified.quote,
+        offset: verified.offset,
+        marker: "reciprocal",
       };
     }
   }
@@ -150,9 +201,22 @@ function pickFrameBreakFailure(
       sermonTitle: sermon.title,
       quote: verified.quote,
       offset: verified.offset,
+      marker: null,
     };
   }
   return null;
+}
+
+/**
+ * Measure 4 focus evidence: final two sentences of an unfinished
+ * conclusion. No rewrite — a conclusion is not a one-line fix.
+ * File headers and front-matter are never candidates.
+ */
+function looksLikeFileHeader(text: string): boolean {
+  return (
+    /\[DATE\]|\[SERVICE\]/i.test(text) ||
+    /Ground-up rebuild/i.test(text)
+  );
 }
 
 function pickConclusionFailure(
@@ -167,15 +231,17 @@ function pickConclusionFailure(
     if (terminalResidue(cleaned) === 0) {
       continue;
     }
-    const paras = sermonParagraphs(cleaned);
-    const candidate = [...paras]
-      .reverse()
-      .find((p) => p.trim().length >= 12 && p.trim().length <= 280);
-    if (!candidate) {
+    const closing = finalTwoSentences(cleaned);
+    if (!closing || looksLikeFileHeader(closing)) {
       continue;
     }
-    const verified = verifyOrDrop(sermon.content, candidate.trim());
+    const verified = verifyOrDrop(sermon.content, closing);
     if (!verified) {
+      continue;
+    }
+    // Must sit in the conclusion region, not the top of the file.
+    const end = verified.offset + verified.quote.length;
+    if (end < cleaned.length * 0.7) {
       continue;
     }
     const key = quoteDedupeKey(verified.quote);
@@ -188,44 +254,8 @@ function pickConclusionFailure(
       sermonTitle: sermon.title,
       quote: verified.quote,
       offset: verified.offset,
+      marker: null,
     };
-  }
-  return null;
-}
-
-function pickNonReciprocalAsk(
-  sermons: SermonRef[],
-  usedQuotes: Set<string>,
-): PrepFailureExample | null {
-  for (const sermon of sermons) {
-    const cleaned = cleanSermonText(sermon.content);
-    const re = new RegExp(IMPERATIVE_START.source, "g");
-    let match: RegExpExecArray | null;
-    while ((match = re.exec(cleaned)) !== null) {
-      const span = (match[1] ?? "").trim();
-      if (span.length < 8) {
-        continue;
-      }
-      const window = cleaned.slice(match.index, match.index + 110);
-      if (RECIPROCAL.test(window)) {
-        continue;
-      }
-      const verified = verifyOrDrop(sermon.content, span);
-      if (!verified) {
-        continue;
-      }
-      const key = quoteDedupeKey(verified.quote);
-      if (usedQuotes.has(key)) {
-        continue;
-      }
-      return {
-        measureId: 7,
-        sermonId: sermon.id,
-        sermonTitle: sermon.title,
-        quote: verified.quote,
-        offset: verified.offset,
-      };
-    }
   }
   return null;
 }
@@ -253,7 +283,11 @@ export function selectFocusFailureExamples(params: {
     } else if (id === 5) {
       example = pickFrameBreakFailure(params.sermons, usedQuotes);
     } else if (id === 7) {
-      example = pickNonReciprocalAsk(params.sermons, usedQuotes);
+      example = pickNonReciprocalCodedAsk(
+        params.askCoding,
+        params.sermons,
+        usedQuotes,
+      );
     }
     if (example) {
       usedQuotes.add(quoteDedupeKey(example.quote));

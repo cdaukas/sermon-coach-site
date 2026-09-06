@@ -227,7 +227,12 @@ export async function buildPrepCardSnapshot(
     askCoding,
   });
 
-  const rewriteResult = await rewriteFocusExamples(failureExamples, codingOpts);
+  // Ask markers (2, 3, 7) get one rewrite call. Measures 4 and 5 are
+  // evidence only — a conclusion or point head is not rewritten in one line.
+  const rewriteInputs = failureExamples.filter(
+    (example) => example.measureId !== 4 && example.measureId !== 5,
+  );
+  const rewriteResult = await rewriteFocusExamples(rewriteInputs, codingOpts);
   const rewriteByMeasure = new Map(
     rewriteResult.rewrites.map((row) => [row.measureId, row.rewrite] as const),
   );
@@ -237,7 +242,10 @@ export async function buildPrepCardSnapshot(
     sermonTitle: example.sermonTitle,
     quote: example.quote,
     offset: example.offset,
-    rewrite: rewriteByMeasure.get(example.measureId) ?? null,
+    rewrite:
+      example.measureId === 4 || example.measureId === 5
+        ? null
+        : (rewriteByMeasure.get(example.measureId) ?? null),
   }));
 
   if (rewriteResult.estimatedCostUsd != null) {
