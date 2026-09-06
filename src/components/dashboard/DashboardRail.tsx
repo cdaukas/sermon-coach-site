@@ -49,6 +49,11 @@ const PRIMARY_ITEMS: NavItem[] = [
     label: "Prep card",
     isActive: (pathname) => pathname.startsWith("/dashboard/prep-card"),
   },
+  {
+    href: "/dashboard/movement",
+    label: "Movement",
+    isActive: (pathname) => pathname.startsWith("/dashboard/movement"),
+  },
 ];
 
 const ACCOUNT_ITEMS: NavItem[] = [
@@ -136,7 +141,8 @@ export function DashboardRail({
   const primaryItems = PRIMARY_ITEMS.filter(
     (item) =>
       (item.href !== "/dashboard/growth" || growthAllowed) &&
-      (item.href !== "/dashboard/prep-card" || prepCardAllowed),
+      (item.href !== "/dashboard/prep-card" || prepCardAllowed) &&
+      (item.href !== "/dashboard/movement" || prepCardAllowed),
   );
 
   const developLabel = teamAccount ? "Team" : "Mentoring";
