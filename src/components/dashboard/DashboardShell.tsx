@@ -6,6 +6,7 @@ import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { profileHasGrowthAccess } from "@/lib/growth/access";
 import { profileIsTeamAccount } from "@/lib/mentor/team-account";
 import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
+import { resolveDeepDiveHref } from "@/lib/prep-card/deep-dive";
 import { createClient } from "@/lib/supabase/server";
 
 type DashboardShellProps = {
@@ -46,6 +47,10 @@ export async function DashboardShell({ children }: DashboardShellProps) {
   const prepCardAllowed = user
     ? await profileHasPrepCardAccess(user.id)
     : false;
+  const deepDiveHref =
+    user && prepCardAllowed
+      ? (await resolveDeepDiveHref(user.id)).href
+      : null;
   const teamAccount = user ? await profileIsTeamAccount(user.id) : false;
 
   return (
@@ -54,6 +59,7 @@ export async function DashboardShell({ children }: DashboardShellProps) {
         creditChipLabel={chip}
         growthAllowed={growthAllowed}
         prepCardAllowed={prepCardAllowed}
+        deepDiveHref={deepDiveHref}
         teamAccount={teamAccount}
       />
       <div className="dashboard-content">{children}</div>

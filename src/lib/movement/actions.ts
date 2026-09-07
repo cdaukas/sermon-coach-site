@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
-import { getLatestPrepCard } from "@/lib/prep-card/queries";
+import { getLatestThemeDiagnostic } from "@/lib/prep-card/queries";
 import type { PrepMeasureId } from "@/lib/prep-card/measures";
 import { buildMovementReportSnapshot } from "./build";
-import { DEFAULT_THEME, THEME_MEASURES } from "./themes";
+import { THEME_MEASURES, type MovementThemeId } from "./themes";
 import type { MovementCount } from "./types";
 import { MOVEMENT_MIN_NEW_SERMONS } from "./types";
 import {
@@ -38,8 +38,8 @@ async function requirePrepCardUser(): Promise<
 }
 
 /**
- * Lock a work-quarter baseline from the latest prep card focus.
- * Freezes sermon ids and counts so regenerating the card cannot move the goalposts.
+ * Lock a work-quarter baseline from the latest theme diagnostic focus.
+ * Freezes sermon ids and counts so regenerating the desk card cannot move the goalposts.
  */
 export async function lockMovementBaselineAction(): Promise<MovementActionResult> {
   const auth = await requirePrepCardUser();
@@ -52,21 +52,26 @@ export async function lockMovementBaselineAction(): Promise<MovementActionResult
     return { ok: false, error: "A work quarter is already open for this theme." };
   }
 
-  const card = await getLatestPrepCard();
+  const card = await getLatestThemeDiagnostic();
   if (!card) {
     return {
       ok: false,
-      error: "Build a prep card first. The movement baseline locks its focus three.",
+      error:
+        "Build a theme diagnostic first. The movement baseline locks its focus three.",
     };
   }
 
   const focus = card.snapshot.focus ?? [];
   if (focus.length === 0) {
-    return { ok: false, error: "The prep card has no focus disciplines to lock." };
+    return {
+      ok: false,
+      error: "The diagnostic has no focus disciplines to lock.",
+    };
   }
 
   const focusMeasureIds = focus.map((row) => row.id as PrepMeasureId);
-  const themeId = DEFAULT_THEME;
+  const themeId: MovementThemeId =
+    card.snapshot.themeId === "christ" ? "christ" : "ask";
   const themeIds = THEME_MEASURES[themeId];
   const countIds = [...new Set([...focusMeasureIds, ...themeIds])];
   const byId = new Map(
@@ -84,7 +89,7 @@ export async function lockMovementBaselineAction(): Promise<MovementActionResult
 
   const sermonIds = card.snapshot.sermonIds ?? [];
   if (sermonIds.length === 0) {
-    return { ok: false, error: "Prep card snapshot is missing sermon ids." };
+    return { ok: false, error: "Diagnostic snapshot is missing sermon ids." };
   }
 
   const baseline = await insertMovementBaseline({
@@ -111,7 +116,7 @@ export async function generateMovementReportAction(): Promise<MovementActionResu
   if (!baseline) {
     return {
       ok: false,
-      error: "Lock a work-quarter baseline from your prep card first.",
+      error: "Lock a work-quarter baseline from your theme diagnostic first.",
     };
   }
 

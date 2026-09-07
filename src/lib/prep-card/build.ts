@@ -31,6 +31,7 @@ import type {
   PrepCardSnapshot,
   PrepFocusExample,
   PrepMeasureCount,
+  PrepRankedMeasure,
   PrepSourceFormat,
 } from "./types";
 
@@ -154,16 +155,27 @@ function unmeasuredOutlineNote(params: {
 }
 
 /**
- * Run live counters and rank a prep card.
- * Actionable computed: 1 (C1), 2, 3, 4, 5, 6 (C2), 7.
- * Strengths-only computed: 8 (C3), 9, 11 (C4), 12 (C5).
+ * Run live counters and rank.
+ * - Default / diagnostic: full ask-theme report (quotes, Was/Now, rewrites), themeId "ask".
+ * - Desk mode: one-page prep card — no quotes/rewrites; locks strength/focus ids from
+ *   `lockedFrom` when provided so a work quarter cannot re-rank mid-stream.
  */
 export async function buildPrepCardSnapshot(
   sermons: PrepSermonInput[],
-  options?: { apiKey?: string; model?: string; now?: Date },
+  options?: {
+    apiKey?: string;
+    model?: string;
+    now?: Date;
+    /** Desk artifact (prep card), not the theme diagnostic. */
+    desk?: boolean;
+    /** When desk: preserve these strength/focus measure ids; refresh counts only. */
+    lockedFrom?: PrepCardSnapshot | null;
+  },
 ): Promise<PrepCardSnapshot> {
   const now = options?.now ?? new Date();
   const sampleSize = sermons.length;
+  const desk = options?.desk === true;
+  const lockedFrom = options?.lockedFrom ?? null;
 
   let m1Hits = 0;
   let m1Eligible = 0;
@@ -284,8 +296,8 @@ export async function buildPrepCardSnapshot(
     m12Eligible: sampleSize,
   });
 
-  const { strengths, focus, strengthTarget, strengthFloorCleared } =
-    rankPrepCard(counts, { sampleSize });
+  const manuscriptCount = formats.filter((f) => f === "manuscript").length;
+  const transcriptCount = formats.filter((f) => f === "transcript").length;
   const ranked = counts
     .filter((c) => c.rate != null && c.eligible != null && c.eligible > 0)
     .map((c) => ({ id: c.id, eligible: c.eligible as number }));
@@ -293,8 +305,88 @@ export async function buildPrepCardSnapshot(
   const actionableRankedCount = ranked.filter((row) =>
     isActionableMeasure(row.id),
   ).length;
-  const manuscriptCount = formats.filter((f) => f === "manuscript").length;
-  const transcriptCount = formats.filter((f) => f === "transcript").length;
+
+  let strengths: PrepRankedMeasure[];
+  let focus: PrepRankedMeasure[];
+  let strengthTarget: number;
+  let strengthFloorCleared: number;
+  let strengthsNote: string | null;
+
+  const lockedFocus = lockedFrom?.focus ?? [];
+  const lockedStrengths = lockedFrom?.strengths ?? [];
+  if (desk && lockedFocus.length > 0) {
+    const byId = new Map(counts.map((row) => [row.id, row] as const));
+    const refresh = (id: PrepMeasureId) => {
+      const row = byId.get(id);
+      if (
+        !row ||
+        row.hits == null ||
+        row.eligible == null ||
+        row.eligible <= 0 ||
+        row.rate == null
+      ) {
+        return null;
+      }
+      return {
+        id,
+        rate: row.rate,
+        hits: row.hits,
+        eligible: row.eligible,
+      };
+    };
+    focus = lockedFocus
+      .map((row) => refresh(row.id))
+      .filter((row): row is NonNullable<typeof row> => row != null);
+    strengths = lockedStrengths
+      .map((row) => refresh(row.id))
+      .filter((row): row is NonNullable<typeof row> => row != null);
+    strengthTarget = lockedStrengths.length;
+    strengthFloorCleared = strengths.length;
+    strengthsNote = null;
+  } else {
+    const rankedCard = rankPrepCard(counts, { sampleSize });
+    strengths = rankedCard.strengths;
+    focus = rankedCard.focus;
+    strengthTarget = rankedCard.strengthTarget;
+    strengthFloorCleared = rankedCard.strengthFloorCleared;
+    strengthsNote = prepStrengthsFloorNote({
+      shown: strengths.length,
+      target: strengthTarget,
+      clearedFloor: strengthFloorCleared,
+    });
+  }
+
+  if (desk) {
+    return {
+      sampleSize,
+      generatedAt: now.toISOString(),
+      sourceFormat: aggregateSourceFormat(formats),
+      manuscriptCount,
+      transcriptCount,
+      themeId: "desk",
+      rankedMeasureCount,
+      poolNote: lockedFocus.length
+        ? `Prep card locked to the current diagnostic focus (${focus.length} disciplines) on your last ${sampleSize} sermons.`
+        : prepCardPoolNote({
+            sampleSize,
+            manuscriptCount,
+            transcriptCount,
+            ranked,
+            actionableRankedCount,
+          }),
+      strengthsNote,
+      genreCaveat: null,
+      unmeasuredNote: null,
+      counts,
+      strengths,
+      focus,
+      focusExamples: [],
+      strengthExamples: [],
+      sermonIds: sermons.map((s) => s.id),
+      rewriteCostUsd: null,
+      rewriteModel: null,
+    };
+  }
 
   const sermonRefs = sermons.map((sermon) => ({
     id: sermon.id,
@@ -373,6 +465,7 @@ export async function buildPrepCardSnapshot(
     sourceFormat: aggregateSourceFormat(formats),
     manuscriptCount,
     transcriptCount,
+    themeId: "ask",
     rankedMeasureCount,
     poolNote: prepCardPoolNote({
       sampleSize,
@@ -381,11 +474,7 @@ export async function buildPrepCardSnapshot(
       ranked,
       actionableRankedCount,
     }),
-    strengthsNote: prepStrengthsFloorNote({
-      shown: strengths.length,
-      target: strengthTarget,
-      clearedFloor: strengthFloorCleared,
-    }),
+    strengthsNote,
     genreCaveat,
     unmeasuredNote,
     counts,

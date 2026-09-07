@@ -73,10 +73,12 @@ export type PrepCardSnapshot = {
   manuscriptCount: number;
   transcriptCount: number;
   /**
-   * Which theme this snapshot belongs to. Ask-theme prep cards omit this
-   * or use "ask". Christ theme reports set "christ".
+   * Which artifact this snapshot is.
+   * - "ask" / "christ": theme diagnostic reports
+   * - "desk": one-page prep card (locked from diagnostic or ranked)
+   * Legacy ask diagnostics omit themeId; treat those as "ask".
    */
-  themeId?: "ask" | "christ";
+  themeId?: "ask" | "christ" | "desk";
   /** How many measures entered the ranking pools. */
   rankedMeasureCount: number;
   /** What was ranked, with format split and per-measure support. */

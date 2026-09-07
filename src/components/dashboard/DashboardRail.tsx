@@ -22,7 +22,7 @@ type NavItem = {
   isActive: (pathname: string) => boolean;
 };
 
-const PRIMARY_ITEMS: NavItem[] = [
+const CORE_ITEMS: NavItem[] = [
   {
     href: "/dashboard",
     label: "Sermons",
@@ -38,27 +38,6 @@ const PRIMARY_ITEMS: NavItem[] = [
       pathname.startsWith("/dashboard/sketches/") ||
       pathname === "/dashboard/sketch" ||
       pathname.startsWith("/dashboard/sketch/"),
-  },
-  {
-    href: "/dashboard/growth",
-    label: "Growth",
-    isActive: (pathname) => pathname.startsWith("/dashboard/growth"),
-  },
-  {
-    href: "/dashboard/prep-card",
-    label: "Prep card",
-    isActive: (pathname) => pathname.startsWith("/dashboard/prep-card"),
-  },
-  {
-    href: "/dashboard/movement",
-    label: "Movement",
-    isActive: (pathname) => pathname.startsWith("/dashboard/movement"),
-  },
-  {
-    href: "/dashboard/christ-theme",
-    label: "Christ theme",
-    shortLabel: "Christ",
-    isActive: (pathname) => pathname.startsWith("/dashboard/christ-theme"),
   },
 ];
 
@@ -81,6 +60,8 @@ type DashboardRailProps = {
   creditChipLabel: string;
   growthAllowed: boolean;
   prepCardAllowed?: boolean;
+  /** Resolved deep-dive href (movement or current theme diagnostic). */
+  deepDiveHref?: string | null;
   teamAccount?: boolean;
 };
 
@@ -141,16 +122,36 @@ export function DashboardRail({
   creditChipLabel,
   growthAllowed,
   prepCardAllowed = false,
+  deepDiveHref = null,
   teamAccount = false,
 }: DashboardRailProps) {
   const pathname = usePathname();
-  const primaryItems = PRIMARY_ITEMS.filter(
-    (item) =>
-      (item.href !== "/dashboard/growth" || growthAllowed) &&
-      (item.href !== "/dashboard/prep-card" || prepCardAllowed) &&
-      (item.href !== "/dashboard/movement" || prepCardAllowed) &&
-      (item.href !== "/dashboard/christ-theme" || prepCardAllowed),
-  );
+
+  const growthItems: NavItem[] = [];
+  if (growthAllowed) {
+    growthItems.push({
+      href: "/dashboard/growth",
+      label: "Trend",
+      isActive: (path) => path.startsWith("/dashboard/growth"),
+    });
+  }
+  if (prepCardAllowed && deepDiveHref) {
+    growthItems.push({
+      href: deepDiveHref,
+      label: "Deep dive",
+      shortLabel: "Deep dive",
+      isActive: (path) =>
+        path === deepDiveHref || path.startsWith(`${deepDiveHref}/`),
+    });
+  }
+  if (prepCardAllowed) {
+    growthItems.push({
+      href: "/dashboard/prep-card",
+      label: "Prep card",
+      shortLabel: "Prep card",
+      isActive: (path) => path.startsWith("/dashboard/prep-card"),
+    });
+  }
 
   const developLabel = teamAccount ? "Team" : "Mentoring";
   const developOthersItem: NavItem = {
@@ -178,9 +179,23 @@ export function DashboardRail({
         <p className="dashboard-rail-group-label" style={uiFont}>
           Your preaching
         </p>
-        {primaryItems.map((item) => (
+        {CORE_ITEMS.map((item) => (
           <NavLink key={item.href} item={item} pathname={pathname} />
         ))}
+        {growthItems.length > 0 ? (
+          <>
+            <p className="dashboard-rail-group-label" style={uiFont}>
+              Growth
+            </p>
+            {growthItems.map((item) => (
+              <NavLink
+                key={`growth-${item.label}-${item.href}`}
+                item={item}
+                pathname={pathname}
+              />
+            ))}
+          </>
+        ) : null}
         <p className="dashboard-rail-group-label" style={uiFont}>
           Developing others
         </p>

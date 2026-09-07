@@ -35,15 +35,16 @@ describe("formatPrepCountCaption", () => {
 });
 
 describe("prepBuiltFromSummary", () => {
-  it("names measures, sermons, and the format split", () => {
+  it("names sample, date, format split, and discipline count in one line", () => {
     assert.equal(
       prepBuiltFromSummary({
-        rankedMeasureCount: 5,
+        rankedMeasureCount: 7,
         sampleSize: 24,
         manuscriptCount: 18,
         transcriptCount: 6,
+        dateLabel: "5 September 2026",
       }),
-      "Built from 5 measures, 24 sermons, 18 manuscripts, 6 transcripts.",
+      "Built from 24 sermons on 5 September 2026 — 18 manuscripts and 6 transcripts — across 7 measured disciplines.",
     );
   });
 });

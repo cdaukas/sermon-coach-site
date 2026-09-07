@@ -256,29 +256,38 @@ export function prepCardPoolNote(input: PrepPoolNoteInput): string {
 }
 
 /**
- * Compact method-footer line: measures, sample, manuscript/transcript split.
- * Replaces the long face note at the top of the card.
+ * Compact method-footer line: sample, date, format split, measure count.
+ * One "Built from" sentence — do not append a second sample line in the view.
  */
 export function prepBuiltFromSummary(params: {
   rankedMeasureCount: number;
   sampleSize: number;
   manuscriptCount: number;
   transcriptCount: number;
+  /** Already formatted for display, e.g. "5 September 2026". */
+  dateLabel: string;
 }): string {
-  const { rankedMeasureCount, sampleSize, manuscriptCount, transcriptCount } =
-    params;
-  const measureWord =
-    rankedMeasureCount === 1 ? "measure" : "measures";
+  const {
+    rankedMeasureCount,
+    sampleSize,
+    manuscriptCount,
+    transcriptCount,
+    dateLabel,
+  } = params;
   const sermonWord = sampleSize === 1 ? "sermon" : "sermons";
+  const disciplineWord =
+    rankedMeasureCount === 1 ? "measured discipline" : "measured disciplines";
+
   let split = "";
   if (manuscriptCount > 0 && transcriptCount > 0) {
-    split = `, ${manuscriptCount} manuscripts, ${transcriptCount} transcripts`;
+    split = ` — ${manuscriptCount} manuscripts and ${transcriptCount} transcripts`;
   } else if (manuscriptCount === sampleSize && sampleSize > 0) {
-    split = `, all manuscripts`;
+    split = " — all manuscripts";
   } else if (transcriptCount === sampleSize && sampleSize > 0) {
-    split = `, all transcripts`;
+    split = " — all transcripts";
   }
-  return `Built from ${rankedMeasureCount} ${measureWord}, ${sampleSize} ${sermonWord}${split}.`;
+
+  return `Built from ${sampleSize} ${sermonWord} on ${dateLabel}${split} — across ${rankedMeasureCount} ${disciplineWord}.`;
 }
 
 /**

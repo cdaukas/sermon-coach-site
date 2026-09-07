@@ -15,6 +15,7 @@ import type {
   PrepStrengthExample,
 } from "@/lib/prep-card/types";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
+import type { ReactNode } from "react";
 
 type PrepCardViewProps = {
   snapshot: PrepCardSnapshot;
@@ -24,7 +25,7 @@ function AttributionLabel({
   children,
   className = "mb-1",
 }: {
-  children: string;
+  children: ReactNode;
   className?: string;
 }) {
   return (
@@ -317,18 +318,16 @@ function SectionHead({
 
 export function PrepCardView({ snapshot }: PrepCardViewProps) {
   const isChristTheme = snapshot.themeId === "christ";
+  const isAskTheme =
+    snapshot.themeId === "ask" || snapshot.themeId == null;
   const generated = new Date(snapshot.generatedAt);
-  const dateLabel = generated.toLocaleDateString("en-US", {
+  const dateLabel = generated.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
   const manuscriptCount = snapshot.manuscriptCount ?? 0;
   const transcriptCount = snapshot.transcriptCount ?? 0;
-  const formatDetail =
-    manuscriptCount > 0 && transcriptCount > 0
-      ? `${manuscriptCount} manuscripts, ${transcriptCount} transcripts`
-      : snapshot.sourceFormat;
   const focusExamples = snapshot.focusExamples ?? [];
   const exampleByMeasure = new Map(
     focusExamples.map((example) => [example.measureId, example] as const),
@@ -375,13 +374,19 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
         className="mb-2.5 text-[36px] font-normal leading-tight tracking-tight md:text-[40px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        {isChristTheme ? "Christ in the sermon" : "Before you preach"}
+        {isChristTheme
+          ? "Christ in the sermon"
+          : isAskTheme
+            ? "The ask"
+            : "Before you preach"}
       </h1>
       <p
         className="mb-10 max-w-[42ch] text-[20px] leading-snug"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
-        {isChristTheme ? PREP_THEME_QUESTION.christ : PREP_THEME_QUESTION.ask}
+        {isChristTheme
+          ? PREP_THEME_QUESTION.christ
+          : PREP_THEME_QUESTION.ask}
       </p>
 
       <section className="mb-11">
@@ -490,6 +495,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
               sampleSize: snapshot.sampleSize,
               manuscriptCount,
               transcriptCount,
+              dateLabel,
             })}
           </p>
           {snapshot.unmeasuredNote ? (
@@ -498,10 +504,6 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
           {snapshot.genreCaveat ? (
             <p className="m-0 max-w-[62ch]">{snapshot.genreCaveat}</p>
           ) : null}
-          <p className="m-0 pt-1">
-            Built from {snapshot.sampleSize} sermons, {dateLabel}
-            {formatDetail ? `. ${formatDetail}` : "."}
-          </p>
         </div>
       </footer>
     </article>

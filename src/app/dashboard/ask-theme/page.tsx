@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GenerateChristThemeButton } from "@/components/christ-theme/GenerateChristThemeButton";
+import { GenerateAskThemeButton } from "@/components/ask-theme/GenerateAskThemeButton";
 import { DeepDiveHistoryList } from "@/components/prep-card/DeepDiveHistoryList";
 import { PrepCardView } from "@/components/prep-card/PrepCardView";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
@@ -10,22 +10,20 @@ import {
   getThemeDiagnosticById,
   listDeepDiveHistory,
 } from "@/lib/prep-card/deep-dive-history";
-import { getLatestChristThemeReport } from "@/lib/prep-card/queries";
+import { getLatestAskThemeReport } from "@/lib/prep-card/queries";
 import { createClient } from "@/lib/supabase/server";
 import "../prep-card/prep-card.css";
 
 export const metadata: Metadata = {
-  title: "Christ in the sermon — The Sermon Coach",
+  title: "The ask — The Sermon Coach",
   robots: { index: false, follow: false },
 };
 
-type ChristThemePageProps = {
+type AskThemePageProps = {
   searchParams: Promise<{ id?: string }>;
 };
 
-export default async function ChristThemePage({
-  searchParams,
-}: ChristThemePageProps) {
+export default async function AskThemePage({ searchParams }: AskThemePageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -37,14 +35,17 @@ export default async function ChristThemePage({
 
   const params = await searchParams;
   const requestedId = typeof params.id === "string" ? params.id.trim() : "";
-  const latest = await getLatestChristThemeReport();
+  const latest = await getLatestAskThemeReport();
 
   let report = latest;
   let isHistorical = false;
 
   if (requestedId) {
     const byId = await getThemeDiagnosticById(user.id, requestedId);
-    if (!byId || byId.snapshot.themeId !== "christ") {
+    if (
+      !byId ||
+      (byId.snapshot.themeId !== "ask" && byId.snapshot.themeId != null)
+    ) {
       notFound();
     }
     report = byId;
@@ -65,14 +66,14 @@ export default async function ChristThemePage({
               Dashboard
             </Link>
             {" · "}
-            Christ theme
+            The ask
             {isHistorical ? " · archived" : ""}
           </p>
           <h1
             className="text-[32px] font-normal tracking-tight md:text-[36px]"
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
-            Christ in the sermon
+            The ask
           </h1>
           <p
             className="mt-2 max-w-[48ch] text-[15px] leading-relaxed"
@@ -80,10 +81,10 @@ export default async function ChristThemePage({
           >
             {isHistorical
               ? "Frozen snapshot — counts and copy as they were when this report was built."
-              : "Does Christ act in this sermon, or is he its destination? Strengths and focus from the three measures we can already count."}
+              : "Does your ask land on anyone? Strengths and focus from the measures we can already count."}
           </p>
         </div>
-        {!isHistorical ? <GenerateChristThemeButton /> : null}
+        {!isHistorical ? <GenerateAskThemeButton /> : null}
       </div>
 
       {report ? (
@@ -104,9 +105,9 @@ export default async function ChristThemePage({
             className="text-[17px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
-            No Christ-theme report yet. Build one from your recent sermons. It
-            runs Christ-as-agent in prose and in a main point (UDPipe), plus
-            cross named-object, gospel-in-skeleton, and outsider-address.
+            No ask-theme report yet. Build one from your recent sermons. It runs
+            visible ask, cost, conclusion finish, frame, reciprocal ask, naming,
+            and address.
           </p>
         </div>
       )}
