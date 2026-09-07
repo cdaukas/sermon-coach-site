@@ -24,7 +24,8 @@ export const metadata: Metadata = {
   title: {
     absolute: "The Sermon Coach · Walk into Sunday knowing your sermon is ready.",
   },
-  description: "Walk into Sunday knowing your sermon is ready.",
+  description:
+    "Expositional feedback on your sermon, scored against an eleven-criterion rubric. Your first evaluation is free, no card. Written for pastors who preach.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "The Sermon Coach",
