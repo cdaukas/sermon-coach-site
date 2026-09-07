@@ -44,7 +44,22 @@ export function HomeV2Proof() {
 
       <div className="container">
         <div className="builder">
-          <div>
+          <div className="builder-photo">
+            {/* Plain img on purpose: the site uses no next/image anywhere, and
+                this asset ships pre-cropped square at 640px for a slot that is
+                never wider than 226px. The circle and its gold ring come from
+                .builder-photo in CSS. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/chris-daukas.jpg"
+              width={640}
+              height={640}
+              alt="Dr. Christopher M. Daukas"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div className="builder-body">
             <div className="eyebrow">Built by a preacher</div>
             <h3>Built by a preacher. Tested in the pulpit.</h3>
             <p>{BUILDER}</p>

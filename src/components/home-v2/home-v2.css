@@ -655,6 +655,36 @@
   background: var(--sc-olive-soft);
   border-radius: 4px;
   padding: 42px;
+  display: flex;
+  align-items: center;
+  gap: 46px;
+}
+
+/* Circular founder portrait. The asset is already cropped square and centred
+   on the face, so object-fit is a safety net rather than the framing tool.
+   The hairline gold ring sits a few pixels off the photo, letting the card
+   colour show through, so the circle reads as part of the card. */
+.home-v2 .builder-photo {
+  flex: 0 0 auto;
+  width: 240px;
+  height: 240px;
+  padding: 6px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--sc-accent-soft) 60%, transparent);
+}
+
+.home-v2 .builder-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  box-shadow: var(--sc-shadow);
+}
+
+.home-v2 .builder-body {
+  min-width: 0;
 }
 
 .home-v2 .builder h3 {
@@ -1156,6 +1186,24 @@
   .home-v2 .held,
   .home-v2 .classroom {
     padding: 26px;
+  }
+
+  /* Portrait stacks above the eyebrow and centres; the copy stays ranged left. */
+  .home-v2 .builder {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .home-v2 .builder-photo {
+    width: 164px;
+    height: 164px;
+    padding: 5px;
+  }
+
+  .home-v2 .builder-body {
+    width: 100%;
+    text-align: left;
   }
 
   .home-v2 .footercta {
