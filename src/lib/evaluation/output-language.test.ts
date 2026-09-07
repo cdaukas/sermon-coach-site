@@ -10,8 +10,8 @@ import {
   parseCriterion2Wording,
   parseOutputLanguage,
   resolveRequestedOutputLanguage,
-  SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
 } from "./output-language";
+import { SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS } from "./output-language-prompts";
 
 describe("output language", () => {
   it("treats anything except es as English", () => {

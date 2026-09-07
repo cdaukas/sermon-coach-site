@@ -1,9 +1,7 @@
 import { buildContextPreamble, type SermonContext } from "./context";
 import { HIP_MOVEMENT_NAMES } from "./hip-schema";
-import {
-  SPANISH_HIP_OUTPUT_INSTRUCTIONS,
-  type OutputLanguage,
-} from "./output-language";
+import { SPANISH_HIP_OUTPUT_INSTRUCTIONS } from "./output-language-prompts";
+import type { OutputLanguage } from "./output-language";
 
 export const HIP_REGISTER_BLOCK = `How It Preaches is a craft read, not a second score. The scored rubric already named what is broken against the criteria. This section does the thing the rubric cannot: it reads the sermon as moving rhetoric, how it opens, carries its idea, and lands.
 
