@@ -68,7 +68,7 @@ describe("getOrCreateStripeCustomer", () => {
         },
         update: async (id: string, params: { email?: string }) => {
           updated.push({ id, email: params.email ?? "" });
-          return {} as Stripe.Customer;
+          return stripeCustomer();
         },
         create: async () => {
           throw new Error("should not create when customer exists");
@@ -107,10 +107,7 @@ describe("getOrCreateStripeCustomer", () => {
             );
           }
           assert.equal(metadata.supabase_user_id, "user-2");
-          return {
-            id: "cus_new",
-            object: "customer",
-          } as Stripe.Customer;
+          return stripeCustomer({ id: "cus_new" });
         },
       },
     } as unknown as Stripe;
