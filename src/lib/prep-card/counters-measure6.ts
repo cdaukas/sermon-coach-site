@@ -1,8 +1,9 @@
 /**
- * Measure 6 stub — Christ-in-point requires spaCy dependency parse.
- * Do not approximate. Returns null and is excluded from ranking.
+ * Measure 6 / Theme 2 C2 — Christ-in-a-main-point via UDPipe.
+ * Re-exports the live counter from counters-agency.
  */
 
-export function measure6ChristInPoint(_raw: string): null {
-  return null;
-}
+export {
+  measure6ChristInPoint,
+  measureChristAgencyInPoint,
+} from "./counters-agency";

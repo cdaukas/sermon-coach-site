@@ -72,6 +72,13 @@ export type PrepCardSnapshot = {
   sourceFormat: PrepSourceFormat;
   manuscriptCount: number;
   transcriptCount: number;
+  /**
+   * Which artifact this snapshot is.
+   * - "ask" / "christ": theme diagnostic reports
+   * - "desk": one-page prep card (locked from diagnostic or ranked)
+   * Legacy ask diagnostics omit themeId; treat those as "ask".
+   */
+  themeId?: "ask" | "christ" | "desk";
   /** How many measures entered the ranking pools. */
   rankedMeasureCount: number;
   /** What was ranked, with format split and per-measure support. */
@@ -81,6 +88,15 @@ export type PrepCardSnapshot = {
    * explains why. Null when the floor did not truncate.
    */
   strengthsNote: string | null;
+  /**
+   * Genre mix caveat for Christ-theme counts. Printed; never adjusts.
+   */
+  genreCaveat: string | null;
+  /**
+   * Method-footer detail: parser calibration (Christ) or outline-only
+   * manuscript note (ask). Null when there is nothing extra to say.
+   */
+  unmeasuredNote: string | null;
   counts: PrepMeasureCount[];
   strengths: PrepRankedMeasure[];
   focus: PrepRankedMeasure[];

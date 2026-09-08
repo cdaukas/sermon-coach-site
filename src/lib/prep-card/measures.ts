@@ -14,11 +14,14 @@ export const STRENGTHS_ONLY_MEASURE_IDS = [8, 9, 10, 11, 12] as const;
 
 /**
  * Measures with a live counter in this ship.
- * 6 is defined but returns null (spaCy not approximated).
- * 1, 8, 10, 11 have no counter yet.
- * 9 and 12 are strengths-only.
+ * 1 = Theme 2 C1 Christ agency in prose (UDPipe).
+ * 6 = Theme 2 C2 Christ in a main point (UDPipe).
+ * 10 has no counter yet.
+ * 8 = C3 cross named object; 11 = C4 gospel in skeleton; 9 and 12 strengths-only.
  */
-export const COMPUTED_MEASURE_IDS = [2, 3, 4, 5, 7, 9, 12] as const;
+export const COMPUTED_MEASURE_IDS = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12,
+] as const;
 
 export type ComputedPrepMeasureId = (typeof COMPUTED_MEASURE_IDS)[number];
 

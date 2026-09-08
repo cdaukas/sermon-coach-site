@@ -8,6 +8,7 @@ export type SermonForPrepCard = {
   id: string;
   title: string;
   content: string;
+  primaryPassage?: string | null;
 };
 
 /**
@@ -22,7 +23,7 @@ export async function loadSermonsForPrepCard(
 
   const { data: sermons, error: sermonsError } = await supabase
     .from("sermons")
-    .select("id, title")
+    .select("id, title, primary_passage")
     .eq("user_id", userId)
     .is("deleted_at", null)
     .eq("excluded_from_growth", false)
@@ -67,6 +68,10 @@ export async function loadSermonsForPrepCard(
       id: sermon.id,
       title: typeof sermon.title === "string" ? sermon.title : "Sermon",
       content,
+      primaryPassage:
+        typeof sermon.primary_passage === "string"
+          ? sermon.primary_passage
+          : null,
     });
   }
 
@@ -74,7 +79,58 @@ export async function loadSermonsForPrepCard(
   return rows.reverse();
 }
 
-export async function getLatestPrepCard(): Promise<PrepCardRow | null> {
+function mapPrepCardRow(row: Record<string, unknown>): PrepCardRow {
+  return {
+    id: row.id as string,
+    user_id: row.user_id as string,
+    generated_at: row.generated_at as string,
+    sample_size: row.sample_size as number,
+    source_format: row.source_format as PrepCardRow["source_format"],
+    ranked_measure_count: row.ranked_measure_count as number,
+    pool_note: row.pool_note as string,
+    snapshot: row.snapshot as PrepCardSnapshot,
+    created_at: row.created_at as string,
+  };
+}
+
+async function listRecentPrepCardRows(
+  userId: string,
+  limit = 20,
+): Promise<PrepCardRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("prep_cards")
+    .select(
+      "id, user_id, generated_at, sample_size, source_format, ranked_measure_count, pool_note, snapshot, created_at",
+    )
+    .eq("user_id", userId)
+    .order("generated_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return (data ?? []).map((row) => mapPrepCardRow(row));
+}
+
+function isAskDiagnostic(snapshot: PrepCardSnapshot): boolean {
+  return snapshot.themeId === "ask" || snapshot.themeId == null;
+}
+
+function isChristDiagnostic(snapshot: PrepCardSnapshot): boolean {
+  return snapshot.themeId === "christ";
+}
+
+function isDeskCard(snapshot: PrepCardSnapshot): boolean {
+  return snapshot.themeId === "desk";
+}
+
+function isThemeDiagnostic(snapshot: PrepCardSnapshot): boolean {
+  return isAskDiagnostic(snapshot) || isChristDiagnostic(snapshot);
+}
+
+/** Ask-theme diagnostic (legacy rows without themeId count as ask). */
+export async function getLatestAskThemeReport(): Promise<PrepCardRow | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -83,34 +139,60 @@ export async function getLatestPrepCard(): Promise<PrepCardRow | null> {
     return null;
   }
 
-  const { data, error } = await supabase
-    .from("prep_cards")
-    .select(
-      "id, user_id, generated_at, sample_size, source_format, ranked_measure_count, pool_note, snapshot, created_at",
-    )
-    .eq("user_id", user.id)
-    .order("generated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const rows = await listRecentPrepCardRows(user.id);
+  return rows.find((row) => isAskDiagnostic(row.snapshot)) ?? null;
+}
 
-  if (error) {
-    throw new Error(error.message);
-  }
-  if (!data) {
+/**
+ * @deprecated Prefer getLatestAskThemeReport or getLatestDeskCard.
+ * Kept for callers that still mean "ask diagnostic, not christ."
+ */
+export async function getLatestPrepCard(): Promise<PrepCardRow | null> {
+  return getLatestAskThemeReport();
+}
+
+export async function getLatestChristThemeReport(): Promise<PrepCardRow | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return null;
   }
 
-  return {
-    id: data.id as string,
-    user_id: data.user_id as string,
-    generated_at: data.generated_at as string,
-    sample_size: data.sample_size as number,
-    source_format: data.source_format as PrepCardRow["source_format"],
-    ranked_measure_count: data.ranked_measure_count as number,
-    pool_note: data.pool_note as string,
-    snapshot: data.snapshot as PrepCardSnapshot,
-    created_at: data.created_at as string,
-  };
+  const rows = await listRecentPrepCardRows(user.id);
+  return rows.find((row) => isChristDiagnostic(row.snapshot)) ?? null;
+}
+
+/** One-page desk prep card. */
+export async function getLatestDeskCard(): Promise<PrepCardRow | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+
+  const rows = await listRecentPrepCardRows(user.id);
+  return rows.find((row) => isDeskCard(row.snapshot)) ?? null;
+}
+
+/**
+ * Latest theme diagnostic across ask and christ (by generated_at).
+ * Desk cards are excluded.
+ */
+export async function getLatestThemeDiagnostic(): Promise<PrepCardRow | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+
+  const rows = await listRecentPrepCardRows(user.id);
+  return rows.find((row) => isThemeDiagnostic(row.snapshot)) ?? null;
 }
 
 export async function insertPrepCard(
@@ -138,15 +220,5 @@ export async function insertPrepCard(
     throw new Error(error?.message ?? "prep_cards insert failed");
   }
 
-  return {
-    id: data.id as string,
-    user_id: data.user_id as string,
-    generated_at: data.generated_at as string,
-    sample_size: data.sample_size as number,
-    source_format: data.source_format as PrepCardRow["source_format"],
-    ranked_measure_count: data.ranked_measure_count as number,
-    pool_note: data.pool_note as string,
-    snapshot: data.snapshot as PrepCardSnapshot,
-    created_at: data.created_at as string,
-  };
+  return mapPrepCardRow(data);
 }
