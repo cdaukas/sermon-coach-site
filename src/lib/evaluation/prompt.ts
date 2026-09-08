@@ -1,10 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildContextPreamble, type SermonContext } from "./context";
-import {
-  SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
-  type OutputLanguage,
-} from "./output-language";
+import { SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS } from "./output-language-prompts";
+import type { OutputLanguage } from "./output-language";
 import { deriveBookFromPassage } from "./scripture-book";
 
 export const EVALUATION_PROMPT_VERSION = "v3.5";

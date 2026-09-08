@@ -3,10 +3,8 @@
  * Never scores. Never sees the evaluation prompt or rubric.
  */
 
-import {
-  SPANISH_VERDICT_LINE_OUTPUT_INSTRUCTIONS,
-  type OutputLanguage,
-} from "./output-language";
+import { SPANISH_VERDICT_LINE_OUTPUT_INSTRUCTIONS } from "./output-language-prompts";
+import type { OutputLanguage } from "./output-language";
 
 export const VERDICT_LINE_MODEL = "claude-haiku-4-5";
 
