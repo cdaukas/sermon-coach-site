@@ -339,7 +339,7 @@ function SubmissionBlock({
   const held = canRelease(item);
   const showRelease = offerRelease && held;
   const explanation = showRelease
-    ? "Coaching debrief and How It Preaches are available to you. Release the score when you're ready."
+    ? "His coaching is written and waiting for him. You have the scored evaluation, all eleven criteria. Release the score when you're ready."
     : !offerRelease && item.status === "complete"
       ? "This evaluation is for you. Nothing here reaches them; you deliver it in person."
       : null;
