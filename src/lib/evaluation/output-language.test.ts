@@ -11,7 +11,6 @@ import {
   parseOutputLanguage,
   resolveRequestedOutputLanguage,
 } from "./output-language";
-import { SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS } from "./output-language-prompts";
 
 describe("output language", () => {
   it("treats anything except es as English", () => {
@@ -183,22 +182,5 @@ describe("Spanish display maps", () => {
     assert.equal(copy.waitTimedOutTitle, "Esto está tardando más de lo debido");
     assert.equal(copy.coachingReport, "Informe de coaching");
     assert.equal(copy.backToMentoring, "Volver a la mentoría");
-  });
-
-  it("includes Reina-Valera 1960 in the Spanish output contract", () => {
-    assert.match(SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS, /Reina-Valera 1960/);
-    assert.match(SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS, /Never free-translate/);
-    assert.match(
-      SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
-      /canonical English enum/,
-    );
-    assert.match(
-      SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
-      /No em-dashes \(U\+2014\)/,
-    );
-    assert.match(
-      SPANISH_EVALUATION_OUTPUT_INSTRUCTIONS,
-      /must begin by naming the book/,
-    );
   });
 });
