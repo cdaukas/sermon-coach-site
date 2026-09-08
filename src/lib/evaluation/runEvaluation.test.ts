@@ -230,12 +230,16 @@ describe("runEvaluation schema retry", () => {
     process.env.ANTHROPIC_API_KEY = "test-key";
 
     const createMessage: CreateEvaluationMessage = async () =>
-      messageWithToolInput(EVALUATION_FIXTURE, "claude-test-model", {
-        input_tokens: 700,
-        output_tokens: 40,
-        cache_creation_input_tokens: 0,
-        cache_read_input_tokens: 24_000,
-      } as Anthropic.Messages.Usage);
+      messageWithToolInput(
+        EVALUATION_FIXTURE,
+        "claude-test-model",
+        anthropicUsage({
+          input_tokens: 700,
+          output_tokens: 40,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 24_000,
+        }),
+      );
 
     const { inputTokens, outputTokens } = await runEvaluation(evaluationInput, {
       createMessage,
