@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { PublicSampleSketchReport } from "@/components/sketch/PublicSampleSketchReport";
 import { getPublicSampleSketch } from "@/lib/sketch/public-sample";
+import type { PublicSampleSketch } from "@/lib/sketch/public-sample";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -18,19 +18,57 @@ export const metadata: Metadata = {
   },
 };
 
-/** Always resolve the flagged row at request time (service role). */
-export const dynamic = "force-dynamic";
+/**
+ * The flagged row changes only when is_public_sample is flipped by hand, so the
+ * rendered page is effectively static. Prerender it and refresh hourly rather
+ * than paying a service-role round trip on every visit.
+ */
+export const revalidate = 3600;
+
+type SampleLoad =
+  | { ok: true; sample: PublicSampleSketch }
+  | { ok: false; reason: string };
+
+/**
+ * Never let a failed load become a 404.
+ *
+ * With the page prerendered, notFound() at build time would bake a 404 and
+ * serve it for the whole revalidate window. A missing row, an empty read, or
+ * absent Supabase env vars degrade to the page shell instead, which still
+ * carries the CTA and is replaced by the real thing at the next revalidation.
+ */
+async function loadPublicSample(): Promise<SampleLoad> {
+  try {
+    const sample = await getPublicSampleSketch();
+    if (!sample) {
+      return { ok: false, reason: "no flagged row, or read_output was empty" };
+    }
+    return { ok: true, sample };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
 
 /**
  * Unauthenticated sample Sketch page.
  * Resolves the single is_public_sample readiness_reads row server-side. No id in the URL.
  */
 export default async function PublicSampleSketchPage() {
-  const sample = await getPublicSampleSketch();
+  const loaded = await loadPublicSample();
 
-  if (!sample) {
-    notFound();
+  if (!loaded.ok) {
+    // Distinct marker: a build that quietly degrades should be greppable in the
+    // build log and in the function log, not invisible.
+    console.error(
+      "[sample-sketch] FALLBACK RENDERED: serving the page shell instead of the Sketch read.",
+      { reason: loaded.reason },
+    );
   }
+
+  const sample = loaded.ok ? loaded.sample : null;
 
   return (
     <div
@@ -58,7 +96,9 @@ export default async function PublicSampleSketchPage() {
             className="max-w-[54ch] text-[15px] leading-relaxed"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            A Sketch read of a real outline, on Hebrews 3:1-6, before the sermon was written. Six answers in, one read out. The Sketch checks whether what you already believe about the passage holds together. It is not independent exegesis, and the six answers it read are printed below so you can see exactly what it worked from.
+            {sample === null
+              ? "The sample Sketch is being refreshed. It will be back shortly. In the meantime you can run the Sketch on your own outline, free, and see the same six answers read back."
+              : "A Sketch read of a real outline, on Hebrews 3:1-6, before the sermon was written. Six answers in, one read out. The Sketch checks whether what you already believe about the passage holds together. It is not independent exegesis, and the six answers it read are printed below so you can see exactly what it worked from."}
           </p>
           <div className="mt-5">
             <Link
@@ -84,12 +124,22 @@ export default async function PublicSampleSketchPage() {
             boxShadow: "var(--sc-shadow-lift)",
           }}
         >
-          <PublicSampleSketchReport
-            primaryPassage={sample.primaryPassage}
-            answers={sample.answers}
-            readOutput={sample.readOutput}
-            status={sample.status}
-          />
+          {sample === null ? (
+            <p
+              className="text-center text-[15px] leading-relaxed"
+              style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+            >
+              This sample is temporarily unavailable. Nothing is wrong with your
+              link.
+            </p>
+          ) : (
+            <PublicSampleSketchReport
+              primaryPassage={sample.primaryPassage}
+              answers={sample.answers}
+              readOutput={sample.readOutput}
+              status={sample.status}
+            />
+          )}
         </main>
 
         <div className="mt-10 text-center">
