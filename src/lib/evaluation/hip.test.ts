@@ -36,6 +36,11 @@ test("Spanish HIP prompt writes body in Spanish and keeps English movement names
   assert.match(spanish, /OUTPUT LANGUAGE \(SPANISH\)/);
   assert.match(spanish, /Reina-Valera 1960/);
   assert.match(spanish, /Keep each movement `name` as the English enum/);
+  assert.match(spanish, /The Open/);
+  assert.match(spanish, /The Big Idea/);
+  assert.match(spanish, /The Structural Logic/);
+  assert.match(spanish, /The Illustrations/);
+  assert.match(spanish, /The Landing/);
 });
 
 describe("runHowItPreachesBestEffort", () => {
