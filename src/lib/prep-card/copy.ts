@@ -19,13 +19,13 @@ export type PrepMeasureCopy = {
 export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
   1: {
     id: 1,
-    strengthHeadline: "You let the text argue with you.",
+    strengthHeadline: "Jesus does things in your sentences.",
     strengthLine:
-      "Your sermons show a willingness to let the passage challenge what you came to say, rather than using it to support what you already wanted.",
-    focusHeadline: "Let the text surprise you.",
+      "He carries, absorbs, finishes, comes back — the subject of a verb, not only a modifier attached to a noun.",
+    focusHeadline: "Give Christ a verb.",
     focusLine:
-      "We can easily find in a passage what we came looking for. The goal is not to find your point in the passage, but to let the passage shape your point.",
-    ask: "What did this text make me see that I would not have seen on my own?",
+      "Christ appears in the genitive — the grace of Christ, the work of Christ — and almost never does anything. That is a sentence problem, and it is fixable.",
+    ask: "What is Christ doing in this week's text?",
   },
   2: {
     id: 2,
@@ -74,8 +74,8 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
       "Christ is not only mentioned through the sermon. He is doing something in its main movement.",
     focusHeadline: "Put Christ in the skeleton, not just the paragraphs.",
     focusLine:
-      "It is possible to mention Jesus throughout a sermon without letting Christ shape where it goes.",
-    ask: "What is Christ doing in this text, and where does that belong in my outline?",
+      "Across 4,227 numbered points in 497 sermons, 21 have Jesus doing something. That is one in two hundred. So this is not a mark against you; it is an open door most preachers walk past.",
+    ask: "Which point in this sermon could have Christ as its subject?",
   },
   7: {
     id: 7,
@@ -89,12 +89,13 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
   },
   8: {
     id: 8,
-    strengthHeadline: "You always reach the gospel",
+    strengthHeadline: "The cross has a named object.",
     strengthLine:
-      "You do not leave the text stranded in its original setting. You show why this passage matters because of what God has done in Christ.",
-    focusHeadline: null,
-    focusLine: null,
-    ask: null,
+      "When you name the cross you say what it dealt with — wrath, the curse, the debt, the grave — so people can tell you what happened rather than only that something did.",
+    focusHeadline: "Name what the cross dealt with.",
+    focusLine:
+      "Your cross sentences are mostly placeholders until they name a specific thing absorbed, paid, or broken.",
+    ask: "At the cross he absorbed ___. Can I fill the blank from this passage?",
   },
   9: {
     id: 9,
@@ -116,21 +117,23 @@ export const PREP_MEASURE_COPY: Record<PrepMeasureId, PrepMeasureCopy> = {
   },
   11: {
     id: 11,
-    strengthHeadline: "Your delight has an object",
+    strengthHeadline: "The gospel is in your skeleton.",
     strengthLine:
-      "When you enjoy the text, people can tell what you are enjoying. Your affection is not generic; it points at something specific.",
-    focusHeadline: null,
-    focusLine: null,
-    ask: null,
+      "A gospel word sits in a numbered main point, so the gospel carries the argument rather than warming it at the end.",
+    focusHeadline: "Put the gospel in a main point.",
+    focusLine:
+      "If every gospel sentence could be deleted and the argument still stood, the gospel is warming the sermon rather than holding it up.",
+    ask: "Would this sermon's argument still stand if I deleted every gospel sentence?",
   },
   12: {
     id: 12,
     strengthHeadline: "You remember the person who does not yet believe",
     strengthLine:
       "Your preaching leaves room for the unbeliever. You address him rather than assuming everyone listening already believes.",
-    focusHeadline: null,
-    focusLine: null,
-    ask: null,
+    focusHeadline: "Speak to the person who has not decided.",
+    focusLine:
+      "Address him once, earlier than the last ninety seconds, and give him something to do.",
+    ask: "In this sermon, what am I asking the person who does not yet believe?",
   },
 };
 
@@ -143,9 +146,15 @@ export const PREP_CARD_REVERENCE = {
 export const PREP_CARD_STANDING_STRENGTH =
   "Self-aimed humor is a strength, not a lapse. Keep it.";
 
+/** Theme question at the top of the report. Methodology lives in the footer. */
+export const PREP_THEME_QUESTION = {
+  ask: "Does your ask land on anyone?",
+  christ: "Does Christ act in this sermon, or is he its destination?",
+} as const;
+
 /** Short labels for pool-note inventory (not display headlines). */
 export const PREP_MEASURE_SHORT_LABEL: Record<PrepMeasureId, string> = {
-  1: "correction move",
+  1: "Christ agency in prose",
   2: "visible ask",
   3: "named cost",
   4: "conclusion finish",
@@ -247,6 +256,41 @@ export function prepCardPoolNote(input: PrepPoolNoteInput): string {
 }
 
 /**
+ * Compact method-footer line: sample, date, format split, measure count.
+ * One "Built from" sentence — do not append a second sample line in the view.
+ */
+export function prepBuiltFromSummary(params: {
+  rankedMeasureCount: number;
+  sampleSize: number;
+  manuscriptCount: number;
+  transcriptCount: number;
+  /** Already formatted for display, e.g. "5 September 2026". */
+  dateLabel: string;
+}): string {
+  const {
+    rankedMeasureCount,
+    sampleSize,
+    manuscriptCount,
+    transcriptCount,
+    dateLabel,
+  } = params;
+  const sermonWord = sampleSize === 1 ? "sermon" : "sermons";
+  const disciplineWord =
+    rankedMeasureCount === 1 ? "measured discipline" : "measured disciplines";
+
+  let split = "";
+  if (manuscriptCount > 0 && transcriptCount > 0) {
+    split = ` — ${manuscriptCount} manuscripts and ${transcriptCount} transcripts`;
+  } else if (manuscriptCount === sampleSize && sampleSize > 0) {
+    split = " — all manuscripts";
+  } else if (transcriptCount === sampleSize && sampleSize > 0) {
+    split = " — all transcripts";
+  }
+
+  return `Built from ${sampleSize} ${sermonWord} on ${dateLabel}${split} — across ${rankedMeasureCount} ${disciplineWord}.`;
+}
+
+/**
  * Single count caption. Do not append a second denominator.
  * Manuscripts (4/5): "6 of your 18 manuscripts"
  * Sermons: "8 of 24 sermons"
@@ -256,10 +300,55 @@ export function formatPrepCountCaption(
   eligible: number,
   measureId: PrepMeasureId,
 ): string {
-  if (measureId === 4 || measureId === 5) {
+  if (measureId === 1) {
+    return `${hits} of ${eligible} Christ mentions`;
+  }
+  if (measureId === 4 || measureId === 5 || measureId === 11) {
+    return `${hits} of your ${eligible} manuscripts`;
+  }
+  if (measureId === 6) {
     return `${hits} of your ${eligible} manuscripts`;
   }
   return `${hits} of ${eligible} sermons`;
+}
+
+/**
+ * Manuscript-only measures: when eligible < sampleSize, name the
+ * transcripts that could not be scored — at the point of use.
+ */
+export function formatPrepDenominatorNote(
+  eligible: number,
+  sampleSize: number,
+  measureId: PrepMeasureId,
+): string | null {
+  if (eligible >= sampleSize || sampleSize <= 0) {
+    return null;
+  }
+  const dropped = sampleSize - eligible;
+  if (
+    measureId === 4 ||
+    measureId === 5 ||
+    measureId === 6 ||
+    measureId === 11
+  ) {
+    if (dropped === 1) {
+      return "One came in as a transcript and has no outline to read.";
+    }
+    const word =
+      dropped === 2
+        ? "Two"
+        : dropped === 3
+          ? "Three"
+          : dropped === 4
+            ? "Four"
+            : dropped === 5
+              ? "Five"
+              : dropped === 6
+                ? "Six"
+                : String(dropped);
+    return `${word} came in as transcripts and have no outline to read.`;
+  }
+  return null;
 }
 
 /**
@@ -308,9 +397,9 @@ export const PREP_MEASURE_INTERPRETATION: Record<
 > = {
   1: {
     high:
-      "You let the text argue back, and you leave the argument in. Most preachers walk into a passage with the sermon mostly written and use the verses to confirm it. Nothing surprises anybody, including the preacher. When you say out loud what you expected and then admit the text says otherwise, the room watches you get corrected by the Bible. That teaches more about reading Scripture than the point you were making.",
+      "Jesus does things in your sentences. He carries, absorbs, finishes, comes back. That sounds obvious and it is not what most preaching does. The common shape is Christ as a modifier — the blood of Christ, the mission of Christ, the love of Christ — where he is attached to a noun and never picks anything up. When he is the subject of a verb, the sermon has somewhere to move.",
     low:
-      "You mostly find what you came looking for. The point is true, the passage supports it, nothing on the page is wrong. But you walked in with the list already written. That's shopping, not reading. The strongest work in this corpus always has a moment where the text refuses the preacher and he says so out loud.",
+      "Christ appears constantly in your preaching and he almost never does anything. He shows up in the genitive: the grace of Christ, the work of Christ, the name of Christ. Grammatically he is furniture. This is not a doctrine problem, it is a sentence problem, and it is the single most fixable thing in this report. Give him a verb and watch what has to change around it.",
   },
   2: {
     high:
@@ -338,9 +427,9 @@ export const PREP_MEASURE_INTERPRETATION: Record<
   },
   6: {
     high:
-      "Jesus does something in the skeleton of your sermon, not just in the paragraphs. Across nearly five hundred manuscripts, Christ is the subject of an action verb in about one numbered point in two hundred. When he acts in the outline, the sermon's movement is his movement. The application then has somewhere to come from.",
+      "Jesus does something in the skeleton of your sermon, not just in the paragraphs. Across 4,227 numbered points in 497 sermons, 21 have Jesus doing something. When he acts in the outline, the sermon's movement is his movement. The application then has somewhere to come from.",
     low:
-      "Christ is in every room of the house and never on the deed. He is named, praised, returned to, and the argument would still stand without him. Corpus-wide that is normal: one numbered point in two hundred has Jesus doing something. It is still the difference between a sermon that mentions Christ and one that is carried by him. Put him in one main point and watch where the sermon has to go instead.",
+      "Across 4,227 numbered points in 497 sermons, 21 have Jesus doing something. That is one in two hundred. So this is not a mark against you; it is an open door most preachers walk past. Your points name topics and truths, and Christ shows up inside them doing the explaining. Make him the subject of one point and the sermon has to go somewhere it was not already going.",
   },
   7: {
     high:
@@ -350,8 +439,9 @@ export const PREP_MEASURE_INTERPRETATION: Record<
   },
   8: {
     high:
-      "No text stays landlocked. Whatever the passage is doing, you find the slope down to what God has done in Christ, and most weeks you find it without forcing the channel. That is a reflex you trained, not a technique you apply. Nobody goes home from your preaching with behavior modification and a smile.",
-    low: null,
+      "That specificity is what separates a gospel sentence from a gospel gesture.",
+    low:
+      "The hearer supplies the content or he does not, and mostly he does not. A cross with a named object is a cross a person can picture.",
   },
   9: {
     high:
@@ -365,13 +455,15 @@ export const PREP_MEASURE_INTERPRETATION: Record<
   },
   11: {
     high:
-      "When you enjoy the text, people can tell what you are enjoying. A preacher can be visibly moved and never say what moved him, and the room learns to admire his warmth instead of the passage. You point at something. A word, a turn, a thing the text does that it did not have to do. Pointing is how people learn to find it themselves.",
-    low: null,
+      "The gospel is in your outline, not only in your prose. That is the clearest structural difference between a sermon where the gospel carries an argument and one where it is applied at the end like a coat of paint. Twenty of forty-one load-bearing sermons put a gospel word in a numbered point. One of fourteen removable ones did.",
+    low:
+      "Your gospel lives in the paragraphs and never in the frame. Delete every gospel sentence and the argument still stands, which means the gospel is warming the sermon rather than holding it up. Put a gospel word in one main point and you will find out quickly whether the rest of that point still works.",
   },
   12: {
     high:
-      "Somebody outside the faith gets addressed in your preaching instead of assumed absent. Most sermons talk to the in-group by default and remember the unbeliever in the last ninety seconds, if at all. Yours does not. The people who have not decided yet know your room has room for them.",
-    low: null,
+      "You talk to the person who has not decided. Most sermons address the in-group by default and remember him in the last ninety seconds, if at all. Yours does not, and the people in your room who are still working it out know that.",
+    low:
+      "Your preaching assumes everyone listening already believes. Across 443 sermons in this corpus the unbeliever is addressed in about one in five, at a median of ninety percent of the way through, and exactly one asks him to do anything physical. He is described his danger and given no verb. Speak to him once, in the first half, and give him something to do.",
   },
 };
 

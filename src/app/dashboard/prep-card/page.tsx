@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GeneratePrepCardButton } from "@/components/prep-card/GeneratePrepCardButton";
-import { PrepCardView } from "@/components/prep-card/PrepCardView";
+import { PrepDeskCardView } from "@/components/prep-card/PrepDeskCardView";
 import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
-import { getLatestPrepCard } from "@/lib/prep-card/queries";
+import { getLatestDeskCard } from "@/lib/prep-card/queries";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
 import { createClient } from "@/lib/supabase/server";
 import "./prep-card.css";
@@ -24,7 +24,7 @@ export default async function PrepCardPage() {
     notFound();
   }
 
-  const card = await getLatestPrepCard();
+  const card = await getLatestDeskCard();
 
   return (
     <main className="prep-card-page mx-auto w-full max-w-5xl flex-1 px-4 py-10 md:px-8">
@@ -50,15 +50,15 @@ export default async function PrepCardPage() {
             className="mt-2 max-w-[48ch] text-[15px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
           >
-            One page for Saturday. Strengths and focus from the measures we can
-            already count.
+            One page for Saturday. Three strengths, three questions, the
+            reverence check — locked to this quarter&apos;s diagnostic.
           </p>
         </div>
         <GeneratePrepCardButton />
       </div>
 
       {card ? (
-        <PrepCardView snapshot={card.snapshot} />
+        <PrepDeskCardView snapshot={card.snapshot} />
       ) : (
         <div
           className="rounded border px-6 py-10"
@@ -72,9 +72,9 @@ export default async function PrepCardPage() {
             className="text-[17px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink)" }}
           >
-            No prep card yet. Build one from your recent sermons. The card uses
-            measured disciplines that already run (visible ask, cost, conclusion
-            finish, frame, reciprocal ask, naming, address).
+            No prep card yet. Build one from your recent sermons. When a theme
+            diagnostic exists, the card locks its three focus disciplines for
+            the quarter.
           </p>
         </div>
       )}

@@ -1,13 +1,21 @@
 import { prepCardPoolNote, prepStrengthsFloorNote } from "./copy";
 import { measure12AddressesNonChristian } from "./counters-address";
+import {
+  christAgencyDetail,
+  measure6ChristInPoint,
+} from "./counters-agency";
+import {
+  codeCrossNamedObjects,
+  measureGospelInSkeleton,
+} from "./counters-christ";
 import { codeApplicationAsks } from "./counters-coding";
 import { measure5OutlineHomogeneous } from "./counters-frame";
-import { measure6ChristInPoint } from "./counters-measure6";
 import { codeLocalNamings } from "./counters-naming";
 import {
   measure4ConclusionFinished,
   measure7HasReciprocalAsk,
 } from "./counters-parser";
+import { prepGenreCaveat } from "./genre";
 import {
   COMPUTED_MEASURE_IDS,
   isActionableMeasure,
@@ -23,9 +31,9 @@ import type {
   PrepCardSnapshot,
   PrepFocusExample,
   PrepMeasureCount,
+  PrepRankedMeasure,
   PrepSourceFormat,
 } from "./types";
-
 
 export type PrepSermonInput = {
   id: string;
@@ -33,6 +41,8 @@ export type PrepSermonInput = {
   content: string;
   /** Optional intake hint (e.g. youtube → transcript). */
   intakePath?: string | null;
+  /** Optional primary passage for genre caveat. */
+  primaryPassage?: string | null;
 };
 
 function rate(hits: number, eligible: number): number {
@@ -40,6 +50,8 @@ function rate(hits: number, eligible: number): number {
 }
 
 function buildCounts(params: {
+  m1Hits: number;
+  m1Eligible: number;
   m2Hits: number;
   m2Eligible: number;
   m3Hits: number;
@@ -48,10 +60,16 @@ function buildCounts(params: {
   m4Eligible: number;
   m5Hits: number;
   m5Eligible: number;
+  m6Hits: number;
+  m6Eligible: number;
   m7Hits: number;
   m7Eligible: number;
+  m8Hits: number;
+  m8Eligible: number;
   m9Hits: number;
   m9Eligible: number;
+  m11Hits: number;
+  m11Eligible: number;
   m12Hits: number;
   m12Eligible: number;
 }): PrepMeasureCount[] {
@@ -73,6 +91,11 @@ function buildCounts(params: {
         : null;
   };
 
+  set(
+    1,
+    params.m1Eligible > 0 ? params.m1Hits : null,
+    params.m1Eligible > 0 ? params.m1Eligible : null,
+  );
   set(2, params.m2Hits, params.m2Eligible);
   set(3, params.m3Hits, params.m3Eligible);
   set(
@@ -85,11 +108,20 @@ function buildCounts(params: {
     params.m5Eligible > 0 ? params.m5Hits : null,
     params.m5Eligible > 0 ? params.m5Eligible : null,
   );
-  set(6, null, null);
+  set(
+    6,
+    params.m6Eligible > 0 ? params.m6Hits : null,
+    params.m6Eligible > 0 ? params.m6Eligible : null,
+  );
   set(7, params.m7Hits, params.m7Eligible);
+  set(8, params.m8Hits, params.m8Eligible);
   set(9, params.m9Hits, params.m9Eligible);
+  set(
+    11,
+    params.m11Eligible > 0 ? params.m11Hits : null,
+    params.m11Eligible > 0 ? params.m11Eligible : null,
+  );
   set(12, params.m12Hits, params.m12Eligible);
-  void measure6ChristInPoint;
   return counts;
 }
 
@@ -107,28 +139,65 @@ function aggregateSourceFormat(
   return hasMs ? "manuscript" : "transcript";
 }
 
+function unmeasuredOutlineNote(params: {
+  sampleSize: number;
+  manuscriptCount: number;
+  transcriptCount: number;
+}): string | null {
+  const { sampleSize, manuscriptCount, transcriptCount } = params;
+  if (transcriptCount === 0 || manuscriptCount === sampleSize) {
+    return null;
+  }
+  return (
+    `Conclusion finish and frame-break ran on your ${manuscriptCount} manuscripts only ` +
+    `(${transcriptCount} transcripts had no outline to read).`
+  );
+}
+
 /**
- * Run live counters (+ measure 6 stub) and rank a prep card.
- * Actionable computed: 2, 3, 4, 5, 7. Strengths-only computed: 9, 12.
+ * Run live counters and rank.
+ * - Default / diagnostic: full ask-theme report (quotes, Was/Now, rewrites), themeId "ask".
+ * - Desk mode: one-page prep card — no quotes/rewrites; locks strength/focus ids from
+ *   `lockedFrom` when provided so a work quarter cannot re-rank mid-stream.
  */
 export async function buildPrepCardSnapshot(
   sermons: PrepSermonInput[],
-  options?: { apiKey?: string; model?: string; now?: Date },
+  options?: {
+    apiKey?: string;
+    model?: string;
+    now?: Date;
+    /** Desk artifact (prep card), not the theme diagnostic. */
+    desk?: boolean;
+    /** When desk: preserve these strength/focus measure ids; refresh counts only. */
+    lockedFrom?: PrepCardSnapshot | null;
+  },
 ): Promise<PrepCardSnapshot> {
   const now = options?.now ?? new Date();
   const sampleSize = sermons.length;
+  const desk = options?.desk === true;
+  const lockedFrom = options?.lockedFrom ?? null;
 
+  let m1Hits = 0;
+  let m1Eligible = 0;
   let m4Hits = 0;
   let m4Eligible = 0;
   let m5Hits = 0;
   let m5Eligible = 0;
+  let m6Hits = 0;
+  let m6Eligible = 0;
   let m7Hits = 0;
+  let m11Hits = 0;
+  let m11Eligible = 0;
   let m12Hits = 0;
   const formats: Array<"manuscript" | "transcript"> = [];
 
   for (const sermon of sermons) {
     const format = detectPrepSourceFormat(sermon.content, sermon.intakePath);
     formats.push(format);
+
+    const agency = await christAgencyDetail(sermon.content);
+    m1Hits += agency.christSubj;
+    m1Eligible += agency.christMentions;
 
     const finished = measure4ConclusionFinished(
       sermon.content,
@@ -152,8 +221,30 @@ export async function buildPrepCardSnapshot(
       }
     }
 
+    const christPoint = await measure6ChristInPoint(
+      sermon.content,
+      sermon.intakePath,
+    );
+    if (christPoint != null) {
+      m6Eligible += 1;
+      if (christPoint) {
+        m6Hits += 1;
+      }
+    }
+
     if (measure7HasReciprocalAsk(sermon.content)) {
       m7Hits += 1;
+    }
+
+    const gospelSkeleton = measureGospelInSkeleton(
+      sermon.content,
+      sermon.intakePath,
+    );
+    if (gospelSkeleton != null) {
+      m11Eligible += 1;
+      if (gospelSkeleton) {
+        m11Hits += 1;
+      }
     }
 
     if (measure12AddressesNonChristian(sermon.content)) {
@@ -168,17 +259,21 @@ export async function buildPrepCardSnapshot(
   }));
   const codingOpts = { apiKey: options?.apiKey, model: options?.model };
 
-  const [askCoding, namingCoding] = await Promise.all([
+  const [askCoding, namingCoding, crossCoding] = await Promise.all([
     codeApplicationAsks(codingInputs, codingOpts),
     codeLocalNamings(codingInputs, codingOpts),
+    codeCrossNamedObjects(codingInputs, codingOpts),
   ]);
 
   const m2Hits = askCoding.filter((row) => row.namedObject).length;
   const m3Hits = askCoding.filter((row) => row.namedCost).length;
+  const m8Hits = crossCoding.filter((row) => row.namedObject).length;
   const m9Hits = namingCoding.filter((row) => row.noFaultNaming).length;
   const codingEligible = sermons.length;
 
   const counts = buildCounts({
+    m1Hits,
+    m1Eligible,
     m2Hits,
     m2Eligible: codingEligible,
     m3Hits,
@@ -187,16 +282,22 @@ export async function buildPrepCardSnapshot(
     m4Eligible,
     m5Hits,
     m5Eligible,
+    m6Hits,
+    m6Eligible,
     m7Hits,
     m7Eligible: sampleSize,
+    m8Hits,
+    m8Eligible: codingEligible,
     m9Hits,
     m9Eligible: codingEligible,
+    m11Hits,
+    m11Eligible,
     m12Hits,
     m12Eligible: sampleSize,
   });
 
-  const { strengths, focus, strengthTarget, strengthFloorCleared } =
-    rankPrepCard(counts, { sampleSize });
+  const manuscriptCount = formats.filter((f) => f === "manuscript").length;
+  const transcriptCount = formats.filter((f) => f === "transcript").length;
   const ranked = counts
     .filter((c) => c.rate != null && c.eligible != null && c.eligible > 0)
     .map((c) => ({ id: c.id, eligible: c.eligible as number }));
@@ -204,8 +305,88 @@ export async function buildPrepCardSnapshot(
   const actionableRankedCount = ranked.filter((row) =>
     isActionableMeasure(row.id),
   ).length;
-  const manuscriptCount = formats.filter((f) => f === "manuscript").length;
-  const transcriptCount = formats.filter((f) => f === "transcript").length;
+
+  let strengths: PrepRankedMeasure[];
+  let focus: PrepRankedMeasure[];
+  let strengthTarget: number;
+  let strengthFloorCleared: number;
+  let strengthsNote: string | null;
+
+  const lockedFocus = lockedFrom?.focus ?? [];
+  const lockedStrengths = lockedFrom?.strengths ?? [];
+  if (desk && lockedFocus.length > 0) {
+    const byId = new Map(counts.map((row) => [row.id, row] as const));
+    const refresh = (id: PrepMeasureId) => {
+      const row = byId.get(id);
+      if (
+        !row ||
+        row.hits == null ||
+        row.eligible == null ||
+        row.eligible <= 0 ||
+        row.rate == null
+      ) {
+        return null;
+      }
+      return {
+        id,
+        rate: row.rate,
+        hits: row.hits,
+        eligible: row.eligible,
+      };
+    };
+    focus = lockedFocus
+      .map((row) => refresh(row.id))
+      .filter((row): row is NonNullable<typeof row> => row != null);
+    strengths = lockedStrengths
+      .map((row) => refresh(row.id))
+      .filter((row): row is NonNullable<typeof row> => row != null);
+    strengthTarget = lockedStrengths.length;
+    strengthFloorCleared = strengths.length;
+    strengthsNote = null;
+  } else {
+    const rankedCard = rankPrepCard(counts, { sampleSize });
+    strengths = rankedCard.strengths;
+    focus = rankedCard.focus;
+    strengthTarget = rankedCard.strengthTarget;
+    strengthFloorCleared = rankedCard.strengthFloorCleared;
+    strengthsNote = prepStrengthsFloorNote({
+      shown: strengths.length,
+      target: strengthTarget,
+      clearedFloor: strengthFloorCleared,
+    });
+  }
+
+  if (desk) {
+    return {
+      sampleSize,
+      generatedAt: now.toISOString(),
+      sourceFormat: aggregateSourceFormat(formats),
+      manuscriptCount,
+      transcriptCount,
+      themeId: "desk",
+      rankedMeasureCount,
+      poolNote: lockedFocus.length
+        ? `Prep card locked to the current diagnostic focus (${focus.length} disciplines) on your last ${sampleSize} sermons.`
+        : prepCardPoolNote({
+            sampleSize,
+            manuscriptCount,
+            transcriptCount,
+            ranked,
+            actionableRankedCount,
+          }),
+      strengthsNote,
+      genreCaveat: null,
+      unmeasuredNote: null,
+      counts,
+      strengths,
+      focus,
+      focusExamples: [],
+      strengthExamples: [],
+      sermonIds: sermons.map((s) => s.id),
+      rewriteCostUsd: null,
+      rewriteModel: null,
+    };
+  }
 
   const sermonRefs = sermons.map((sermon) => ({
     id: sermon.id,
@@ -268,12 +449,23 @@ export async function buildPrepCardSnapshot(
     );
   }
 
+  const genreCaveat = prepGenreCaveat({
+    passages: sermons.map((s) => s.primaryPassage ?? null),
+    sampleSize,
+  });
+  const unmeasuredNote = unmeasuredOutlineNote({
+    sampleSize,
+    manuscriptCount,
+    transcriptCount,
+  });
+
   return {
     sampleSize,
     generatedAt: now.toISOString(),
     sourceFormat: aggregateSourceFormat(formats),
     manuscriptCount,
     transcriptCount,
+    themeId: "ask",
     rankedMeasureCount,
     poolNote: prepCardPoolNote({
       sampleSize,
@@ -282,11 +474,9 @@ export async function buildPrepCardSnapshot(
       ranked,
       actionableRankedCount,
     }),
-    strengthsNote: prepStrengthsFloorNote({
-      shown: strengths.length,
-      target: strengthTarget,
-      clearedFloor: strengthFloorCleared,
-    }),
+    strengthsNote,
+    genreCaveat,
+    unmeasuredNote,
     counts,
     strengths,
     focus,

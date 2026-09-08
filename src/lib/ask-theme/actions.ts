@@ -2,23 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { profileHasPrepCardAccess } from "./access";
-import { buildPrepCardSnapshot } from "./build";
+import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
+import { buildPrepCardSnapshot } from "@/lib/prep-card/build";
 import {
-  getLatestThemeDiagnostic,
   insertPrepCard,
   loadSermonsForPrepCard,
-} from "./queries";
+} from "@/lib/prep-card/queries";
 
-export type GeneratePrepCardResult =
+export type GenerateAskThemeResult =
   | { ok: true; cardId: string; sampleSize: number }
   | { ok: false; error: string };
 
-/**
- * Desk prep card. Not rate-limited. Locks strength/focus from the current
- * theme diagnostic when one exists; otherwise ranks as before.
- */
-export async function generatePrepCardAction(): Promise<GeneratePrepCardResult> {
+export async function generateAskThemeAction(): Promise<GenerateAskThemeResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -28,7 +23,10 @@ export async function generatePrepCardAction(): Promise<GeneratePrepCardResult> 
   }
 
   if (!(await profileHasPrepCardAccess(user.id))) {
-    return { ok: false, error: "Prep card is not available on this account." };
+    return {
+      ok: false,
+      error: "Ask theme report is not available on this account.",
+    };
   }
 
   const sermons = await loadSermonsForPrepCard(user.id);
@@ -40,12 +38,9 @@ export async function generatePrepCardAction(): Promise<GeneratePrepCardResult> 
   }
 
   try {
-    const diagnostic = await getLatestThemeDiagnostic();
-    const snapshot = await buildPrepCardSnapshot(sermons, {
-      desk: true,
-      lockedFrom: diagnostic?.snapshot ?? null,
-    });
+    const snapshot = await buildPrepCardSnapshot(sermons);
     const row = await insertPrepCard(user.id, snapshot);
+    revalidatePath("/dashboard/ask-theme");
     revalidatePath("/dashboard/prep-card");
     return {
       ok: true,
@@ -54,8 +49,10 @@ export async function generatePrepCardAction(): Promise<GeneratePrepCardResult> 
     };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Prep card generation failed";
-    console.error("[prep_card]", message);
+      error instanceof Error
+        ? error.message
+        : "Ask theme report generation failed";
+    console.error("[ask_theme]", message);
     return { ok: false, error: message };
   }
 }

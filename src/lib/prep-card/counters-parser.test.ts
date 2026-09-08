@@ -10,8 +10,10 @@ import { measure6ChristInPoint } from "./counters-measure6";
 import {
   hasFrameBreak,
   headPattern,
+  isQuotableMainPoint,
   measure5OutlineHomogeneous,
   outlinePoints,
+  quotableMainPoints,
 } from "./counters-frame";
 import { measure12AddressesNonChristian } from "./counters-address";
 import { landingZone } from "./landing-zone";
@@ -41,6 +43,28 @@ describe("measure 5 / Frame-Break", () => {
       "1. Consider who you are",
       "2. Consider what you have",
       "3. Consider who Christ is",
+    ]);
+  });
+
+  it("rejects template slot labels as quotable main points", () => {
+    assert.equal(isQuotableMainPoint("ME / INTRO"), false);
+    assert.equal(isQuotableMainPoint("1. ME / INTRO"), false);
+    assert.equal(isQuotableMainPoint("1. PROP"), false);
+    assert.equal(isQuotableMainPoint("1. Trust"), false);
+    assert.equal(
+      isQuotableMainPoint("1. Freedom Christ bought, not freedom you earned"),
+      true,
+    );
+    const cleaned = [
+      "ME / INTRO",
+      "1. ME / INTRO",
+      "1. PROP",
+      "2. Consider who you are today",
+      "3. Consider what you have in Christ",
+    ].join("\n");
+    assert.deepEqual(quotableMainPoints(cleaned), [
+      "2. Consider who you are today",
+      "3. Consider what you have in Christ",
     ]);
   });
 
@@ -89,9 +113,12 @@ describe("measure 7 / RI", () => {
   });
 });
 
-describe("measure 6 stub", () => {
-  it("always returns null", () => {
-    assert.equal(measure6ChristInPoint("Jesus saves the lost."), null);
+describe("measure 6 Christ in point", () => {
+  it("returns null on transcript intake", async () => {
+    assert.equal(
+      await measure6ChristInPoint("Jesus saves the lost.", "youtube"),
+      null,
+    );
   });
 });
 

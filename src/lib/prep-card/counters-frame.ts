@@ -74,6 +74,67 @@ export function stripOutlineNumber(point: string): string {
   return point.replace(NUMBER_PREFIX, "").trim();
 }
 
+/** Template slot labels that look like outline heads but are not content. */
+const TEMPLATE_SLOT_LABELS = new Set([
+  "ME",
+  "WE",
+  "GOD",
+  "YOU",
+  "INTRO",
+  "TREASURE",
+  "LIVE",
+  "PROP",
+  "BIG IDEA",
+]);
+
+const NUMBERED_POINT = /^(?:\d+[.)]\s+|[IVX]+[.)]\s+)/;
+const ALL_CAPS_BODY = /^[A-Z0-9][A-Z0-9 \-/&']*$/;
+
+/**
+ * Numbered main-point heads with real content — not template slots.
+ * Rejects: known slot labels, under four words, all-caps with a slash.
+ */
+export function isQuotableMainPoint(point: string): boolean {
+  const raw = point.trim();
+  if (!NUMBERED_POINT.test(raw)) {
+    return false;
+  }
+  const body = stripOutlineNumber(raw).replace(/:$/, "").trim();
+  if (!body) {
+    return false;
+  }
+  if (ALL_CAPS_BODY.test(body) && body.includes("/")) {
+    return false;
+  }
+  const upper = body.toUpperCase();
+  if (TEMPLATE_SLOT_LABELS.has(upper) || STAGE_LABELS.has(upper)) {
+    return false;
+  }
+  const slashParts = upper
+    .split(/\s*\/\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (
+    slashParts.length > 1 &&
+    slashParts.every(
+      (part) => TEMPLATE_SLOT_LABELS.has(part) || STAGE_LABELS.has(part),
+    )
+  ) {
+    return false;
+  }
+  const words = body.split(/\s+/).filter(Boolean);
+  if (words.length < 4) {
+    return false;
+  }
+  return true;
+}
+
+/** Outline points that are safe to quote as Was / strength evidence. */
+export function quotableMainPoints(cleaned: string): string[] {
+  return outlinePoints(cleaned).filter(isQuotableMainPoint);
+}
+
+
 /** Coarse grammatical frame for a point head. */
 export function headPattern(point: string): HeadPattern {
   const body = stripOutlineNumber(point);
