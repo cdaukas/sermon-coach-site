@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import type Anthropic from "@anthropic-ai/sdk";
 import {
+  anthropicMessage,
+  anthropicToolUseBlock,
+  anthropicUsage,
+} from "../test-support/sdk-fixtures";
+import {
   clearCriterionVerdictLines,
   evaluationResultSchemaForPromptVersion,
   evaluationResultStrictSchema,
@@ -58,25 +63,21 @@ function elevenLines(
 function messageWithVerdictLines(
   lines: { id: number; verdict_line: string }[],
   model = "claude-haiku-test",
-  usage: Anthropic.Messages.Usage = { input_tokens: 10, output_tokens: 20 },
+  usage: Anthropic.Messages.Usage = anthropicUsage(),
 ): Anthropic.Messages.Message {
-  return {
+  return anthropicMessage({
     id: "msg_verdict_test",
-    type: "message",
-    role: "assistant",
     model,
     content: [
-      {
-        type: "tool_use",
+      anthropicToolUseBlock({
         id: "toolu_verdict",
         name: submitCriterionVerdictLinesTool.name,
         input: { lines },
-      },
+      }),
     ],
     stop_reason: "tool_use",
-    stop_sequence: null,
     usage,
-  };
+  });
 }
 
 describe("criterion verdict_line schema gate", () => {
@@ -389,10 +390,14 @@ describe("runCriterionVerdictLines length gate", () => {
     const createMessage: CreateVerdictLineMessage = async () => {
       createCalls += 1;
       const lines = createCalls === 1 ? overlongBatch : stillOverlongBatch;
-      return messageWithVerdictLines(lines, "claude-haiku-test", {
-        input_tokens: createCalls === 1 ? 11 : 22,
-        output_tokens: createCalls === 1 ? 12 : 24,
-      });
+      return messageWithVerdictLines(
+        lines,
+        "claude-haiku-test",
+        anthropicUsage({
+          input_tokens: createCalls === 1 ? 11 : 22,
+          output_tokens: createCalls === 1 ? 12 : 24,
+        }),
+      );
     };
 
     const base = clearCriterionVerdictLines(EVALUATION_FIXTURE as never);

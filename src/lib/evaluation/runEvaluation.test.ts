@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 import type Anthropic from "@anthropic-ai/sdk";
+import {
+  anthropicMessage,
+  anthropicToolUseBlock,
+  anthropicUsage,
+} from "../test-support/sdk-fixtures";
 import { EVALUATION_FIXTURE } from "./fixture";
 import {
   EvaluationRunError,
@@ -17,25 +22,19 @@ const evaluationInput = {
 function messageWithToolInput(
   toolInput: unknown,
   model = "claude-test-model",
-  usage: Anthropic.Messages.Usage = { input_tokens: 10, output_tokens: 20 },
+  usage: Anthropic.Messages.Usage = anthropicUsage(),
 ): Anthropic.Messages.Message {
-  return {
-    id: "msg_test",
-    type: "message",
-    role: "assistant",
+  return anthropicMessage({
     model,
     content: [
-      {
-        type: "tool_use",
-        id: "toolu_test",
+      anthropicToolUseBlock({
         name: submitSermonEvaluationTool.name,
         input: toolInput,
-      },
+      }),
     ],
     stop_reason: "tool_use",
-    stop_sequence: null,
     usage,
-  };
+  });
 }
 
 function createMessageFromResponses(
@@ -70,15 +69,17 @@ describe("runEvaluation schema retry", () => {
     const createMessage: CreateEvaluationMessage = async () => {
       createCalls += 1;
       if (createCalls === 1) {
-        return messageWithToolInput({ invalid: "schema" }, "claude-test-model", {
-          input_tokens: 10,
-          output_tokens: 20,
-        });
+        return messageWithToolInput(
+          { invalid: "schema" },
+          "claude-test-model",
+          anthropicUsage({ input_tokens: 10, output_tokens: 20 }),
+        );
       }
-      return messageWithToolInput(EVALUATION_FIXTURE, "claude-test-model", {
-        input_tokens: 30,
-        output_tokens: 40,
-      });
+      return messageWithToolInput(
+        EVALUATION_FIXTURE,
+        "claude-test-model",
+        anthropicUsage({ input_tokens: 30, output_tokens: 40 }),
+      );
     };
 
     const logs: string[] = [];
@@ -169,16 +170,10 @@ describe("runEvaluation schema retry", () => {
     let createCalls = 0;
     const createMessage: CreateEvaluationMessage = async () => {
       createCalls += 1;
-      return {
-        id: "msg_test",
-        type: "message",
-        role: "assistant",
-        model: "claude-test-model",
-        content: [{ type: "text", text: "No tool output." }],
-        stop_reason: "end_turn",
-        stop_sequence: null,
-        usage: { input_tokens: 5, output_tokens: 5 },
-      };
+      return anthropicMessage({
+        content: [{ type: "text", text: "No tool output.", citations: null }],
+        usage: anthropicUsage({ input_tokens: 5, output_tokens: 5 }),
+      });
     };
 
     await assert.rejects(

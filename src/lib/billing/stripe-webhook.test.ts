@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { stripeCustomer } from "../test-support/sdk-fixtures";
 import {
   extractSubscriptionBillingFields,
   getMentorSeatTypeFromMetadata,
@@ -571,12 +572,10 @@ describe("resolveCustomerEmail", () => {
       customers: {
         retrieve: async (id: string) => {
           assert.equal(id, "cus_abc");
-          return {
+          return stripeCustomer({
             id: "cus_abc",
-            object: "customer",
             email: "pastor@church.org",
-            deleted: false,
-          } as Stripe.Customer;
+          });
         },
       },
     } as unknown as Stripe;
@@ -816,12 +815,7 @@ describe("handleSubscriptionActivationEvent", () => {
     const stripe = {
       customers: {
         retrieve: async () =>
-          ({
-            id: "cus_abc",
-            object: "customer",
-            email: "pastor@church.org",
-            deleted: false,
-          }) as Stripe.Customer,
+          stripeCustomer({ id: "cus_abc", email: "pastor@church.org" }),
       },
     } as unknown as Stripe;
 
@@ -852,12 +846,7 @@ describe("handleSubscriptionActivationEvent", () => {
     const stripe = {
       customers: {
         retrieve: async () =>
-          ({
-            id: "cus_abc",
-            object: "customer",
-            email: "unknown@church.org",
-            deleted: false,
-          }) as Stripe.Customer,
+          stripeCustomer({ id: "cus_abc", email: "unknown@church.org" }),
       },
     } as unknown as Stripe;
 

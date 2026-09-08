@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type Stripe from "stripe";
+import { stripeCustomer } from "../test-support/sdk-fixtures";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getOrCreateStripeCustomer } from "./stripe-customer";
 
@@ -60,12 +61,10 @@ describe("getOrCreateStripeCustomer", () => {
       customers: {
         retrieve: async (id: string) => {
           assert.equal(id, "cus_existing");
-          return {
+          return stripeCustomer({
             id: "cus_existing",
-            object: "customer",
             email: "old@church.org",
-            deleted: false,
-          } as Stripe.Customer;
+          });
         },
         update: async (id: string, params: { email?: string }) => {
           updated.push({ id, email: params.email ?? "" });
@@ -98,7 +97,16 @@ describe("getOrCreateStripeCustomer", () => {
         },
         create: async (params: Stripe.CustomerCreateParams) => {
           assert.equal(params.email, "pastor@church.org");
-          assert.equal(params.metadata?.supabase_user_id, "user-2");
+          // Stripe types metadata as `MetadataParam | ""` because "" is the
+          // sentinel meaning "delete all metadata". Narrow off it before
+          // reading the key, rather than widening or casting the assertion.
+          const metadata = params.metadata;
+          if (typeof metadata !== "object" || metadata === null) {
+            assert.fail(
+              `expected a metadata object, got ${JSON.stringify(metadata)}`,
+            );
+          }
+          assert.equal(metadata.supabase_user_id, "user-2");
           return {
             id: "cus_new",
             object: "customer",
