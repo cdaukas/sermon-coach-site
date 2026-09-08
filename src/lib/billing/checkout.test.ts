@@ -7,6 +7,7 @@ import {
   buildPackCheckoutPath,
   COACH_STRIPE_PRICE_IDS,
   getCoachPriceId,
+  MentorSeatPriceNotConfiguredError,
   getMentorSeatPriceId,
   getPackPriceId,
   PACK_STRIPE_PRICE_IDS,
@@ -138,6 +139,36 @@ describe("checkout params", () => {
       if (prevEval === undefined) {
         delete process.env.STRIPE_PRICE_MENTOR_EVALUATION;
       } else {
+        process.env.STRIPE_PRICE_MENTOR_EVALUATION = prevEval;
+      }
+    }
+  });
+
+  it("throws and names the env var when a seat price is not configured", () => {
+    const prevDebrief = process.env.STRIPE_PRICE_MENTOR_DEBRIEF;
+    const prevEval = process.env.STRIPE_PRICE_MENTOR_EVALUATION;
+    delete process.env.STRIPE_PRICE_MENTOR_DEBRIEF;
+    delete process.env.STRIPE_PRICE_MENTOR_EVALUATION;
+    try {
+      assert.throws(
+        () => getMentorSeatPriceId("debrief"),
+        (error: unknown) =>
+          error instanceof MentorSeatPriceNotConfiguredError &&
+          error.envVar === "STRIPE_PRICE_MENTOR_DEBRIEF" &&
+          error.message.includes("STRIPE_PRICE_MENTOR_DEBRIEF"),
+      );
+      assert.throws(
+        () => getMentorSeatPriceId("evaluation"),
+        (error: unknown) =>
+          error instanceof MentorSeatPriceNotConfiguredError &&
+          error.envVar === "STRIPE_PRICE_MENTOR_EVALUATION" &&
+          error.message.includes("STRIPE_PRICE_MENTOR_EVALUATION"),
+      );
+    } finally {
+      if (prevDebrief !== undefined) {
+        process.env.STRIPE_PRICE_MENTOR_DEBRIEF = prevDebrief;
+      }
+      if (prevEval !== undefined) {
         process.env.STRIPE_PRICE_MENTOR_EVALUATION = prevEval;
       }
     }

@@ -12,13 +12,17 @@ export const PACK_STRIPE_PRICE_IDS = {
 } as const;
 
 /**
- * Mentoring seat monthly prices (Apprentice $12 / Colleague $25).
- * Prefer env IDs after creating Products in Stripe Dashboard; fallbacks are
- * placeholders and must be replaced before live checkout works.
+ * Mentoring seat SKUs (Apprentice $12 / Colleague $25). The seat prices live
+ * only in the environment: unlike Coach and packs there is no hardcoded
+ * fallback, because a fake price ID turns a missing variable into a Stripe
+ * resource_missing that reads as a broken link rather than a config gap.
  */
-export const MENTOR_SEAT_STRIPE_PRICE_IDS = {
-  debrief: "price_mentor_debrief_placeholder",
-  evaluation: "price_mentor_evaluation_placeholder",
+export const MENTOR_SEAT_SKUS = ["debrief", "evaluation"] as const;
+
+/** The environment variable carrying each seat's Stripe price ID. */
+export const MENTOR_SEAT_PRICE_ENV_VARS = {
+  debrief: "STRIPE_PRICE_MENTOR_DEBRIEF",
+  evaluation: "STRIPE_PRICE_MENTOR_EVALUATION",
 } as const;
 
 /**
@@ -29,7 +33,7 @@ export const MENTOR_SEAT_STRIPE_PRICE_IDS = {
 
 export type CoachCadence = keyof typeof COACH_STRIPE_PRICE_IDS;
 export type PackSku = keyof typeof PACK_STRIPE_PRICE_IDS;
-export type MentorSeatSku = keyof typeof MENTOR_SEAT_STRIPE_PRICE_IDS;
+export type MentorSeatSku = (typeof MENTOR_SEAT_SKUS)[number];
 
 export type CoachCheckoutParams = {
   plan: "coach";
@@ -157,12 +161,32 @@ export function getPackPriceId(pack: PackSku): string {
   return fromEnv ?? PACK_STRIPE_PRICE_IDS[pack];
 }
 
+/**
+ * Thrown when a mentoring seat price is not configured in this environment.
+ * Distinguishable so the checkout route can name the missing variable instead
+ * of surfacing a Stripe "No such price" for a fabricated ID.
+ */
+export class MentorSeatPriceNotConfiguredError extends Error {
+  readonly seat: MentorSeatSku;
+  readonly envVar: string;
+
+  constructor(seat: MentorSeatSku) {
+    const envVar = MENTOR_SEAT_PRICE_ENV_VARS[seat];
+    super(
+      `Mentor seat price is not configured for "${seat}": set ${envVar} in this environment.`,
+    );
+    this.name = "MentorSeatPriceNotConfiguredError";
+    this.seat = seat;
+    this.envVar = envVar;
+  }
+}
+
 export function getMentorSeatPriceId(seat: MentorSeatSku): string {
-  const fromEnv =
-    seat === "debrief"
-      ? process.env.STRIPE_PRICE_MENTOR_DEBRIEF
-      : process.env.STRIPE_PRICE_MENTOR_EVALUATION;
-  return fromEnv ?? MENTOR_SEAT_STRIPE_PRICE_IDS[seat];
+  const fromEnv = process.env[MENTOR_SEAT_PRICE_ENV_VARS[seat]];
+  if (!fromEnv) {
+    throw new MentorSeatPriceNotConfiguredError(seat);
+  }
+  return fromEnv;
 }
 
 export function buildAuthCallbackUrl(

@@ -1,5 +1,6 @@
 import { createStripeCheckoutSession } from "@/lib/billing/create-checkout-session";
 import {
+  MentorSeatPriceNotConfiguredError,
   buildMentorSeatSignupPath,
   buildPackSignupPath,
   buildSignupPath,
@@ -98,6 +99,17 @@ export async function GET(request: Request) {
 
     return NextResponse.redirect(session.url);
   } catch (error) {
+    // A missing seat price is a config gap, not a Stripe failure. Name the
+    // variable so the log says what to set rather than reporting a 404 for an
+    // ID that was never real.
+    if (error instanceof MentorSeatPriceNotConfiguredError) {
+      console.error(
+        `Checkout: mentor seat price not configured, set ${error.envVar} in this environment`,
+        { seat: error.seat, envVar: error.envVar },
+      );
+      return NextResponse.redirect(new URL("/pricing.html", requestUrl.origin));
+    }
+
     const message =
       error instanceof Error ? error.message : "Unknown checkout error";
     console.error("Checkout: failed to create Stripe session", message, error);
