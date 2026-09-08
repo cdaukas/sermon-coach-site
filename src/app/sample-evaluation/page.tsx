@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { EvaluationDashboard } from "@/components/evaluation/EvaluationDashboard";
 import { getPublicSampleEvaluation } from "@/lib/evaluation/public-sample";
+import type { PublicSampleEvaluation } from "@/lib/evaluation/public-sample";
 import "@/app/evaluation-print.css";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
@@ -19,24 +19,66 @@ export const metadata: Metadata = {
   },
 };
 
-/** Always resolve the flagged row at request time (service role). */
-export const dynamic = "force-dynamic";
+/**
+ * The flagged row changes only when is_public_sample is flipped by hand, so the
+ * rendered page is effectively static. Prerender it and refresh hourly rather
+ * than paying a service-role round trip on every visit: this URL is what cold
+ * outreach links point at, and it was the slowest page on the site.
+ */
+export const revalidate = 3600;
+
+type SampleLoad =
+  | { ok: true; sample: PublicSampleEvaluation }
+  | { ok: false; reason: string };
+
+/**
+ * Never let a failed load become a 404.
+ *
+ * With the page prerendered, notFound() at build time would bake a 404 and
+ * serve it for the whole revalidate window, on the one URL a pastor reaches
+ * from an email. A missing row, a failed parse, or absent Supabase env vars
+ * degrade to the page shell instead, which still carries the CTA and is
+ * replaced by the real thing at the next revalidation.
+ */
+async function loadPublicSample(): Promise<SampleLoad> {
+  try {
+    const sample = await getPublicSampleEvaluation();
+    if (!sample) {
+      return { ok: false, reason: "no flagged row, or the stored result failed schema parse" };
+    }
+    return { ok: true, sample };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
 
 /**
  * Unauthenticated sample evaluation page.
  * Resolves the single is_public_sample row server-side. No evaluation id in the URL.
  */
 export default async function PublicSampleEvaluationPage() {
-  const sample = await getPublicSampleEvaluation();
+  const loaded = await loadPublicSample();
 
-  if (!sample) {
-    notFound();
+  if (!loaded.ok) {
+    // Distinct marker: a build that quietly degrades should be greppable in the
+    // build log and in the function log, not invisible.
+    console.error(
+      "[sample-evaluation] FALLBACK RENDERED: serving the page shell instead of the evaluation.",
+      { reason: loaded.reason },
+    );
   }
 
+  const sample = loaded.ok ? loaded.sample : null;
+
   const scriptureReference =
-    sample.primaryPassage?.trim() ||
-    sample.result.meta.scripture_reference.trim() ||
-    null;
+    sample === null
+      ? null
+      : sample.primaryPassage?.trim() ||
+        sample.result.meta.scripture_reference.trim() ||
+        null;
 
   return (
     <div
@@ -64,7 +106,9 @@ export default async function PublicSampleEvaluationPage() {
             className="max-w-[54ch] text-[15px] leading-relaxed"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
           >
-            A real evaluation of a real sermon, on Hebrews 3:1-6. Eleven criteria, each one traced to a named source. The band, the scores, and every criterion read below come straight from a stored Sermon Coach report.
+            {sample === null
+              ? "The sample evaluation is being refreshed. It will be back shortly. In the meantime you can start your own, free, and see the same eleven criteria applied to your sermon."
+              : "A real evaluation of a real sermon, on Hebrews 3:1-6. Eleven criteria, each one traced to a named source. The band, the scores, and every criterion read below come straight from a stored Sermon Coach report."}
           </p>
           <div className="mt-5">
             <Link
@@ -90,14 +134,24 @@ export default async function PublicSampleEvaluationPage() {
             boxShadow: "var(--sc-shadow-lift)",
           }}
         >
-          <EvaluationDashboard
-            result={sample.result}
-            sermonTitle={sample.sermonTitle}
-            scriptureReference={scriptureReference}
-            howItPreaches={sample.howItPreaches}
-            showPrintActions={false}
-            headlineTitle={sample.sermonTitle}
-          />
+          {sample === null ? (
+            <p
+              className="text-center text-[15px] leading-relaxed"
+              style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+            >
+              This sample is temporarily unavailable. Nothing is wrong with your
+              link.
+            </p>
+          ) : (
+            <EvaluationDashboard
+              result={sample.result}
+              sermonTitle={sample.sermonTitle}
+              scriptureReference={scriptureReference}
+              howItPreaches={sample.howItPreaches}
+              showPrintActions={false}
+              headlineTitle={sample.sermonTitle}
+            />
+          )}
         </main>
 
         <div className="mt-10 text-center">
