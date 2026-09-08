@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BuyPackCards } from "@/components/dashboard/BuyPackCards";
 import { BillingSection } from "@/components/dashboard/BillingCard";
 import { SermonEvaluationsCard } from "@/components/dashboard/SermonEvaluationsCard";
+import { MentorSeatDiscoveryCard } from "@/components/dashboard/MentorSeatDiscoveryCard";
 import {
   DevelopingOthersCard,
   PlanCard,
@@ -16,6 +17,7 @@ import {
 import { buildCreditStripModel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
+import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -101,6 +103,9 @@ export default async function BuyPage() {
 
   let developingOthers: string | null = null;
   let seatBreakdown: MentorSeatBreakdown | null = null;
+  // Starts true so a failed seat lookup hides the discovery card rather than
+  // offering a seat to someone who may already hold one.
+  let holdsMentorSeat = true;
   if (user) {
     try {
       const seats = await listMentorSeatsForMentor();
@@ -110,11 +115,26 @@ export default async function BuyPage() {
       };
       developingOthers = developingOthersCopy(seatInput);
       seatBreakdown = mentorSeatBreakdown(seatInput);
+      holdsMentorSeat = seats.active.length > 0 || seats.pending.length > 0;
     } catch {
       developingOthers = null;
       seatBreakdown = null;
+      holdsMentorSeat = true;
     }
   }
+
+  // A mentee reads his own coaching here; he is not a buyer of seats.
+  const isMentee = user
+    ? await viewerHasActiveMentorRelationship(user.id)
+    : false;
+
+  // Paying or comped, holds no seat, is not a mentee. A pack-only account and
+  // a cancelled subscription both fail the first clause.
+  const showSeatDiscovery =
+    user !== null &&
+    (subscriptionStatus === "active" || isComped) &&
+    !holdsMentorSeat &&
+    !isMentee;
 
   const packSection = (
     <>
@@ -174,6 +194,12 @@ export default async function BuyPage() {
             text={developingOthers}
             breakdown={seatBreakdown}
           />
+        </BillingSection>
+      ) : null}
+
+      {showSeatDiscovery ? (
+        <BillingSection eyebrow="Developing others">
+          <MentorSeatDiscoveryCard />
         </BillingSection>
       ) : null}
     </main>
