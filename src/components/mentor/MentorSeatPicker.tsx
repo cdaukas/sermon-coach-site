@@ -25,14 +25,15 @@ export const SEAT_OPTIONS: SeatOption[] = [
     value: "debrief",
     audience: "For developing preachers",
     cadence: "2 sermons / month",
-    detail: "You receive the coaching debrief and How It Preaches.",
+    detail:
+      "The preacher in this seat receives the coaching debrief and How It Preaches.",
     price: "$12/month",
   },
   {
     value: "evaluation",
     audience: "For experienced preachers",
     cadence: "4 sermons / month",
-    detail: "You receive the full evaluation and score.",
+    detail: "The preacher in this seat receives the full evaluation and score.",
     price: "$25/month",
   },
 ];
