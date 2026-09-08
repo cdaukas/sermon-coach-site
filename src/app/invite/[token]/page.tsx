@@ -145,6 +145,20 @@ export default async function InvitePage({ params }: InvitePageProps) {
     );
   }
 
+  // Drives the precedence disclosure only. Same entitlement test as
+  // /dashboard/buy. A failed or empty lookup leaves this false: no line is
+  // better than telling someone they subscribe when we do not know.
+  let viewerHasCoachAccess = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("subscription_status, is_comped")
+      .eq("id", user.id)
+      .maybeSingle();
+    viewerHasCoachAccess =
+      profile?.subscription_status === "active" || profile?.is_comped === true;
+  }
+
   return (
     <InviteShell>
       <InviteAcceptPanel
@@ -153,6 +167,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
         seatType={preview.seat_type}
         menteeReads={preview.mentee_reads}
         loggedIn={Boolean(user)}
+        viewerHasCoachAccess={viewerHasCoachAccess}
       />
     </InviteShell>
   );

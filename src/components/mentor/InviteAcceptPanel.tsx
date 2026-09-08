@@ -40,7 +40,7 @@ function acceptSeatFirstLines(
     return darkInviteDebriefLine(mentor);
   }
   if (seatType === "debrief") {
-    return `${mentor} is mentoring you. Your first two sermons each month go there. You get the coaching debrief and How It Preaches, and ${menteeFacingMentorName(mentorName)} decides when to release your score.`;
+    return `${mentor} is mentoring you. Your first two sermons each month go to them, manuscript and evaluation both. You get the coaching debrief and How It Preaches, and ${menteeFacingMentorName(mentorName)} decides when to release your score.`;
   }
   return `${mentor} is mentoring you. Your first four sermons each month go to ${menteeFacingMentorName(mentorName)}. You see everything, including the score, as soon as it is ready.`;
 }
@@ -73,6 +73,13 @@ type InviteAcceptPanelProps = {
   seatType: InviteSeatType;
   menteeReads: MenteeReads;
   loggedIn: boolean;
+  /**
+   * Viewer already holds Coach access. Drives the precedence disclosure, which
+   * only matters to someone with credits of their own to displace. False when
+   * signed out or when the profile lookup fails: silence beats a false claim
+   * that someone subscribes.
+   */
+  viewerHasCoachAccess: boolean;
 };
 
 type AcceptErrorView = "self_invite" | "already_mentored" | "email_mismatch";
@@ -125,7 +132,7 @@ function stepsFor(
       },
       {
         title: "Talk it through",
-        body: `Your full evaluation stays private until ${mentorName} has had the opportunity to discuss it with you.`,
+        body: `Your full evaluation stays held until ${mentorName} has had the opportunity to discuss it with you.`,
       },
       {
         title: "Keep growing",
@@ -281,6 +288,7 @@ export function InviteAcceptPanel({
   seatType,
   menteeReads,
   loggedIn,
+  viewerHasCoachAccess,
 }: InviteAcceptPanelProps) {
   const displayMentorName = menteeFacingMentorName(mentorName);
   const [loading, setLoading] = useState(false);
@@ -420,6 +428,10 @@ export function InviteAcceptPanel({
   }
 
   const seatName = mentorSeatDisplayName(seatType);
+  // Apprentice normal only. The Colleague and dark variants say what they say
+  // already, and precedence only bites someone with credits of their own.
+  const showPrecedenceNote =
+    viewerHasCoachAccess && seatType === "debrief" && menteeReads === "debrief";
 
   return (
     <div>
@@ -449,6 +461,17 @@ export function InviteAcceptPanel({
       >
         {acceptSeatFirstLines(seatType, displayMentorName, menteeReads)}
       </p>
+
+      {showPrecedenceNote ? (
+        <p
+          className="mt-4 text-[15px] leading-relaxed"
+          style={{ ...uiFont, color: "var(--sc-ink-mid)" }}
+        >
+          You already subscribe to Coach. While this relationship is active,
+          your submissions go to {displayMentorName} first, before your own
+          credits. Sermons you submit are visible to them.
+        </p>
+      ) : null}
 
       <section
         className="mt-10 border-t pt-8"
