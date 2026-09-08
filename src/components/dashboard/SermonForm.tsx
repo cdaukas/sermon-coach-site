@@ -16,7 +16,10 @@ import { normalizeSermonContext, sermonContextStorageKey } from "@/lib/evaluatio
 import { evalErrorParamForStartFailure } from "@/lib/evaluation/eval-start-errors";
 import type { EvaluationEntitlement } from "@/lib/evaluation/entitlement-types";
 import type { OutputLanguage } from "@/lib/evaluation/output-language";
-import { menteeSubmitStandingLine } from "@/lib/mentor/mentee-reads";
+import {
+  menteeSubmitStandingLine,
+  menteeSubmitStandingLineUnknownCount,
+} from "@/lib/mentor/mentee-reads";
 import type { MentorSeatType } from "@/lib/mentor/relationships";
 import { createSermon } from "@/lib/sermons/actions";
 import type { TranscriptErrorCode } from "@/lib/transcripts/types";
@@ -148,8 +151,9 @@ export function SermonForm({
     seatType != null;
   const atCap =
     allotmentKnown && submissionsUsed >= submissionsLimit;
-  const standingLine =
-    isMentoredMentee && allotmentKnown
+  const standingLine = !isMentoredMentee
+    ? null
+    : allotmentKnown
       ? menteeSubmitStandingLine({
           mentorName,
           seatType,
@@ -157,7 +161,13 @@ export function SermonForm({
           used: submissionsUsed,
           cap: submissionsLimit,
         })
-      : null;
+      : // Counter unknown. Drop the count, keep the disclosure: without this
+        // the form falls silent and reads as an ordinary submission.
+        menteeSubmitStandingLineUnknownCount({
+          mentorName,
+          seatType,
+          menteeReadsNone,
+        });
 
   const handleEvalComplete = useCallback(
     (evaluationId: string, sermonId: string) => {

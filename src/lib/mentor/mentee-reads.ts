@@ -124,3 +124,37 @@ export function menteeSubmitStandingLine(
 
   return `This sermon goes to ${mentor}. You see everything, including the score, as soon as it is ready. ${input.used} of ${input.cap} this month.`;
 }
+
+export type MenteeSubmitFallbackInput = {
+  mentorName: string;
+  /** Null when the seat type is not known. */
+  seatType: "debrief" | "evaluation" | null;
+  menteeReadsNone: boolean;
+};
+
+/**
+ * Standing line when the monthly count is unavailable. Never invents a zero
+ * and never shows a count. The fact that the sermon reaches the mentor has to
+ * survive a failed counter, or the form reads as an ordinary submission.
+ */
+export function menteeSubmitStandingLineUnknownCount(
+  input: MenteeSubmitFallbackInput,
+): string {
+  const mentor = menteeFacingMentorName(input.mentorName);
+  const mentorStart = sentenceStartMentorName(input.mentorName);
+  const opening = `This sermon goes to ${mentor}.`;
+
+  if (input.seatType === "debrief" && input.menteeReadsNone) {
+    return `${opening} It will not appear in your account. ${mentorStart} will review it and reach out to you.`;
+  }
+
+  if (input.seatType === "debrief") {
+    return `${opening} You will get the coaching debrief and How It Preaches. ${mentorStart} decides when to release your score.`;
+  }
+
+  if (input.seatType === "evaluation") {
+    return `${opening} You see everything, including the score, as soon as it is ready.`;
+  }
+
+  return opening;
+}
