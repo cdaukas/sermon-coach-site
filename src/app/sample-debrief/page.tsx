@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { CoachingReportView } from "@/components/evaluation/CoachingReportView";
 import { HowItPreachesSection } from "@/components/evaluation/HowItPreachesSection";
 import { getPublicSampleDebrief } from "@/lib/evaluation/public-sample-debrief";
+import type { PublicSampleDebrief } from "@/lib/evaluation/public-sample-debrief";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -19,19 +19,70 @@ export const metadata: Metadata = {
   },
 };
 
-/** Always resolve the fixed mentored pair at request time (service role). */
-export const dynamic = "force-dynamic";
+/**
+ * The pair is selected by fixed id and changes only when those rows are edited
+ * by hand, so the rendered page is effectively static. Prerender it and refresh
+ * hourly rather than paying a service-role round trip on every visit.
+ */
+export const revalidate = 3600;
+
+type SampleLoad =
+  | { ok: true; sample: PublicSampleDebrief }
+  | { ok: false; reason: string };
+
+/**
+ * Never let a failed load become a 404.
+ *
+ * This loader has seven distinct null paths (either row missing, either row
+ * the wrong status or report_mode, either schema failing to parse, either
+ * follow-up lookup failing) plus a throw when Supabase env vars are absent,
+ * so it is the most likely of the three sample pages to come back empty.
+ * Prerendered, notFound() would bake a 404 and serve it for the whole
+ * revalidate window. The shell renders instead: both panels keep their
+ * headings, the closing copy and the link to the full evaluation stay, and
+ * the real thing returns at the next revalidation.
+ */
+async function loadPublicSample(): Promise<SampleLoad> {
+  try {
+    const sample = await getPublicSampleDebrief();
+    if (!sample) {
+      return {
+        ok: false,
+        reason:
+          "a row was missing, had the wrong status or report_mode, or failed schema parse",
+      };
+    }
+    return { ok: true, sample };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+const unavailableStyle = {
+  fontFamily: "var(--font-ui)",
+  color: "var(--sc-ink-soft)",
+} as const;
 
 /**
  * Unauthenticated sample debrief page.
  * Loads a hard-coded mentored diagnostic + debrief pair. No evaluation id in the URL.
  */
 export default async function PublicSampleDebriefPage() {
-  const sample = await getPublicSampleDebrief();
+  const loaded = await loadPublicSample();
 
-  if (!sample) {
-    notFound();
+  if (!loaded.ok) {
+    // Distinct marker: a build that quietly degrades should be greppable in the
+    // build log and in the function log, not invisible.
+    console.error(
+      "[sample-debrief] FALLBACK RENDERED: serving the page shell instead of the mentored pair.",
+      { reason: loaded.reason },
+    );
   }
+
+  const sample = loaded.ok ? loaded.sample : null;
 
   return (
     <div
@@ -87,11 +138,20 @@ export default async function PublicSampleDebriefPage() {
             >
               What he reads
             </p>
-            <CoachingReportView
-              data={sample.coaching}
-              showPrintActions={false}
-            />
-            <HowItPreachesSection howItPreaches={sample.howItPreaches} />
+            {sample === null ? (
+              <p className="text-[15px] leading-relaxed" style={unavailableStyle}>
+                This sample is temporarily unavailable. Nothing is wrong with
+                your link.
+              </p>
+            ) : (
+              <>
+                <CoachingReportView
+                  data={sample.coaching}
+                  showPrintActions={false}
+                />
+                <HowItPreachesSection howItPreaches={sample.howItPreaches} />
+              </>
+            )}
           </section>
 
           <section
@@ -108,20 +168,29 @@ export default async function PublicSampleDebriefPage() {
             >
               What you read
             </p>
-            <p
-              className="text-[48px] font-semibold leading-none tracking-tight md:text-[56px]"
-              style={{ ...serifFont, color: "var(--sc-ink)" }}
-            >
-              {sample.mentorScore.displayScore}
-            </p>
-            <p
-              className="mt-3 text-[15px] leading-relaxed"
-              style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-            >
-              {sample.mentorScore.bandLabel}
-              <span aria-hidden="true"> · </span>
-              {sample.mentorScore.weighted55} of 55
-            </p>
+            {sample === null ? (
+              <p className="text-[15px] leading-relaxed" style={unavailableStyle}>
+                This sample is temporarily unavailable. Nothing is wrong with
+                your link.
+              </p>
+            ) : (
+              <>
+                <p
+                  className="text-[48px] font-semibold leading-none tracking-tight md:text-[56px]"
+                  style={{ ...serifFont, color: "var(--sc-ink)" }}
+                >
+                  {sample.mentorScore.displayScore}
+                </p>
+                <p
+                  className="mt-3 text-[15px] leading-relaxed"
+                  style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+                >
+                  {sample.mentorScore.bandLabel}
+                  <span aria-hidden="true"> · </span>
+                  {sample.mentorScore.weighted55} of 55
+                </p>
+              </>
+            )}
           </section>
         </div>
 
