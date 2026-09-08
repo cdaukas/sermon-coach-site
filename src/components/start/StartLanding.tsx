@@ -356,6 +356,16 @@ export function StartLanding({
               <AuthSubmit disabled={loading || !captcha.ready}>
                 {loading ? "Creating account…" : "Create free account"}
               </AuthSubmit>
+              {/* Inside the card, directly under the button. Outside it this
+                  would read as a footnote and compete with the sign-in line,
+                  which does a different job. */}
+              <p
+                className="text-center text-[13px] leading-relaxed"
+                style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+              >
+                Your manuscript stays in your account. It is not used to train
+                AI models and it is not sold.
+              </p>
             </AuthForm>
           )}
         </div>
