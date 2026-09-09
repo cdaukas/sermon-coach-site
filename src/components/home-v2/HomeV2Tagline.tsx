@@ -1,8 +1,8 @@
 export function HomeV2Tagline() {
   return (
     <div className="tagline">
-      Not another sermon-writing tool. A system for continuous preaching
-      development.
+      Not a sermon-writing tool. A system that turns weekly feedback into
+      long-term development.
     </div>
   );
 }
