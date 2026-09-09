@@ -6,7 +6,6 @@ import { HomeV2Framework } from "@/components/home-v2/HomeV2Framework";
 import { HomeV2DevelopOthers } from "@/components/home-v2/HomeV2DevelopOthers";
 import { HomeV2Header } from "@/components/home-v2/HomeV2Header";
 import { HomeV2Hero } from "@/components/home-v2/HomeV2Hero";
-import { HomeV2Newsletter } from "@/components/home-v2/HomeV2Newsletter";
 import { HomeV2Proof } from "@/components/home-v2/HomeV2Proof";
 import { HomeV2SampleSermon } from "@/components/home-v2/HomeV2SampleSermon";
 import { HomeV2StartFree } from "@/components/home-v2/HomeV2StartFree";
@@ -43,10 +42,12 @@ export const metadata: Metadata = {
 
 /**
  * Homepage. Narrative order is deliberate:
- * problem → sample → standard → mentoring → proof → objection → offer.
+ * problem → sample → standard → mentoring → objection → proof → offer.
  * The standard follows the sample rather than preceding it: it reads as the
  * methodology underneath a product the visitor has already seen, not as the
- * product itself.
+ * product itself. The objection is answered before the proof so the page ends
+ * on people rather than on a caveat: testimonials, then the preacher who built
+ * it, then one call to action and nothing after it.
  * Evaluation is presented as one step of the development system, never as
  * the product. Framework naming and criteria come from
  * `src/lib/evaluation/tool-schema.ts` and `public/how-its-scored.html`.
@@ -61,10 +62,9 @@ export default function HomePage() {
       <HomeV2SampleSermon />
       <HomeV2Framework />
       <HomeV2DevelopOthers />
-      <HomeV2Proof />
       <HomeV2AiAndPreaching />
+      <HomeV2Proof />
       <HomeV2StartFree />
-      <HomeV2Newsletter />
       <HomeV2Footer />
     </div>
   );

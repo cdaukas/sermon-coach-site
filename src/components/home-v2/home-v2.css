@@ -876,12 +876,21 @@
   color: var(--sc-panel);
 }
 
-.home-v2 .footercta > .container > p:not(.pricingnote) {
-  color: var(--sc-gold-soft);
-  margin: 0 auto 28px;
+/* The eyebrow's default --sc-accent is 4.17:1 on this ground and fails AA at
+   11px; --sc-accent-soft is 6.78:1, the same choice the framework panel makes. */
+.home-v2 .footercta .eyebrow {
+  color: var(--sc-accent-soft);
+}
+
+/* Reassurance under the button. Brighter than the fine print below it so the
+   three levels below the headline read as button, answer, then footnotes. */
+.home-v2 .footercta .ctanote {
+  margin: 18px auto 0;
   max-width: 540px;
-  font-size: 17px;
+  font-family: var(--font-ui);
+  font-size: 14px;
   line-height: 1.7;
+  color: var(--sc-gold-soft);
 }
 
 /* gold primary button, as on the original closing section */

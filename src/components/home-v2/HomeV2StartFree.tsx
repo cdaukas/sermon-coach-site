@@ -1,9 +1,8 @@
 import Link from "next/link";
 
 /** Matches .pricingnote's scale and colour on the dark footercta ground
- *  (--sc-rule on --sc-ink, 8.03:1 at the darker gradient stop). Every
- *  property the section's own p rule sets is restated so the inline style
- *  fully overrides it. */
+ *  (--sc-rule on --sc-ink, 8.03:1 at the darker gradient stop) without
+ *  borrowing its class, since these are separate statements. */
 const dataNoteStyle = {
   margin: "24px auto 0",
   maxWidth: 540,
@@ -18,14 +17,16 @@ export function HomeV2StartFree() {
   return (
     <section className="footercta">
       <div className="container">
-        <h2>Walk into Sunday knowing you&rsquo;re ready.</h2>
-        <p>
-          Start with one. Your first evaluation is free. No card, no
-          commitment, full evaluation back in minutes.
-        </p>
+        <div className="eyebrow">Your next sermon is already coming</div>
+        <h2>Walk into Sunday knowing your sermon is ready.</h2>
         <Link href="/start" className="btn btn-lg">
-          Get Your First Evaluation Free
+          Evaluate your first sermon free
         </Link>
+        {/* Under the button, not above it: the reassurance answers the
+            hesitation the button just created. */}
+        <p className="ctanote">
+          No card. No commitment. Full evaluation, back in minutes.
+        </p>
         {/* Answers the hesitation that stops the click, so it sits above the
             pricing note rather than below it. Styled inline to match the
             pricingnote typography without borrowing its class: these are
