@@ -1,38 +1,83 @@
+/** Two symptoms of the same gap. Each card's body ends on the phrase that
+ *  names what is actually missing, so the emphasis always closes the
+ *  sentence rather than interrupting it. */
 const POINTS = [
   {
-    heading: "Encouragement is not the same as feedback.",
-    body: "The people around you care about your preaching. But caring about your preaching and being able to evaluate it are two different things. Most pastors have people who encourage them. Far fewer have someone who can consistently tell them what is working, what is not, and what to work on next.",
+    label: "01 — Useful feedback is rare",
+    heading: "You rarely get useful feedback.",
+    lead: "People may encourage you after you preach. But few can consistently show you ",
+    emphasis: "what worked, what didn't, and what to work on next.",
   },
   {
-    heading: "Without clear feedback, development stays difficult to see.",
-    body: "You may know a sermon felt stronger, or that something didn't quite land. But without a consistent way to examine your preaching, it is hard to know why. And if you don't know what to work on, the next sermon starts with the same questions.",
+    label: "02 — Growth becomes hard to see",
+    heading: "Every sermon starts over.",
+    lead: "You may sense something worked—or didn't—but without consistent feedback, it's hard to know ",
+    emphasis: "why, what to change, or whether it's becoming a pattern.",
   },
 ] as const;
+
+/** The conclusion of the argument. Two sentences, each on its own line, with
+ *  the payoff carrying the weight. Kept as consts so the apostrophes stay
+ *  straight like the rest of this directory's copy rather than becoming JSX
+ *  entities. */
+const CLOSER_SETUP = "Encouragement gets you through a sermon.";
+const CLOSER_ACCENT = "Clear feedback";
+const CLOSER_REST = " helps you grow from it.";
+
+const BRIDGE = "That's the gap Sermon Coach was built to fill.";
 
 export function HomeV2FeedbackVacuum() {
   return (
     <section className="section problem">
       <div className="container center">
-        <div className="eyebrow">The problem underneath</div>
+        <div className="eyebrow">The feedback gap</div>
         <h2>
           You want to grow as a preacher.
           <br />
           But who helps you see how?
         </h2>
       </div>
-      <div className="container grid2">
+      <div className="container grid2 gap-cards">
         {POINTS.map((point) => (
-          <div key={point.heading} className="card">
+          <div key={point.heading} className="card gap-card">
+            <div className="gap-label">{point.label}</div>
             <h3>{point.heading}</h3>
-            <p>{point.body}</p>
+            <p>
+              {point.lead}
+              <strong className="gap-emphasis">{point.emphasis}</strong>
+            </p>
           </div>
         ))}
       </div>
       <div className="container center">
-        <p className="closer">
-          Encouragement gets you through a sermon. Clear feedback helps you grow
-          from it.
-        </p>
+        <div className="gap-closer">
+          <p>
+            <span className="gap-closer-setup">{CLOSER_SETUP}</span>
+            <span className="gap-closer-payoff">
+              <span className="gap-closer-accent">{CLOSER_ACCENT}</span>
+              {CLOSER_REST}
+            </span>
+          </p>
+          <p className="gap-bridge">{BRIDGE}</p>
+          {/* Decorative. Points into the navy Framework panel that follows. */}
+          <svg
+            className="gap-chevron"
+            width="18"
+            height="10"
+            viewBox="0 0 18 10"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M1 1l8 7 8-7"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
       </div>
     </section>
   );

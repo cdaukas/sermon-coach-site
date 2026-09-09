@@ -285,15 +285,6 @@
   margin: auto;
 }
 
-.home-v2 .closer {
-  margin: 34px auto 0;
-  max-width: 640px;
-  font-family: var(--font-serif);
-  font-size: 21px;
-  line-height: 1.5;
-  color: var(--sc-ink);
-}
-
 .home-v2 .grid2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -350,10 +341,117 @@
   text-decoration: underline;
 }
 
+/* ---------- the feedback gap ---------- */
 /* Tightens only the run-out below this section's closing line so the navy
-   Framework panel follows sooner. Interior spacing is untouched. */
+   Framework panel follows sooner. The chevron already carries the eye down,
+   so the run-out needs less room than it did without one. */
 .home-v2 .problem {
-  padding-bottom: 46px;
+  padding-bottom: 40px;
+}
+
+/* Narrower than the page's 1160px frame so the pair reads as one block under
+   the headline instead of spanning the full measure: 1136px less the 28px
+   gutters is 1080px of cards. Overrides the shared .grid2 top margin and gap
+   without touching the other grids that use it. */
+.home-v2 .gap-cards {
+  max-width: 1136px;
+  margin-top: 30px;
+  gap: 16px;
+}
+
+/* Compact against the shared .card 30px. Two short paragraphs do not need a
+   card's worth of padding on every side. */
+.home-v2 .gap-card {
+  padding: 24px 26px 26px;
+}
+
+/* --sc-gold is 5.24:1 on the white card. --sc-accent, which the section
+   eyebrow uses on cream at a larger tracking, is 3.79:1 here and fails AA at
+   this size, so the label takes the darker gold. */
+.home-v2 .gap-label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sc-gold);
+  margin-bottom: 12px;
+}
+
+.home-v2 .gap-card h3 {
+  font-size: 20px;
+  margin-bottom: 9px;
+}
+
+.home-v2 .gap-card p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Weight and one step of ink, not colour. The phrase should read as the
+   sentence landing, not as a callout. */
+.home-v2 .gap-emphasis {
+  font-weight: 600;
+  color: var(--sc-ink-mid);
+}
+
+/* The rule and the space above it mark this as the conclusion of the
+   argument rather than a third card. */
+.home-v2 .gap-closer {
+  max-width: 720px;
+  margin: 44px auto 0;
+  padding-top: 34px;
+  border-top: 1px solid var(--sc-rule);
+}
+
+.home-v2 .gap-closer p {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--sc-ink);
+}
+
+/* Each sentence owns its own line box at every width, so a break never lands
+   between the two. The setup recedes a step so the payoff reads as the answer.
+   Balancing keeps a narrow viewport from stranding the last word of either
+   sentence on a line by itself; browsers without it just wrap normally. */
+.home-v2 .gap-closer-setup,
+.home-v2 .gap-closer-payoff {
+  display: block;
+  text-wrap: balance;
+}
+
+.home-v2 .gap-closer-setup {
+  color: var(--sc-ink-soft);
+  font-weight: 400;
+}
+
+/* 4.94:1 on the cream ground, so it clears AA as body text and not only as
+   the large text it is set at. */
+.home-v2 .gap-closer-accent {
+  color: var(--sc-gold);
+}
+
+/* Supporting line, not a second headline: UI face, body size, soft ink. */
+.home-v2 .gap-closer .gap-bridge {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--sc-ink-soft);
+  margin-top: 20px;
+  text-wrap: balance;
+}
+
+.home-v2 .gap-chevron {
+  display: block;
+  margin: 22px auto 0;
+  color: var(--sc-accent-soft);
 }
 
 /* ---------- framework ---------- */
@@ -1113,6 +1211,30 @@
     padding-bottom: 32px;
   }
 
+  .home-v2 .gap-cards {
+    margin-top: 26px;
+    gap: 14px;
+  }
+
+  .home-v2 .gap-closer {
+    margin-top: 34px;
+    padding-top: 28px;
+  }
+
+  .home-v2 .gap-closer p {
+    font-size: 25px;
+  }
+
+  /* Both sentences run to two lines down here, so they need a hairline of
+     separation to stay legible as two. */
+  .home-v2 .gap-closer-payoff {
+    margin-top: 6px;
+  }
+
+  .home-v2 .gap-closer .gap-bridge {
+    font-size: 14px;
+  }
+
 }
 
 /* Mobile, where the three beats stack. "Become a better preacher." is the
@@ -1122,5 +1244,13 @@
 @media (max-width: 420px) {
   .home-v2 .hero h1 {
     font-size: 27px;
+  }
+
+  .home-v2 .gap-card {
+    padding: 22px 22px 24px;
+  }
+
+  .home-v2 .gap-closer p {
+    font-size: 22px;
   }
 }
