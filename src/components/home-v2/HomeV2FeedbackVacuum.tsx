@@ -3,15 +3,15 @@
  *  sentence rather than interrupting it. */
 const POINTS = [
   {
-    label: "01 — Useful feedback is rare",
+    label: "01 · Useful feedback is rare",
     heading: "You rarely get useful feedback.",
     lead: "People may encourage you after you preach. But few can consistently show you ",
     emphasis: "what worked, what didn't, and what to work on next.",
   },
   {
-    label: "02 — Growth becomes hard to see",
+    label: "02 · Growth becomes hard to see",
     heading: "Every sermon starts over.",
-    lead: "You may sense something worked—or didn't—but without consistent feedback, it's hard to know ",
+    lead: "You may sense something worked, or didn't, but without consistent feedback, it's hard to know ",
     emphasis: "why, what to change, or whether it's becoming a pattern.",
   },
 ] as const;
