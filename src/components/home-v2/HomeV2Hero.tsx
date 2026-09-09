@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-/** Three beats, hard-broken. The breaks are the copy, so each line is its own
- *  block and the type scales down at narrow widths rather than reflowing. */
-const HEADLINE = [
-  "Preach better sermons.",
-  "Become a better preacher.",
-  "Build a healthier church.",
-] as const;
+/** Three beats. The first two are inline and unbreakable, so they share a line
+ *  wherever they fit and the browser wraps between them when they do not. The
+ *  wrap point is therefore always the gap between sentences, never inside one,
+ *  at any width. The third beat is its own block at every width. */
+const BEAT_ONE = "Preach better sermons.";
+const BEAT_TWO = "Become a better preacher.";
+const BEAT_TURN = "Build a healthier church.";
 
 /** Serif lede. Carries the promise; the paragraph under it carries the loop. */
 const LEDE =
@@ -21,16 +21,9 @@ export function HomeV2Hero() {
       <div className="container">
         <div className="eyebrow">Built by a preacher for preachers</div>
         <h1>
-          {HEADLINE.map((line, i) => (
-            <span
-              key={line}
-              className={
-                i === HEADLINE.length - 1 ? "hero-line hero-line-turn" : "hero-line"
-              }
-            >
-              {line}
-            </span>
-          ))}
+          <span className="hero-beat">{BEAT_ONE}</span>{" "}
+          <span className="hero-beat">{BEAT_TWO}</span>
+          <span className="hero-beat hero-beat-turn">{BEAT_TURN}</span>
         </h1>
         <p className="hero-lede">{LEDE}</p>
         <p>{BODY}</p>
