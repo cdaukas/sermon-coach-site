@@ -28,7 +28,10 @@ import type {
 } from "../src/lib/email/blog-email-types";
 import { BLOG_EMAIL_FROM } from "../src/lib/email/constants";
 import { sendResendEmail } from "../src/lib/email/resend-send";
-import { buildUnsubscribeUrl } from "../src/lib/email/unsubscribe";
+import {
+  buildUnsubscribePostUrl,
+  buildUnsubscribeUrl,
+} from "../src/lib/email/unsubscribe";
 import { createAdminClient } from "../src/lib/supabase/admin";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -519,6 +522,7 @@ async function main(): Promise<void> {
       to: [email],
       subject: content.subject,
       html,
+      unsubscribePostUrl: buildUnsubscribePostUrl(email),
     });
 
     if (!sendResult.ok) {
