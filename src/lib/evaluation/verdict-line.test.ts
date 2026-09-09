@@ -82,7 +82,7 @@ function messageWithVerdictLines(
 
 describe("criterion verdict_line schema gate", () => {
   it("does not bump prompt version for a non-scoring pass", () => {
-    assert.equal(EVALUATION_PROMPT_VERSION, "v3.5");
+    assert.equal(EVALUATION_PROMPT_VERSION, "v3.6");
   });
 
   it("read path tolerates missing verdict_line on any prompt version", () => {

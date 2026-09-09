@@ -64,9 +64,9 @@ describe("locked tradition_tag", () => {
   });
 });
 
-describe("v3.5 live-run prompt locks", () => {
-  it("stays on v3.5 and forbids em-dashes, locks FCF's work, and places the melodic observation last", () => {
-    assert.equal(EVALUATION_PROMPT_VERSION, "v3.5");
+describe("v3.6 live-run prompt locks", () => {
+  it("stays on v3.6 and forbids em-dashes, locks FCF's work, and places the melodic observation last", () => {
+    assert.equal(EVALUATION_PROMPT_VERSION, "v3.6");
     const prompt = buildSystemPrompt();
     assert.match(prompt, /NO EM-DASHES IN GENERATED PROSE/);
     assert.match(
