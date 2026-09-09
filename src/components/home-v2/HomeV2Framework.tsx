@@ -48,6 +48,19 @@ export function HomeV2Framework() {
       <div className="container">
         <div className="card standard">
           <div className="eyebrow">The standard</div>
+          {/* Both lines are differentiation, which is why they sit here rather
+              than in the hero. The first says why the instrument exists; the
+              second says the instrument is one part of a system. */}
+          <div className="standard-leadin">
+            <p>
+              Your shelf is full of commentaries. There has never been one on
+              the sermon itself.
+            </p>
+            <p>
+              Sketch before you write. Evaluate before you preach. Learn from
+              the result.
+            </p>
+          </div>
           <h2>The Sermon Coach Expositional Framework&trade;</h2>
           <p>{SUBHEAD}</p>
 

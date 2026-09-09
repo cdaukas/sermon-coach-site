@@ -20,7 +20,7 @@ export function HomeV2StartFree() {
       <div className="container">
         <h2>Walk into Sunday knowing you&rsquo;re ready.</h2>
         <p>
-          Start with one. Your first evaluation is free — no card, no
+          Start with one. Your first evaluation is free. No card, no
           commitment, full evaluation back in minutes.
         </p>
         <Link href="/start" className="btn btn-lg">

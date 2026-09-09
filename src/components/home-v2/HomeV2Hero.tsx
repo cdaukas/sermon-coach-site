@@ -1,10 +1,19 @@
 import Link from "next/link";
 
-const HEADLINE_LEAD = "Your shelf is full of commentaries.";
-const HEADLINE_TURN = "There has never been one on the sermon itself.";
+/** Three beats, hard-broken. The breaks are the copy, so each line is its own
+ *  block and the type scales down at narrow widths rather than reflowing. */
+const HEADLINE = [
+  "Preach better sermons.",
+  "Become a better preacher.",
+  "Build a healthier church.",
+] as const;
+
+/** Serif lede. Carries the promise; the paragraph under it carries the loop. */
+const LEDE =
+  "The Sermon Coach reads the sermons you actually write and shows you what is working, what needs attention, and where to focus before you preach on Sunday.";
 
 const BODY =
-  "The Sermon Coach reads the sermon you actually wrote and measures it against the Sermon Coach Expositional Framework™ — eleven questions across four areas. Then it keeps going. Sketch before you write. Evaluate before you preach. Learn from the result. Over time, those sermons become a picture of how you are developing as a preacher.";
+  "Do that week after week and the patterns become visible: what you keep doing well, what keeps slipping, and what to work on next to keep growing as a preacher.";
 
 export function HomeV2Hero() {
   return (
@@ -12,9 +21,18 @@ export function HomeV2Hero() {
       <div className="container">
         <div className="eyebrow">Built by a preacher for preachers</div>
         <h1>
-          {HEADLINE_LEAD}
-          <span className="hero-turn">{HEADLINE_TURN}</span>
+          {HEADLINE.map((line, i) => (
+            <span
+              key={line}
+              className={
+                i === HEADLINE.length - 1 ? "hero-line hero-line-turn" : "hero-line"
+              }
+            >
+              {line}
+            </span>
+          ))}
         </h1>
+        <p className="hero-lede">{LEDE}</p>
         <p>{BODY}</p>
         <Link href="/start" className="btn btn-lg">
           Evaluate your first sermon free
