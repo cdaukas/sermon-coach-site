@@ -59,7 +59,7 @@ export function HomeV2FeedbackVacuum() {
             </span>
           </p>
           <p className="gap-bridge">{BRIDGE}</p>
-          {/* Decorative. Points into the navy Framework panel that follows. */}
+          {/* Decorative. Points into the section that follows. */}
           <svg
             className="gap-chevron"
             width="18"

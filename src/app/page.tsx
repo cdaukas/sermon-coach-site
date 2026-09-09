@@ -43,7 +43,10 @@ export const metadata: Metadata = {
 
 /**
  * Homepage. Narrative order is deliberate:
- * problem → standard → sample → mentoring → proof → objection → offer.
+ * problem → sample → standard → mentoring → proof → objection → offer.
+ * The standard follows the sample rather than preceding it: it reads as the
+ * methodology underneath a product the visitor has already seen, not as the
+ * product itself.
  * Evaluation is presented as one step of the development system, never as
  * the product. Framework naming and criteria come from
  * `src/lib/evaluation/tool-schema.ts` and `public/how-its-scored.html`.
@@ -55,8 +58,8 @@ export default function HomePage() {
       <HomeV2Hero />
       <HomeV2Tagline />
       <HomeV2FeedbackVacuum />
-      <HomeV2Framework />
       <HomeV2SampleSermon />
+      <HomeV2Framework />
       <HomeV2DevelopOthers />
       <HomeV2Proof />
       <HomeV2AiAndPreaching />
