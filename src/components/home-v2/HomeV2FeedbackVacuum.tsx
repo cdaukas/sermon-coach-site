@@ -5,7 +5,7 @@ const POINTS = [
   },
   {
     heading: "Without clear feedback, development stays difficult to see.",
-    body: "You may know a sermon felt stronger—or something didn't quite land. But without a consistent way to examine your preaching, it is hard to know why. And if you don't know what to work on, the next sermon starts with the same questions.",
+    body: "You may know a sermon felt stronger, or that something didn't quite land. But without a consistent way to examine your preaching, it is hard to know why. And if you don't know what to work on, the next sermon starts with the same questions.",
   },
 ] as const;
 
