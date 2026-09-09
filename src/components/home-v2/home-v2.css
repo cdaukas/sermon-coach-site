@@ -465,10 +465,15 @@
 /* ---------- develop others ---------- */
 /* The growth and Classroom lines bring this section to four body paragraphs.
    .lead is capped at 730px but plain paragraphs were not, so they ran the full
-   container as centred text. Cap them to the same measure. */
+   container as centred text. Cap them to the same measure.
+
+   The bottom margin is load-bearing, not decoration: preflight zeroes every
+   paragraph margin here, so consecutive paragraphs sat line-to-line and the
+   whole block read as one paragraph. 22px matches .held p, the closest
+   analogue on the page. */
 .home-v2 .develop p {
   max-width: 730px;
-  margin-inline: auto;
+  margin: 0 auto 22px;
 }
 
 /* The only inline-prose link on the homepage; every other link here is a
