@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { HomeV2AiAndPreaching } from "@/components/home-v2/HomeV2AiAndPreaching";
-import { HomeV2PreachingRhythm } from "@/components/home-v2/HomeV2PreachingRhythm";
 import { HomeV2FeedbackVacuum } from "@/components/home-v2/HomeV2FeedbackVacuum";
 import { HomeV2Footer } from "@/components/home-v2/HomeV2Footer";
 import { HomeV2Framework } from "@/components/home-v2/HomeV2Framework";
 import { HomeV2DevelopOthers } from "@/components/home-v2/HomeV2DevelopOthers";
-import { HomeV2GrowthProfile } from "@/components/home-v2/HomeV2GrowthProfile";
 import { HomeV2Header } from "@/components/home-v2/HomeV2Header";
 import { HomeV2Hero } from "@/components/home-v2/HomeV2Hero";
 import { HomeV2Newsletter } from "@/components/home-v2/HomeV2Newsletter";
@@ -45,9 +43,9 @@ export const metadata: Metadata = {
 
 /**
  * Homepage. Narrative order is deliberate:
- * problem → standard → loop → growth → proof → mentoring → institutions →
- * objection → offer. Evaluation is presented as one step of the loop, never
- * as the product. Framework naming and criteria come from
+ * problem → standard → sample → mentoring → proof → objection → offer.
+ * Evaluation is presented as one step of the development system, never as
+ * the product. Framework naming and criteria come from
  * `src/lib/evaluation/tool-schema.ts` and `public/how-its-scored.html`.
  */
 export default function HomePage() {
@@ -58,9 +56,7 @@ export default function HomePage() {
       <HomeV2Tagline />
       <HomeV2FeedbackVacuum />
       <HomeV2Framework />
-      <HomeV2PreachingRhythm />
       <HomeV2SampleSermon />
-      <HomeV2GrowthProfile />
       <HomeV2DevelopOthers />
       <HomeV2Proof />
       <HomeV2AiAndPreaching />

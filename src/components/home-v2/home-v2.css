@@ -460,143 +460,36 @@
   text-decoration: underline;
 }
 
-/* ---------- preaching rhythm ---------- */
-/* Pulls the section up under the navy Framework panel so the two read as
-   connected. Bottom padding and all interior spacing stay as they were. */
-.home-v2 .rhythm {
-  padding-top: 58px;
+
+
+/* ---------- develop others ---------- */
+/* The growth and Classroom lines bring this section to four body paragraphs.
+   .lead is capped at 730px but plain paragraphs were not, so they ran the full
+   container as centred text. Cap them to the same measure.
+
+   The bottom margin is load-bearing, not decoration: preflight zeroes every
+   paragraph margin here, so consecutive paragraphs sat line-to-line and the
+   whole block read as one paragraph. 22px matches .held p, the closest
+   analogue on the page. */
+.home-v2 .develop p {
+  max-width: 730px;
+  margin: 0 auto 22px;
 }
 
-.home-v2 .rhythm-figure {
-  margin: 48px auto 0;
-  max-width: 820px;
-  padding: 0;
+/* The only inline-prose link on the homepage; every other link here is a
+   standalone block. Ink text with a gold underline rather than gold text:
+   --sc-accent on this ground is 3.57:1, which fails AA at body size, and the
+   underline carries the affordance without depending on colour. */
+.home-v2 .develop p a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--sc-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
-.home-v2 .rhythm-figure img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.home-v2 .rhythm .closer {
-  margin-top: 44px;
-}
-
-/* ---------- growth profile ---------- */
-.home-v2 .profilecard {
-  margin-top: 45px;
-  background: var(--sc-panel);
-  border: 1px solid var(--sc-rule);
-  border-radius: 4px;
-  box-shadow: var(--sc-shadow-lift);
-  overflow: hidden;
-}
-
-.home-v2 .profilehead {
-  padding: 22px 28px;
-  border-bottom: 1px solid var(--sc-rule);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.home-v2 .profilehead strong {
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-weight: 600;
-  color: var(--sc-ink);
-}
-
-.home-v2 .illustration {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--sc-ink-soft);
-  border: 1px solid var(--sc-rule);
-  border-radius: 30px;
-  padding: 5px 11px;
-}
-
-.home-v2 .profilebody {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-
-.home-v2 .profilecol {
-  padding: 28px 30px;
-}
-
-.home-v2 .profilecol + .profilecol {
-  border-left: 1px solid var(--sc-rule);
-}
-
-.home-v2 .profilecol small {
-  display: block;
-  font-family: var(--font-ui);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--sc-ink-soft);
-  margin-bottom: 12px;
-}
-
-.home-v2 .critlist {
-  list-style: none;
-  margin: 0 0 26px;
-  padding: 0;
-  font-family: var(--font-ui);
-  font-size: 14px;
-}
-
-.home-v2 .critlist li {
-  padding: 9px 14px;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  color: var(--sc-ink);
-}
-
-.home-v2 .critlist.strong li {
-  background: var(--sc-olive-soft);
-  border-left: 3px solid var(--sc-olive);
-}
-
-.home-v2 .critlist.gap li {
-  background: var(--sc-gold-soft);
-  border-left: 3px solid var(--sc-gold);
-}
-
-.home-v2 .profilecol.focus {
-  background: var(--sc-cream-tint);
-}
-
-.home-v2 .profilecol.focus strong {
-  display: block;
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: var(--sc-ink);
-}
-
-.home-v2 .profilecol.focus p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--sc-ink-soft);
-}
-
-.home-v2 .profilenote {
-  padding: 18px 28px;
-  border-top: 1px solid var(--sc-rule);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  line-height: 1.65;
-  color: var(--sc-ink-soft);
+.home-v2 .develop p a:hover {
+  text-decoration-color: var(--sc-ink);
 }
 
 /* ---------- sample sermon ---------- */
@@ -750,70 +643,6 @@
   margin-top: 0;
 }
 
-/* ---------- institutions ---------- */
-.home-v2 .classroom {
-  margin-top: 42px;
-  background: var(--sc-panel);
-  border: 1px solid var(--sc-rule);
-  border-radius: 4px;
-  box-shadow: var(--sc-shadow);
-  padding: 36px;
-  max-width: 820px;
-  margin-inline: auto;
-}
-
-.home-v2 .classroom-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--sc-rule);
-}
-
-.home-v2 .classroom-head strong {
-  font-family: var(--font-serif);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--sc-ink);
-}
-
-.home-v2 .classroom-head span {
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--sc-accent);
-}
-
-.home-v2 .classroom ul {
-  list-style: none;
-  margin: 20px 0;
-  padding: 0;
-  font-family: var(--font-ui);
-  font-size: 14px;
-  color: var(--sc-ink-soft);
-}
-
-.home-v2 .classroom li {
-  padding: 11px 0 11px 22px;
-  border-bottom: 1px solid var(--sc-rule);
-  position: relative;
-}
-
-.home-v2 .classroom li::before {
-  content: "·";
-  position: absolute;
-  left: 6px;
-  color: var(--sc-accent);
-  font-weight: 700;
-}
-
-.home-v2 .classroom-note {
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--sc-ink-soft);
-  margin: 0 0 22px;
-}
 
 /* ---------- objection ---------- */
 .home-v2 .objection {
@@ -1172,19 +1001,13 @@
   .home-v2 .framework-grid,
   .home-v2 .grid2,
   .home-v2 .grid3,
-  .home-v2 .profilebody,
   .home-v2 .footer-cols {
     grid-template-columns: 1fr;
   }
 
-  .home-v2 .profilecol + .profilecol {
-    border-left: 0;
-    border-top: 1px solid var(--sc-rule);
-  }
 
   .home-v2 .builder,
-  .home-v2 .held,
-  .home-v2 .classroom {
+  .home-v2 .held {
     padding: 26px;
   }
 
@@ -1237,7 +1060,4 @@
     padding-bottom: 32px;
   }
 
-  .home-v2 .rhythm {
-    padding-top: 40px;
-  }
 }

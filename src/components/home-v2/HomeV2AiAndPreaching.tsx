@@ -26,7 +26,8 @@ export function HomeV2AiAndPreaching() {
         <p className="objection-close">
           Your study, your writing, your preaching, your judgment about your
           people, and the Spirit&rsquo;s work in all of it stay yours. The
-          evaluation is an assessment, not a verdict.
+          evaluation is an assessment rather than a verdict, and one step in the
+          development system rather than the destination.
         </p>
         <a href="/why-sermon-coach.html" className="cardlink">
           Read the full position &rarr;
