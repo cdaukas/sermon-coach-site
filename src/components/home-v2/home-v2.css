@@ -163,27 +163,41 @@
   margin-bottom: 18px;
 }
 
+/* Sized so the first two beats share a line with room to spare rather than
+   only just fitting. The measured combined line is 889px here against a 1000px
+   cap, and the real face is unknown at build time: a visitor without Iowan Old
+   Style or Charter gets Georgia, which sets wider. Headroom buys that. */
 .home-v2 .hero h1 {
   font-family: var(--font-serif);
-  font-size: 52px;
+  font-size: 44px;
   font-weight: 600;
   line-height: 1.12;
   letter-spacing: -0.02em;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto 22px;
   color: var(--sc-ink);
 }
 
-/* Each beat is its own block so the three lines can never merge into a
-   paragraph. Narrow widths reduce the type size instead; see the 720px and
-   420px blocks. */
-.home-v2 .hero-line {
-  display: block;
+/* Tablet. 768px leaves 712px of content and the combined line measures 649px
+   here, so the two beats still share a line, with 63px to spare. */
+@media (max-width: 1023px) {
+  .home-v2 .hero h1 {
+    font-size: 32px;
+  }
 }
 
-/* The third beat is the payoff. --sc-gold is 5.24:1 on the hero's white
+/* No sentence may ever be broken across lines. Each beat is unbreakable, so
+   the only place a wrap can land is the space between two of them. The first
+   two beats stay inline and share a line wherever they fit; when they do not,
+   the browser wraps between them without a breakpoint deciding it. */
+.home-v2 .hero-beat {
+  white-space: nowrap;
+}
+
+/* The payoff always gets its own line. --sc-gold is 5.24:1 on the hero's white
    panel, where --sc-accent would be 3.1:1 and fail even large-text AA. */
-.home-v2 .hero-line-turn {
+.home-v2 .hero-beat-turn {
+  display: block;
   color: var(--sc-gold);
 }
 
@@ -1003,10 +1017,6 @@
     padding: 48px 0 40px;
   }
 
-  .home-v2 .hero h1 {
-    font-size: 34px;
-  }
-
   .home-v2 .standard-leadin p {
     font-size: 17px;
   }
@@ -1105,10 +1115,12 @@
 
 }
 
-/* "Become a better preacher." is the longest beat and still wraps at 34px on a
-   375px screen. The break is the copy, so the type gives way, not the line. */
+/* Mobile, where the three beats stack. "Become a better preacher." is the
+   longest and must fit 375px of viewport on its own: it measures 286px here
+   against 335px of content width. A beat that does not fit would overflow
+   rather than wrap, so this step is sized down further than the fit needs. */
 @media (max-width: 420px) {
   .home-v2 .hero h1 {
-    font-size: 29px;
+    font-size: 27px;
   }
 }
