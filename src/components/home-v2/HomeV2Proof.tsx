@@ -27,7 +27,7 @@ export function HomeV2Proof() {
     <section className="section">
       <div className="container center">
         <div className="eyebrow">From preachers using it</div>
-        <h2>Feedback specific enough to help you grow.</h2>
+        <h2>What pastors are saying.</h2>
       </div>
 
       <div className="container grid3">
