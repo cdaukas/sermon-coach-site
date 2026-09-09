@@ -64,9 +64,9 @@ export function HomeV2Proof() {
             <h3>Built by a preacher. Tested in the pulpit.</h3>
             <p>{BUILDER}</p>
             <p>
-              The framework is the one Chris uses on his own work. It finds the
-              soft spots in a sermon, and he let it find his before he showed it
-              to anyone.
+              The framework is the same one Chris uses on his own sermons.
+              Before asking other preachers to trust it, he let Sermon Coach
+              find the soft spots in his own.
             </p>
             <a href="/story.html" className="cardlink">
               Read the story &rarr;
