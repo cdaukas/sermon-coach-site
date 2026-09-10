@@ -977,19 +977,22 @@
   box-shadow: var(--sc-shadow-lift);
 }
 
-.home-v2 .footercta .pricingnote {
-  margin: 24px auto 0;
-  max-width: 540px;
+/* The pricing detail moved behind the link, so what is left is the link
+   itself. inline-block on a centred section, at the same 13px as the fine
+   print above it. --sc-accent-soft is 6.78:1 on this ground. */
+.home-v2 .footercta .ctapricing {
+  display: inline-block;
+  margin-top: 24px;
   font-family: var(--font-ui);
   font-size: 13px;
   line-height: 1.7;
-  font-style: italic;
-  color: var(--sc-rule);
+  font-weight: 600;
+  color: var(--sc-accent-soft);
+  text-decoration: none;
 }
 
-.home-v2 .footercta .pricingnote a {
-  font-style: normal;
-  color: var(--sc-accent-soft);
+.home-v2 .footercta .ctapricing:hover {
+  text-decoration: underline;
 }
 
 /* ---------- newsletter ---------- */
