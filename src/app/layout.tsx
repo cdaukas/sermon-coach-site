@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s · The Sermon Coach",
   },
   description:
-    "Structured sermon evaluation for pastors — substantive feedback drawn from trusted preaching resources.",
+    "Continuous preaching development for pastors who preach every week. See what is working, what needs attention, and what to work on next.",
   icons: {
     icon: [
       { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
