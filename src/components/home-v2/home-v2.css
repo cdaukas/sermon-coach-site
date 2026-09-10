@@ -466,11 +466,18 @@
   color: var(--sc-accent-soft);
 }
 
+/* Intro only. text-align is not inherited past this block because
+   .framework-cat resets it, so the four cards keep their left-ranged
+   interiors while the eyebrow, headline, name and subhead centre. */
+.home-v2 .standard-intro {
+  text-align: center;
+}
+
 /* The claim leads. Tight below it so the intro reads as one block rather than
    three stacked statements. */
 .home-v2 .standard h2 {
   color: var(--sc-panel);
-  margin: 0 0 12px;
+  margin: 0 auto 12px;
   /* Two lines at desktop rather than three: the headline stays dominant and
      the intro block stays short, which is the point of the rework. */
   max-width: 30ch;
@@ -486,16 +493,19 @@
   line-height: 1.3;
   letter-spacing: -0.01em;
   color: var(--sc-accent-soft);
-  margin: 0 0 6px;
+  margin: 0 auto 6px;
   max-width: none;
 }
 
 .home-v2 .standard .standard-sub {
   color: var(--sc-rule);
-  max-width: 730px;
+  /* Wide enough to hold the sentence on one line at desktop; balanced so a
+     narrow viewport splits it evenly instead of orphaning the last word. */
+  max-width: 64ch;
   font-size: 16px;
   line-height: 1.7;
-  margin: 0;
+  margin: 0 auto;
+  text-wrap: balance;
 }
 
 /* Four across at desktop: these are pillars of one framework, and a single
@@ -524,6 +534,7 @@
 /* Cream card on the navy panel: the four areas read as distinct pieces of
    thought inside the framework environment, not as more of the same surface. */
 .home-v2 .framework-cat {
+  text-align: left;
   background: var(--sc-cream-tint);
   border: 1px solid var(--sc-rule);
   border-radius: 4px;
@@ -611,6 +622,56 @@
 
 
 
+/* ---------- a single voice ---------- */
+/* One quote alone, not a card: no panel, no border, no shadow. The rules above
+   and below are the only framing it gets. */
+.home-v2 .voice {
+  padding: 64px 0;
+}
+
+.home-v2 .voice figure {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px 0 0;
+  border-top: 1px solid var(--sc-rule);
+}
+
+.home-v2 .voice blockquote {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: var(--sc-ink);
+  text-wrap: pretty;
+}
+
+/* --sc-gold is 4.94:1 on the cream ground, so the lifted sentence clears AA as
+   body text and not only as the large text it is set at. */
+.home-v2 .voice-lift {
+  color: var(--sc-gold);
+}
+
+.home-v2 .voice figcaption {
+  margin-top: 26px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.home-v2 .voice-name {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--sc-ink);
+}
+
+.home-v2 .voice-role {
+  display: block;
+  color: var(--sc-ink-soft);
+}
+
 /* ---------- develop others ---------- */
 /* The growth and Classroom lines bring this section to four body paragraphs.
    .lead is capped at 730px but plain paragraphs were not, so they ran the full
@@ -620,6 +681,14 @@
    paragraph margin here, so consecutive paragraphs sat line-to-line and the
    whole block read as one paragraph. 22px matches .held p, the closest
    analogue on the page. */
+/* Same white band as the hero and the sample section, so the page alternates
+   white, cream, navy, white rather than running two cream sections together. */
+.home-v2 .develop {
+  background: var(--sc-panel);
+  border-top: 1px solid var(--sc-rule);
+  border-bottom: 1px solid var(--sc-rule);
+}
+
 .home-v2 .develop p {
   max-width: 730px;
   margin: 0 auto 22px;
@@ -1132,6 +1201,18 @@
 
   .home-v2 .standard {
     padding: 30px;
+  }
+
+  .home-v2 .voice {
+    padding: 48px 0;
+  }
+
+  .home-v2 .voice figure {
+    padding-top: 30px;
+  }
+
+  .home-v2 .voice blockquote {
+    font-size: 21px;
   }
 
   .home-v2 .standard h2 {

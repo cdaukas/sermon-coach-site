@@ -12,9 +12,6 @@ const PARAGRAPH_2 =
 const GROWTH =
   "The strengths that repeat and the gaps that keep returning only show up across sermons, in your library and in his. His seat keeps every sermon he submits, so what you read after six months is a line of development rather than six unrelated critiques.";
 
-const PARAGRAPH_3 =
-  "For a staff, a class, or a training lab, seats are billed on one invoice.";
-
 export function HomeV2DevelopOthers() {
   return (
     <section className="section develop">
@@ -24,7 +21,6 @@ export function HomeV2DevelopOthers() {
         <p className="lead">{PARAGRAPH_1}</p>
         <p>{PARAGRAPH_2}</p>
         <p>{GROWTH}</p>
-        <p>{PARAGRAPH_3}</p>
         {/* Names the teaching contexts the page otherwise never mentions. No
             price and no mailto here: the pricing page carries both. */}
         <p>
