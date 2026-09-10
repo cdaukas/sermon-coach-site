@@ -11,6 +11,7 @@
     "verify:billing-lock": "tsx scripts/verify-profiles-billing-lock.mts",
     "pdf:auth-cookies": "tsx scripts/capture-pdf-auth-cookies.mts",
     "pdf:eval": "tsx scripts/generate-eval-pdf.mts",
+    "og:image": "tsx scripts/generate-og-image.mts",
     "blog:send": "tsx scripts/send-blog-email.mts"
   },
   "dependencies": {
