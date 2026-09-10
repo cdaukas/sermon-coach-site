@@ -43,14 +43,18 @@ export function HomeV2Framework() {
     <section className="section">
       <div className="container">
         <div className="card standard">
-          <div className="eyebrow">The standard</div>
-          <h2>{HEADLINE}</h2>
-          {/* The framework's proper name, deliberately below the headline:
-              important, but the claim leads and the name follows it. */}
-          <p className="standard-name">
-            The Sermon Coach Expositional Framework&trade;
-          </p>
-          <p className="standard-sub">{SUBHEAD}</p>
+          {/* Centred as a block. The cards below reset text-align, so this
+              does not reach their interiors. */}
+          <div className="standard-intro">
+            <div className="eyebrow">The standard</div>
+            <h2>{HEADLINE}</h2>
+            {/* The framework's proper name, deliberately below the headline:
+                important, but the claim leads and the name follows it. */}
+            <p className="standard-name">
+              The Sermon Coach Expositional Framework&trade;
+            </p>
+            <p className="standard-sub">{SUBHEAD}</p>
+          </div>
 
           <div className="framework-grid">
             {CATEGORIES.map((category) => (

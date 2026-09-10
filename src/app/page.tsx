@@ -10,6 +10,7 @@ import { HomeV2Proof } from "@/components/home-v2/HomeV2Proof";
 import { HomeV2SampleSermon } from "@/components/home-v2/HomeV2SampleSermon";
 import { HomeV2StartFree } from "@/components/home-v2/HomeV2StartFree";
 import { HomeV2Tagline } from "@/components/home-v2/HomeV2Tagline";
+import { HomeV2Velasquez } from "@/components/home-v2/HomeV2Velasquez";
 import "@/components/home-v2/home-v2.css";
 
 const OG_DESCRIPTION =
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
 
 /**
  * Homepage. Narrative order is deliberate:
- * problem → sample → standard → mentoring → objection → proof → offer.
+ * problem → sample → standard → voice → mentoring → objection → proof → offer.
  * The standard follows the sample rather than preceding it: it reads as the
  * methodology underneath a product the visitor has already seen, not as the
  * product itself. The objection is answered before the proof so the page ends
@@ -61,6 +62,7 @@ export default function HomePage() {
       <HomeV2FeedbackVacuum />
       <HomeV2SampleSermon />
       <HomeV2Framework />
+      <HomeV2Velasquez />
       <HomeV2DevelopOthers />
       <HomeV2AiAndPreaching />
       <HomeV2Proof />
