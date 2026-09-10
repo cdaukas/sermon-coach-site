@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Open Graph card</title>
+    <style>
+      /* Same tokens as the site. Kept literal rather than imported so this
+         file renders standalone in any browser. */
+      :root {
+        --sc-ink: #1a2332;
+        --sc-bg: #faf8f3;
+        --sc-accent-soft: #c9a55c;
+        --font-serif: "Iowan Old Style", "Charter", Georgia, "Times New Roman",
+          serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        width: 1200px;
+        height: 630px;
+        background: var(--sc-ink);
+        font-family: var(--font-serif);
+        color: var(--sc-bg);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 96px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .the {
+        font-size: 34px;
+        font-style: italic;
+        opacity: 0.75;
+        margin-bottom: 2px;
+      }
+
+      .brand {
+        font-size: 92px;
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+      }
+
+      .rule {
+        width: 120px;
+        height: 5px;
+        background: var(--sc-accent-soft);
+        margin: 34px 0 38px;
+      }
+
+      .line {
+        font-size: 40px;
+        line-height: 1.35;
+      }
+
+      .url {
+        margin-top: 56px;
+        font-size: 25px;
+        color: var(--sc-accent-soft);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="the">The</div>
+    <div class="brand">Sermon Coach</div>
+    <div class="rule"></div>
+    <!-- Matches og:title and the closing call to action on the homepage. -->
+    <div class="line">Walk into Sunday knowing</div>
+    <div class="line">your sermon is ready.</div>
+    <div class="url">sermoncoach.com</div>
+  </body>
+</html>
