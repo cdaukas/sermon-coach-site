@@ -13,8 +13,14 @@ import { HomeV2Tagline } from "@/components/home-v2/HomeV2Tagline";
 import { HomeV2Velasquez } from "@/components/home-v2/HomeV2Velasquez";
 import "@/components/home-v2/home-v2.css";
 
+/** Shared by the Open Graph and Twitter cards. Carries the tagline the page
+ *  itself leads with, so a link preview and the page say the same thing. */
 const OG_DESCRIPTION =
-  "Expositional feedback on your sermon, scored against an 11-criterion rubric covering textual fidelity, gospel clarity, and application. Your first evaluation is free.";
+  "Not a sermon-writing tool. A system that turns weekly feedback into long-term development. Your first evaluation is free, no card.";
+
+/** The card title carries the claim on its own: `siteName` already renders
+ *  "The Sermon Coach" beside it, so repeating the brand would double it. */
+const OG_TITLE = "Walk into Sunday knowing your sermon is ready.";
 
 export const metadata: Metadata = {
   // `absolute` so the layout's "%s · The Sermon Coach" template does not
@@ -23,10 +29,10 @@ export const metadata: Metadata = {
     absolute: "The Sermon Coach · Walk into Sunday knowing your sermon is ready.",
   },
   description:
-    "Expositional feedback on your sermon, scored against an eleven-criterion rubric. Your first evaluation is free, no card. Written for pastors who preach.",
+    "The Sermon Coach reads the sermons you actually write and shows you what is working, what needs attention, and where to focus before Sunday.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "The Sermon Coach",
+    title: OG_TITLE,
     description: OG_DESCRIPTION,
     url: "https://sermoncoach.com",
     siteName: "The Sermon Coach",
@@ -35,7 +41,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Sermon Coach",
+    title: OG_TITLE,
     description: OG_DESCRIPTION,
     images: ["/og-image.png"],
   },
