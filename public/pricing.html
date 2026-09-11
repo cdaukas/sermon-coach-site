@@ -422,7 +422,9 @@
   .tier.featured .tier-cta { background: var(--accent); border-color: var(--accent); }
   .tier.featured .tier-cta:hover { background: #8a6624; border-color: #8a6624; }
 
-  /* ---------- INTENSIVE ---------- */
+  /* ---------- INTENSIVE ----------
+     The card is archived: markup removed, styles kept so restoring it is a
+     paste. Last rendered form is in git before this commit. */
   .intensive-wrap {
     max-width: 640px;
     margin: 0 auto;
@@ -1050,8 +1052,9 @@
       <span class="price-now"><span class="currency">$</span><span data-price="cohort">12</span></span>
       <span class="price-period" data-period="cohort">/preacher/mo</span>
     </div>
-    <div class="price-note" data-note="cohort">Or $25 for the ones who see their scores. Any size, billed by the term, one invoice.</div>
+    <div class="price-note" data-note="cohort">Or $25 for the ones who see their scores.</div>
     <ul class="tier-features">
+      <li>Five preachers or more, billed by the term. Smaller groups run as a Preaching Lab through the same form</li>
       <li><strong>You choose what each preacher sees</strong>, one at a time. Coaching without the score at $12 with two sermons a month, the full evaluation at $25 with four, or nothing but what comes through you</li>
       <li>Your own seat is free</li>
       <li>Each preacher keeps a private library, visible to you, never to the others</li>
@@ -1062,34 +1065,6 @@
   </div>
 
 </section>
-
-<!-- SECTION 3: WORKING ONE ON ONE -->
-<div class="section-header" style="margin-top: 56px;">
-  <h2>Working one on one</h2>
-  <p>A personal preaching intensive. The whole arc of how you preach, not just a single sermon.</p>
-</div>
-
-<div class="intensive-wrap">
-  <div class="intensive-card">
-    <div class="intensive-badge">By application</div>
-    <div class="intensive-name">Intensive</div>
-    <div class="intensive-tagline">An hour with Chris, after he has read your recent preaching.</div>
-    <div class="intensive-price-row">
-      <span class="intensive-price"><span class="currency">$</span>549</span>
-      <span class="intensive-period">one-time</span>
-    </div>
-    <div class="intensive-note">One-time engagement</div>
-    <ul class="intensive-features">
-      <li>A sixty-minute conversation, one to one, about what to change next</li>
-      <li>Five to ten of your sermons read in full, not skimmed</li>
-      <li>A pattern report across the set, plus one in-depth evaluation</li>
-      <li>Both reports in your hands a week before we talk</li>
-      <li>A short written follow-up naming what you decided to work on</li>
-    </ul>
-    <a href="https://tally.so/r/9qx2OK" class="intensive-cta">Apply for a spot</a>
-    <div class="intensive-capacity">Two a month. Apply, and you will hear back either way, with a date rather than a maybe.</div>
-  </div>
-</div>
 
 <!-- MISSION -->
 <div class="explainer">
@@ -1193,7 +1168,7 @@
       cohort: {
         price: '12',
         period: '/preacher/mo',
-        note: 'Or $25 for the ones who see their scores. Any size, billed by the term, one invoice.',
+        note: 'Or $25 for the ones who see their scores.',
         checkoutUrl: 'https://tally.so/r/obj9k1',
       },
     },
@@ -1206,7 +1181,7 @@
       cohort: {
         price: '12',
         period: '/preacher/mo',
-        note: 'Or $25 for the ones who see their scores. Any size, billed by the term, one invoice.',
+        note: 'Or $25 for the ones who see their scores.',
         checkoutUrl: 'https://tally.so/r/obj9k1',
       },
     },
