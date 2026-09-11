@@ -1388,6 +1388,22 @@
     font-size: 28px;
   }
 
+  /* The headline's break before "as a preacher?" is right from 768px up.
+     At phone width the first half wraps on its own, so forcing the break
+     too leaves a stubby "need to grow" line in the middle. Dropping it
+     here lets the question split evenly in two instead. Inside the
+     breakpoint and after `.section h2`, so source order keeps it. */
+  .home-v2 .problem h2 br {
+    display: none;
+  }
+
+  /* Below roughly 370px the question needs three lines however it breaks,
+     and the natural split strands "preacher?" alone. Balancing evens them.
+     Same treatment `.gap-closer-*` and `.standard p` already use. */
+  .home-v2 .problem h2 {
+    text-wrap: balance;
+  }
+
   .home-v2 .standard {
     padding: 30px;
   }
