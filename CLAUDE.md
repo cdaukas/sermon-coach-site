@@ -61,10 +61,12 @@ changes; read `node_modules/next/dist/docs/` before writing framework code.
 
 | Surface | Where | Notes |
 |---|---|---|
-| **Marketing site** | Static HTML in `public/` | `index.html`, `pricing.html`, `faq.html`, `how-its-scored.html`, `story.html`, `why-sermon-coach.html`, `privacy.html`, `terms.html`, `blog/` |
-| **Product app** | `src/app/` | Authenticated dashboard and product routes. There is no root `page.tsx`. |
+| **Marketing pages** | Static HTML in `public/` | 7 root pages — `pricing.html`, `faq.html`, `how-its-scored.html`, `story.html`, `why-sermon-coach.html`, `privacy.html`, `terms.html` — plus `blog/` |
+| **Homepage and product app** | `src/app/` | The homepage is a React route at `src/app/page.tsx`. Authenticated dashboard and product routes live alongside it. |
 
-Do not assume the homepage is a React route. Today it is static HTML.
+The homepage is React. `public/index.html` no longer exists; the static page it
+held was replaced by `src/app/page.tsx` (see §3). The rest of the marketing site
+is still hand-written HTML, so copy can still drift between the two.
 
 ### Major product surfaces
 
@@ -75,8 +77,10 @@ Do not assume the homepage is a React route. Today it is static HTML.
 - `/dashboard/develop`, `/dashboard/mentoring` — Mentoring lane (see §5)
 - `/dashboard/buy`, `/dashboard/account` — plans and billing management
 - `/start`, `/invite/[token]`, `/mentor/*` — onboarding, invitations, acceptance
-- `/sample-evaluation`, `/sample-sketch` — public samples
-- `/v2` — homepage draft, noindex (see §3)
+- `/sample-evaluation`, `/sample-sketch`, `/sample-debrief` — public samples
+- `/sketch` — the public Free Outline Check, no account required. The nav links
+  to it as **Sketch — Free**
+- `/` — the homepage (see §3)
 
 ### Authentication
 
@@ -90,7 +94,7 @@ code before altering auth timing.
 
 ### Supabase / database
 
-Postgres via Supabase. **78 migrations** in `supabase/migrations/`. Core tables
+Postgres via Supabase. **94 migrations** in `supabase/migrations/`. Core tables
 include `profiles`, `sermons`, `sermon_versions`, and `sermon_evaluations`
 (`result` jsonb, status, scores, tokens). RLS enforces ownership through the
 `sermons` → `sermon_versions` chain. Server-only work uses the service role key.
@@ -121,15 +125,17 @@ Quotas and cooldowns in `quota.ts`. Related generators: `runHowItPreaches.ts`,
 
 ### API routes
 
-18 route handlers under `src/app/api/` — evaluations polling, Stripe webhook,
+14 route handlers under `src/app/api/` — evaluations polling, Stripe webhook,
 mentor invite email, newsletter subscribe, readiness read, sketch run/save,
-YouTube transcript import, and two cron endpoints.
+YouTube transcript import, and four cron endpoints.
 
 ### Vercel / crons
 
-`vercel.json` schedules two Monday jobs:
-`/api/cron/operator-digest` (13:00 UTC) and
-`/api/cron/purge-unverified-users` (14:00 UTC).
+`vercel.json` schedules four jobs:
+`/api/cron/operator-digest` (Mon 13:00 UTC),
+`/api/cron/purge-unverified-users` (Mon 14:00 UTC),
+`/api/cron/tuesday-nudge` (Tue 13:00 UTC) and
+`/api/cron/purge-sermons` (daily 15:00 UTC).
 
 ### External services
 
@@ -140,32 +146,38 @@ delivery (see `EMAIL_DELIVERABILITY.md` for the Resend/Postmark plan).
 
 ---
 
-## 3. Current homepage work
+## 3. The homepage
 
-**Live homepage:** `public/index.html` — static HTML, currently serving
-production. Title and meta: *"Walk into Sunday knowing your sermon is ready."*
-This is the real homepage.
+The homepage is **`src/app/page.tsx`**, a React route. Title and meta: *"Walk
+into Sunday knowing your sermon is ready."*
 
-**Draft homepage:** `/v2`, a React implementation at `src/app/v2/page.tsx`. It
-is explicitly a draft: metadata title *"Homepage draft v2"* with
-`robots: { index: false, follow: false }`. It is not linked from navigation and
-does not replace `public/index.html`.
+It began as a `/v2` draft alongside a static `public/index.html`. Both are gone:
+the draft shipped to `/` and the static file was deleted. If you find a doc
+referring to `/v2` or `public/index.html`, that doc is stale.
 
-Components in `src/components/home-v2/`, styled by `home-v2.css` using site CSS
-tokens (`docs/design-tokens.md`):
+Components live in `src/components/home-v2/` (the directory kept its name),
+styled by `home-v2.css` using site CSS tokens (`docs/design-tokens.md`).
 
-`HomeV2Header`, `HomeV2Hero`, `HomeV2Tagline`, `HomeV2DevelopmentLoop`,
-`HomeV2GrowthProfile`, `HomeV2WhatCoachDoes`, `HomeV2ExpositoryStandard`,
-`HomeV2Testimonial`, `HomeV2PreachingWeek`, `HomeV2ClosingCta`, `HomeV2Footer`.
+Section order is deliberate, and the reasoning is in the file's own header
+comment: problem → sample → standard → voice → mentoring → objection → proof →
+offer.
 
-The layout tracks `docs/sermoncoach_homepage_mockup.html`.
+`HomeV2Header`, `HomeV2Hero`, `HomeV2Tagline`, `HomeV2FeedbackVacuum`,
+`HomeV2SampleSermon`, `HomeV2Framework`, `HomeV2Velasquez`,
+`HomeV2DevelopOthers`, `HomeV2AiAndPreaching`, `HomeV2Proof`, `HomeV2StartFree`,
+`HomeV2Footer`.
 
-**Status:** on branch `homepage-v2`, two commits ahead of `main`, currently
-non-interactive (visual draft).
+`HomeV2Newsletter` is still in the directory but is **not rendered**. Its CSS
+and `/api/newsletter/subscribe` are intact; restoring it is one import and one
+line.
 
-**Rule:** keep the draft and the live homepage distinct. Do not point production
-routes, sitemap, or navigation at `/v2`, and do not delete or rewrite
-`public/index.html` in favor of it, unless explicitly instructed.
+`HomeV2SampleSermon` is the one interactive piece: a `"use client"` carousel
+with no dependency, driven by arrow keys, dots and touch swipe.
+
+**Rule:** `home-v2.css` is over 1,200 lines with breakpoints scattered through
+it. At equal specificity source order decides, so a `@media` block placed
+*before* the rule it overrides silently loses. This has cost a debugging round
+twice. Put overrides after their base rules.
 
 ---
 
@@ -222,10 +234,11 @@ are methodology decisions requiring explicit approval.
 
 ## 5. Mentoring / develop-others
 
-Current state is the ledger: what is open, decided, and closed. The ledger
-is not in this repo. It lives in Chris's Claude project and is not readable
-from here. If you need current state, ask him rather than guessing or
-reading a stale doc.
+Current state is the ledger: what is open, decided, and closed. It is in this
+repo, at **`claude/ledger.md`**, with the open-items board alongside it at
+**`claude/board-v2.html`**. Read them before asking Chris or guessing; the board
+carries dated decisions with the reasoning and the rejected alternatives. Both
+were last updated 5 September 2026, so check the date against the code.
 
 `docs/develop-others-canon.md` is reference: the shape of the Mentoring
 lane, terminology, routing, schema. It does not track state.
@@ -282,7 +295,8 @@ routes `/dashboard/develop`, `/dashboard/mentoring`, `/mentor/*`,
 7. **Do not replace a working system because another approach seems cleaner.**
    Static marketing HTML, the polling evaluation job, the `/55` internal score —
    these are choices, not accidents.
-8. **Verify after meaningful changes:** `npm run test:unit` (237 tests today),
+8. **Verify after meaningful changes:** `npm run test:unit` (380 tests, 132
+   suites today),
    `npx tsc --noEmit` for type safety, `npm run lint`, and `npm run build` when
    the change could affect the build.
 9. **No unrelated cleanup.** Do not reformat, rename, prune branches, or fix
@@ -295,11 +309,15 @@ routes `/dashboard/develop`, `/dashboard/mentoring`, `/mentor/*`,
 
 - **`main`** is the trunk. GitHub is the source of truth:
   `github.com/cdaukas/sermon-coach-site`.
-- **Current branch: `homepage-v2`** — 2 commits ahead of `main`, 0 behind.
-- Work happens on short-lived topic branches merged into `main` via PR. Branch
-  names follow themes (`copy/…`, `chore/…`, `build/…`, feature slugs).
-- There are ~197 local branches, ~139 already merged into `main`. They are noise,
-  not garbage to clear on your own initiative.
+- Work happens on short-lived topic branches merged into `main` via PR, squash
+  merged. Branch names follow themes (`copy/…`, `chore/…`, `build/…`, `docs/…`,
+  feature slugs).
+- Because merges are squashed, a merged topic branch is never an ancestor of
+  `main`. `git pull` on a local branch that still holds those commits reports
+  divergence; the fix is to reset the local branch to `origin/main`, not to
+  merge.
+- Local branches accumulate. They are noise, not garbage to clear on your own
+  initiative.
 
 Rules:
 
@@ -316,10 +334,11 @@ Rules:
 ## 8. Documentation map
 
 **Authoritative**
-- The ledger — current Mentoring state: what is open, decided, and closed.
-  Not in this repo. It lives in Chris's Claude project and is not readable
-  from here. If you need current state, ask him rather than guessing or
-  reading a stale doc.
+- `claude/ledger.md` — the working ledger: what is open, decided, and closed.
+  Its "Decided, do not relitigate" table is the one to read before reopening a
+  settled question.
+- `claude/board-v2.html` — open items by priority, with dated decisions, the
+  reasoning, and the alternatives that were rejected.
 - `docs/develop-others-canon.md` — Mentoring lane reference: seats, the hold,
   terminology, routing, schema. It does not track state.
 - `SYNC.md` — rubric source-of-truth rule
@@ -353,30 +372,31 @@ delete documentation as a side effect of unrelated work.
 
 ## 9. Important current state
 
-*Snapshot taken 2026-08-26. Verify with `git status` and a test run before
-relying on it.*
+*Snapshot taken 2026-09-11. It will go stale. Verify with `git status`, a test
+run, and a `grep` before relying on any number here.*
 
-- **Branch:** `homepage-v2`, 2 ahead of `main`, 0 behind.
-- **Homepage-v2:** visual, non-interactive draft at `/v2`, noindex, not linked
-  from anywhere. Live homepage is still `public/index.html`.
-- **Tests:** `npm run test:unit` — 237 passing, 0 failing, 83 suites.
-- **Uncommitted change:** `next.config.ts` is modified, adding
-  `turbopack: { root: __dirname }`. Reason in the code comment: a stray
-  `package-lock.json` in the home directory was winning workspace-root inference
-  and causing Turbopack to watch every file under `~/`. This is a local dev-loop
-  fix, unrelated to the homepage work, and belongs in its own commit. **Do not
-  discard it.**
+- **Branch:** `main`, clean working tree.
+- **Homepage:** shipped. React at `src/app/page.tsx`. There is no `/v2` route and
+  no `public/index.html`.
+- **Tests:** `npm run test:unit` — 380 passing, 0 failing, 132 suites.
+- **`next.config.ts`** carries `turbopack: { root: __dirname }`, and it is
+  committed. The comment explains why: a stray `package-lock.json` in the home
+  directory was winning workspace-root inference and making Turbopack watch every
+  file under `~/`.
 - **Known issues / risks:**
-  - Two marketing/product surfaces (static HTML and React) can drift in copy and
-    styling. Copy changes may need to land in both.
+  - The static marketing pages and the React homepage can drift in copy and
+    styling. A copy change may need to land in both.
+  - Site chrome lives in 18 places, 19 counting the footer. See §12, and count
+    rather than trust the number.
+  - `home-v2.css` is 1,200+ lines with breakpoints scattered through it. A media
+    query placed before the rule it overrides silently loses. See §3.
   - `rubric.md` can silently drift from `SKILL.md` — the sync is manual.
   - The evaluation pipeline depends on a model returning schema-valid tool
     output; malformed responses and client timeouts are documented historical
     failure modes.
-  - ~197 local branches make branch listings noisy.
-- **Assumptions to avoid:** there is no root `page.tsx`; the homepage is not
-  React; the 10-point score is not what is stored; `seat_type` values are not the
-  display names; this is Next 16, not the Next in your training data.
+- **Assumptions to avoid:** the 10-point score is not what is stored; `seat_type`
+  values are not the display names; the ledger *is* in this repo; this is
+  Next 16, not the Next in your training data.
 
 ---
 
@@ -427,14 +447,20 @@ At the start of any task:
 ## 12. Site chrome lives in two places
 
 The header, nav, and footer are implemented twice. Any change to them touches
-17 surfaces:
+**18 surfaces**:
 
 - `src/components/home-v2/HomeV2Header.tsx` — the React homepage at `/`.
   Mobile nav is a `"use client"` component driven by `useState`.
-- 16 hand-written static HTML files — the 7 root pages in `public/` plus
-  `public/blog/` (8 posts + `_template.html`). Each carries its own inline
-  `<style>` block; there is no shared stylesheet. Mobile nav is a vanilla-JS
-  listener.
+- 17 hand-written static HTML files — the 7 root pages in `public/` plus
+  `public/blog/` (8 posts, `index.html` and `_template.html`). Each carries its
+  own inline `<style>` block; there is no shared stylesheet. Mobile nav is a
+  vanilla-JS listener.
+
+`public/blog/index.html` is the one most often left out of the count. Re-count
+with `grep -rl 'class="nav-link"' public/` rather than trusting this number.
+
+The footer is a **19th** surface: `HomeV2Footer.tsx` repeats several nav labels
+and does not share the header's list, so a label rename touches it too.
 
 Rules when touching any of them:
 
