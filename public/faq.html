@@ -65,6 +65,8 @@
     margin: 0 auto;
     font-style: italic;
   }
+  .hero-sub a { color: var(--accent); text-decoration: none; }
+  .hero-sub a:hover { text-decoration: underline; }
 
   /* ---------- TABLE OF CONTENTS ---------- */
   .toc {
@@ -264,9 +266,8 @@
 
 <!-- HERO -->
 <header class="hero">
-  <div class="eyebrow">Frequently Asked Questions</div>
-  <h1>Everything you might be wondering.</h1>
-  <p class="hero-sub">Answers to the questions you might actually ask. If yours isn't here, email Chris directly.</p>
+  <h1>Frequently asked questions</h1>
+  <p class="hero-sub">The questions pastors actually ask. If yours isn't here, <a href="mailto:chris@sermoncoach.com">email Chris</a>. He reads everything.</p>
 </header>
 
 <!-- TOC -->
@@ -274,11 +275,13 @@
   <div class="toc-inner">
     <div class="toc-label">Jump to a section</div>
     <div class="toc-links">
-      <a href="#trust">Trust &amp; Safety</a>
-      <a href="#how">How It Works</a>
-      <a href="#pricing">Pricing &amp; Plans</a>
-      <a href="#classroom">Classroom</a>
-      <a href="#data">Data &amp; Privacy</a>
+      <a href="#trust">Trust and safety</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing and plans</a>
+      <a href="#develop">Develop others and teams</a>
+      <a href="#classroom">Classroom and preaching lab</a>
+      <a href="#intensive">The Intensive</a>
+      <a href="#data">Data and privacy</a>
       <a href="#about">About</a>
     </div>
   </div>
@@ -287,187 +290,280 @@
 <!-- CONTENT -->
 <main class="content">
 
-  <!-- TRUST & SAFETY -->
+  <!-- TRUST AND SAFETY -->
   <section class="section" id="trust">
-    <div class="section-title">Trust &amp; Safety</div>
+    <div class="section-title">Trust and safety</div>
 
     <div class="faq-item">
-      <div class="faq-q">Am I outsourcing my calling? And is my sermon safe?</div>
+      <div class="faq-q">Am I outsourcing my calling?</div>
       <div class="faq-a">
-        <p>Most preachers ask two questions when they consider a tool like this: <em>Am I outsourcing my calling?</em> and <em>Is my sermon safe?</em> This page answers both.</p>
-        <p><strong>The short answer to the question of outsourcing your calling: No.</strong> The Sermon Coach evaluates a sermon you've already written. It doesn't study for you, write for you, or pray for you. The pulpit is still yours, and the work of getting there is still yours. The rubric is a trusted reader after the fact — not a co-author, not a ghostwriter, not a stand-in for the slow, prayerful, Spirit-driven work of sermon prep.</p>
-        <p><strong>The short answer to the question of safety: Yes.</strong> Your sermons are yours — your study, your prayer, your work for your congregation — and The Sermon Coach is built to keep it that way.</p>
-        <p>Here's what that means in practice:</p>
-        <p><strong>Your sermons stay private to your account.</strong> No other user can see them. In a Classroom, your instructor can read your evaluations — that oversight is the point of the tier — but your classmates never can. Everywhere else, private by default.</p>
-        <p><strong>Your sermons are never used to train AI models.</strong> The Sermon Coach uses Anthropic's Claude API under data privacy terms that prohibit using your inputs for model training. Your preaching stays your preaching.</p>
-        <p><strong>Your sermons are never shared or sold.</strong> We don't sell your data. We don't share your manuscripts with third parties. The only services that touch your sermon text are the ones required to deliver your evaluation — and they're listed in our <a href="./privacy.html">Privacy Policy</a>.</p>
-        <p><strong>You stay in control.</strong> You can request deletion of any evaluation, or your entire account, at any time — just email Chris and we'll permanently delete it within 48 hours. Deletion is permanent. Your library is yours. Ask anytime and we'll send you everything you've submitted.</p>
-        <p>Built by a pastor, for pastors. We use the rubric on our own sermons too. If you ever have a question about how your data is handled — or about how the tool fits in your week of sermon prep — <a href="mailto:chris@sermoncoach.com">email Chris directly</a>. He reads every email.</p>
+        <p>No. The Sermon Coach reads a sermon you have already written. It doesn't study the passage for you, write for you, or pray for you. The study, the prayer, and the slow wrestle with the text on a Tuesday morning stay yours.</p>
+        <p>What comes back is an honest read of what you wrote. Think of it less as a ghostwriter and more as the seminary friend who would tell you the truth about your manuscript before Sunday, if only he weren't three states away and as buried as you are.</p>
       </div>
     </div>
+
     <div class="faq-item">
-      <div class="faq-q">Has Bryan Chapell or any of these teachers endorsed The Sermon Coach?</div>
-      <div class="faq-a">No. None of them has endorsed this tool, and none of them has any affiliation with it. Their published work shaped the criteria, and all six sources are named on the <a href="./how-its-scored.html">How It's Scored</a> page so you can go read them for yourself. The questions I chose, the weighting, and the arrangement are my own.</div>
+      <div class="faq-q">Have Bryan Chapell or any of these teachers endorsed The Sermon Coach?</div>
+      <div class="faq-a">No. None of them has endorsed it, and none of them is affiliated with it. Their published work shaped the criteria, and all six sources are named on the <a href="./how-its-scored.html">How It's Scored</a> page so you can read them for yourself. The questions, the weighting, and the arrangement are The Sermon Coach's own synthesis.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How is this different from pasting my sermon into ChatGPT?</div>
+      <div class="faq-a">
+        <p>A general chatbot answers whatever you ask it, in whatever way you happen to ask. Ask twice and you get two different frameworks. It also tends to encourage you.</p>
+        <p>The Sermon Coach asks the same eleven questions of every sermon, and each one traces to a published source. Every note is anchored to a line from your manuscript. Every evaluation goes into your library, so over months you can see what keeps holding and what keeps slipping. And it won't write your sermon, even if you ask.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What if I disagree with my evaluation?</div>
+      <div class="faq-a">
+        <p>Then take it seriously and weigh it. The evaluation is an assessment, not a verdict. It reads the page. It has never met your people, and it can't hear how the sermon sounded in the room.</p>
+        <p>Read the notes before the number. A small change in score between two drafts isn't worth chasing. If a criterion misread your sermon, <a href="mailto:chris@sermoncoach.com">email Chris</a> and tell him. Those emails make the product better.</p>
+      </div>
     </div>
   </section>
 
   <!-- HOW IT WORKS -->
   <section class="section" id="how">
-    <div class="section-title">How It Works</div>
+    <div class="section-title">How it works</div>
 
     <div class="faq-item">
-      <div class="faq-q">What do I submit — a manuscript or audio?</div>
-      <div class="faq-a">Paste your sermon text: a manuscript you wrote or a transcript of a sermon you preached. The evaluation works on the written text. All 11 criteria are scored in your dashboard, including emotional arc and dynamics (criterion 8) in the written category narratives. A visual beat-by-beat timeline is planned for when audio upload is available; it is not part of the product today. If you preach from notes rather than a full manuscript, send what you have and we'll work with it.</div>
+      <div class="faq-q">What do I submit?</div>
+      <div class="faq-a">
+        <p>Your sermon as text. That can be a manuscript you wrote, a transcript of a sermon you preached, or a YouTube link to a sermon you preached, and The Sermon Coach will pull the transcript for you.</p>
+        <p>If you preach from notes, send what you have. The evaluation can only read what is on the page, so a notes-only submission will say less about flow, illustrations, and the landing than a full manuscript.</p>
+      </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">Can I run a sermon through it before I preach it?</div>
-      <div class="faq-a">Yes, and many preachers find that's the most useful way to use it. Paste your manuscript on Thursday or Friday, read the evaluation, and you've still got time to fix what needs fixing before Sunday. The rubric doesn't care whether you've preached the sermon yet. It reads what's on the page: whether the text is driving, whether the gospel is clear, whether the application speaks to a real person's Monday morning. You walk up to preach having already heard the hard feedback, instead of wondering about it from the pulpit.</div>
+      <div class="faq-q">Does it work in Spanish?</div>
+      <div class="faq-a">Yes. Submit a sermon written or preached in Spanish and it is evaluated against the same framework.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I run a sermon before I preach it?</div>
+      <div class="faq-a">Yes, and many preachers find that the most useful way to use it. Submit your manuscript on Thursday or Friday, read the evaluation, and you still have time to fix what needs fixing before Sunday. You walk up to preach having already heard the hard feedback.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q">How long does an evaluation take?</div>
-      <div class="faq-a">A few minutes. You submit your manuscript and your evaluation comes back while you're still at your desk.</div>
+      <div class="faq-a">A few minutes. It comes back while you're still at your desk.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q">What does the evaluation look like?</div>
-      <div class="faq-a">A structured dashboard scoring your sermon against 11 criteria drawn from Chapell, Simeon Trust, Piper, 9Marks, Keller, and Robinson — with specific anchors in your sermon text, a band-level summary (Faithful, Strong, Exemplary, etc.), and an affirmation paragraph plus an improvement paragraph at the top. Every evaluation also includes How It Preaches, a separate craft read of the sermon (more on that just below). See the samples on the homepage for the actual format.</div>
+      <div class="faq-a">
+        <p>Each of the eleven criteria is scored out of five, with a note explaining the score and quoting the line that earned it. Above the criteria you get what the sermon did well, where it can grow, and your top three priorities with a practical step for each. An overall band tells you where the sermon landed.</p>
+        <p>Every evaluation also includes How It Preaches. See the <a href="/sample-evaluation">sample evaluation</a> for the full format.</p>
+      </div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q">What is How It Preaches?</div>
       <div class="faq-a">
-        <p>Every evaluation has two halves. The rubric scores your sermon against 11 criteria and tells you whether it is faithful: is the text driving, is the gospel clear, does the application land on a real person's Monday. How It Preaches is the second half. It sets the scoring aside and reads your sermon the way it plays for the person in the pew, walking the five movements every sermon moves through: the open, the big idea, the structural logic, the illustrations, and the landing.</p>
-        <p>It is a craft read, not a scorecard. No numbers, no bands. Just an honest paragraph on each movement: where the sermon grips, where it goes slack, whether an illustration earns its place or stalls the momentum, whether the ending arrives or just stops. It reads for what you were going for before it tells you whether you got there, and it names the real weak spots without inventing problems that aren't on the page.</p>
-        <p>The rubric tells you whether the sermon is faithful. How It Preaches tells you whether it lands. Two reads of one sermon, so you walk up to preach knowing both.</p>
+        <p>The rubric tells you whether the sermon is faithful. How It Preaches tells you whether it lands.</p>
+        <p>It sets the scores aside and reads your sermon the way it plays for the person in the pew, through five movements: the open, the big idea, the structural logic, the illustrations, and the landing. No numbers. Just an honest paragraph on each movement: where the sermon grips, where it goes slack, and whether the ending arrives or just stops.</p>
       </div>
     </div>
 
     <div class="faq-item">
+      <div class="faq-q">What is the Free Outline Check?</div>
+      <div class="faq-a">A check on your sermon's direction and structure before the manuscript is finished. Answer six questions about what you're planning to preach and you get a short read back on whether it holds together. It's <a href="/sketch">free</a>, and you don't need an account.</div>
+    </div>
+
+    <div class="faq-item">
       <div class="faq-q">Will it work for my preaching style?</div>
-      <div class="faq-a">The rubric draws from the evangelical expositional tradition. It will work best for preachers who already operate inside the expository, gospel-centered, and text-driven stream. Email Chris before subscribing if you're not sure — he'll be honest about whether it's a fit.</div>
+      <div class="faq-a">It works best for preachers in the expository, gospel-centered, text-driven stream, because that is the tradition the framework comes from. If you're not sure it fits, <a href="mailto:chris@sermoncoach.com">email Chris</a> before subscribing. He'll tell you honestly.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Does it work for topical sermons, funerals, and holiday services?</div>
+      <div class="faq-a">
+        <p>Yes. A standalone sermon is read as a standalone sermon. It isn't judged against a series it was never part of.</p>
+        <p>A topical sermon is still read against the same framework, so expect the evaluation to show you where the text is driving the sermon and where it isn't.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How does it track my growth?</div>
+      <div class="faq-a">
+        <p>Every Coach subscriber gets growth reporting. Once you have several evaluations in your library, it shows the strengths that keep repeating and the gaps that keep returning.</p>
+        <p>If an evaluation shouldn't count, such as a test run or a sermon someone else preached, you can exclude it from growth tracking. It stays in your library. Excluding it doesn't return the credit.</p>
+      </div>
     </div>
   </section>
 
-  <!-- PRICING & PLANS -->
+  <!-- PRICING AND PLANS -->
   <section class="section" id="pricing">
-    <div class="section-title">Pricing &amp; Plans</div>
+    <div class="section-title">Pricing and plans</div>
 
     <div class="faq-item">
       <div class="faq-q">What's the difference between a subscription and a pack?</div>
-      <div class="faq-a">A subscription is built for preachers who preach regularly — every Sunday, or close to it. You get a monthly credit allotment, you build a habit, and the per-sermon cost drops sharply. A pack is for preachers who preach occasionally — elders, guest preachers, lay preachers, church planters in early days, retired pastors doing pulpit supply. You buy a pack when you need it, use the credits when you preach, and skip the months you don't. Packs cost more per sermon than subscriptions because there's no commitment and no cadence — but you only pay for what you actually use.</div>
+      <div class="faq-a">
+        <p>A subscription is for the preacher in the pulpit most weeks. You get ten credits a month, and the cost per sermon is low.</p>
+        <p>A pack is for the preacher who steps in a few times a year: elders, guest preachers, lay preachers, retired pastors doing pulpit supply. You buy credits once and use them when you preach. Packs cost more per credit because there is no commitment and no renewal.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What uses a credit?</div>
+      <div class="faq-a">
+        <p>One evaluation of one sermon uses one credit. Revising a sermon and resubmitting it uses another credit, which is how you compare drafts.</p>
+        <p>Unused subscription credits don't roll over to the next month.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What if I use all my monthly credits?</div>
+      <div class="faq-a">Wait for your next billing cycle, or buy a pack to cover the gap. There are no automatic overage charges.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q">Do pack credits expire?</div>
-      <div class="faq-a">Yes — 18 months from the date of purchase, for all pack sizes. That covers the once-a-quarter preacher comfortably and gives you room for unexpected slow stretches. After 18 months, unused credits expire — but you'll receive reminders before that happens.</div>
-    </div>
-
-
-    <div class="faq-item">
-      <div class="faq-q">Can I switch from a pack to a subscription later?</div>
-      <div class="faq-a">Yes, anytime. If you have unused pack credits when you subscribe, they stay in your account and get used after your monthly subscription credits — so nothing's wasted. Many preachers start with Guest Preacher, which is two evaluations, or Pulpit Supply at six, to see how the rubric works on their own preaching, then move to a Coach subscription once they know they want it regularly.</div>
+      <div class="faq-a">Yes, 18 months after purchase. That comfortably covers a preacher who is in the pulpit once a quarter.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">Can I switch tiers?</div>
-      <div class="faq-a">Yes. You can move between Coach monthly and annual billing, or between Coach and a pack, at any time. Upgrades are prorated; downgrades take effect at your next billing cycle. Classroom is an institutional purchase set up by hand, not a self-serve tier switch, so it works differently — email Chris to start one.</div>
+      <div class="faq-q">Can I move from a pack to a subscription?</div>
+      <div class="faq-a">Yes, anytime. Unused pack credits stay in your account and are used after your monthly subscription credits, so nothing is wasted.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">What does "2 months free" mean for annual billing?</div>
-      <div class="faq-a">Pay for the year up front and you get the equivalent of ten months at the monthly price instead of twelve. Coach: $290/year instead of $348. Same evaluations, same features — just less money in total.</div>
+      <div class="faq-q">Can I switch between monthly and annual billing?</div>
+      <div class="faq-a">Yes. Annual billing is $290 a year instead of $348, the equivalent of two months free. Same evaluations, same features.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">What if I hit my monthly subscription limit?</div>
-      <div class="faq-a">You can either upgrade to the next tier mid-month (prorated) or wait for your next billing cycle. We don't auto-charge for overages — you stay in control of your spend. If you'd rather not change tiers, you can also buy a pack to bridge the gap.</div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-q">What's included in the Founding Member offer?</div>
-      <div class="faq-a">Founding Member spots have been filled. Founding members who reserved early get 50% off subscriptions for their first 12 months, plus permanent Founding Member status: priority support direct from Chris, early access to new features, and a Founding Member badge on their account that doesn't expire when the discount does.</div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-q">Does the Founding Member discount apply to packs?</div>
-      <div class="faq-a">No — Founding Member pricing is for subscriptions only. The 50% off is meant to reward preachers who bet on the product early and committed to a monthly cadence. Packs are already priced for low-commitment use, so they stay at standard pricing. If you're a Founding Member and want to add a pack on top of your subscription (for a season when you're preaching more than usual, for instance), you absolutely can — at standard pack pricing.</div>
+      <div class="faq-q">Will the price go up?</div>
+      <div class="faq-a">Probably, as the product grows. Coach is at introductory pricing, and your rate stays locked for as long as your subscription stays active. Packs are priced separately and aren't covered by the lock.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q">What about refunds?</div>
-      <div class="faq-a">Every subscription comes with a 30-day money-back guarantee. If The Sermon Coach isn't useful for your preaching after a month of real use, email Chris and you'll get a full refund — no issues. Packs can be refunded within 7 days of purchase if no credits have been used.</div>
+      <div class="faq-a">
+        <p>Every subscription and every seat comes with a 30-day money-back guarantee. If The Sermon Coach isn't useful for your preaching after a month of real use, <a href="mailto:chris@sermoncoach.com">email Chris</a> and you'll get a full refund.</p>
+        <p>Packs can be refunded within 7 days of purchase if no credits have been used. The Intensive is non-refundable once work begins.</p>
+      </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">Can I cancel anytime?</div>
-      <div class="faq-a">Yes. No contracts. Email Chris anytime to cancel and your subscription stays active through the end of the current billing month, then ends — you won't be charged again. Packs aren't a subscription, so there's nothing to cancel.</div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-q">Is it live yet?</div>
-      <div class="faq-a">It's live. Create an account, submit a sermon, and you'll have your evaluation in a few minutes.</div>
+      <div class="faq-q">How do I cancel?</div>
+      <div class="faq-a">From the billing page in your account. There are no contracts. Your subscription stays active through the period you've already paid for, monthly or annual, and then ends without another charge. Packs aren't a subscription, so there is nothing to cancel.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q">Is there a free trial?</div>
-      <div class="faq-a">Sort of — better than a trial. Your first evaluation is free when you create an account. No card, no commitment. Submit a sermon, get the full evaluation back in a few minutes, and see the rubric on your own preaching before you decide anything. If it's useful, subscribe or grab a pack. If it's not, you've lost nothing but the time it took to paste in a manuscript.</div>
+      <div class="faq-a">Your first evaluation is free when you create an account. No card, no commitment. Submit a sermon, read the full evaluation, and decide from there. If it isn't useful, you've lost the time it took to paste in a manuscript.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is a Founding Member?</div>
+      <div class="faq-a">One of the first ten subscribers. The offer is closed.</div>
     </div>
   </section>
 
-  <!-- CLASSROOM -->
+  <!-- DEVELOP OTHERS AND TEAMS -->
+  <section class="section" id="develop">
+    <div class="section-title">Develop others and teams</div>
+
+    <div class="faq-item">
+      <div class="faq-q">What's the difference between an Apprentice seat and a Colleague seat?</div>
+      <div class="faq-a">
+        <p>Both give another preacher his own account and his own library, which you can read.</p>
+        <p>An Apprentice seat is $12 a month with two submissions a month. He reads the coaching and How It Preaches right away, and his scored evaluation is held until you decide to release it.</p>
+        <p>A Colleague seat is $25 a month with four submissions a month, and he sees everything as it comes back.</p>
+        <p>Seat submissions never use your own credits.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What happens when I cancel a seat?</div>
+      <div class="faq-a">It stays open through the period you've paid for. When it closes, the mentoring relationship ends. He keeps his account and everything you've already released to him. If you're holding a score you want him to have, release it before the seat closes.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is a Pastoral Team?</div>
+      <div class="faq-a">For a church where several people preach, each to a different room. Each preacher gets four evaluations a month for $25. The lead pastor holds a full Coach subscription and can read every preacher's work. The preachers can't see one another's. <a href="./pricing.html#teams">Request a team</a> and Chris will set up every account by hand.</div>
+    </div>
+  </section>
+
+  <!-- CLASSROOM AND PREACHING LAB -->
   <section class="section" id="classroom">
-    <div class="section-title">Classroom</div>
+    <div class="section-title">Classroom and preaching lab</div>
 
     <div class="faq-item">
-      <div class="faq-q">How does Classroom work?</div>
-      <div class="faq-a">Classroom is for institutions training preachers — a seminary course, a church planting cohort, a denominational track. An instructor oversees a class of preachers. The instructor reads and tracks every preacher's evaluations; each preacher's library stays private to them, visible to the instructor but never to classmates. Each seat carries four credits a month. It's $25 per seat per month, billed by the term, with the instructor seat included free and a five-seat minimum.</div>
+      <div class="faq-q">How does it work?</div>
+      <div class="faq-a">For a seminary course, a church planting cohort, a denominational track, or the men your church is raising up. The instructor reads every preacher's evaluations. Each preacher's library is private to him and never visible to classmates. The instructor's seat is free.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">Who can see a student's sermons in Classroom?</div>
-      <div class="faq-a">The instructor, and no one else. Each preacher submits privately. The instructor over the class can read every preacher's evaluations — that oversight is the point of the tier. Other students in the class cannot see one another's work. If you're a preacher in a class, your manuscripts are visible to your instructor and to no classmate.</div>
+      <div class="faq-q">What does it cost?</div>
+      <div class="faq-a">
+        <p>$12 per preacher per month for coaching without the score and two sermons a month, or $25 per preacher per month for the full evaluation and four sermons a month. Five-preacher minimum, billed by the term, one invoice.</p>
+        <p>A ten-preacher class over a four-month term is $480 at $12 or $1,000 at $25.</p>
+      </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">How much does a Classroom cost?</div>
-      <div class="faq-a">$25 per seat per month, billed by the term. A ten-preacher class for a sixteen-week term is $1,000. The instructor seat is free, so you pay only for the preachers you're training. Minimum five seats. Tell us about your class and we'll set it up and send one invoice.</div>
+      <div class="faq-q">Who can see a preacher's sermons?</div>
+      <div class="faq-a">The instructor, and no one else. Classmates never see one another's work.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">How do we get started with Classroom?</div>
-      <div class="faq-a">Email Chris with your class size and term dates. We provision the class by hand right now — instructor and students set up, ready before your term starts — and send the institution a single invoice. No per-student signups, no chasing fifteen people for payment.</div>
+      <div class="faq-q">What happens when the term ends?</div>
+      <div class="faq-a">Every preacher keeps his account, his sermons, and his coaching.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do we get started?</div>
+      <div class="faq-a">Register your class with the form on the <a href="./pricing.html#classroom">pricing page</a>. Chris sets up every account by hand before your term starts and sends the institution a single invoice.</div>
     </div>
   </section>
 
-  <!-- DATA & PRIVACY -->
+  <!-- THE INTENSIVE -->
+  <section class="section" id="intensive">
+    <div class="section-title">The Intensive</div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is the Intensive?</div>
+      <div class="faq-a">
+        <p>A one-to-one look at the whole arc of how you preach, not just a single sermon. Chris reads five to ten of your recent sermons in full and writes a pattern report across the set, plus one in-depth evaluation. You get both a week before a sixty-minute conversation about what to change next, then a short written follow-up naming what you decided to work on.</p>
+        <p>It is $549, by application, and limited to two a month. Apply, and you'll hear back either way. The Intensive is non-refundable once work begins.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA AND PRIVACY -->
   <section class="section" id="data">
-    <div class="section-title">Data &amp; Privacy</div>
+    <div class="section-title">Data and privacy</div>
 
     <div class="faq-item">
-      <div class="faq-q">Am I handing my calling to a machine?</div>
-      <div class="faq-a">No. The Sermon Coach doesn't write your sermon. It reads it. The study, the prayer, the slow wrestle with the text on a Tuesday morning — that work is yours, and it stays yours. What comes back is a nuanced read of what you already wrote, measured against the preachers who shaped how you preach. Think of it less as a ghostwriter and more as the seminary friend who'd tell you the truth about your manuscript before Sunday, if only he weren't three states away and as buried as you are.</div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-q">Is my data private?</div>
-      <div class="faq-a">Yes. Your sermons stay private to your account, are never used to train AI models, and are never shared with third parties. You own your work; The Sermon Coach is just the rubric you run it through.</div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-q">Who can see my evaluations?</div>
-      <div class="faq-a">Only you — with one deliberate exception. Each preacher's library is private to their account. In a Classroom, the instructor can read every preacher's evaluations, but classmates never see one another's work. Private by default is the rule everywhere else.</div>
+      <div class="faq-q">Who can see my sermons?</div>
+      <div class="faq-a">You. The only other person who can read your sermons is someone you've joined on purpose: the mentor on a seat you accepted, the lead pastor of your Pastoral Team, or the instructor of your class. Nobody else can see them, including other preachers on the same team or in the same class.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q">Will my sermons be used to train AI?</div>
-      <div class="faq-a">No. The Sermon Coach uses Anthropic's Claude API with data privacy commitments that prohibit using your sermons for model training. Your preaching stays your preaching.</div>
+      <div class="faq-a">No. The Sermon Coach runs on Anthropic's Claude API, and Anthropic does not use API inputs to train its models under its commercial terms.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q">Can I delete an evaluation?</div>
-      <div class="faq-a">Yes. Email Chris and we'll permanently delete any individual evaluation, or your entire account and all its contents, within 48 hours. Deletion is permanent.</div>
+      <div class="faq-q">Are my sermons shared or sold?</div>
+      <div class="faq-a">Never sold. Your sermon text is shared only with the services needed to store it and run your evaluation, and those are listed in the <a href="./privacy.html">Privacy Policy</a>.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I delete a sermon?</div>
+      <div class="faq-a">
+        <p>Yes, from your dashboard. A deleted sermon can be restored for 30 days, and after that it is permanently removed. Deleting a sermon doesn't return the credit it used.</p>
+        <p>To delete your entire account and everything in it, <a href="mailto:chris@sermoncoach.com">email Chris</a>.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I get a copy of everything I've submitted?</div>
+      <div class="faq-a">Yes. <a href="mailto:chris@sermoncoach.com">Email Chris</a> and he'll send it.</div>
     </div>
   </section>
 
@@ -477,7 +573,10 @@
 
     <div class="faq-item">
       <div class="faq-q">Who built this?</div>
-      <div class="faq-a">Dr. Christopher M. Daukas — a church planter in Phoenix, Arizona, with 25 years in pastoral ministry, 14 of them as a lead pastor, and a PhD along the way. He built The Sermon Coach for a plain reason: somewhere after seminary, the honest feedback on his own preaching dried up, and he wanted it back. It's the actual rubric he runs on his own sermons. Two of the samples on the homepage are his. Chris also serves as Executive Vice President of Global Training Network, which trains pastors and church planters across the Majority World. <a href="./story.html">The fuller story is here.</a></div>
+      <div class="faq-a">
+        <p>Dr. Christopher M. Daukas, a former church planter in Phoenix, Arizona, with 20 years in pastoral ministry and a PhD along the way. He built The Sermon Coach for a plain reason: somewhere after seminary, the honest feedback on his own preaching dried up, and he wanted it back. It is the framework he runs on his own sermons.</p>
+        <p>Chris also serves as Executive Vice President of Global Training Network, which trains pastors across the Majority World. The fuller story is on the <a href="./story.html">Story</a> page.</p>
+      </div>
     </div>
 
   </section>
