@@ -32,9 +32,9 @@ export function HomeV2FeedbackVacuum() {
       <div className="container center">
         <div className="eyebrow">The feedback gap</div>
         <h2>
-          You want to grow as a preacher.
+          How do you know where you need to grow
           <br />
-          But who helps you see how?
+          as a preacher?
         </h2>
       </div>
       <div className="container grid2 gap-cards">
