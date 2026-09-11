@@ -47,13 +47,28 @@
     font-weight: 600;
     margin-bottom: 24px;
   }
+  /* Circle portrait, the same treatment as .builder-photo on the homepage:
+     the square asset inside a hairline gold ring set a few pixels off the
+     photo, so the ring reads as part of the page rather than a border on the
+     image. --accent-soft and --shadow here hold the same values the homepage
+     tokens --sc-accent-soft and --sc-shadow do, so the two circles match.
+     aspect-ratio keeps it round when the 55% cap binds at narrow widths. */
   .founder-photo {
-    display: block;
-    width: 220px;
-    max-width: 55%;
-    height: auto;
+    width: min(220px, 55%);
+    aspect-ratio: 1;
+    padding: 6px;
     margin: 0 0 28px;
-    border-radius: 2px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--accent-soft) 60%, transparent);
+  }
+  .founder-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: 50% 50%;
+    box-shadow: var(--shadow);
   }
   h1 {
     font-size: 42px;
@@ -324,8 +339,10 @@
 
 <header class="hero">
   <div class="eyebrow">AI and preaching</div>
-  <h1>AI should help you see your preaching. Not replace it.</h1>
-  <img class="founder-photo" src="/chris-daukas.png" width="682" height="1024" alt="Dr. Christopher M. Daukas">
+  <h1>Digital tools should help you see your preaching. Not replace it.</h1>
+  <div class="founder-photo">
+    <img src="/images/chris-daukas.jpg" width="640" height="640" alt="Dr. Christopher M. Daukas">
+  </div>
   <div class="lede">
     <p>I have preached for twenty five years, and I am not looking for something to do the work for me. Neither should you be. The hard work of prayer, study, and wrestling with the text is what the Spirit uses to form the preacher&mdash;not just the sermon.</p>
     <p class="lede-setup">So I built The Sermon Coach around a narrower question:</p>
