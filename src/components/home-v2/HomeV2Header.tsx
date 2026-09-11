@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const NAV_ITEMS = [
   { label: "How It's Scored", href: "/how-its-scored.html" },
-  { label: "Free Outline Check", href: "/sketch" },
+  { label: "Sketch — Free", href: "/sketch" },
   { label: "Blog", href: "/blog" },
   { label: "Pricing", href: "/pricing.html" },
   { label: "FAQ", href: "/faq.html" },
