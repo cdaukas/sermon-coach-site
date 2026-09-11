@@ -10,7 +10,7 @@ export function HomeV2AiAndPreaching() {
     <section className="section objection">
       <div className="container">
         <div className="eyebrow">AI and preaching</div>
-        <h2>AI should help you see your preaching. Not replace it.</h2>
+        <h2>Digital tools should help you see your preaching. Not replace it.</h2>
         <p className="lead objection-lead">
           The hard work of prayer and study and wrestling with the text is what
           the Spirit uses to form the preacher, not just the sermon. So The
