@@ -10,6 +10,10 @@
  *   PDF_EVALUATION_ID=... PDF_SERMON_ID=... npm run pdf:eval
  *   PDF_PREPARED_FOR="Pastor Name" PDF_COVER_VARIANT=theirs|mine npm run pdf:eval
  *   PDF_PREACHER="Preacher Name" npm run pdf:eval
+ *
+ * Commendation variant (affirming half only, written to <id>-commendation.pdf):
+ *   PDF_VARIANT=commendation PDF_PREACHER_NAME="Firstname Lastname" \
+ *     [PDF_CHURCH_NAME="Church"] npm run pdf:eval
  */
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -47,6 +51,45 @@ function parseArgs(): { evaluationId: string; sermonId: string } {
   return { evaluationId: evaluationId.trim(), sermonId: sermonId.trim() };
 }
 
+type PdfVariant = "commendation";
+
+type CommendationOptions = {
+  preacherName: string;
+  churchName: string | null;
+};
+
+/**
+ * The preacher name is never inferred from the profile: a sermon pulled off a
+ * stranger's channel is submitted under Chris's own account and would print his
+ * name on another man's commendation.
+ */
+function parseCommendationOptions(): CommendationOptions {
+  const preacherName = process.env.PDF_PREACHER_NAME?.trim() ?? "";
+  if (!preacherName) {
+    throw new Error(
+      "PDF_VARIANT=commendation requires PDF_PREACHER_NAME.\nThe preacher name is never inferred from the account that submitted the sermon.\nRe-run with: PDF_PREACHER_NAME=\"Firstname Lastname\"",
+    );
+  }
+
+  return {
+    preacherName,
+    churchName: process.env.PDF_CHURCH_NAME?.trim() || null,
+  };
+}
+
+function parseVariant(): PdfVariant | null {
+  const raw = process.env.PDF_VARIANT?.trim();
+  if (!raw) {
+    return null;
+  }
+  if (raw !== "commendation") {
+    throw new Error(
+      `Unknown PDF_VARIANT: ${JSON.stringify(raw)}. Supported values: commendation.`,
+    );
+  }
+  return raw;
+}
+
 function stripLeadingHonorific(name: string): string {
   return name
     .trim()
@@ -76,6 +119,7 @@ function buildCaptureUrl(
   baseUrl: string,
   sermonId: string,
   evaluationId: string,
+  commendation: CommendationOptions | null,
 ): {
   url: string;
   preparedFor: string | null;
@@ -83,6 +127,24 @@ function buildCaptureUrl(
   preacher: string | null;
 } {
   const params = new URLSearchParams({ pdf: "1" });
+
+  // Commendation carries its own cover and ignores the sales-cover env vars.
+  if (commendation) {
+    const { preacherName, churchName } = commendation;
+    params.set("doc", "commendation");
+    params.set("preacher_name", preacherName);
+    if (churchName) {
+      params.set("church_name", churchName);
+    }
+
+    return {
+      url: `${baseUrl}/dashboard/sermons/${sermonId}/evaluations/${evaluationId}?${params.toString()}`,
+      preparedFor: null,
+      coverVariant: null,
+      preacher: preacherName,
+    };
+  }
+
   const preparedFor = process.env.PDF_PREPARED_FOR?.trim() ?? "";
   const preacherEnv = process.env.PDF_PREACHER?.trim() ?? "";
   let coverVariant: "theirs" | "mine" | null = null;
@@ -209,10 +271,17 @@ function toPuppeteerCookie(cookie: StoredCookie, baseUrl: string): CookieParam {
   return mapped;
 }
 
-async function waitForEvaluationRender(page: Page): Promise<void> {
+async function waitForEvaluationRender(
+  page: Page,
+  variant: PdfVariant | null,
+): Promise<void> {
   await page.waitForSelector('[data-pdf-capture="1"]', { timeout: 60_000 });
   await page.waitForSelector(".evaluation-report", { timeout: 60_000 });
-  await page.waitForSelector(".evaluation-headline-lockup", { timeout: 60_000 });
+  if (variant === "commendation") {
+    await page.waitForSelector(".evaluation-commendation", { timeout: 60_000 });
+  } else {
+    await page.waitForSelector(".evaluation-headline-lockup", { timeout: 60_000 });
+  }
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() => {
     document
@@ -254,6 +323,10 @@ async function waitForEvaluationRender(page: Page): Promise<void> {
 
 async function main(): Promise<void> {
   const baseUrl = process.env.PDF_BASE_URL ?? "http://localhost:3000";
+  // Variant options are resolved before cookies so a missing PDF_PREACHER_NAME
+  // reports itself instead of hiding behind a stale-session error.
+  const variant = parseVariant();
+  const commendation = variant === "commendation" ? parseCommendationOptions() : null;
   const { evaluationId, sermonId } = parseArgs();
   const cookies = await loadCookies();
   validateAuthCookies(cookies);
@@ -262,11 +335,18 @@ async function main(): Promise<void> {
     baseUrl,
     sermonId,
     evaluationId,
+    commendation,
   );
   if (!url.includes("?pdf=1")) {
     throw new Error(`Internal error: capture URL must include ?pdf=1 (got ${url})`);
   }
 
+  console.log(
+    "PDF_VARIANT:",
+    process.env.PDF_VARIANT === undefined
+      ? "(undefined)"
+      : JSON.stringify(process.env.PDF_VARIANT),
+  );
   console.log(
     "PDF_PREPARED_FOR:",
     process.env.PDF_PREPARED_FOR === undefined
@@ -290,7 +370,12 @@ async function main(): Promise<void> {
   );
   console.log("CAPTURE URL:", url);
 
-  const outputPath = path.join(OUTPUT_DIR, `${evaluationId}.pdf`);
+  const outputPath = path.join(
+    OUTPUT_DIR,
+    variant === "commendation"
+      ? `${evaluationId}-commendation.pdf`
+      : `${evaluationId}.pdf`,
+  );
 
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
@@ -340,7 +425,17 @@ async function main(): Promise<void> {
     });
     console.log("COVER CHECK:", JSON.stringify(coverCheck));
 
-    await waitForEvaluationRender(page);
+    await waitForEvaluationRender(page, variant);
+
+    if (variant === "commendation") {
+      const hipRendered = await page.evaluate(
+        () => document.querySelectorAll(".evaluation-hip-section").length > 0,
+      );
+      if (!hipRendered) {
+        console.log("WARNING: how_it_preaches is empty on this row.");
+        console.log("Rendered without it. Read before sending.");
+      }
+    }
 
     // Same media for PDF paint as for layout wait (must stay "print"; see above).
     await page.emulateMediaType("print");
@@ -367,6 +462,10 @@ async function main(): Promise<void> {
     }
     if (preacher) {
       console.log(`  preacher=${preacher}`);
+    }
+    if (commendation) {
+      console.log(`  variant=${variant}`);
+      console.log(`  church=${commendation.churchName ?? "(none)"}`);
     }
     console.log(`  source=${url}`);
     console.log("  capture=print (?pdf=1; evaluation-print.css)");
