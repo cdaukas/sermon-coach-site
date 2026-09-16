@@ -6,7 +6,6 @@
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/newsletter-signup.css">
 <title>Concerned about AI and preaching? · The Sermon Coach</title>
 <link rel="canonical" href="https://sermoncoach.com/why-sermon-coach.html">
 <meta name="description" content="I have preached for twenty five years and I am not looking for a tool that writes the sermon. The Sermon Coach shows you your preaching, it does not replace it.">
@@ -23,11 +22,17 @@
     --accent-soft: #c9a55c;
     --accent-pale: #faf6ed;
     --shadow: 0 1px 3px rgba(26,35,50,.06), 0 1px 2px rgba(26,35,50,.04);
+    /* Two faces on this page and no more: the site serif carries every
+       heading and every paragraph, the UI sans is reserved for labels,
+       numbers, buttons and the footer. Every rule below pulls from these
+       tokens so body copy cannot drift into the UI face. */
+    --font-serif: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    font-family: var(--font-serif);
     background: var(--bg);
     color: var(--ink);
     line-height: 1.6;
@@ -40,7 +45,7 @@
     padding: 32px 24px 8px;
   }
   .eyebrow {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-ui);
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -53,12 +58,14 @@
      photo, so the ring reads as part of the page rather than a border on the
      image. --accent-soft and --shadow here hold the same values the homepage
      tokens --sc-accent-soft and --sc-shadow do, so the two circles match.
-     aspect-ratio keeps it round when the 55% cap binds at narrow widths. */
+     aspect-ratio keeps it round when the 55% cap binds at narrow widths.
+     margin-inline auto centres it in the 720px content column at every
+     width, including when the 55% cap is what sets the size. */
   .founder-photo {
     width: min(220px, 55%);
     aspect-ratio: 1;
     padding: 6px;
-    margin: 0 0 28px;
+    margin: 0 auto 28px;
     border-radius: 50%;
     border: 1px solid color-mix(in srgb, var(--accent-soft) 60%, transparent);
   }
@@ -108,15 +115,6 @@
   .beliefs p {
     margin-bottom: 0.85em;
   }
-  .content .belief-turn {
-    margin-top: 28px;
-    padding-top: 28px;
-    border-top: 1px solid var(--rule);
-    font-weight: 600;
-    color: var(--ink);
-    font-size: 19px;
-    line-height: 1.45;
-  }
   .signoff {
     margin-top: 36px;
     font-size: 17px;
@@ -128,7 +126,7 @@
   }
   .cta-btn {
     display: inline-block;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-ui);
     font-size: 15px;
     font-weight: 600;
     background: var(--ink);
@@ -145,14 +143,14 @@
     margin: 0 auto;
     padding: 40px 24px 48px;
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-ui);
     font-size: 13px;
     color: var(--ink-soft);
     line-height: 1.7;
     border-top: 1px solid var(--rule);
   }
   .footer-tagline {
-    font-family: 'Iowan Old Style', Georgia, serif;
+    font-family: var(--font-serif);
     font-size: 15px;
     color: var(--ink);
     margin-bottom: 10px;
@@ -167,12 +165,11 @@
   }
 
   /* ---------- AI and preaching: structured sections ---------- */
+  /* The setup line is body copy, not a label: it inherits the serif, the
+     size and the colour of the paragraph above it, and only tightens its
+     bottom margin so it reads into the ruled question beneath. */
   .lede .lede-setup {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    letter-spacing: 0.02em;
-    color: var(--ink-soft);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
   .lede .lede-question {
     padding: 22px 0;
@@ -184,31 +181,38 @@
     margin-bottom: 0;
   }
 
-  /* what it won't do — compact cards */
-  .wont-grid {
+  /* what it won't do — open rows on the page background, built from the
+     same parts as .does-row below: a thin rule, a serif title, supporting
+     copy at the same size and colour. Two columns on desktop so four short
+     statements do not read as a long thin list; one column on mobile. */
+  .wont-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    column-gap: 44px;
   }
-  .wont-card {
-    background: var(--panel);
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: 22px 20px;
+  .wont-item {
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
   }
-  .wont-card strong {
+  /* closes the bottom of the final row, the way .does-row:last-child does */
+  .wont-item:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--rule);
+  }
+  .wont-item strong {
     display: block;
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 600;
     line-height: 1.35;
     color: var(--ink);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
-  .wont-card p {
+  .wont-item p {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 14px;
-    line-height: 1.65;
+    font-size: 16px;
+    line-height: 1.7;
     color: var(--ink-soft);
   }
 
@@ -225,7 +229,7 @@
   }
   .does-row:last-child { border-bottom: 1px solid var(--rule); }
   .does-num {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-ui);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.18em;
@@ -250,65 +254,78 @@
   .content ul.beliefs { list-style: none; margin: 0; padding: 0; }
   .content ul.beliefs li {
     position: relative;
-    padding: 15px 0 15px 24px;
+    padding: 18px 0 18px 24px;
     border-top: 1px solid var(--rule);
     font-size: 18px;
     line-height: 1.5;
     color: var(--ink);
   }
+  /* closes the list the way .does-row:last-child closes the numbered one */
+  .content ul.beliefs li:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
   .content ul.beliefs li::before {
     content: "";
     position: absolute;
     left: 0;
-    top: 26px;
+    top: 29px;
     width: 10px;
     height: 1px;
     background: var(--accent);
   }
+  /* the conviction the beliefs build toward: no panel, no radius, just a
+     hairline gold rule and room to breathe on the page background */
   .content .belief-turn {
-    margin-top: 36px;
-    padding: 26px 24px;
-    border-top: none;
-    background: var(--panel);
-    border-left: 3px solid var(--accent);
-    border-radius: 4px;
-    font-size: 21px;
+    margin: 56px 0 0;
+    padding: 4px 0 4px 24px;
+    border-left: 2px solid var(--accent);
+    font-size: 24px;
     font-weight: 600;
-    line-height: 1.45;
+    line-height: 1.4;
     color: var(--ink);
   }
 
   .content .agree { color: var(--ink-soft); }
 
-  /* founder statement — pull quote, not a testimonial */
-  .founder-quote {
-    margin: 48px 0 0;
-    padding-left: 24px;
-    border-left: 3px solid var(--accent);
-  }
-  .founder-quote blockquote {
-    margin: 0 0 14px;
-    font-size: 22px;
+  /* founder narrative — first person prose, not a quoted testimonial */
+  .content .founder-turn {
+    margin-top: 24px;
+    font-size: 19px;
+    font-weight: 600;
     line-height: 1.5;
     color: var(--ink);
   }
-  .founder-quote figcaption {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--ink-soft);
+
+  /* closing — the last movement of the page, set off by a single rule */
+  .closing {
+    margin-top: 64px;
+    padding-top: 40px;
+    border-top: 1px solid var(--rule);
   }
-  .content .founder-close { margin-top: 20px; padding-left: 27px; color: var(--ink-soft); }
+  .content .closing h2 { margin-top: 0; }
+  /* the payoff has to out-weigh the h2 above it or it reads as one more
+     heading; sized between h2 and h1 so it lands without becoming a banner */
+  .content .closing .payoff {
+    margin: 32px 0 0;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
 
   @media (max-width: 640px) {
-    .wont-grid { grid-template-columns: 1fr; }
+    .content h2 { font-size: 23px; margin-top: 44px; }
+    .wont-list { grid-template-columns: 1fr; }
+    /* one column: only the true last item closes the list */
+    .wont-item:nth-last-child(-n+2) { border-bottom: none; }
+    .wont-item:last-child { border-bottom: 1px solid var(--rule); }
     .does-row { grid-template-columns: 1fr; gap: 4px; }
     .lede .lede-question { font-size: 18px; }
-    .content .belief-turn { font-size: 18px; padding: 22px 20px; }
-    .founder-quote { padding-left: 18px; }
-    .founder-quote blockquote { font-size: 19px; }
-    .content .founder-close { padding-left: 21px; }
+    .content .belief-turn { margin-top: 44px; font-size: 20px; padding-left: 20px; }
+    .content .founder-turn { font-size: 18px; }
+    .closing { margin-top: 48px; padding-top: 32px; }
+    .content .closing .payoff { margin-top: 28px; font-size: 26px; }
   }
 </style>
 <link rel="stylesheet" href="/site-nav.css">
@@ -353,24 +370,24 @@
 
 <main class="content">
   <h2>What it won&rsquo;t do</h2>
-  <div class="wont-grid">
-    <div class="wont-card">
+  <ul class="wont-list">
+    <li class="wont-item">
       <strong>It won&rsquo;t write your sermon.</strong>
       <p>You do the study, the wrestling, the writing, and the preaching.</p>
-    </div>
-    <div class="wont-card">
+    </li>
+    <li class="wont-item">
       <strong>It won&rsquo;t tell you what God is saying.</strong>
       <p>Scripture is the authority. Technology isn&rsquo;t.</p>
-    </div>
-    <div class="wont-card">
+    </li>
+    <li class="wont-item">
       <strong>It won&rsquo;t know your people.</strong>
       <p>You know the people sitting in front of you on Sunday. It doesn&rsquo;t.</p>
-    </div>
-    <div class="wont-card">
+    </li>
+    <li class="wont-item">
       <strong>It won&rsquo;t judge your faithfulness.</strong>
       <p>Faithfulness isn&rsquo;t something software can measure.</p>
-    </div>
-  </div>
+    </li>
+  </ul>
 
   <h2>What it does</h2>
   <p class="does-intro">It reads the sermon you already wrote.</p>
@@ -423,35 +440,22 @@
   </ul>
   <p class="belief-turn">Never let a tool become a replacement for the Holy Spirit.</p>
 
-  <h2>You don&rsquo;t have to agree with it.</h2>
-  <p class="agree">The evaluation is an assessment, not a verdict. Read it, take what is useful, and throw out the rest. You know the text, the room, and what that Sunday was for. It doesn&rsquo;t.</p>
+  <h2>You don&rsquo;t have to agree with every suggestion or observation.</h2>
+  <p class="agree">The evaluation is an assessment, not a verdict. Read it, consider the evidence, keep what is useful, and set aside what isn&rsquo;t. You know the text, your people, and what that Sunday called for. Sermon Coach doesn&rsquo;t.</p>
 
-  <figure class="founder-quote">
-    <blockquote>I ran my own sermons through it before I showed it to anyone. It found things I had missed, and I knew it the second I saw them.</blockquote>
-    <figcaption>Dr. Christopher M. Daukas</figcaption>
-  </figure>
-  <p class="founder-close">That&rsquo;s roughly what a good editor does.</p>
+  <h2>I tested Sermon Coach on my own preaching first.</h2>
+  <p>I ran my own sermons through it before I showed it to anyone. More than once, it surfaced something I had missed&mdash;and the moment I saw the evidence in my own manuscript, I knew it was right.</p>
+  <p class="founder-turn">That&rsquo;s when I knew this could help other preachers too.</p>
 
-  <div class="cta">
-    <a href="/start" class="cta-btn">Start with a free evaluation</a>
-  </div>
-</main>
-
-<section class="newsletter-band">
-  <div class="newsletter-band-inner">
-    <div class="newsletter-signup" data-newsletter-source="why_sermon_coach">
-      <p class="newsletter-signup-lead"><strong>Not ready to run an evaluation?</strong> Get the Friday post. A short word on sharper preaching, free, no account required.</p>
-      <form class="newsletter-signup-form" novalidate>
-        <label class="newsletter-signup-label" for="newsletter-email-why-sermon-coach">Email</label>
-        <div class="newsletter-signup-row">
-          <input id="newsletter-email-why-sermon-coach" class="newsletter-signup-input" type="email" name="email" required placeholder="you@church.org" autocomplete="email">
-          <button type="submit" class="newsletter-signup-btn">Get the Friday post</button>
-        </div>
-      </form>
-      <p class="newsletter-signup-message" role="status" aria-live="polite" hidden></p>
+  <section class="closing">
+    <h2>The sermon is still yours.</h2>
+    <p>You study the text. You know your people. You stand in the pulpit. Sermon Coach simply gives you another set of eyes before&mdash;or after&mdash;you preach.</p>
+    <p class="payoff">Walk into Sunday knowing it&rsquo;s ready.</p>
+    <div class="cta">
+      <a href="/start" class="cta-btn">Start with a free evaluation</a>
     </div>
-  </div>
-</section>
+  </section>
+</main>
 
 <footer>
   <div class="footer-tagline">Strengthen the Local Church. Train the Global Church.</div>
@@ -489,7 +493,6 @@
   });
 })();
 </script>
-<script src="/newsletter-signup.js"></script>
 
 </body>
 </html>
