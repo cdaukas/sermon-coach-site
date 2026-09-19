@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
+  ACQUISITION_DETAIL_MAX_LENGTH,
   ACQUISITION_SOURCE_OPTIONS,
+  acquisitionDetailLabel,
+  acquisitionSourceAcceptsDetail,
   setAcquisitionSource,
   type AcquisitionSource,
 } from "@/lib/auth/acquisition-source";
@@ -16,22 +19,26 @@ const serifFont = { fontFamily: "var(--font-serif)" };
 export function StartRedirect() {
   const router = useRouter();
   const [selected, setSelected] = useState<AcquisitionSource | null>(null);
-  const [otherDetail, setOtherDetail] = useState("");
+  const [detail, setDetail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const detailLabel = acquisitionDetailLabel(selected);
+  const showDetail = acquisitionSourceAcceptsDetail(selected);
+
+  /** Changing the answer drops any detail typed for the previous one. */
+  function selectSource(source: AcquisitionSource) {
+    setSelected(source);
+    setDetail("");
+  }
 
   async function handleContinue() {
     if (submitting) return;
     setSubmitting(true);
 
-    const shouldWrite =
-      selected !== null &&
-      (selected !== "other" || otherDetail.trim().length > 0);
-
-    if (shouldWrite && selected) {
-      await setAcquisitionSource(
-        selected,
-        selected === "other" ? otherDetail : null,
-      );
+    // The channel is written whenever one is chosen. Detail is independent and
+    // may be empty; an unanswered detail must never discard the answer itself.
+    if (selected !== null) {
+      await setAcquisitionSource(selected, showDetail ? detail : null);
     }
 
     router.push(START_DESTINATION);
@@ -90,7 +97,7 @@ export function StartRedirect() {
                   role="radio"
                   aria-checked={isSelected}
                   disabled={submitting}
-                  onClick={() => setSelected(option.key)}
+                  onClick={() => selectSource(option.key)}
                   className="rounded border px-4 py-3 text-left text-[14px] leading-snug transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   style={{
                     ...uiFont,
@@ -110,19 +117,23 @@ export function StartRedirect() {
             })}
           </div>
 
-          {selected === "other" ? (
+          {showDetail && detailLabel ? (
             <div className="mt-3">
-              <label htmlFor="acquisition-other-detail" className="sr-only">
-                Tell us how you heard about us
+              <label
+                htmlFor="acquisition-detail"
+                className="mb-1.5 block text-[14px] leading-snug"
+                style={{ ...uiFont, color: "var(--sc-ink)" }}
+              >
+                {detailLabel}
               </label>
               <input
-                id="acquisition-other-detail"
+                id="acquisition-detail"
                 type="text"
-                value={otherDetail}
-                onChange={(event) => setOtherDetail(event.target.value)}
+                value={detail}
+                onChange={(event) => setDetail(event.target.value)}
                 disabled={submitting}
-                placeholder="Where did you hear about it?"
-                maxLength={200}
+                placeholder="Optional"
+                maxLength={ACQUISITION_DETAIL_MAX_LENGTH}
                 className="w-full rounded border px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-[var(--sc-accent)] focus:ring-2 focus:ring-[var(--sc-accent)]/20 disabled:opacity-60"
                 style={{
                   ...uiFont,
