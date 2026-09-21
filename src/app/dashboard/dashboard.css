@@ -384,7 +384,9 @@
 
 .dashboard-pack-size-control {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  /* Two packs, two segments. The third column was left behind when Series
+     Prep was retired in 17150b0 and rendered as an empty slot. */
+  grid-template-columns: 1fr 1fr;
   width: 100%;
   margin-bottom: 20px;
   border: 1px solid var(--sc-rule);
@@ -1218,5 +1220,99 @@
   .billing-eval-half + .billing-eval-half {
     border-left: none;
     padding-left: 0;
+  }
+}
+
+/* ---------- COACH CADENCE OFFER (no-plan card footer) ---------- */
+
+.dashboard-coach-offer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--sc-rule);
+}
+
+.dashboard-cadence-control {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--sc-rule);
+  border-radius: 999px;
+  background: var(--sc-panel);
+  box-shadow: var(--sc-shadow);
+}
+
+.dashboard-cadence-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sc-ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.dashboard-cadence-option[aria-checked="true"] {
+  background: var(--sc-ink);
+  color: var(--sc-bg);
+}
+
+.dashboard-cadence-option:focus-visible {
+  outline: 2px solid var(--sc-accent);
+  outline-offset: 2px;
+}
+
+.dashboard-cadence-badge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--sc-accent);
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-coach-price {
+  margin: 14px 0 0;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--sc-ink);
+}
+
+.dashboard-coach-currency {
+  margin-right: 2px;
+  font-size: 18px;
+  font-weight: 600;
+  vertical-align: 6px;
+}
+
+.dashboard-coach-period {
+  margin-left: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sc-ink-soft);
+}
+
+.dashboard-coach-note {
+  margin: 6px 0 14px;
+  font-size: 13px;
+  color: var(--sc-ink-soft);
+}
+
+@media (max-width: 480px) {
+  .dashboard-cadence-control {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .dashboard-cadence-option {
+    justify-content: center;
+    padding: 10px 8px;
   }
 }

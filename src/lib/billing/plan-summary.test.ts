@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { buildCheckoutPath } from "./checkout";
 import {
+  COACH_CADENCE_OPTIONS,
+  DEFAULT_COACH_CADENCE,
+  coachCadenceOption,
   developingOthersCopy,
   formatPlanDate,
   mentorSeatBreakdown,
@@ -257,5 +261,79 @@ describe("mentorSeatBreakdown", () => {
       mentorSeatBreakdown({ activeSeatTypes: [], pendingSeatTypes: [] }),
       null,
     );
+  });
+});
+
+describe("Coach cadence offer on the no-plan card", () => {
+  const noPlan: PlanProfileFields = {
+    isComped: false,
+    subscriptionActive: false,
+    discountNote: null,
+    subscriptionInterval: null,
+    currentPeriodEnd: null,
+  };
+
+  it("defaults to annual, as pricing.html does", () => {
+    assert.equal(DEFAULT_COACH_CADENCE, "annual");
+  });
+
+  it("the default cadence sends Start Coach to an annual checkout", () => {
+    assert.equal(
+      buildCheckoutPath(DEFAULT_COACH_CADENCE),
+      "/checkout?plan=coach&cadence=annual",
+    );
+  });
+
+  it("switching to monthly sends Start Coach to a monthly checkout", () => {
+    assert.equal(
+      buildCheckoutPath("monthly"),
+      "/checkout?plan=coach&cadence=monthly",
+    );
+  });
+
+  it("offers both cadences, monthly first, as pricing.html orders them", () => {
+    assert.deepEqual(
+      COACH_CADENCE_OPTIONS.map((option) => option.cadence),
+      ["monthly", "annual"],
+    );
+  });
+
+  it("carries the price and note pricing.html states for each cadence", () => {
+    const monthly = coachCadenceOption("monthly");
+    assert.equal(monthly.price, "29");
+    assert.equal(monthly.note, "Billed monthly.");
+    assert.equal(monthly.badge, null);
+
+    const annual = coachCadenceOption("annual");
+    assert.equal(annual.price, "24.17");
+    assert.equal(annual.note, "2 months free. Billed annually at $290.");
+    assert.equal(annual.badge, "BEST VALUE");
+  });
+
+  it("rejects a cadence it does not offer", () => {
+    assert.throws(
+      () => coachCadenceOption("weekly" as never),
+      /Unknown Coach cadence/,
+    );
+  });
+
+  it("leaves the price to the toggle rather than the detail line", () => {
+    const copy = resolvePlanCopy(noPlan, { remaining: 0, expiryIso: null }, now);
+    assert.equal(
+      copy.detail,
+      "10 evaluations a month, cancel anytime, 30 days money back.",
+    );
+    assert.ok(!copy.detail.includes("$"));
+  });
+
+  it("offers the choice on the pack-credits variant too", () => {
+    const copy = resolvePlanCopy(
+      noPlan,
+      { remaining: 4, expiryIso: "2027-01-15T00:00:00.000Z" },
+      now,
+    );
+    assert.equal(copy.headline, "No subscription.");
+    assert.equal(copy.actions, "start_coach");
+    assert.equal(copy.detail, "You have 4 pack credits, good through Jan 15, 2027.");
   });
 });

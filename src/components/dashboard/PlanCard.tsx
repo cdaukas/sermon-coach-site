@@ -7,7 +7,7 @@ import {
   MentoringCardIcon,
   goldActionStyle,
 } from "@/components/dashboard/BillingCard";
-import { buildCheckoutPath } from "@/lib/billing/checkout";
+import { StartCoachOffer } from "@/components/dashboard/StartCoachOffer";
 import {
   MENTOR_SEAT_MONTHLY_USD,
   type MentorSeatBreakdown,
@@ -17,25 +17,14 @@ import {
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
-function StartCoachButton() {
-  return (
-    <Link
-      href={buildCheckoutPath("monthly")}
-      className="shrink-0 no-underline hover:underline"
-      style={goldActionStyle}
-    >
-      Start Coach
-      <ActionArrow />
-    </Link>
-  );
-}
-
 function PlanActions({ actions }: { actions: PlanCopy["actions"] }) {
   if (actions === "none") {
     return null;
   }
+  // The Start Coach link travels with the cadence toggle in the card footer,
+  // because its href is whichever cadence is selected.
   if (actions === "start_coach") {
-    return <StartCoachButton />;
+    return null;
   }
   if (actions === "annual_and_manage") {
     return (
@@ -55,6 +44,7 @@ export function PlanCard({ copy }: { copy: PlanCopy }) {
       aria-label="Current plan"
       icon={<CoachCardIcon />}
       action={<PlanActions actions={copy.actions} />}
+      footer={copy.actions === "start_coach" ? <StartCoachOffer /> : null}
     >
       <div className="min-w-0 leading-relaxed">
         {copy.headline ? (
