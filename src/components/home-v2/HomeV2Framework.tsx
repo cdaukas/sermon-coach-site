@@ -4,7 +4,7 @@
 const HEADLINE = "Every sermon is measured against the same standard.";
 
 const SUBHEAD =
-  "Eleven questions. Four areas. One consistent framework for every sermon.";
+  "Eleven criteria. Four areas. One consistent framework for every sermon.";
 
 const CATEGORIES = [
   {
@@ -71,7 +71,7 @@ export function HomeV2Framework() {
             <p className="sources-line">{SOURCES}</p>
             <p className="disclaimer">{DISCLAIMER}</p>
             <a href="/how-its-scored.html" className="standard-link">
-              See all 11 questions and where each comes from &rarr;
+              See all eleven criteria and where each comes from &rarr;
             </a>
           </div>
         </div>
