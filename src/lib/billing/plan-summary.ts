@@ -1,4 +1,50 @@
+import type { CoachCadence } from "@/lib/billing/checkout";
 import type { MentorSeatType } from "@/lib/mentor/relationships";
+
+/**
+ * The Coach cadence choice offered to an account with no plan. Order, prices,
+ * notes and default match the toggle on pricing.html, so a preacher who chose
+ * annual there does not land here and see monthly only. If that page changes,
+ * change this with it.
+ */
+export const COACH_CADENCE_OPTIONS = [
+  {
+    cadence: "monthly",
+    label: "Monthly",
+    badge: null,
+    price: "29",
+    period: "/mo",
+    note: "Billed monthly.",
+  },
+  {
+    cadence: "annual",
+    label: "Annual",
+    badge: "BEST VALUE",
+    price: "24.17",
+    period: "/mo",
+    note: "2 months free. Billed annually at $290.",
+  },
+] as const satisfies ReadonlyArray<{
+  cadence: CoachCadence;
+  label: string;
+  badge: string | null;
+  price: string;
+  period: string;
+  note: string;
+}>;
+
+/** Annual, as on pricing.html. */
+export const DEFAULT_COACH_CADENCE: CoachCadence = "annual";
+
+export function coachCadenceOption(cadence: CoachCadence) {
+  const option = COACH_CADENCE_OPTIONS.find(
+    (candidate) => candidate.cadence === cadence,
+  );
+  if (!option) {
+    throw new Error(`Unknown Coach cadence: ${cadence}`);
+  }
+  return option;
+}
 
 export type PlanProfileFields = {
   isComped: boolean;
@@ -83,10 +129,11 @@ export function resolvePlanCopy(
         actions: "start_coach",
       };
     }
+    // No price here: the cadence toggle on the card carries it, and two
+    // places stating $29 is how the marketing pages drifted apart.
     return {
       headline: "You're not on a plan.",
-      detail:
-        "Coach is $29 a month for 10 evaluations, cancel anytime, 30 days money back.",
+      detail: "10 evaluations a month, cancel anytime, 30 days money back.",
       nudge: null,
       actions: "start_coach",
     };
