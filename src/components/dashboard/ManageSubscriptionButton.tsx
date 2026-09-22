@@ -4,10 +4,18 @@ import { useState } from "react";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 
+/**
+ * `intent` is the only thing this sends. "Switch to annual" passes
+ * switch_to_annual so the server can deep-link the confirmation screen;
+ * "Manage subscription" passes nothing and posts an empty body, exactly as
+ * before. The client never names a price or a subscription.
+ */
 export function ManageSubscriptionButton({
   label = "Manage subscription",
+  intent,
 }: {
   label?: string;
+  intent?: "switch_to_annual";
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +27,11 @@ export function ManageSubscriptionButton({
     setError(null);
 
     try {
-      const response = await fetch("/api/billing/portal", { method: "POST" });
+      const response = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(intent ? { intent } : {}),
+      });
       const payload = (await response.json().catch(() => null)) as {
         url?: unknown;
         error?: unknown;

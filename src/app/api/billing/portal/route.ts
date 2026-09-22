@@ -1,8 +1,20 @@
 // POST /api/billing/portal
 // Creates a Stripe Billing Portal session for the signed-in user.
 // stripe_customer_id is always read from the user's profile — never from the request.
+//
+// An optional { intent: "switch_to_annual" } body deep-links a Coach monthly
+// subscriber to a "confirm Coach annual" screen instead of the portal front
+// page. The subscription, item and target price are all derived server-side
+// from that customer id; the request never supplies them. Any guard that does
+// not hold falls back to a plain session, which is the behaviour that shipped
+// before the deep link and is always safe.
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  buildAnnualSwitchFlow,
+  parsePortalIntent,
+  PORTAL_INTENT_SWITCH_TO_ANNUAL,
+} from "@/lib/billing/portal-flow";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -18,6 +30,10 @@ function isMissingPortalConfiguration(message: string): boolean {
 }
 
 export async function POST(request: Request) {
+  const intent = parsePortalIntent(
+    await request.json().catch(() => null),
+  );
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -69,9 +85,26 @@ export async function POST(request: Request) {
   const stripe = new Stripe(stripeSecretKey);
 
   try {
+    let flowData:
+      | Stripe.BillingPortal.SessionCreateParams.FlowData
+      | undefined;
+
+    if (intent === PORTAL_INTENT_SWITCH_TO_ANNUAL) {
+      const result = await buildAnnualSwitchFlow(stripe, customerId);
+      if ("flowData" in result) {
+        flowData = result.flowData;
+      } else {
+        console.info(
+          "Billing portal: switch_to_annual fell back to a plain session",
+          { reason: result.fallback },
+        );
+      }
+    }
+
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${origin}/dashboard/buy`,
+      ...(flowData ? { flow_data: flowData } : {}),
     });
 
     if (!session.url) {
