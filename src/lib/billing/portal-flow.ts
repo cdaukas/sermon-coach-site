@@ -30,7 +30,9 @@ export type AnnualFlowFallbackReason =
   | "no_active_subscription"
   | "multiple_subscription_items"
   | "current_price_is_not_coach_monthly"
-  | "subscription_carries_a_discount";
+  | "subscription_carries_a_discount"
+  | "customer_carries_a_discount"
+  | "customer_lookup_failed";
 
 export type AnnualFlowResult =
   | { flowData: Stripe.BillingPortal.SessionCreateParams.FlowData }
@@ -42,6 +44,22 @@ export type SubscriptionLister = {
     list: (
       params: Stripe.SubscriptionListParams,
     ) => Promise<{ data: Stripe.Subscription[] }>;
+  };
+  customers: {
+    retrieve: (
+      id: string,
+    ) => Promise<Stripe.Customer | Stripe.DeletedCustomer>;
+  };
+};
+
+/** Just enough of the client to open a portal session. */
+export type PortalSessionCreator = {
+  billingPortal: {
+    sessions: {
+      create: (
+        params: Stripe.BillingPortal.SessionCreateParams,
+      ) => Promise<Stripe.BillingPortal.Session>;
+    };
   };
 };
 
@@ -94,6 +112,24 @@ export async function buildAnnualSwitchFlow(
     return { fallback: "subscription_carries_a_discount" };
   }
 
+  // A coupon on the customer reduces the same invoices, so a price switch puts
+  // it at the same risk. Worth one extra call on a rarely pressed button
+  // rather than trusting a hand-maintained discount_note to have caught it.
+  let customer: Stripe.Customer | Stripe.DeletedCustomer;
+  try {
+    customer = await stripe.customers.retrieve(customerId);
+  } catch {
+    return { fallback: "customer_lookup_failed" };
+  }
+
+  if (customer.deleted) {
+    return { fallback: "customer_lookup_failed" };
+  }
+
+  if (customer.discount) {
+    return { fallback: "customer_carries_a_discount" };
+  }
+
   return {
     flowData: {
       type: "subscription_update_confirm",
@@ -109,4 +145,43 @@ export async function buildAnnualSwitchFlow(
       },
     },
   };
+}
+
+/**
+ * Open a portal session, deep-linked when flowData is given.
+ *
+ * Stripe rejects a flow whose target price is not allowed by the live portal
+ * configuration, and that rejection must not become a dead button. A throw
+ * from the deep-linked call is logged and retried as a plain session, which is
+ * the behaviour that shipped before the deep link. A throw from the plain call
+ * is the caller's to handle, exactly as before.
+ */
+export async function createPortalSession(
+  stripe: PortalSessionCreator,
+  params: {
+    customerId: string;
+    returnUrl: string;
+    flowData?: Stripe.BillingPortal.SessionCreateParams.FlowData;
+  },
+): Promise<Stripe.BillingPortal.Session> {
+  const base = {
+    customer: params.customerId,
+    return_url: params.returnUrl,
+  };
+
+  if (params.flowData) {
+    try {
+      return await stripe.billingPortal.sessions.create({
+        ...base,
+        flow_data: params.flowData,
+      });
+    } catch (error) {
+      console.error(
+        "Billing portal: flow_data session failed, retrying without the deep link. The target price is most likely not allowed by the portal configuration.",
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  return stripe.billingPortal.sessions.create(base);
 }

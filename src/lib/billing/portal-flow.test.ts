@@ -4,8 +4,10 @@ import type Stripe from "stripe";
 import { COACH_STRIPE_PRICE_IDS } from "./checkout";
 import {
   buildAnnualSwitchFlow,
+  createPortalSession,
   parsePortalIntent,
   PORTAL_INTENT_SWITCH_TO_ANNUAL,
+  type PortalSessionCreator,
   type SubscriptionLister,
 } from "./portal-flow";
 
@@ -37,9 +39,18 @@ function subscriptionStub(options: {
   } as unknown as Stripe.Subscription;
 }
 
+type CustomerStub =
+  | { discount?: Stripe.Discount | null; deleted?: false }
+  | { deleted: true }
+  | { throws: true };
+
 /** Records the params it was called with so the test can assert on them. */
-function listerFor(subscriptions: Stripe.Subscription[]) {
+function listerFor(
+  subscriptions: Stripe.Subscription[],
+  customer: CustomerStub = {},
+) {
   const calls: Stripe.SubscriptionListParams[] = [];
+  const customerLookups: string[] = [];
   const stripe: SubscriptionLister = {
     subscriptions: {
       list: async (params) => {
@@ -47,8 +58,20 @@ function listerFor(subscriptions: Stripe.Subscription[]) {
         return { data: subscriptions };
       },
     },
+    customers: {
+      retrieve: async (id) => {
+        customerLookups.push(id);
+        if ("throws" in customer) {
+          throw new Error("stripe is down");
+        }
+        return {
+          id,
+          ...customer,
+        } as unknown as Stripe.Customer | Stripe.DeletedCustomer;
+      },
+    },
   };
-  return { stripe, calls };
+  return { stripe, calls, customerLookups };
 }
 
 describe("parsePortalIntent", () => {
@@ -202,6 +225,40 @@ describe("buildAnnualSwitchFlow guards, each falling back with no flow", () => {
     });
   });
 
+  it("falls back when the discount sits on the customer rather than the subscription", async () => {
+    const { stripe } = listerFor([subscriptionStub({})], {
+      discount: { id: "di_comp100" } as unknown as Stripe.Discount,
+    });
+    const result = await buildAnnualSwitchFlow(stripe, "cus_customer_discount");
+    assert.deepEqual(result, { fallback: "customer_carries_a_discount" });
+  });
+
+  it("looks the customer up only after the cheaper guards have passed", async () => {
+    // A subscription-level discount short-circuits, so the extra call is not
+    // made on a request that was going to fall back anyway.
+    const { stripe, customerLookups } = listerFor([
+      subscriptionStub({ discounts: ["di_sub"] }),
+    ]);
+    await buildAnnualSwitchFlow(stripe, "cus_short_circuit");
+    assert.deepEqual(customerLookups, []);
+
+    const passing = listerFor([subscriptionStub({})]);
+    await buildAnnualSwitchFlow(passing.stripe, "cus_reaches_lookup");
+    assert.deepEqual(passing.customerLookups, ["cus_reaches_lookup"]);
+  });
+
+  it("falls back when the customer lookup throws", async () => {
+    const { stripe } = listerFor([subscriptionStub({})], { throws: true });
+    const result = await buildAnnualSwitchFlow(stripe, "cus_unreachable");
+    assert.deepEqual(result, { fallback: "customer_lookup_failed" });
+  });
+
+  it("falls back when the customer has been deleted", async () => {
+    const { stripe } = listerFor([subscriptionStub({})], { deleted: true });
+    const result = await buildAnnualSwitchFlow(stripe, "cus_deleted");
+    assert.deepEqual(result, { fallback: "customer_lookup_failed" });
+  });
+
   it("returns no flowData on any fallback", async () => {
     const cases = [
       listerFor([]),
@@ -214,5 +271,101 @@ describe("buildAnnualSwitchFlow guards, each falling back with no flow", () => {
       const result = await buildAnnualSwitchFlow(stripe, "cus_any");
       assert.ok(!("flowData" in result), "a guard must not produce a flow");
     }
+  });
+});
+
+const FLOW_DATA = {
+  type: "subscription_update_confirm",
+  subscription_update_confirm: {
+    subscription: "sub_live",
+    items: [{ id: "si_live", price: ANNUAL_PRICE, quantity: 1 }],
+  },
+} as Stripe.BillingPortal.SessionCreateParams.FlowData;
+
+/** Records every create call; optionally throws on the deep-linked one. */
+function sessionCreatorThatRejectsFlows(options: { rejectFlow: boolean }) {
+  const calls: Stripe.BillingPortal.SessionCreateParams[] = [];
+  const stripe: PortalSessionCreator = {
+    billingPortal: {
+      sessions: {
+        create: async (params) => {
+          calls.push(params);
+          if (options.rejectFlow && params.flow_data) {
+            throw new Error(
+              "The price specified in flow_data is not allowed by this portal configuration.",
+            );
+          }
+          return { id: "bps_1", url: "https://billing.stripe.com/session" } as Stripe.BillingPortal.Session;
+        },
+      },
+    },
+  };
+  return { stripe, calls };
+}
+
+describe("createPortalSession", () => {
+  it("deep-links when the flow is accepted", async () => {
+    const { stripe, calls } = sessionCreatorThatRejectsFlows({ rejectFlow: false });
+    const session = await createPortalSession(stripe, {
+      customerId: "cus_ok",
+      returnUrl: "https://example.test/dashboard/buy",
+      flowData: FLOW_DATA,
+    });
+
+    assert.equal(session.url, "https://billing.stripe.com/session");
+    assert.equal(calls.length, 1);
+    assert.deepEqual(calls[0].flow_data, FLOW_DATA);
+    assert.equal(calls[0].customer, "cus_ok");
+    assert.equal(calls[0].return_url, "https://example.test/dashboard/buy");
+  });
+
+  it("falls back to a plain session when the flow session throws", async () => {
+    const { stripe, calls } = sessionCreatorThatRejectsFlows({ rejectFlow: true });
+
+    // No throw reaches the caller, so no error reaches the user.
+    const session = await createPortalSession(stripe, {
+      customerId: "cus_rejected",
+      returnUrl: "https://example.test/dashboard/buy",
+      flowData: FLOW_DATA,
+    });
+
+    assert.equal(session.url, "https://billing.stripe.com/session");
+    assert.equal(calls.length, 2, "expected a retry after the flow was rejected");
+    assert.deepEqual(calls[0].flow_data, FLOW_DATA);
+    assert.equal(calls[1].flow_data, undefined, "the retry must carry no flow");
+    assert.equal(calls[1].customer, "cus_rejected");
+    assert.equal(calls[1].return_url, "https://example.test/dashboard/buy");
+  });
+
+  it("makes one plain call when there is no flow to begin with", async () => {
+    const { stripe, calls } = sessionCreatorThatRejectsFlows({ rejectFlow: true });
+    await createPortalSession(stripe, {
+      customerId: "cus_manage",
+      returnUrl: "https://example.test/dashboard/buy",
+    });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].flow_data, undefined);
+  });
+
+  it("lets a plain session failure through to the caller", async () => {
+    // Manage subscription's existing error handling must keep working: a
+    // portal that is not configured at all is still a real error.
+    const stripe: PortalSessionCreator = {
+      billingPortal: {
+        sessions: {
+          create: async () => {
+            throw new Error("No configuration provided");
+          },
+        },
+      },
+    };
+    await assert.rejects(
+      () =>
+        createPortalSession(stripe, {
+          customerId: "cus_unconfigured",
+          returnUrl: "https://example.test/dashboard/buy",
+        }),
+      /No configuration provided/,
+    );
   });
 });

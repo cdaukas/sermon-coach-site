@@ -12,6 +12,7 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   buildAnnualSwitchFlow,
+  createPortalSession,
   parsePortalIntent,
   PORTAL_INTENT_SWITCH_TO_ANNUAL,
 } from "@/lib/billing/portal-flow";
@@ -101,10 +102,10 @@ export async function POST(request: Request) {
       }
     }
 
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${origin}/dashboard/buy`,
-      ...(flowData ? { flow_data: flowData } : {}),
+    const session = await createPortalSession(stripe, {
+      customerId,
+      returnUrl: `${origin}/dashboard/buy`,
+      flowData,
     });
 
     if (!session.url) {
