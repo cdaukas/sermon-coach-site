@@ -29,7 +29,7 @@ function PlanActions({ actions }: { actions: PlanCopy["actions"] }) {
   if (actions === "annual_and_manage") {
     return (
       <span className="flex shrink-0 flex-wrap items-center justify-end gap-x-2 gap-y-1">
-        <ManageSubscriptionButton label="Switch to annual" />
+        <ManageSubscriptionButton label="Switch to annual" intent="switch_to_annual" />
         <span style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}>·</span>
         <ManageSubscriptionButton />
       </span>
