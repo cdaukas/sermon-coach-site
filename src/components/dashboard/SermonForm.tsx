@@ -409,7 +409,8 @@ export function SermonForm({
 
       <div className="mb-5 flex flex-col gap-1.5">
         <AuthLabel htmlFor="sermon-working-melodic-line">
-          Working melodic line for this book, if you have one (optional)
+          Working melodic line (overall theme) for this book of the Bible, if
+          you have one (optional)
         </AuthLabel>
         <textarea
           id="sermon-working-melodic-line"
