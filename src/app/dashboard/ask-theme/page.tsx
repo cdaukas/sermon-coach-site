@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GenerateAskThemeButton } from "@/components/ask-theme/GenerateAskThemeButton";
 import { DeepDiveHistoryList } from "@/components/prep-card/DeepDiveHistoryList";
 import { PrepCardView } from "@/components/prep-card/PrepCardView";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
-import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
+import { profileHasDeepDiveAccess } from "@/lib/prep-card/access";
 import {
   getThemeDiagnosticById,
   listDeepDiveHistory,
@@ -29,7 +28,7 @@ export default async function AskThemePage({ searchParams }: AskThemePageProps) 
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !(await profileHasPrepCardAccess(user.id))) {
+  if (!user || !(await profileHasDeepDiveAccess(user.id))) {
     notFound();
   }
 
@@ -84,7 +83,15 @@ export default async function AskThemePage({ searchParams }: AskThemePageProps) 
               : "Does your ask land on anyone? Strengths and focus from the measures we can already count."}
           </p>
         </div>
-        {!isHistorical ? <GenerateAskThemeButton /> : null}
+        {!isHistorical ? (
+          <Link
+            href="/dashboard/deep-dive?theme=ask"
+            className="text-[13px] font-semibold no-underline hover:underline"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            Choose sermons
+          </Link>
+        ) : null}
       </div>
 
       {report ? (

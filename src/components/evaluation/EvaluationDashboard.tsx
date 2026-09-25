@@ -13,6 +13,7 @@ import { HeatMapSection } from "./HeatMapSection";
 import { HowItPreachesSection } from "./HowItPreachesSection";
 import { MelodicLineSection } from "./MelodicLineSection";
 import { MethodologySection } from "./MethodologySection";
+import { EvaluationReturnNote } from "./EvaluationReturnNote";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
 import { EvaluationPrintButtons } from "@/components/evaluation/EvaluationPrintButtons";
@@ -40,6 +41,12 @@ type EvaluationDashboardProps = {
    * the public sample and the stub smoke test keep the block.
    */
   showMethodology?: boolean;
+  /**
+   * Sentences after the three practical steps. Owner scores view only.
+   * Absent on the public sample, a mentor reading someone else's sermon,
+   * and PDF capture.
+   */
+  returnNoteLines?: readonly string[] | null;
 };
 
 export function EvaluationDashboard({
@@ -53,6 +60,7 @@ export function EvaluationDashboard({
   criterion2Wording = "default",
   criterion2SwitcherHrefs,
   showMethodology = true,
+  returnNoteLines = null,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const copy = evaluationReportCopy(outputLanguage);
@@ -202,6 +210,10 @@ export function EvaluationDashboard({
         topPriorities={result.top_priorities}
         outputLanguage={outputLanguage}
       />
+
+      {returnNoteLines && returnNoteLines.length > 0 ? (
+        <EvaluationReturnNote lines={returnNoteLines} />
+      ) : null}
 
       <RewritesSection rewrites={result.rewrites} outputLanguage={outputLanguage} />
 

@@ -22,6 +22,7 @@ import {
   sermonHasActiveEvaluation,
 } from "@/lib/evaluation/queries";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
+import { evaluationReturnNoteLines } from "@/lib/evaluation/return-note";
 import { viewerHasActiveMentorRelationship } from "@/lib/mentor/relationship";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -344,6 +345,11 @@ export default async function EvaluationPage({
           howItPreaches={evaluation.how_it_preaches}
           outputLanguage={outputLanguage}
           showMethodology={showMethodology}
+          returnNoteLines={
+            showOwnerReportActions
+              ? evaluationReturnNoteLines(entitlement, outputLanguage)
+              : null
+          }
           criterion2Wording={criterion2Wording}
           criterion2SwitcherHrefs={
             pdfCapture || outputLanguage !== "es"

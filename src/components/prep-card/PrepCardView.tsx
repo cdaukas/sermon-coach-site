@@ -8,6 +8,7 @@ import {
   prepBuiltFromSummary,
   prepInterpretationParagraph,
 } from "@/lib/prep-card/copy";
+import { deepDiveSmallSampleLine } from "@/lib/prep-card/deep-dive-dashboard";
 import type {
   PrepCardSnapshot,
   PrepFocusExample,
@@ -339,6 +340,7 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
     list.push(example);
     strengthExamplesByMeasure.set(example.measureId, list);
   }
+  const smallSampleLine = deepDiveSmallSampleLine(snapshot.sampleSize);
   const focusTag =
     snapshot.focus.length === 1
       ? "One, this quarter"
@@ -381,13 +383,21 @@ export function PrepCardView({ snapshot }: PrepCardViewProps) {
             : "Before you preach"}
       </h1>
       <p
-        className="mb-10 max-w-[42ch] text-[20px] leading-snug"
+        className={`${smallSampleLine ? "mb-4" : "mb-10"} max-w-[42ch] text-[20px] leading-snug`}
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
         {isChristTheme
           ? PREP_THEME_QUESTION.christ
           : PREP_THEME_QUESTION.ask}
       </p>
+      {smallSampleLine ? (
+        <p
+          className="mb-10 max-w-[48ch] text-[15px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+        >
+          {smallSampleLine}
+        </p>
+      ) : null}
 
       <section className="mb-11">
         <SectionHead title="What is working" tag="Don't trade it" />

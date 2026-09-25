@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GenerateChristThemeButton } from "@/components/christ-theme/GenerateChristThemeButton";
 import { DeepDiveHistoryList } from "@/components/prep-card/DeepDiveHistoryList";
 import { PrepCardView } from "@/components/prep-card/PrepCardView";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
-import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
+import { profileHasDeepDiveAccess } from "@/lib/prep-card/access";
 import {
   getThemeDiagnosticById,
   listDeepDiveHistory,
@@ -31,7 +30,7 @@ export default async function ChristThemePage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !(await profileHasPrepCardAccess(user.id))) {
+  if (!user || !(await profileHasDeepDiveAccess(user.id))) {
     notFound();
   }
 
@@ -83,7 +82,15 @@ export default async function ChristThemePage({
               : "Does Christ act in this sermon, or is he its destination? Strengths and focus from the three measures we can already count."}
           </p>
         </div>
-        {!isHistorical ? <GenerateChristThemeButton /> : null}
+        {!isHistorical ? (
+          <Link
+            href="/dashboard/deep-dive?theme=christ"
+            className="text-[13px] font-semibold no-underline hover:underline"
+            style={{ ...uiFont, color: "var(--sc-accent)" }}
+          >
+            Choose sermons
+          </Link>
+        ) : null}
       </div>
 
       {report ? (
