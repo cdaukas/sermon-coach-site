@@ -635,6 +635,11 @@
   max-width: 1100px;
 }
 
+/* Deep dive theme list needs a wider measure than the 900px dashboard column. */
+.dashboard-content:has(.deep-dive-page) {
+  max-width: 1180px;
+}
+
 /* Compact sermon table rows (dashboard home) */
 .dashboard-sermon-list {
   margin: 0;

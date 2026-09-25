@@ -5,8 +5,7 @@ import { formatCreditChipLabel } from "@/lib/billing/credit-display";
 import { getEvaluationEntitlement } from "@/lib/evaluation/quota";
 import { profileHasGrowthAccess } from "@/lib/growth/access";
 import { profileIsTeamAccount } from "@/lib/mentor/team-account";
-import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
-import { resolveDeepDiveHref } from "@/lib/prep-card/deep-dive";
+import { profileHasDeepDiveAccess, profileHasPrepCardAccess } from "@/lib/prep-card/access";
 import { createClient } from "@/lib/supabase/server";
 
 type DashboardShellProps = {
@@ -44,19 +43,8 @@ export async function DashboardShell({ children }: DashboardShellProps) {
 
   const chip = formatCreditChipLabel(entitlement);
   const growthAllowed = user ? await profileHasGrowthAccess(user.id) : false;
-  const prepCardAllowed = user
-    ? await profileHasPrepCardAccess(user.id)
-    : false;
-  // Resolved but not yet wired to the rail. The rail's Trend/Deep dive
-  // regroup is held back from this merge because it is gated on
-  // growth_access, not prep_card_access, and would rename "Growth" for
-  // accounts that cannot see the surfaces it points at. Re-add
-  // deepDiveHref={deepDiveHref} to <DashboardRail> when that lands.
-  const deepDiveHref =
-    user && prepCardAllowed
-      ? (await resolveDeepDiveHref(user.id)).href
-      : null;
-  void deepDiveHref;
+  const prepCardAllowed = user ? await profileHasPrepCardAccess(user.id) : false;
+  const deepDiveAllowed = user ? await profileHasDeepDiveAccess(user.id) : false;
   const teamAccount = user ? await profileIsTeamAccount(user.id) : false;
 
   return (
@@ -65,6 +53,7 @@ export async function DashboardShell({ children }: DashboardShellProps) {
         creditChipLabel={chip}
         growthAllowed={growthAllowed}
         prepCardAllowed={prepCardAllowed}
+        deepDiveAllowed={deepDiveAllowed}
         teamAccount={teamAccount}
       />
       <div className="dashboard-content">{children}</div>

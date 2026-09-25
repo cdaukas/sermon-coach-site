@@ -45,6 +45,11 @@ const PRIMARY_ITEMS: NavItem[] = [
     isActive: (pathname) => pathname.startsWith("/dashboard/growth"),
   },
   {
+    href: "/dashboard/deep-dive",
+    label: "Deep dive",
+    isActive: (pathname) => pathname.startsWith("/dashboard/deep-dive"),
+  },
+  {
     href: "/dashboard/prep-card",
     label: "Prep card",
     isActive: (pathname) => pathname.startsWith("/dashboard/prep-card"),
@@ -70,6 +75,7 @@ type DashboardRailProps = {
   creditChipLabel: string;
   growthAllowed: boolean;
   prepCardAllowed?: boolean;
+  deepDiveAllowed?: boolean;
   teamAccount?: boolean;
 };
 
@@ -130,13 +136,15 @@ export function DashboardRail({
   creditChipLabel,
   growthAllowed,
   prepCardAllowed = false,
+  deepDiveAllowed = false,
   teamAccount = false,
 }: DashboardRailProps) {
   const pathname = usePathname();
   const primaryItems = PRIMARY_ITEMS.filter(
     (item) =>
       (item.href !== "/dashboard/growth" || growthAllowed) &&
-      (item.href !== "/dashboard/prep-card" || prepCardAllowed),
+      (item.href !== "/dashboard/prep-card" || prepCardAllowed) &&
+      (item.href !== "/dashboard/deep-dive" || deepDiveAllowed),
   );
 
   const developLabel = teamAccount ? "Team" : "Mentoring";

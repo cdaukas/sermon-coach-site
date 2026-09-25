@@ -15,8 +15,9 @@ export type GeneratePrepCardResult =
   | { ok: false; error: string };
 
 /**
- * Desk prep card. Not rate-limited. Locks strength/focus from the current
- * theme diagnostic when one exists; otherwise ranks as before.
+ * Desk prep card. Not rate-limited, and not the quarterly deep dive.
+ * Still built from the recent window so it can move between reports.
+ * Locks strength/focus from the current theme diagnostic when one exists.
  */
 export async function generatePrepCardAction(): Promise<GeneratePrepCardResult> {
   const supabase = await createClient();

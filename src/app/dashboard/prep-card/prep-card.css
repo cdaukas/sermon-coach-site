@@ -2,6 +2,65 @@
   background: var(--sc-bg);
 }
 
+.deep-dive-themes {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.deep-dive-theme-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deep-dive-theme-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--sc-rule);
+}
+
+.deep-dive-theme-question--empty {
+  display: none;
+  margin: 0;
+}
+
+.deep-dive-theme-action {
+  text-align: left;
+  white-space: nowrap;
+}
+
+@container (min-width: 900px) {
+  .deep-dive-theme-list {
+    grid-template-columns: max-content minmax(0, 1fr) 5.5rem;
+    column-gap: 24px;
+  }
+
+  .deep-dive-theme-row {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    column-gap: 24px;
+    align-items: baseline;
+  }
+
+  .deep-dive-theme-name-text {
+    white-space: nowrap;
+  }
+
+  .deep-dive-theme-question--empty {
+    display: block;
+  }
+
+  .deep-dive-theme-action {
+    text-align: right;
+  }
+}
+
 .prep-card-section-head {
   display: flex;
   align-items: baseline;

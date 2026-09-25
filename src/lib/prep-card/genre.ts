@@ -199,6 +199,10 @@ export function genreForPassage(passage: string | null | undefined): PrepGenre {
   return genreForBook(bookFromPrimaryPassage(passage));
 }
 
+export function prepGenreLabel(genre: PrepGenre): string {
+  return GENRE_LABEL[genre];
+}
+
 const GENRE_LABEL: Record<PrepGenre, string> = {
   gospel_narrative: "gospel narrative",
   acts: "Acts",
