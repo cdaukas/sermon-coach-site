@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { GeneratePrepCardButton } from "@/components/prep-card/GeneratePrepCardButton";
 import { PrepDeskCardView } from "@/components/prep-card/PrepDeskCardView";
 import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
-import { getLatestDeskCard } from "@/lib/prep-card/queries";
+import {
+  getLatestDeskCard,
+  getLatestThemeDiagnostic,
+} from "@/lib/prep-card/queries";
 import { serifFont, uiFont } from "@/components/evaluation/shared";
 import { createClient } from "@/lib/supabase/server";
 import "./prep-card.css";
@@ -24,7 +27,13 @@ export default async function PrepCardPage() {
     notFound();
   }
 
-  const card = await getLatestDeskCard();
+  const [card, diagnostic] = await Promise.all([
+    getLatestDeskCard(),
+    getLatestThemeDiagnostic(),
+  ]);
+  const subtitle = diagnostic
+    ? "One page for Saturday. Three strengths, three questions, the reverence check — locked to this quarter's diagnostic."
+    : "One page for Saturday. Three strengths, three questions, the reverence check.";
 
   return (
     <main className="prep-card-page mx-auto w-full max-w-5xl flex-1 px-4 py-10 md:px-8">
@@ -50,8 +59,7 @@ export default async function PrepCardPage() {
             className="mt-2 max-w-[48ch] text-[15px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
           >
-            One page for Saturday. Three strengths, three questions, the
-            reverence check — locked to this quarter&apos;s diagnostic.
+            {subtitle}
           </p>
         </div>
         <GeneratePrepCardButton />
