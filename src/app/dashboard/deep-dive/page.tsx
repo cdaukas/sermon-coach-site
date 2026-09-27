@@ -92,7 +92,7 @@ export default async function DeepDivePage({ searchParams }: DeepDivePageProps) 
         style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
       >
         A close look at one thread across up to 30 sermons: how you apply the
-        text, or how you bring it to Christ. One report each quarter.
+        text, or how you bring it to Christ.
       </p>
 
       {unlock ? <DeepDiveUnlockBar sermonCount={sermons.length} /> : null}
