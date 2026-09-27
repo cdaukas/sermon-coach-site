@@ -60,3 +60,14 @@ export function buildUnsubscribeUrl(email: string): string {
   const token = signUnsubscribeToken(email);
   return `${BLOG_EMAIL_UNSUBSCRIBE_BASE_URL}?token=${encodeURIComponent(token)}`;
 }
+
+/**
+ * One-click (RFC 8058) POST target. Same token as the human footer link;
+ * host comes from BLOG_EMAIL_UNSUBSCRIBE_BASE_URL so it cannot drift.
+ */
+export function buildUnsubscribePostUrl(email: string): string {
+  const token = signUnsubscribeToken(email);
+  const origin = new URL(BLOG_EMAIL_UNSUBSCRIBE_BASE_URL).origin;
+  return `${origin}/api/unsubscribe?token=${encodeURIComponent(token)}`;
+}
+
