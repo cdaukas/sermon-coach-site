@@ -20,9 +20,15 @@ export type RevokeExcessPendingOptions = {
  *
  * Capacity = purchased(+comp for debrief). Close order: unaccepted invitations
  * first (oldest pending revoked), then the oldest active relationship until
- * used <= capacity. Comp is never written here. Held evaluations are not
- * released on an active close (unlike end_mentor_relationship).
+ * used <= capacity. Comp is never written here. Ending an active relationship
+ * goes through end_active_mentor_relationships_at_capacity, which releases
+ * held complete diagnostics in the same transaction. Pending revokes are not
+ * passed to that function.
  */
+
+export const END_ACTIVE_RELATIONSHIPS_AT_CAPACITY_RPC =
+  "end_active_mentor_relationships_at_capacity";
+
 export async function revokeExcessPendingMentorInvites(
   supabase: SupabaseClient,
   mentorId: string,
@@ -124,15 +130,10 @@ export async function revokeExcessPendingMentorInvites(
   }
 
   const endIds = active.slice(0, endCount).map((r) => r.id);
-  const { error: endError } = await supabase
-    .from("mentor_relationships")
-    // Deliberately does not release held evaluations. end_mentor_relationship
-    // does, because a manual end is a considered act. A cancel can be an
-    // expired card, and releasing a man's held scores on a failed payment
-    // would be wrong. Do not "fix" this into parity with the RPC.
-    .update({ status: "ended", ended_at: endedAt })
-    .in("id", endIds)
-    .eq("status", "active");
+  const { error: endError } = await supabase.rpc(
+    END_ACTIVE_RELATIONSHIPS_AT_CAPACITY_RPC,
+    { p_relationship_ids: endIds },
+  );
 
   if (endError) {
     throw new Error(

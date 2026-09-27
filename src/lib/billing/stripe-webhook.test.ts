@@ -82,6 +82,7 @@ function makeSupabaseMock(handlers: {
     ids: string[];
     values: Record<string, unknown>;
   }> = [];
+  const rpcCalls: Array<{ fn: string; args: unknown }> = [];
 
   // Mutable seat row so writes are visible on the next capacity re-read.
   const seatRow = {
@@ -222,7 +223,11 @@ function makeSupabaseMock(handlers: {
         },
       };
     },
-    rpc(fn: string, _args: { p_email: string }) {
+    rpc(fn: string, args: unknown) {
+      rpcCalls.push({ fn, args });
+      if (fn === "end_active_mentor_relationships_at_capacity") {
+        return Promise.resolve({ data: 0, error: null });
+      }
       assert.equal(fn, "find_profile_id_by_email");
       return Promise.resolve({
         data: handlers.profileIdByEmail ?? null,
@@ -231,7 +236,7 @@ function makeSupabaseMock(handlers: {
     },
   } as unknown as SupabaseClient;
 
-  return { supabase, updates, relationshipUpdates };
+  return { supabase, updates, relationshipUpdates, rpcCalls };
 }
 
 const activeProfileValues = {
@@ -458,7 +463,7 @@ describe("mentor seat subscription lifecycle", () => {
   });
 
   it("revokes excess pending invites when mentor seat subscription is deleted", async () => {
-    const { supabase, updates, relationshipUpdates } = makeSupabaseMock({
+    const { supabase, updates, relationshipUpdates, rpcCalls } = makeSupabaseMock({
       profileById: "user-mentor",
       seatProfile: {
         purchased_debrief_seats: 3,
@@ -529,15 +534,20 @@ describe("mentor seat subscription lifecycle", () => {
       ),
       `expected pending revoke, got ${JSON.stringify(relationshipUpdates)}`,
     );
+    const capacityEnd = rpcCalls.find(
+      (call) => call.fn === "end_active_mentor_relationships_at_capacity",
+    );
+    const endedIds =
+      capacityEnd &&
+      typeof capacityEnd.args === "object" &&
+      capacityEnd.args !== null &&
+      "p_relationship_ids" in capacityEnd.args &&
+      Array.isArray(capacityEnd.args.p_relationship_ids)
+        ? capacityEnd.args.p_relationship_ids
+        : [];
     assert.ok(
-      relationshipUpdates.some(
-        (u) =>
-          u.values.status === "ended" &&
-          typeof u.values.ended_at === "string" &&
-          u.ids.includes("active-1") &&
-          u.ids.includes("active-2"),
-      ),
-      `expected active relationships to end, got ${JSON.stringify(relationshipUpdates)}`,
+      endedIds.includes("active-1") && endedIds.includes("active-2"),
+      `expected active relationships to end through capacity release, got ${JSON.stringify(rpcCalls)}`,
     );
   });
 });
