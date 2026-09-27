@@ -1,5 +1,8 @@
 import Stripe from "stripe";
 import { getMentorSeatTypeFromMetadata } from "@/lib/billing/stripe-webhook";
+import type { MentorSeatCapacity } from "@/lib/mentor/capacity-parse";
+import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
+import type { MentorSeatType } from "@/lib/mentor/relationships";
 
 /** Statuses on which a seat subscription can still be managed in the portal. */
 const OPEN_SEAT_SUBSCRIPTION_STATUSES = new Set([
@@ -13,27 +16,61 @@ export function seatSubscriptionOpensPortal(status: string): boolean {
 }
 
 /**
- * Seat portal control. Requires a Stripe customer and at least one open
- * mentor-seat subscription. A Coach subscriber with a seat sees it beside
- * Manage subscription; each button opens its own portal session.
+ * Which Developing others section the billing page mounts. At most one.
+ * An open seat subscription with no active or pending relationship is its
+ * own card, not the upsell and not a second portal block. The portal button
+ * still follows showSeatBillingPortalButton, including past_due.
  */
-export type BillingSeatPortalPlacement = "hidden" | "on-card" | "standalone";
+export type DevelopingOthersBillingSection =
+  | "upsell"
+  | "open-seats"
+  | "relationships";
+
+export function developingOthersBillingSection(input: {
+  openSeatSubscription: boolean;
+  activeOrPendingRelationships: boolean;
+  seatDiscoveryEligible: boolean;
+}): DevelopingOthersBillingSection | null {
+  if (input.activeOrPendingRelationships) {
+    return "relationships";
+  }
+  if (input.openSeatSubscription) {
+    return "open-seats";
+  }
+  if (input.seatDiscoveryEligible) {
+    return "upsell";
+  }
+  return null;
+}
 
 /**
- * One control on the billing page. On the Developing others card when that
- * card is mounted, otherwise on its own. Never both.
+ * Held seats with nobody on them, in the Your seats shape:
+ * "Apprentice · 1 available".
  */
-export function billingSeatPortalPlacement(input: {
-  portalVisible: boolean;
-  developingOthersCardMounted: boolean;
-}): BillingSeatPortalPlacement {
-  if (!input.portalVisible) {
-    return "hidden";
-  }
-  if (input.developingOthersCardMounted) {
-    return "on-card";
-  }
-  return "standalone";
+export function idleSeatSummaryLines(capacity: MentorSeatCapacity): string[] {
+  const rows: { seatType: MentorSeatType; available: number; capacity: number }[] =
+    [
+      {
+        seatType: "debrief",
+        capacity: capacity.debrief.capacity,
+        available: Math.max(0, capacity.debrief.capacity - capacity.debrief.used),
+      },
+      {
+        seatType: "evaluation",
+        capacity: capacity.evaluation.capacity,
+        available: Math.max(
+          0,
+          capacity.evaluation.capacity - capacity.evaluation.used,
+        ),
+      },
+    ];
+
+  return rows
+    .filter((row) => row.capacity > 0)
+    .map(
+      (row) =>
+        `${mentorSeatDisplayName(row.seatType)} · ${row.available} available`,
+    );
 }
 
 export function showSeatBillingPortalButton(input: {

@@ -5,8 +5,8 @@ import { SermonEvaluationsCard } from "@/components/dashboard/SermonEvaluationsC
 import { MentorSeatDiscoveryCard } from "@/components/dashboard/MentorSeatDiscoveryCard";
 import {
   DevelopingOthersCard,
+  OpenSeatsCard,
   PlanCard,
-  SeatBillingPortalBlock,
 } from "@/components/dashboard/PlanCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import {
@@ -14,9 +14,11 @@ import {
   loadAnnualSwitchButtonVisible,
 } from "@/lib/billing/portal-flow";
 import {
-  billingSeatPortalPlacement,
+  developingOthersBillingSection,
+  idleSeatSummaryLines,
   loadSeatBillingPortalVisible,
 } from "@/lib/billing/seat-portal";
+import { getMentorSeatCapacity } from "@/lib/mentor/capacity";
 import {
   developingOthersCopy,
   mentorSeatBreakdown,
@@ -145,26 +147,42 @@ export default async function BuyPage() {
       : false,
   });
 
-  const seatPortalPlacement = billingSeatPortalPlacement({
-    portalVisible: await loadSeatBillingPortalVisible({
-      stripeCustomerId,
-    }),
-    developingOthersCardMounted:
-      developingOthers !== null && seatBreakdown !== null,
+  const openSeatSubscription = await loadSeatBillingPortalVisible({
+    stripeCustomerId,
   });
+  const activeOrPendingRelationships =
+    developingOthers !== null && seatBreakdown !== null;
 
   // A mentee reads his own coaching here; he is not a buyer of seats.
   const isMentee = user
     ? await viewerHasActiveMentorRelationship(user.id)
     : false;
 
-  // Paying or comped, holds no seat, is not a mentee. A pack-only account and
-  // a cancelled subscription both fail the first clause.
-  const showSeatDiscovery =
+  // Paying or comped, holds no relationship, is not a mentee. A pack-only
+  // account and a cancelled subscription both fail the first clause. An open
+  // seat subscription still suppresses this: that account gets the open-seats
+  // card instead.
+  const seatDiscoveryEligible =
     user !== null &&
     (subscriptionStatus === "active" || isComped) &&
     !holdsMentorSeat &&
     !isMentee;
+
+  const developingOthersSection = developingOthersBillingSection({
+    openSeatSubscription,
+    activeOrPendingRelationships,
+    seatDiscoveryEligible,
+  });
+
+  const idleSeatLines =
+    developingOthersSection === "open-seats"
+      ? idleSeatSummaryLines(
+          (await getMentorSeatCapacity()) ?? {
+            debrief: { used: 0, capacity: 0, purchased: 0, comp: 0 },
+            evaluation: { used: 0, capacity: 0, purchased: 0, comp: 0 },
+          },
+        )
+      : [];
 
   const packSection = (
     <>
@@ -226,23 +244,25 @@ export default async function BuyPage() {
         </SermonEvaluationsCard>
       </BillingSection>
 
-      {developingOthers && seatBreakdown ? (
+      {developingOthersSection === "relationships" &&
+      developingOthers &&
+      seatBreakdown ? (
         <BillingSection eyebrow="Developing others">
           <DevelopingOthersCard
             text={developingOthers}
             breakdown={seatBreakdown}
-            showSeatBillingPortal={seatPortalPlacement === "on-card"}
+            showSeatBillingPortal={openSeatSubscription}
           />
         </BillingSection>
       ) : null}
 
-      {seatPortalPlacement === "standalone" ? (
+      {developingOthersSection === "open-seats" ? (
         <BillingSection eyebrow="Developing others">
-          <SeatBillingPortalBlock />
+          <OpenSeatsCard summaryLines={idleSeatLines} />
         </BillingSection>
       ) : null}
 
-      {showSeatDiscovery ? (
+      {developingOthersSection === "upsell" ? (
         <BillingSection eyebrow="Developing others">
           <MentorSeatDiscoveryCard />
         </BillingSection>
