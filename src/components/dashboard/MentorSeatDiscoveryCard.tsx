@@ -28,8 +28,8 @@ const seatLinkStyle = {
  * seat is otherwise invisible to him. Names one product and routes the rest;
  * a billing page listing four priced products reads as an upsell.
  *
- * Mutually exclusive with DevelopingOthersCard, which covers the seat holder,
- * so the shared "Developing others" eyebrow never appears twice at once.
+ * Mutually exclusive with the other Developing others cards. The billing
+ * page mounts at most one of them.
  */
 export function MentorSeatDiscoveryCard() {
   return (

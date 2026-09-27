@@ -189,23 +189,47 @@ function SeatBreakdownRow({
   );
 }
 
-export function SeatBillingPortalBlock() {
+export function OpenSeatsCard({ summaryLines }: { summaryLines: string[] }) {
   return (
-    <BillingCard
-      aria-label="Manage seats and billing"
-      icon={<MentoringCardIcon />}
-    >
+    <BillingCard aria-label="Developing others" icon={<MentoringCardIcon />}>
       <div className="min-w-0">
-        <ManageSubscriptionButton
-          label={SEAT_BILLING_PORTAL_LABEL}
-          intent="manage_seats"
-        />
-        <p
-          className="mt-2 mb-0 max-w-md leading-relaxed"
-          style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
+        {summaryLines.length > 0 ? (
+          <ul className="m-0 list-none p-0">
+            {summaryLines.map((line) => (
+              <li
+                key={line}
+                className="text-[16px] font-semibold leading-snug tracking-tight"
+                style={{ ...serifFont, color: "var(--sc-ink)" }}
+              >
+                {line}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <Link
+          href="/dashboard/develop"
+          className={`${summaryLines.length > 0 ? "mt-4" : ""} inline-flex w-full items-center justify-center gap-2 rounded border px-7 py-3.5 text-sm font-semibold tracking-wide no-underline transition-opacity hover:opacity-90 sm:w-auto`}
+          style={{
+            ...uiFont,
+            background: "var(--sc-ink)",
+            color: "var(--sc-bg)",
+            borderColor: "var(--sc-ink)",
+          }}
         >
-          {SEAT_END_RELEASE_NOTICE}
-        </p>
+          Invite a preacher
+        </Link>
+        <div className="mt-4 max-w-md">
+          <ManageSubscriptionButton
+            label={SEAT_BILLING_PORTAL_LABEL}
+            intent="manage_seats"
+          />
+          <p
+            className="mt-2 mb-0 leading-relaxed"
+            style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
+          >
+            {SEAT_END_RELEASE_NOTICE}
+          </p>
+        </div>
       </div>
     </BillingCard>
   );

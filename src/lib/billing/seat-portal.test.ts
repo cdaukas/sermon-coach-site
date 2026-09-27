@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type Stripe from "stripe";
+import type { MentorSeatCapacity } from "@/lib/mentor/capacity-parse";
 import {
-  billingSeatPortalPlacement,
+  developingOthersBillingSection,
+  idleSeatSummaryLines,
   listMentorSeatSubscriptionStatuses,
   showSeatBillingPortalButton,
 } from "./seat-portal";
@@ -80,49 +82,85 @@ describe("showSeatBillingPortalButton", () => {
   });
 });
 
-describe("billingSeatPortalPlacement", () => {
-  function place(input: {
-    seatSubscriptionStatuses: readonly string[];
-    activeOrPendingRelationships: number;
-  }) {
-    const portalVisible = showSeatBillingPortalButton({
+function emptySlice() {
+  return { used: 0, capacity: 0, purchased: 0, comp: 0 };
+}
+
+describe("developingOthersBillingSection", () => {
+  it("shows the upsell when there is no open seat subscription", () => {
+    assert.equal(
+      developingOthersBillingSection({
+        openSeatSubscription: false,
+        activeOrPendingRelationships: false,
+        seatDiscoveryEligible: true,
+      }),
+      "upsell",
+    );
+    assert.equal(
+      developingOthersBillingSection({
+        openSeatSubscription: false,
+        activeOrPendingRelationships: false,
+        seatDiscoveryEligible: false,
+      }),
+      null,
+    );
+  });
+
+  it("shows one open-seats card when a subscription is open and nobody is on it", () => {
+    const pastDueOpen = showSeatBillingPortalButton({
       stripeCustomerId: "cus_seat",
-      seatSubscriptionStatuses: input.seatSubscriptionStatuses,
+      seatSubscriptionStatuses: ["past_due"],
     });
-    return billingSeatPortalPlacement({
-      portalVisible,
-      developingOthersCardMounted: input.activeOrPendingRelationships > 0,
-    });
-  }
-
-  it("stands alone for a past_due seat after relationships have closed", () => {
     assert.equal(
-      place({
-        seatSubscriptionStatuses: ["past_due"],
-        activeOrPendingRelationships: 0,
+      developingOthersBillingSection({
+        openSeatSubscription: pastDueOpen,
+        activeOrPendingRelationships: false,
+        seatDiscoveryEligible: true,
       }),
-      "standalone",
+      "open-seats",
+    );
+    assert.equal(
+      developingOthersBillingSection({
+        openSeatSubscription: showSeatBillingPortalButton({
+          stripeCustomerId: "cus_seat",
+          seatSubscriptionStatuses: ["active"],
+        }),
+        activeOrPendingRelationships: false,
+        seatDiscoveryEligible: true,
+      }),
+      "open-seats",
     );
   });
 
-  it("stands alone for a seat-only account with no invites yet", () => {
+  it("keeps the relationships card when someone is active or pending", () => {
     assert.equal(
-      place({
-        seatSubscriptionStatuses: ["active"],
-        activeOrPendingRelationships: 0,
+      developingOthersBillingSection({
+        openSeatSubscription: true,
+        activeOrPendingRelationships: true,
+        seatDiscoveryEligible: false,
       }),
-      "standalone",
+      "relationships",
+    );
+    assert.equal(
+      developingOthersBillingSection({
+        openSeatSubscription: false,
+        activeOrPendingRelationships: true,
+        seatDiscoveryEligible: true,
+      }),
+      "relationships",
     );
   });
+});
 
-  it("sits on the Developing others card once, not twice", () => {
-    assert.equal(
-      place({
-        seatSubscriptionStatuses: ["active"],
-        activeOrPendingRelationships: 1,
-      }),
-      "on-card",
-    );
+describe("idleSeatSummaryLines", () => {
+  it("names a held empty seat the way Your seats does", () => {
+    const capacity: MentorSeatCapacity = {
+      debrief: { ...emptySlice(), capacity: 1, purchased: 1 },
+      evaluation: emptySlice(),
+    };
+    assert.deepEqual(idleSeatSummaryLines(capacity), [
+      "Apprentice · 1 available",
+    ]);
   });
 });
 
