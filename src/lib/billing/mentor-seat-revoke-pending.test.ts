@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
+  END_ACTIVE_RELATIONSHIPS_AT_CAPACITY_RPC,
   revokeExcessPendingForMentor,
   revokeExcessPendingMentorInvites,
 } from "./mentor-seat-revoke-pending";
@@ -27,6 +28,7 @@ function makeMentorSupabase(opts: {
     values: Record<string, unknown>;
     statusGuard?: string;
   }> = [];
+  const rpcCalls: Array<{ fn: string; args: Record<string, unknown> }> = [];
   const profileUpdates: Array<Record<string, unknown>> = [];
   const tablesTouched: string[] = [];
 
@@ -112,9 +114,13 @@ function makeMentorSupabase(opts: {
       }
       throw new Error(`unexpected table ${table}`);
     },
+    rpc(fn: string, args: Record<string, unknown>) {
+      rpcCalls.push({ fn, args });
+      return Promise.resolve({ data: 0, error: null });
+    },
   } as unknown as SupabaseClient;
 
-  return { supabase, updates, profileUpdates, tablesTouched };
+  return { supabase, updates, rpcCalls, profileUpdates, tablesTouched };
 }
 
 describe("revokeExcessPendingMentorInvites", () => {
@@ -224,7 +230,7 @@ describe("revokeExcessPendingMentorInvites", () => {
   });
 
   it("ends a single active relationship when capacity is zero", async () => {
-    const { supabase, updates } = makeMentorSupabase({
+    const { supabase, updates, rpcCalls } = makeMentorSupabase({
       profile: {
         purchased_debrief_seats: 0,
         purchased_evaluation_seats: 0,
@@ -241,39 +247,73 @@ describe("revokeExcessPendingMentorInvites", () => {
 
     await revokeExcessPendingMentorInvites(supabase, "mentor-1", "debrief");
 
-    assert.equal(updates.length, 1);
-    assert.deepEqual(updates[0].ids, ["a1"]);
-    assert.equal(updates[0].values.status, "ended");
-    assert.equal(updates[0].statusGuard, "active");
-    assert.equal(typeof updates[0].values.ended_at, "string");
+    assert.equal(updates.length, 0);
+    assert.equal(rpcCalls.length, 1);
+    assert.equal(rpcCalls[0].fn, END_ACTIVE_RELATIONSHIPS_AT_CAPACITY_RPC);
+    assert.deepEqual(rpcCalls[0].args.p_relationship_ids, ["a1"]);
   });
 
-  it("does not write released_to_mentee_at when ending an active relationship", async () => {
-    const { supabase, updates, tablesTouched } = makeMentorSupabase({
+  it("releases held complete diagnostics when capacity ends an active Apprentice relationship", async () => {
+    const { supabase, updates, rpcCalls, tablesTouched } = makeMentorSupabase({
       profile: {
-        purchased_debrief_seats: 0,
-        purchased_evaluation_seats: 0,
+        purchased_debrief_seats: 1,
+        purchased_evaluation_seats: 1,
         comp_debrief_seats: 0,
       },
       rows: [
         {
           id: "a-held",
           status: "active",
+          created_at: "2026-06-01T00:00:00Z",
+          seat_type: "debrief",
+        },
+        {
+          id: "a-keep",
+          status: "active",
           created_at: "2026-07-01T00:00:00Z",
+          seat_type: "debrief",
+        },
+        {
+          id: "p-open",
+          status: "pending",
+          created_at: "2026-08-01T00:00:00Z",
+          seat_type: "debrief",
+        },
+        {
+          id: "colleague-active",
+          status: "active",
+          created_at: "2026-06-01T00:00:00Z",
+          seat_type: "evaluation",
         },
       ],
     });
 
-    await revokeExcessPendingMentorInvites(supabase, "mentor-1", "evaluation");
+    await revokeExcessPendingMentorInvites(supabase, "mentor-1", "debrief");
 
+    // The release itself is release_held_evaluations_for_relationship, called
+    // inside end_active_mentor_relationships_at_capacity. That statement
+    // updates only complete diagnostics on the ids passed here, still held.
+    // Incomplete diagnostics are not in that predicate. This path does not
+    // write sermon_evaluations itself.
+    assert.equal(rpcCalls.length, 1);
+    assert.equal(rpcCalls[0].fn, END_ACTIVE_RELATIONSHIPS_AT_CAPACITY_RPC);
+    assert.deepEqual(rpcCalls[0].args.p_relationship_ids, ["a-held"]);
     assert.ok(!tablesTouched.includes("sermon_evaluations"));
     assert.equal(updates.length, 1);
-    assert.equal(updates[0].values.status, "ended");
-    assert.equal("released_to_mentee_at" in updates[0].values, false);
+    assert.equal(updates[0].values.status, "revoked");
+    assert.deepEqual(updates[0].ids, ["p-open"]);
+    const passed = rpcCalls.flatMap((call) =>
+      Array.isArray(call.args.p_relationship_ids)
+        ? call.args.p_relationship_ids
+        : [],
+    );
+    assert.ok(!passed.includes("a-keep"));
+    assert.ok(!passed.includes("p-open"));
+    assert.ok(!passed.includes("colleague-active"));
   });
 
   it("revokes both pending first, then ends the oldest active, when capacity drops to 1", async () => {
-    const { supabase, updates } = makeMentorSupabase({
+    const { supabase, updates, rpcCalls } = makeMentorSupabase({
       profile: {
         purchased_debrief_seats: 1,
         purchased_evaluation_seats: 0,
@@ -305,17 +345,17 @@ describe("revokeExcessPendingMentorInvites", () => {
 
     await revokeExcessPendingMentorInvites(supabase, "mentor-1", "debrief");
 
-    assert.equal(updates.length, 2);
+    assert.equal(updates.length, 1);
     assert.equal(updates[0].values.status, "revoked");
     assert.equal(updates[0].statusGuard, "pending");
     assert.deepEqual(updates[0].ids, ["p-old", "p-new"]);
-    assert.equal(updates[1].values.status, "ended");
-    assert.equal(updates[1].statusGuard, "active");
-    assert.deepEqual(updates[1].ids, ["a-old"]);
+    assert.equal(rpcCalls.length, 1);
+    assert.equal(rpcCalls[0].fn, END_ACTIVE_RELATIONSHIPS_AT_CAPACITY_RPC);
+    assert.deepEqual(rpcCalls[0].args.p_relationship_ids, ["a-old"]);
   });
 
   it("leaves the newer active when cancelling purchased seats if a comp seat remains", async () => {
-    const { supabase, updates, profileUpdates } = makeMentorSupabase({
+    const { supabase, updates, rpcCalls, profileUpdates } = makeMentorSupabase({
       profile: {
         purchased_debrief_seats: 0,
         purchased_evaluation_seats: 0,
@@ -340,9 +380,9 @@ describe("revokeExcessPendingMentorInvites", () => {
     });
 
     assert.equal(profileUpdates.length, 0);
-    assert.equal(updates.length, 1);
-    assert.deepEqual(updates[0].ids, ["a-old"]);
-    assert.equal(updates[0].values.status, "ended");
+    assert.equal(updates.length, 0);
+    assert.equal(rpcCalls.length, 1);
+    assert.deepEqual(rpcCalls[0].args.p_relationship_ids, ["a-old"]);
   });
 
   it("recomputes both seat types for a mentor", async () => {
@@ -372,7 +412,7 @@ describe("revokeExcessPendingMentorInvites", () => {
   });
 
   it("does not close the other seat type's relationships", async () => {
-    const { supabase, updates } = makeMentorSupabase({
+    const { supabase, updates, rpcCalls } = makeMentorSupabase({
       profile: {
         purchased_debrief_seats: 1,
         purchased_evaluation_seats: 0,
@@ -410,10 +450,18 @@ describe("revokeExcessPendingMentorInvites", () => {
       purchasedSeats: 0,
     });
 
-    const touched = updates.flatMap((u) => u.ids);
-    assert.ok(touched.includes("eval-pending"));
-    assert.ok(touched.includes("eval-active"));
-    assert.ok(!touched.includes("deb-active"));
-    assert.ok(!touched.includes("deb-pending"));
+    const revoked = updates.flatMap((u) => u.ids);
+    const ended = rpcCalls.flatMap((call) =>
+      Array.isArray(call.args.p_relationship_ids)
+        ? call.args.p_relationship_ids
+        : [],
+    );
+    assert.ok(revoked.includes("eval-pending"));
+    assert.ok(ended.includes("eval-active"));
+    assert.ok(!revoked.includes("deb-active"));
+    assert.ok(!revoked.includes("deb-pending"));
+    assert.ok(!ended.includes("deb-active"));
+    assert.ok(!ended.includes("deb-pending"));
+    assert.equal(rpcCalls[0]?.fn, END_ACTIVE_RELATIONSHIPS_AT_CAPACITY_RPC);
   });
 });
