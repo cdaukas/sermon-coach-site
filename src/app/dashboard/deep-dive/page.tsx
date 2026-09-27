@@ -82,11 +82,18 @@ export default async function DeepDivePage({ searchParams }: DeepDivePageProps) 
         Deep dive
       </p>
       <h1
-        className={`${showThemes ? "mb-2" : "mb-8"} text-[32px] font-normal tracking-tight md:text-[36px]`}
+        className="text-[32px] font-normal tracking-tight md:text-[36px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
       >
         Deep dive
       </h1>
+      <p
+        className={`mt-2 max-w-[48ch] text-[15px] leading-relaxed ${showThemes ? "mb-2" : "mb-8"}`}
+        style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+      >
+        A close look at one thread across up to 30 sermons: how you apply the
+        text, or how you bring it to Christ. One report each quarter.
+      </p>
 
       {unlock ? <DeepDiveUnlockBar sermonCount={sermons.length} /> : null}
 

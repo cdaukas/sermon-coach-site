@@ -144,7 +144,7 @@ export type DeepDiveUnlock = {
 };
 
 export function deepDiveEmptyLine(sermonCount: number): string {
-  return `Your deep dive appears after ${DEEP_DIVE_MIN_SERMONS} sermons. You have ${sermonCount}.`;
+  return `Your deep dive appears after ${DEEP_DIVE_MIN_SERMONS} evaluated sermons. You have ${sermonCount}.`;
 }
 
 export function deepDiveUnlock(eligible: number): DeepDiveUnlock | null {

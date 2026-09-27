@@ -66,6 +66,13 @@ function GrowthReportHeadline() {
           >
             How your preaching is moving
           </h1>
+          <p
+            className="mt-2 max-w-[48ch] text-[15px] leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink-soft)" }}
+          >
+            Your scores sermon by sermon, so you can see what is rising, what
+            is holding steady, and what keeps slipping.
+          </p>
         </div>
         <NewEvaluationButton />
       </div>

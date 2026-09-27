@@ -52,7 +52,7 @@ describe("deep dive empty state", () => {
   it("names the minimum and the sermons on hand", () => {
     assert.equal(
       deepDiveEmptyLine(2),
-      "Your deep dive appears after 12 sermons. You have 2.",
+      "Your deep dive appears after 12 evaluated sermons. You have 2.",
     );
     assert.equal(deepDiveUnlock(DEEP_DIVE_MIN_SERMONS), null);
   });
