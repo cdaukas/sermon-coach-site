@@ -134,6 +134,24 @@
   background: var(--sc-ink-mid);
 }
 
+.home-v2 .btn:focus-visible,
+.home-v2 .navlinks a:focus-visible,
+.home-v2 .navlogin:focus-visible,
+.home-v2 .cardlink:focus-visible {
+  outline: 2px solid var(--sc-gold);
+  outline-offset: 3px;
+}
+
+.home-v2 .btn-secondary {
+  background: transparent;
+  color: var(--sc-ink);
+}
+
+.home-v2 .btn-secondary:hover {
+  background: var(--sc-ink);
+  color: var(--sc-bg);
+}
+
 .home-v2 .btn:disabled {
   opacity: 0.6;
   cursor: default;
@@ -238,12 +256,14 @@
   font-size: 13px;
 }
 
-.home-v2 .herolinks a {
+.home-v2 .herolinks a,
+.home-v2 .subnote a {
   color: var(--sc-accent);
   text-decoration: none;
 }
 
-.home-v2 .herolinks a:hover {
+.home-v2 .herolinks a:hover,
+.home-v2 .subnote a:hover {
   text-decoration: underline;
 }
 
