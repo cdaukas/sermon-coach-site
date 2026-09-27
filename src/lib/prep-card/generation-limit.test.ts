@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  isPrepCardBelowMinimum,
   isPrepCardGenerationLimited,
+  prepCardEmptyLine,
   prepCardLimitLine,
   prepCardNextAvailableAt,
 } from "./generation-limit";
@@ -28,5 +30,16 @@ describe("prep card generation limit", () => {
 
   it("does not limit an account that has never generated a card", () => {
     assert.equal(isPrepCardGenerationLimited(null, GENERATED), false);
+  });
+});
+
+describe("prep card minimum", () => {
+  it("blocks 3 evaluated sermons and allows 4", () => {
+    assert.equal(isPrepCardBelowMinimum(3), true);
+    assert.equal(
+      prepCardEmptyLine(3),
+      "Your prep card appears after 4 evaluated sermons. You have 3.",
+    );
+    assert.equal(isPrepCardBelowMinimum(4), false);
   });
 });

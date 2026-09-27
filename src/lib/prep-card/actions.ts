@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { loadGrowthTrendSeries } from "@/lib/evaluation/queries";
 import { profileHasPrepCardAccess } from "./access";
 import { buildPrepCardSnapshot } from "./build";
 import {
+  isPrepCardBelowMinimum,
   isPrepCardGenerationLimited,
+  prepCardEmptyLine,
   prepCardLimitLine,
   prepCardNextAvailableAt,
 } from "./generation-limit";
@@ -36,6 +39,11 @@ export async function generatePrepCardAction(): Promise<GeneratePrepCardResult> 
 
   if (!(await profileHasPrepCardAccess(user.id))) {
     return { ok: false, error: "Prep card is not available on this account." };
+  }
+
+  const evaluatedSermonCount = (await loadGrowthTrendSeries()).includedSermonCount;
+  if (isPrepCardBelowMinimum(evaluatedSermonCount)) {
+    return { ok: false, error: prepCardEmptyLine(evaluatedSermonCount) };
   }
 
   const now = new Date();
