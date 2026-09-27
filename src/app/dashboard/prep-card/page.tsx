@@ -3,9 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GeneratePrepCardButton } from "@/components/prep-card/GeneratePrepCardButton";
 import { PrepDeskCardView } from "@/components/prep-card/PrepDeskCardView";
+import { loadGrowthTrendSeries } from "@/lib/evaluation/queries";
 import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
 import {
+  isPrepCardBelowMinimum,
   isPrepCardGenerationLimited,
+  prepCardEmptyLine,
   prepCardLimitLine,
   prepCardNextAvailableAt,
 } from "@/lib/prep-card/generation-limit";
@@ -32,13 +35,17 @@ export default async function PrepCardPage() {
     notFound();
   }
 
-  const [card, diagnostic] = await Promise.all([
+  const [card, diagnostic, trend] = await Promise.all([
     getLatestDeskCard(),
     getLatestThemeDiagnostic(),
+    loadGrowthTrendSeries(),
   ]);
+  const evaluatedSermonCount = trend.includedSermonCount;
+  const belowMinimum = isPrepCardBelowMinimum(evaluatedSermonCount);
   const now = new Date();
   const lastGeneratedAt = card ? new Date(card.generated_at) : null;
-  const limited = isPrepCardGenerationLimited(lastGeneratedAt, now);
+  const limited =
+    !belowMinimum && isPrepCardGenerationLimited(lastGeneratedAt, now);
   const limitLine =
     limited && lastGeneratedAt
       ? prepCardLimitLine(prepCardNextAvailableAt(lastGeneratedAt), now)
@@ -74,7 +81,7 @@ export default async function PrepCardPage() {
             {subtitle}
           </p>
         </div>
-        {limitLine ? (
+        {belowMinimum ? null : limitLine ? (
           <p
             className="text-[15px] leading-relaxed"
             style={{ ...serifFont, color: "var(--sc-ink)" }}
@@ -87,9 +94,19 @@ export default async function PrepCardPage() {
         )}
       </div>
 
+      {belowMinimum ? (
+        <p
+          className="mb-8 text-[15px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+          role="status"
+        >
+          {prepCardEmptyLine(evaluatedSermonCount)}
+        </p>
+      ) : null}
+
       {card ? (
         <PrepDeskCardView snapshot={card.snapshot} />
-      ) : (
+      ) : belowMinimum ? null : (
         <div
           className="rounded border px-6 py-10"
           style={{
