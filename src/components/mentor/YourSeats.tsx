@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { ManageSubscriptionButton } from "@/components/dashboard/ManageSubscriptionButton";
 import type { MentorSeatCapacity } from "@/lib/mentor/capacity";
 import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import { seatAvailability } from "@/components/mentor/seat-availability";
 import { MentorSeatPurchaseOptions } from "@/components/mentor/MentorSeatPurchaseOptions";
+import {
+  SEAT_BILLING_PORTAL_LABEL,
+  SEAT_END_RELEASE_NOTICE,
+} from "@/lib/mentor/seat-end-notice";
 
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
@@ -14,7 +18,13 @@ const serifFont = { fontFamily: "var(--font-serif)" };
  * Seat counts, stated plainly. Billing is a footnote to the mentoring work
  * above it, so this stays quiet: no card, no shadow, one hairline rule.
  */
-export function YourSeats({ capacity }: { capacity: MentorSeatCapacity }) {
+export function YourSeats({
+  capacity,
+  showSeatBillingPortal = false,
+}: {
+  capacity: MentorSeatCapacity;
+  showSeatBillingPortal?: boolean;
+}) {
   const [addingSeat, setAddingSeat] = useState(false);
   const rows = seatAvailability(capacity);
 
@@ -69,15 +79,27 @@ export function YourSeats({ capacity }: { capacity: MentorSeatCapacity }) {
         className="mt-6 text-[13px] leading-relaxed"
         style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
       >
-        Seats renew monthly.{" "}
-        <Link
-          href="/dashboard/buy"
-          className="font-medium underline-offset-4 hover:underline"
-          style={{ color: "var(--sc-ink-soft)" }}
-        >
-          Manage billing
-        </Link>
-        <span aria-hidden="true"> · </span>
+        Seats renew monthly.
+      </p>
+      {showSeatBillingPortal ? (
+        <div className="mt-3 max-w-md">
+          <ManageSubscriptionButton label={SEAT_BILLING_PORTAL_LABEL} />
+          <p
+            className="mt-2 text-[13px] leading-relaxed"
+            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+          >
+            {SEAT_END_RELEASE_NOTICE}
+          </p>
+        </div>
+      ) : null}
+      <p
+        className={
+          showSeatBillingPortal
+            ? "mt-3 text-[13px] leading-relaxed"
+            : "mt-2 text-[13px] leading-relaxed"
+        }
+        style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
+      >
         <button
           type="button"
           onClick={() => setAddingSeat((open) => !open)}

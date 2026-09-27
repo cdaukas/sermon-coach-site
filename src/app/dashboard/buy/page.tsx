@@ -6,8 +6,14 @@ import { MentorSeatDiscoveryCard } from "@/components/dashboard/MentorSeatDiscov
 import {
   DevelopingOthersCard,
   PlanCard,
+  SeatBillingPortalBlock,
 } from "@/components/dashboard/PlanCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
+import {
+  billingSeatPortalPlacement,
+  coachManageSubscriptionShowing,
+  loadSeatBillingPortalVisible,
+} from "@/lib/billing/seat-portal";
 import {
   developingOthersCopy,
   mentorSeatBreakdown,
@@ -48,6 +54,7 @@ export default async function BuyPage() {
   let subscriptionInterval: string | null = null;
   let currentPeriodEnd: string | null = null;
   let subscriptionStatus: string | null = null;
+  let stripeCustomerId: string | null = null;
 
   if (user) {
     const { data: profile } = await supabase
@@ -76,6 +83,10 @@ export default async function BuyPage() {
     subscriptionStatus =
       typeof profile?.subscription_status === "string"
         ? profile.subscription_status
+        : null;
+    stripeCustomerId =
+      typeof profile?.stripe_customer_id === "string"
+        ? profile.stripe_customer_id.trim()
         : null;
   }
 
@@ -122,6 +133,18 @@ export default async function BuyPage() {
       holdsMentorSeat = true;
     }
   }
+
+  const seatPortalPlacement = billingSeatPortalPlacement({
+    portalVisible: await loadSeatBillingPortalVisible({
+      stripeCustomerId,
+      coachManageShowing: coachManageSubscriptionShowing({
+        isComped,
+        subscriptionActive: subscriptionStatus === "active",
+      }),
+    }),
+    developingOthersCardMounted:
+      developingOthers !== null && seatBreakdown !== null,
+  });
 
   // A mentee reads his own coaching here; he is not a buyer of seats.
   const isMentee = user
@@ -175,7 +198,14 @@ export default async function BuyPage() {
 
       {planCopy ? (
         <BillingSection eyebrow={planEyebrow}>
-          <PlanCard copy={planCopy} />
+          <PlanCard
+            copy={planCopy}
+            seatEndNotice={
+              developingOthers !== null &&
+              (planCopy.actions === "manage" ||
+                planCopy.actions === "annual_and_manage")
+            }
+          />
         </BillingSection>
       ) : null}
 
@@ -193,7 +223,14 @@ export default async function BuyPage() {
           <DevelopingOthersCard
             text={developingOthers}
             breakdown={seatBreakdown}
+            showSeatBillingPortal={seatPortalPlacement === "on-card"}
           />
+        </BillingSection>
+      ) : null}
+
+      {seatPortalPlacement === "standalone" ? (
+        <BillingSection eyebrow="Developing others">
+          <SeatBillingPortalBlock />
         </BillingSection>
       ) : null}
 
