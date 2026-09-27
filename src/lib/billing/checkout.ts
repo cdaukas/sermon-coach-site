@@ -8,7 +8,6 @@ export const COACH_STRIPE_PRICE_IDS = {
 export const PACK_STRIPE_PRICE_IDS = {
   pack_2: "price_1ThKRT2Ea1b3J5pTr5k7ogyX",
   pack_6: "price_1ThKTR2Ea1b3J5pTH7geLyc2",
-  pack_12: "price_1ThKUo2Ea1b3J5pTwjlOCQUm",
 } as const;
 
 /**
@@ -53,6 +52,16 @@ type SearchParamReader = {
   get: (key: string) => string | null;
 };
 
+/**
+ * Series Prep (pack_12) is no longer sold. Checkout redirects this query
+ * to /pricing. Existing credit grants still use the pack_12 source.
+ */
+export function isRetiredPackCheckout(
+  searchParams: SearchParamReader,
+): boolean {
+  return searchParams.get("pack") === "pack_12";
+}
+
 export function parseCoachCheckoutParams(
   searchParams: SearchParamReader,
 ): CoachCheckoutParams | null {
@@ -75,7 +84,7 @@ export function parsePackCheckoutParams(
 ): PackCheckoutParams | null {
   const pack = searchParams.get("pack");
 
-  if (pack !== "pack_2" && pack !== "pack_6" && pack !== "pack_12") {
+  if (pack !== "pack_2" && pack !== "pack_6") {
     return null;
   }
 
@@ -155,9 +164,7 @@ export function getPackPriceId(pack: PackSku): string {
   const fromEnv =
     pack === "pack_2"
       ? process.env.STRIPE_PRICE_PACK_2
-      : pack === "pack_6"
-        ? process.env.STRIPE_PRICE_PACK_6
-        : process.env.STRIPE_PRICE_PACK_12;
+      : process.env.STRIPE_PRICE_PACK_6;
   return fromEnv ?? PACK_STRIPE_PRICE_IDS[pack];
 }
 

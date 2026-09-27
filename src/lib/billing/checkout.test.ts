@@ -10,6 +10,7 @@ import {
   MentorSeatPriceNotConfiguredError,
   getMentorSeatPriceId,
   getPackPriceId,
+  isRetiredPackCheckout,
   PACK_STRIPE_PRICE_IDS,
   parseCoachCheckoutParams,
   parseMentorSeatCheckoutParams,
@@ -76,14 +77,23 @@ describe("checkout params", () => {
     assert.deepEqual(parsePackCheckoutParams(new URLSearchParams("pack=pack_2")), {
       pack: "pack_2",
     });
-    assert.deepEqual(parsePackCheckoutParams(new URLSearchParams("pack=pack_12")), {
-      pack: "pack_12",
+    assert.deepEqual(parsePackCheckoutParams(new URLSearchParams("pack=pack_6")), {
+      pack: "pack_6",
     });
   });
 
-  it("rejects invalid pack params", () => {
+  it("rejects invalid pack params and the retired 12-credit pack", () => {
     assert.equal(parsePackCheckoutParams(new URLSearchParams("pack=pack_3")), null);
+    assert.equal(parsePackCheckoutParams(new URLSearchParams("pack=pack_12")), null);
     assert.equal(parsePackCheckoutParams(new URLSearchParams("plan=coach&cadence=monthly")), null);
+    assert.equal(
+      isRetiredPackCheckout(new URLSearchParams("pack=pack_12")),
+      true,
+    );
+    assert.equal(
+      isRetiredPackCheckout(new URLSearchParams("pack=pack_6")),
+      false,
+    );
   });
 
   it("builds pack checkout path", () => {
@@ -93,7 +103,7 @@ describe("checkout params", () => {
   it("maps pack sku to Stripe price IDs", () => {
     assert.equal(getPackPriceId("pack_2"), PACK_STRIPE_PRICE_IDS.pack_2);
     assert.equal(getPackPriceId("pack_6"), PACK_STRIPE_PRICE_IDS.pack_6);
-    assert.equal(getPackPriceId("pack_12"), PACK_STRIPE_PRICE_IDS.pack_12);
+    assert.equal("pack_12" in PACK_STRIPE_PRICE_IDS, false);
   });
 
   it("parses mentor seat checkout params", () => {
