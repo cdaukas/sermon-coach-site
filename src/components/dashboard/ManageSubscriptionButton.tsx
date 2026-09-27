@@ -6,16 +6,18 @@ const uiFont = { fontFamily: "var(--font-ui)" };
 
 /**
  * `intent` is the only thing this sends. "Switch to annual" passes
- * switch_to_annual so the server can deep-link the confirmation screen;
- * "Manage subscription" passes nothing and posts an empty body, exactly as
- * before. The client never names a price or a subscription.
+ * switch_to_annual so the server can deep-link the confirmation screen.
+ * "Manage seats and billing" passes manage_seats so the server can open the
+ * seat portal configuration. "Manage subscription" passes nothing and posts
+ * an empty body. The client never names a price, subscription, or
+ * configuration id.
  */
 export function ManageSubscriptionButton({
   label = "Manage subscription",
   intent,
 }: {
   label?: string;
-  intent?: "switch_to_annual";
+  intent?: "switch_to_annual" | "manage_seats";
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);

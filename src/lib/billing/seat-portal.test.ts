@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import type Stripe from "stripe";
 import {
   billingSeatPortalPlacement,
   listMentorSeatSubscriptionStatuses,
@@ -7,11 +8,10 @@ import {
 } from "./seat-portal";
 
 describe("showSeatBillingPortalButton", () => {
-  it("shows the button for a seat-only user", () => {
+  it("shows the button for a seat-only account", () => {
     assert.equal(
       showSeatBillingPortalButton({
         stripeCustomerId: "cus_seat",
-        coachManageShowing: false,
         seatSubscriptionStatuses: ["active"],
       }),
       true,
@@ -19,7 +19,6 @@ describe("showSeatBillingPortalButton", () => {
     assert.equal(
       showSeatBillingPortalButton({
         stripeCustomerId: "cus_seat",
-        coachManageShowing: false,
         seatSubscriptionStatuses: ["past_due"],
       }),
       true,
@@ -27,21 +26,29 @@ describe("showSeatBillingPortalButton", () => {
     assert.equal(
       showSeatBillingPortalButton({
         stripeCustomerId: "cus_seat",
-        coachManageShowing: false,
         seatSubscriptionStatuses: ["trialing"],
       }),
       true,
     );
   });
 
-  it("hides the button when Coach manage subscription is already showing", () => {
+  it("hides the button for a Coach-only account", () => {
+    assert.equal(
+      showSeatBillingPortalButton({
+        stripeCustomerId: "cus_coach",
+        seatSubscriptionStatuses: [],
+      }),
+      false,
+    );
+  });
+
+  it("shows the button for a Coach subscriber who also has an open seat", () => {
     assert.equal(
       showSeatBillingPortalButton({
         stripeCustomerId: "cus_both",
-        coachManageShowing: true,
         seatSubscriptionStatuses: ["active", "past_due"],
       }),
-      false,
+      true,
     );
   });
 
@@ -49,7 +56,6 @@ describe("showSeatBillingPortalButton", () => {
     assert.equal(
       showSeatBillingPortalButton({
         stripeCustomerId: null,
-        coachManageShowing: false,
         seatSubscriptionStatuses: ["active"],
       }),
       false,
@@ -57,7 +63,6 @@ describe("showSeatBillingPortalButton", () => {
     assert.equal(
       showSeatBillingPortalButton({
         stripeCustomerId: "   ",
-        coachManageShowing: false,
         seatSubscriptionStatuses: ["active"],
       }),
       false,
@@ -68,7 +73,6 @@ describe("showSeatBillingPortalButton", () => {
     assert.equal(
       showSeatBillingPortalButton({
         stripeCustomerId: "cus_seat",
-        coachManageShowing: false,
         seatSubscriptionStatuses: ["canceled", "unpaid"],
       }),
       false,
@@ -83,7 +87,6 @@ describe("billingSeatPortalPlacement", () => {
   }) {
     const portalVisible = showSeatBillingPortalButton({
       stripeCustomerId: "cus_seat",
-      coachManageShowing: false,
       seatSubscriptionStatuses: input.seatSubscriptionStatuses,
     });
     return billingSeatPortalPlacement({
@@ -134,7 +137,7 @@ describe("listMentorSeatSubscriptionStatuses", () => {
                 {
                   id: "sub_coach",
                   status: "active",
-                  metadata: { checkout_type: "subscription" },
+                  metadata: { checkout_type: "subscription" } as Stripe.Metadata,
                 },
                 {
                   id: "sub_seat",
@@ -142,7 +145,7 @@ describe("listMentorSeatSubscriptionStatuses", () => {
                   metadata: {
                     checkout_type: "mentor_seat",
                     seat_type: "debrief",
-                  },
+                  } as Stripe.Metadata,
                 },
               ],
               has_more: false,

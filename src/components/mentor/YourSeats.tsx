@@ -83,7 +83,10 @@ export function YourSeats({
       </p>
       {showSeatBillingPortal ? (
         <div className="mt-3 max-w-md">
-          <ManageSubscriptionButton label={SEAT_BILLING_PORTAL_LABEL} />
+          <ManageSubscriptionButton
+            label={SEAT_BILLING_PORTAL_LABEL}
+            intent="manage_seats"
+          />
           <p
             className="mt-2 text-[13px] leading-relaxed"
             style={{ ...uiFont, color: "var(--sc-ink-soft)" }}

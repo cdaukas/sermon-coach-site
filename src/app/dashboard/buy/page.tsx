@@ -10,8 +10,11 @@ import {
 } from "@/components/dashboard/PlanCard";
 import { getPackCredits } from "@/lib/billing/pack-credits";
 import {
+  annualSwitchButtonVisible,
+  loadAnnualSwitchButtonVisible,
+} from "@/lib/billing/portal-flow";
+import {
   billingSeatPortalPlacement,
-  coachManageSubscriptionShowing,
   loadSeatBillingPortalVisible,
 } from "@/lib/billing/seat-portal";
 import {
@@ -134,13 +137,17 @@ export default async function BuyPage() {
     }
   }
 
+  const planOffersAnnualSwitch = planCopy?.actions === "annual_and_manage";
+  const showSwitchToAnnual = annualSwitchButtonVisible({
+    planOffersAnnualSwitch,
+    coachMonthlySubscriptionFound: planOffersAnnualSwitch
+      ? await loadAnnualSwitchButtonVisible(stripeCustomerId)
+      : false,
+  });
+
   const seatPortalPlacement = billingSeatPortalPlacement({
     portalVisible: await loadSeatBillingPortalVisible({
       stripeCustomerId,
-      coachManageShowing: coachManageSubscriptionShowing({
-        isComped,
-        subscriptionActive: subscriptionStatus === "active",
-      }),
     }),
     developingOthersCardMounted:
       developingOthers !== null && seatBreakdown !== null,
@@ -200,6 +207,7 @@ export default async function BuyPage() {
         <BillingSection eyebrow={planEyebrow}>
           <PlanCard
             copy={planCopy}
+            showSwitchToAnnual={showSwitchToAnnual}
             seatEndNotice={
               developingOthers !== null &&
               (planCopy.actions === "manage" ||
