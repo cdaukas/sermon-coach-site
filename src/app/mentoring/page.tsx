@@ -17,7 +17,7 @@ const DISCLAIMER =
 export const metadata: Metadata = {
   title: "Mentoring",
   description:
-    "They submit their own sermons and keep their own library. Sermon Coach gives them a practical coaching debrief. You see the full evaluation.",
+    "They submit their own sermons and keep their own library. The Sermon Coach gives them a practical coaching debrief. You see the full evaluation.",
   alternates: { canonical: "/mentoring" },
 };
 
@@ -26,7 +26,7 @@ const CHANGES = [
     title: "Better-prepared conversations",
     paragraphs: [
       "Spend your time on the preacher's highest-leverage development need instead of diagnosing everything from scratch.",
-      "Sermon Coach brings structured evidence and a consistent framework. You bring what you know about the preacher, his congregation, his context, his calling, and his character.",
+      "The Sermon Coach brings structured evidence and a consistent framework. You bring what you know about the preacher, his congregation, his context, his calling, and his character.",
     ],
   },
   {
@@ -108,7 +108,7 @@ const QUESTIONS = [
     a: "Yes. His account, sermons, and evaluations stay with him. He can keep going on his own with a plan or a pack.",
   },
   {
-    q: "Does Sermon Coach replace the mentor?",
+    q: "Does The Sermon Coach replace the mentor?",
     a: "No. It gives you structured evidence and a consistent framework. You bring what software cannot: knowledge of the preacher, his congregation, his calling, and his character.",
   },
   {
@@ -184,7 +184,7 @@ export default function MentoringPage() {
               scratch.
             </h1>
             <p className="mentoring-lede">
-              They submit their own sermons and keep their own library. Sermon
+              They submit their own sermons and keep their own library. The Sermon
               Coach gives them a practical coaching debrief. You see the full
               evaluation, recognize patterns across sermons, and walk into the
               mentoring conversation knowing where to focus.
@@ -203,7 +203,7 @@ export default function MentoringPage() {
             </div>
           </div>
           <blockquote className="mentoring-quote">
-            <p>Sermon Coach does not replace the mentor.</p>
+            <p>The Sermon Coach does not replace the mentor.</p>
             <p>
               It makes the mentoring conversation more specific, more
               consistent, and more useful.
@@ -214,7 +214,7 @@ export default function MentoringPage() {
 
       <section className="section mentoring-section">
         <div className="container">
-          <h2>What changes when you mentor with Sermon Coach</h2>
+          <h2>What changes when you mentor with The Sermon Coach</h2>
           <div className="grid3">
             {CHANGES.map((item) => (
               <article key={item.title} className="card">
@@ -262,12 +262,15 @@ export default function MentoringPage() {
               </p>
               <img
                 src="/images/mentoring/mentoring-debrief-rewrite.jpg"
-                alt="A before and after rewrite from a Sermon Coach debrief. The before quotes Jonathan Edwards at length. The after names how the congregation presumes on grace in the preacher's own words."
+                alt="A before and after rewrite from The Sermon Coach's debrief. The before quotes Jonathan Edwards at length. The after names how the congregation presumes on grace in the preacher's own words."
               />
               <figcaption>
                 From the How To Grow section of a coaching debrief, the
                 feedback an Apprentice preacher receives.
               </figcaption>
+              <p className="mentoring-shot-more">
+                <a href="/sample-debrief">See a full sample debrief &rarr;</a>
+              </p>
             </figure>
             <figure className="mentoring-shot">
               <h3>What you read before you meet</h3>
@@ -278,7 +281,7 @@ export default function MentoringPage() {
               </p>
               <img
                 src="/images/mentoring/mentoring-where-you-can-grow.jpg"
-                alt="The Where You Can Grow section of a full Sermon Coach evaluation. Item one, landing the application in one concrete Monday, explains that the sermon's application stays abstract and the closing questions are never answered with a concrete picture."
+                alt="The Where You Can Grow section of The Sermon Coach's full evaluation. Item one, landing the application in one concrete Monday, explains that the sermon's application stays abstract and the closing questions are never answered with a concrete picture."
               />
               <figcaption>
                 From the full evaluation, which you read on either seat.

@@ -175,6 +175,21 @@ html:has(.mentoring-page) {
   color: var(--sc-ink-soft);
 }
 
+.home-v2 .mentoring-shot-more {
+  margin: 14px 0 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.home-v2 .mentoring-shot-more a {
+  color: var(--sc-accent);
+  text-decoration: none;
+}
+
+.home-v2 .mentoring-shot-more a:hover {
+  text-decoration: underline;
+}
+
 .home-v2 .mentoring-seats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -240,7 +255,7 @@ html:has(.mentoring-page) {
 }
 
 .home-v2 .mentoring-seat .btn {
-  align-self: end;
+  align-self: start;
   justify-self: start;
 }
 
@@ -370,5 +385,12 @@ html:has(.mentoring-page) {
 
   .home-v2 .mentoring-quote {
     margin-top: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-v2 .mentoring-seat .btn {
+    align-self: stretch;
+    width: 100%;
   }
 }

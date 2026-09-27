@@ -6,7 +6,7 @@ const COLUMNS = [
       { label: "How It's Scored", href: "/how-its-scored.html" },
       { label: "Sample sketch", href: "/sample-sketch" },
       { label: "Sample evaluation", href: "/sample-evaluation" },
-      { label: "Sample Mentoring debrief", href: "/sample-debrief" },
+      { label: "Sample mentoring debrief", href: "/sample-debrief" },
     ],
   },
   {
