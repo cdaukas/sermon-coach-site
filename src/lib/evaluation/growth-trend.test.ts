@@ -4,6 +4,7 @@ import { EVALUATION_FIXTURE } from "./fixture";
 import {
   buildGrowthTrendSeries,
   directionCopyForSeries,
+  growthChartEmptyLine,
   evaluationIsValidForGrowth,
   type GrowthTrendRollingPoint,
   type GrowthTrendSourceRow,
@@ -247,6 +248,19 @@ describe("buildGrowthTrendSeries", () => {
     const copy = directionCopyForSeries(sermons, rolling);
     assert.match(copy, /^Up /);
     assert.doesNotMatch(copy, /^Down /);
+  });
+});
+
+describe("growth chart empty state", () => {
+  it("names the minimum and the evaluated sermons on hand", () => {
+    assert.equal(
+      growthChartEmptyLine(2),
+      "Your growth chart appears after 6 evaluated sermons. You have 2.",
+    );
+    assert.equal(
+      growthChartEmptyLine(0),
+      "Your growth chart appears after 6 evaluated sermons. You have 0.",
+    );
   });
 });
 

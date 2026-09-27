@@ -122,7 +122,7 @@ export function deepDiveLockLines(params: {
   return {
     ranLine: `You ran ${theme} on ${ranOn}. Your next deep dive opens ${opensOn}.`,
     prepCardLine:
-      "Your prep card is always available and updates whenever you want it.",
+      "Your prep card can be built again 30 days after the last one.",
     opensAt,
   };
 }
@@ -142,6 +142,10 @@ export type DeepDiveUnlock = {
   countLabel: string;
   remainder: string;
 };
+
+export function deepDiveEmptyLine(sermonCount: number): string {
+  return `Your deep dive appears after ${DEEP_DIVE_MIN_SERMONS} sermons. You have ${sermonCount}.`;
+}
 
 export function deepDiveUnlock(eligible: number): DeepDiveUnlock | null {
   if (eligible >= DEEP_DIVE_MIN_SERMONS) {
