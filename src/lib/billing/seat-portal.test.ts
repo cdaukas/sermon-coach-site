@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type Stripe from "stripe";
 import type { MentorSeatCapacity } from "@/lib/mentor/capacity-parse";
+import { SEAT_END_RELEASE_NOTICE } from "@/lib/mentor/seat-end-notice";
 import {
   developingOthersBillingSection,
+  developingOthersReleaseLine,
   idleSeatSummaryLines,
   listMentorSeatSubscriptionStatuses,
   showSeatBillingPortalButton,
@@ -129,6 +131,11 @@ describe("developingOthersBillingSection", () => {
         seatDiscoveryEligible: true,
       }),
       "open-seats",
+    );
+    assert.equal(developingOthersReleaseLine("open-seats"), null);
+    assert.equal(
+      developingOthersReleaseLine("relationships"),
+      SEAT_END_RELEASE_NOTICE,
     );
   });
 
