@@ -12,6 +12,10 @@ export {
 
 export const GROWTH_ROLLING_WINDOW = 4;
 export const GROWTH_LINE_MIN_SERMONS = 6;
+
+export function growthChartEmptyLine(evaluatedSermonCount: number): string {
+  return `Your growth chart appears after ${GROWTH_LINE_MIN_SERMONS} evaluated sermons. You have ${evaluatedSermonCount}.`;
+}
 export const GROWTH_STAT_PAIR_MIN_SERMONS = 8;
 export const GROWTH_CHART_POINT_LIMIT = 24;
 export const GROWTH_DIRECTION_FLOOR = 0.6;

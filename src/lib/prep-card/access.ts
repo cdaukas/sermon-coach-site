@@ -1,3 +1,4 @@
+import { allowsCoachSurface, hasActiveCoach } from "@/lib/billing/coach-access";
 import { createClient } from "@/lib/supabase/server";
 
 export async function profileHasPrepCardAccess(
@@ -6,17 +7,20 @@ export async function profileHasPrepCardAccess(
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("prep_card_access")
+    .select("prep_card_access, is_comped, subscription_status, plan_tier")
     .eq("id", userId)
     .maybeSingle();
 
-  return data?.prep_card_access === true;
+  if (hasActiveCoach(data)) return true;
+  return allowsCoachSurface({
+    flag: data?.prep_card_access,
+    is_comped: data?.is_comped,
+    subscription_status: data?.subscription_status,
+    plan_tier: data?.plan_tier,
+  });
 }
 
-/**
- * Deep dive pilot. The prep-card flag only, so the two surfaces match.
- * Subscription and comped access come back in this function, and only here.
- */
+/** Deep dive uses the same access as the prep card. */
 export async function profileHasDeepDiveAccess(
   userId: string,
 ): Promise<boolean> {

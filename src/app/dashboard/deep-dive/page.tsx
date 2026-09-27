@@ -88,7 +88,7 @@ export default async function DeepDivePage({ searchParams }: DeepDivePageProps) 
         Deep dive
       </h1>
 
-      {unlock ? <DeepDiveUnlockBar unlock={unlock} /> : null}
+      {unlock ? <DeepDiveUnlockBar sermonCount={sermons.length} /> : null}
 
       {lock ? (
         <DeepDiveLock ranLine={lock.ranLine} prepCardLine={lock.prepCardLine} />

@@ -8,6 +8,7 @@ import {
   deepDiveThresholdProse,
 } from "./deep-dive-threshold";
 import {
+  deepDiveEmptyLine,
   deepDiveLockLines,
   deepDiveOpensAt,
   deepDiveSelectionBlock,
@@ -40,7 +41,20 @@ describe("deep dive quarter", () => {
       lines.ranLine,
       "You ran The ask on 14 September. Your next deep dive opens 14 December.",
     );
-    assert.match(lines.prepCardLine, /prep card is always available/);
+    assert.equal(
+      lines.prepCardLine,
+      "Your prep card can be built again 30 days after the last one.",
+    );
+  });
+});
+
+describe("deep dive empty state", () => {
+  it("names the minimum and the sermons on hand", () => {
+    assert.equal(
+      deepDiveEmptyLine(2),
+      "Your deep dive appears after 12 sermons. You have 2.",
+    );
+    assert.equal(deepDiveUnlock(DEEP_DIVE_MIN_SERMONS), null);
   });
 });
 

@@ -5,6 +5,11 @@ import { GeneratePrepCardButton } from "@/components/prep-card/GeneratePrepCardB
 import { PrepDeskCardView } from "@/components/prep-card/PrepDeskCardView";
 import { profileHasPrepCardAccess } from "@/lib/prep-card/access";
 import {
+  isPrepCardGenerationLimited,
+  prepCardLimitLine,
+  prepCardNextAvailableAt,
+} from "@/lib/prep-card/generation-limit";
+import {
   getLatestDeskCard,
   getLatestThemeDiagnostic,
 } from "@/lib/prep-card/queries";
@@ -31,6 +36,13 @@ export default async function PrepCardPage() {
     getLatestDeskCard(),
     getLatestThemeDiagnostic(),
   ]);
+  const now = new Date();
+  const lastGeneratedAt = card ? new Date(card.generated_at) : null;
+  const limited = isPrepCardGenerationLimited(lastGeneratedAt, now);
+  const limitLine =
+    limited && lastGeneratedAt
+      ? prepCardLimitLine(prepCardNextAvailableAt(lastGeneratedAt), now)
+      : null;
   const subtitle = diagnostic
     ? "One page for Saturday. Three strengths, three questions, the reverence check — locked to this quarter's diagnostic."
     : "One page for Saturday. Three strengths, three questions, the reverence check.";
@@ -62,7 +74,17 @@ export default async function PrepCardPage() {
             {subtitle}
           </p>
         </div>
-        <GeneratePrepCardButton />
+        {limitLine ? (
+          <p
+            className="text-[15px] leading-relaxed"
+            style={{ ...serifFont, color: "var(--sc-ink)" }}
+            role="status"
+          >
+            {limitLine}
+          </p>
+        ) : (
+          <GeneratePrepCardButton />
+        )}
       </div>
 
       {card ? (

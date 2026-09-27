@@ -21,7 +21,9 @@ import {
   loadGrowthTrendSeries,
 } from "@/lib/evaluation/queries";
 import {
+  GROWTH_LINE_MIN_SERMONS,
   GROWTH_ROLLING_WINDOW,
+  growthChartEmptyLine,
   type GrowthTrendSeries,
 } from "@/lib/evaluation/growth-trend";
 
@@ -35,51 +37,6 @@ export const metadata: Metadata = {
 type GrowthReportPageProps = {
   searchParams: Promise<{ baseline?: string; current?: string }>;
 };
-
-function GrowthReportUnavailable() {
-  return (
-    <main
-      className="rounded px-8 py-10"
-      style={{
-        background: "var(--sc-panel)",
-        border: "1px solid var(--sc-rule)",
-        boxShadow: "var(--sc-shadow-lift)",
-      }}
-    >
-      <Link
-        href="/dashboard"
-        className="mb-8 inline-block text-[13px] font-medium no-underline hover:underline"
-        style={{ ...uiFont, color: "var(--sc-accent)" }}
-      >
-        ← Back to library
-      </Link>
-
-      <div
-        className="mb-4 flex flex-wrap items-end justify-between gap-4"
-        style={{ borderBottom: "1px solid #d4cfc1", paddingBottom: 18 }}
-      >
-        <div className="min-w-0">
-          <p
-            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
-            style={{ ...uiFont, color: "var(--sc-accent)" }}
-          >
-            Growth report
-          </p>
-          <h1
-            className="mb-4 text-[32px] font-semibold leading-tight tracking-tight"
-            style={{ ...serifFont, color: "var(--sc-ink)" }}
-          >
-            How your preaching is moving
-          </h1>
-        </div>
-        <NewEvaluationButton />
-      </div>
-      <p className="text-[15px] leading-relaxed" style={{ ...uiFont, color: "var(--sc-ink-soft)" }}>
-        Complete at least two sermon evaluations to compare growth across sermons.
-      </p>
-    </main>
-  );
-}
 
 function GrowthReportHeadline() {
   return (
@@ -211,21 +168,13 @@ function GrowthTrendSection({ series }: { series: GrowthTrendSeries }) {
           </p>
         </>
       ) : (
-        <>
-          <p
-            className="text-[14px] leading-relaxed"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-            role="status"
-          >
-            {series.directionCopy}
-          </p>
-          <p
-            className="mt-3 text-[13px] leading-relaxed"
-            style={{ ...uiFont, color: "var(--sc-ink-soft)" }}
-          >
-            {series.sampleLine}
-          </p>
-        </>
+        <p
+          className="text-[15px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+          role="status"
+        >
+          {growthChartEmptyLine(series.includedSermonCount)}
+        </p>
       )}
     </section>
   );
@@ -261,8 +210,26 @@ export default async function GrowthReportPage({
     loadGrowthTrendSeries(),
   ]);
 
-  if (trendSeries.includedSermonCount === 0) {
-    return <GrowthReportUnavailable />;
+  if (trendSeries.includedSermonCount < GROWTH_LINE_MIN_SERMONS && options.length < 2) {
+    return (
+      <main
+        className="rounded px-8 py-10"
+        style={{
+          background: "var(--sc-panel)",
+          border: "1px solid var(--sc-rule)",
+          boxShadow: "var(--sc-shadow-lift)",
+        }}
+      >
+        <GrowthReportHeadline />
+        <p
+          className="text-[15px] leading-relaxed"
+          style={{ ...serifFont, color: "var(--sc-ink)" }}
+          role="status"
+        >
+          {growthChartEmptyLine(trendSeries.includedSermonCount)}
+        </p>
+      </main>
+    );
   }
 
   if (options.length < 2) {
