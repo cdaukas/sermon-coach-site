@@ -1,0 +1,396 @@
+/* Public /mentoring. Tokens and type match home-v2. Media overrides sit
+   after the rules they change. */
+
+html:has(.mentoring-page) {
+  scroll-behavior: smooth;
+}
+
+.home-v2 .mentoring-page :focus-visible {
+  outline: 2px solid var(--sc-gold);
+  outline-offset: 3px;
+}
+
+.home-v2 .mentoring-hero {
+  padding: 72px 0 64px;
+  background: var(--sc-panel);
+  border-top: 1px solid var(--sc-rule);
+  border-bottom: 1px solid var(--sc-rule);
+}
+
+.home-v2 .mentoring-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.7fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.home-v2 .mentoring-hero h1 {
+  font-family: var(--font-serif);
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--sc-ink);
+  margin: 0 0 18px;
+  max-width: 16em;
+}
+
+.home-v2 .mentoring-hero .mentoring-lede {
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--sc-ink-soft);
+  margin: 0 0 28px;
+  max-width: 42em;
+}
+
+.home-v2 .mentoring-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.home-v2 .mentoring-quote {
+  margin: 0;
+  padding: 4px 0 4px 20px;
+  border-left: 3px solid var(--sc-gold);
+}
+
+.home-v2 .mentoring-quote p {
+  margin: 0 0 12px;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  line-height: 1.45;
+  color: var(--sc-ink);
+}
+
+.home-v2 .mentoring-quote p:last-child {
+  margin-bottom: 0;
+}
+
+.home-v2 .mentoring-band {
+  background: var(--sc-panel);
+  border-top: 1px solid var(--sc-rule);
+  border-bottom: 1px solid var(--sc-rule);
+}
+
+.home-v2 .mentoring-page section[id] {
+  scroll-margin-top: 12px;
+}
+
+.home-v2 .mentoring-section h2 {
+  max-width: 18em;
+}
+
+.home-v2 .mentoring-sub {
+  color: var(--sc-ink-soft);
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 40em;
+  margin: 0 auto 8px;
+}
+
+.home-v2 .mentoring-steps {
+  list-style: none;
+  counter-reset: mentoring-step;
+  max-width: 740px;
+  margin: 36px auto 0;
+  padding: 0;
+  text-align: left;
+}
+
+.home-v2 .mentoring-steps li {
+  counter-increment: mentoring-step;
+  display: grid;
+  grid-template-columns: 2.2em 1fr;
+  gap: 8px 14px;
+  padding: 16px 0;
+  border-top: 1px solid var(--sc-rule);
+  color: var(--sc-ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.home-v2 .mentoring-steps li:last-child {
+  border-bottom: 1px solid var(--sc-rule);
+}
+
+.home-v2 .mentoring-steps li::before {
+  content: counter(mentoring-step);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sc-ink);
+  padding-top: 4px;
+}
+
+.home-v2 .mentoring-steps strong {
+  color: var(--sc-ink);
+  font-weight: 600;
+}
+
+.home-v2 .mentoring-shots {
+  display: grid;
+  gap: 56px;
+  margin-top: 42px;
+}
+
+.home-v2 .mentoring-shot {
+  margin: 0;
+  text-align: left;
+}
+
+.home-v2 .mentoring-shot h3 {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--sc-ink);
+  margin: 0 0 10px;
+}
+
+.home-v2 .mentoring-shot .mentoring-shot-body {
+  color: var(--sc-ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0 0 18px;
+  max-width: 42em;
+}
+
+.home-v2 .mentoring-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--sc-rule);
+  border-radius: 4px;
+  box-shadow: var(--sc-shadow);
+  background: var(--sc-panel);
+}
+
+.home-v2 .mentoring-shot figcaption {
+  margin-top: 12px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--sc-ink-soft);
+}
+
+.home-v2 .mentoring-shot-more {
+  margin: 14px 0 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.home-v2 .mentoring-shot-more a {
+  color: var(--sc-accent);
+  text-decoration: none;
+}
+
+.home-v2 .mentoring-shot-more a:hover {
+  text-decoration: underline;
+}
+
+.home-v2 .mentoring-seats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 18px;
+  margin-top: 36px;
+  text-align: left;
+}
+
+.home-v2 .mentoring-seat {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 8;
+  row-gap: 16px;
+  background: var(--sc-panel);
+  border: 1px solid var(--sc-rule);
+  border-radius: 4px;
+  box-shadow: var(--sc-shadow);
+  padding: 28px 26px 26px;
+}
+
+.home-v2 .mentoring-seat h3 {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--sc-ink);
+}
+
+.home-v2 .mentoring-seat-desc {
+  margin: 0;
+  color: var(--sc-ink-soft);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.home-v2 .mentoring-seat-row {
+  margin: 0;
+}
+
+.home-v2 .mentoring-seat-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sc-gold);
+  margin-bottom: 4px;
+}
+
+.home-v2 .mentoring-seat-value {
+  display: block;
+  color: var(--sc-ink);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.home-v2 .mentoring-seat-price {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.home-v2 .mentoring-seat .btn {
+  align-self: start;
+  justify-self: start;
+}
+
+.home-v2 .mentoring-classroom {
+  max-width: 40em;
+  margin: 28px auto 0;
+  text-align: center;
+  color: var(--sc-ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.home-v2 .mentoring-classroom a,
+.home-v2 .mentoring-trust-intro a,
+.home-v2 .mentoring-page .mentoring-inline-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--sc-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.home-v2 .mentoring-classroom a:hover,
+.home-v2 .mentoring-trust-intro a:hover,
+.home-v2 .mentoring-page .mentoring-inline-link:hover {
+  text-decoration-color: var(--sc-ink);
+}
+
+.home-v2 .mentoring-trust-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px 48px;
+  align-items: end;
+  text-align: left;
+}
+
+.home-v2 .mentoring-trust-head h2 {
+  margin: 0;
+  max-width: none;
+}
+
+.home-v2 .mentoring-trust-intro {
+  margin: 0;
+  color: var(--sc-ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.home-v2 .mentoring-trust-list {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  text-align: left;
+}
+
+.home-v2 .mentoring-trust-list li {
+  padding: 14px 0;
+  border-top: 1px solid var(--sc-rule);
+  color: var(--sc-ink);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.home-v2 .mentoring-trust-list li:last-child {
+  border-bottom: 1px solid var(--sc-rule);
+}
+
+.home-v2 .mentoring-faq {
+  max-width: 740px;
+  margin: 28px auto 0;
+  text-align: left;
+}
+
+.home-v2 .mentoring-faq h3 {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--sc-ink);
+  margin: 0 0 8px;
+}
+
+.home-v2 .mentoring-faq p {
+  margin: 0 0 26px;
+  color: var(--sc-ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.home-v2 .mentoring-close h2 {
+  max-width: 16em;
+}
+
+.home-v2 .mentoring-close .mentoring-actions {
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.home-v2 .legal-disclaimer {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--sc-ink-soft);
+  line-height: 1.55;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 28px 36px;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .home-v2 .mentoring-hero-grid,
+  .home-v2 .mentoring-trust-head,
+  .home-v2 .mentoring-seats {
+    grid-template-columns: 1fr;
+  }
+
+  .home-v2 .mentoring-seat {
+    display: flex;
+    flex-direction: column;
+    grid-row: auto;
+    margin-bottom: 18px;
+  }
+
+  .home-v2 .mentoring-hero h1 {
+    font-size: 32px;
+  }
+
+  .home-v2 .mentoring-quote {
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-v2 .mentoring-seat .btn {
+    align-self: stretch;
+    width: 100%;
+  }
+}

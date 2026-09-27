@@ -34,8 +34,11 @@ export function HomeV2Hero() {
           No card, no commitment. Full evaluation, back in minutes.
         </div>
         <div className="herolinks">
-          <Link href="/sample-sketch">See a sample sketch &rarr;</Link>
           <Link href="/sample-evaluation">See a sample evaluation &rarr;</Link>
+        </div>
+        <div className="subnote">
+          Developing an associate or church planter?{" "}
+          <Link href="/mentoring">See how mentoring works &rarr;</Link>
         </div>
       </div>
     </header>

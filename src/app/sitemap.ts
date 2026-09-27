@@ -28,6 +28,7 @@ const STATIC_PAGES = [
   { path: "/blog", priority: 0.8, changeFrequency: "weekly" },
   { path: "/sample-sketch", priority: 0.7, changeFrequency: "monthly" },
   { path: "/sample-debrief", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/mentoring", priority: 0.8, changeFrequency: "monthly" },
   { path: "/faq.html", priority: 0.7, changeFrequency: "monthly" },
   { path: "/why-sermon-coach.html", priority: 0.7, changeFrequency: "monthly" },
   { path: "/story.html", priority: 0.7, changeFrequency: "yearly" },

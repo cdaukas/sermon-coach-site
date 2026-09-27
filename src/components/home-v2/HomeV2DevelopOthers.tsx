@@ -31,7 +31,7 @@ export function HomeV2DevelopOthers() {
           </a>{" "}
           set up before the term starts.
         </p>
-        <a href="/pricing.html" className="cardlink">
+        <a href="/mentoring" className="cardlink">
           See seats and pricing &rarr;
         </a>
       </div>
