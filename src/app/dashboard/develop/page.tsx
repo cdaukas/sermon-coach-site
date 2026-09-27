@@ -18,10 +18,7 @@ import {
 import { listMentorSeatsForMentor } from "@/lib/mentor/list-seats";
 import { listMentoredEvaluationsForMentor } from "@/lib/mentor/submissions";
 import { profileIsTeamAccount } from "@/lib/mentor/team-account";
-import {
-  coachManageSubscriptionShowing,
-  loadSeatBillingPortalVisible,
-} from "@/lib/billing/seat-portal";
+import { loadSeatBillingPortalVisible } from "@/lib/billing/seat-portal";
 import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -214,7 +211,7 @@ export default async function DevelopPage({ searchParams }: DevelopPageProps) {
   let initialDisplayName: string | null = null;
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, stripe_customer_id, is_comped, subscription_status")
+    .select("display_name, stripe_customer_id")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -230,10 +227,6 @@ export default async function DevelopPage({ searchParams }: DevelopPageProps) {
     ? false
     : await loadSeatBillingPortalVisible({
         stripeCustomerId,
-        coachManageShowing: coachManageSubscriptionShowing({
-          isComped: profile?.is_comped === true,
-          subscriptionActive: profile?.subscription_status === "active",
-        }),
       });
 
   const [submissions, seats, coachingView] = await Promise.all([

@@ -21,7 +21,13 @@ import {
 const uiFont = { fontFamily: "var(--font-ui)" };
 const serifFont = { fontFamily: "var(--font-serif)" };
 
-function PlanActions({ actions }: { actions: PlanCopy["actions"] }) {
+function PlanActions({
+  actions,
+  showSwitchToAnnual,
+}: {
+  actions: PlanCopy["actions"];
+  showSwitchToAnnual: boolean;
+}) {
   if (actions === "none") {
     return null;
   }
@@ -30,7 +36,7 @@ function PlanActions({ actions }: { actions: PlanCopy["actions"] }) {
   if (actions === "start_coach") {
     return null;
   }
-  if (actions === "annual_and_manage") {
+  if (actions === "annual_and_manage" && showSwitchToAnnual) {
     return (
       <span className="flex shrink-0 flex-wrap items-center justify-end gap-x-2 gap-y-1">
         <ManageSubscriptionButton label="Switch to annual" intent="switch_to_annual" />
@@ -45,16 +51,24 @@ function PlanActions({ actions }: { actions: PlanCopy["actions"] }) {
 export function PlanCard({
   copy,
   seatEndNotice = false,
+  showSwitchToAnnual = true,
 }: {
   copy: PlanCopy;
   /** Next to Manage subscription, which opens the portal where a seat is cancelled. */
   seatEndNotice?: boolean;
+  /** Hidden when Stripe has no subscription on the Coach monthly price. */
+  showSwitchToAnnual?: boolean;
 }) {
   return (
     <BillingCard
       aria-label="Current plan"
       icon={<CoachCardIcon />}
-      action={<PlanActions actions={copy.actions} />}
+      action={
+        <PlanActions
+          actions={copy.actions}
+          showSwitchToAnnual={showSwitchToAnnual}
+        />
+      }
       footer={copy.actions === "start_coach" ? <StartCoachOffer /> : null}
     >
       <div className="min-w-0 leading-relaxed">
@@ -182,7 +196,10 @@ export function SeatBillingPortalBlock() {
       icon={<MentoringCardIcon />}
     >
       <div className="min-w-0">
-        <ManageSubscriptionButton label={SEAT_BILLING_PORTAL_LABEL} />
+        <ManageSubscriptionButton
+          label={SEAT_BILLING_PORTAL_LABEL}
+          intent="manage_seats"
+        />
         <p
           className="mt-2 mb-0 max-w-md leading-relaxed"
           style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
@@ -211,7 +228,10 @@ export function DevelopingOthersCard({
         <div className="flex flex-wrap items-start justify-end gap-x-3 gap-y-2">
           {showSeatBillingPortal ? (
             <div className="flex max-w-xs flex-col items-end gap-2">
-              <ManageSubscriptionButton label={SEAT_BILLING_PORTAL_LABEL} />
+              <ManageSubscriptionButton
+                label={SEAT_BILLING_PORTAL_LABEL}
+                intent="manage_seats"
+              />
               <p
                 className="m-0 text-right leading-relaxed"
                 style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}

@@ -1,24 +1,52 @@
-import type Stripe from "stripe";
+import Stripe from "stripe";
 import { getCoachPriceId } from "@/lib/billing/checkout";
 
 /**
- * The only intent the portal route accepts from a client. Everything the flow
- * needs (subscription id, item id, target price) is derived server-side from
- * the signed-in user's own stripe_customer_id. A price or subscription id from
- * the request body is never read.
+ * Intents the portal route accepts from a client. Everything the flow needs
+ * (subscription id, item id, target price, portal configuration) is derived
+ * server-side. A price, subscription id, or configuration id from the request
+ * body is never read.
  */
 export const PORTAL_INTENT_SWITCH_TO_ANNUAL = "switch_to_annual";
+export const PORTAL_INTENT_MANAGE_SEATS = "manage_seats";
 
-export type PortalIntent = typeof PORTAL_INTENT_SWITCH_TO_ANNUAL;
+export const SEAT_PORTAL_CONFIGURATION_ENV = "STRIPE_SEAT_PORTAL_CONFIGURATION_ID";
+export const ANNUAL_PORTAL_CONFIGURATION_ENV =
+  "STRIPE_ANNUAL_PORTAL_CONFIGURATION_ID";
+
+export type PortalIntent =
+  | typeof PORTAL_INTENT_SWITCH_TO_ANNUAL
+  | typeof PORTAL_INTENT_MANAGE_SEATS;
 
 export function parsePortalIntent(body: unknown): PortalIntent | null {
   if (typeof body !== "object" || body === null) {
     return null;
   }
   const intent = (body as { intent?: unknown }).intent;
-  return intent === PORTAL_INTENT_SWITCH_TO_ANNUAL
-    ? PORTAL_INTENT_SWITCH_TO_ANNUAL
-    : null;
+  if (intent === PORTAL_INTENT_SWITCH_TO_ANNUAL) {
+    return PORTAL_INTENT_SWITCH_TO_ANNUAL;
+  }
+  if (intent === PORTAL_INTENT_MANAGE_SEATS) {
+    return PORTAL_INTENT_MANAGE_SEATS;
+  }
+  return null;
+}
+
+/**
+ * Portal configuration for this session. A missing variable keeps today's
+ * default-configuration session and logs a warning. It does not throw.
+ */
+export function readOptionalPortalConfiguration(
+  envName: string,
+): string | undefined {
+  const value = process.env[envName]?.trim() ?? "";
+  if (!value) {
+    console.warn(
+      `Billing portal: ${envName} is not set; using the default portal configuration.`,
+    );
+    return undefined;
+  }
+  return value;
 }
 
 /**
@@ -39,11 +67,16 @@ export type AnnualFlowResult =
   | { fallback: AnnualFlowFallbackReason };
 
 /** Narrow surface so tests can supply a stub instead of a real Stripe client. */
+export type SubscriptionPage = {
+  data: Stripe.Subscription[];
+  has_more?: boolean;
+};
+
 export type SubscriptionLister = {
   subscriptions: {
     list: (
       params: Stripe.SubscriptionListParams,
-    ) => Promise<{ data: Stripe.Subscription[] }>;
+    ) => Promise<SubscriptionPage>;
   };
   customers: {
     retrieve: (
@@ -62,6 +95,119 @@ export type PortalSessionCreator = {
     };
   };
 };
+
+function itemPriceId(item: Stripe.SubscriptionItem): string | null {
+  const price = item.price;
+  if (typeof price === "string") {
+    return price;
+  }
+  return price?.id ?? null;
+}
+
+/**
+ * The active subscription whose single item is the Coach monthly price.
+ * A newer seat subscription on the same customer is skipped.
+ */
+export async function findCoachMonthlySubscription(
+  stripe: SubscriptionLister,
+  customerId: string,
+): Promise<
+  | { ok: true; subscription: Stripe.Subscription; itemId: string }
+  | { ok: false; fallback: AnnualFlowFallbackReason }
+> {
+  let startingAfter: string | undefined;
+  let sawAny = false;
+  let sawMultiItemCoachMonthly = false;
+
+  for (let page = 0; page < 5; page += 1) {
+    const list = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "active",
+      limit: 100,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+
+    for (const subscription of list.data) {
+      sawAny = true;
+      const items = subscription.items?.data ?? [];
+      const monthlyItem = items.find(
+        (item) => itemPriceId(item) === getCoachPriceId("monthly"),
+      );
+      if (!monthlyItem) {
+        continue;
+      }
+      if (items.length !== 1) {
+        sawMultiItemCoachMonthly = true;
+        continue;
+      }
+      return { ok: true, subscription, itemId: monthlyItem.id };
+    }
+
+    if (!list.has_more || list.data.length === 0) {
+      break;
+    }
+    startingAfter = list.data[list.data.length - 1]?.id;
+    if (!startingAfter) {
+      break;
+    }
+  }
+
+  if (!sawAny) {
+    return { ok: false, fallback: "no_active_subscription" };
+  }
+  if (sawMultiItemCoachMonthly) {
+    return { ok: false, fallback: "multiple_subscription_items" };
+  }
+  return { ok: false, fallback: "current_price_is_not_coach_monthly" };
+}
+
+/**
+ * Switch to annual is offered only when a Coach monthly subscription exists.
+ * `coachMonthlySubscriptionFound: null` means the lookup failed; keep the
+ * button, which is today's behavior.
+ */
+export function annualSwitchButtonVisible(input: {
+  planOffersAnnualSwitch: boolean;
+  coachMonthlySubscriptionFound: boolean | null;
+}): boolean {
+  if (!input.planOffersAnnualSwitch) {
+    return false;
+  }
+  if (input.coachMonthlySubscriptionFound === null) {
+    return true;
+  }
+  return input.coachMonthlySubscriptionFound;
+}
+
+export async function loadAnnualSwitchButtonVisible(
+  stripeCustomerId: string | null | undefined,
+): Promise<boolean> {
+  const customerId =
+    typeof stripeCustomerId === "string" ? stripeCustomerId.trim() : "";
+  if (!customerId) {
+    return false;
+  }
+
+  const secret = process.env.STRIPE_SECRET_KEY?.trim();
+  if (!secret) {
+    console.warn(
+      "Billing portal: missing STRIPE_SECRET_KEY; leaving Switch to annual visible.",
+    );
+    return true;
+  }
+
+  try {
+    const stripe = new Stripe(secret);
+    const found = await findCoachMonthlySubscription(stripe, customerId);
+    return found.ok;
+  } catch (error) {
+    console.warn(
+      "Billing portal: could not list subscriptions for Switch to annual; leaving the button visible.",
+      error instanceof Error ? error.message : error,
+    );
+    return true;
+  }
+}
 
 function hasDiscount(subscription: Stripe.Subscription): boolean {
   if (Array.isArray(subscription.discounts) && subscription.discounts.length > 0) {
@@ -86,27 +232,12 @@ export async function buildAnnualSwitchFlow(
   stripe: SubscriptionLister,
   customerId: string,
 ): Promise<AnnualFlowResult> {
-  const { data } = await stripe.subscriptions.list({
-    customer: customerId,
-    status: "active",
-    limit: 2,
-  });
-
-  const subscription = data[0];
-  if (!subscription) {
-    return { fallback: "no_active_subscription" };
+  const found = await findCoachMonthlySubscription(stripe, customerId);
+  if (!found.ok) {
+    return { fallback: found.fallback };
   }
 
-  const items = subscription.items.data;
-  if (items.length !== 1) {
-    return { fallback: "multiple_subscription_items" };
-  }
-
-  const item = items[0];
-  const currentPriceId = item.price?.id ?? null;
-  if (currentPriceId !== getCoachPriceId("monthly")) {
-    return { fallback: "current_price_is_not_coach_monthly" };
-  }
+  const { subscription, itemId } = found;
 
   if (hasDiscount(subscription)) {
     return { fallback: "subscription_carries_a_discount" };
@@ -137,7 +268,7 @@ export async function buildAnnualSwitchFlow(
         subscription: subscription.id,
         items: [
           {
-            id: item.id,
+            id: itemId,
             price: getCoachPriceId("annual"),
             quantity: 1,
           },
@@ -162,6 +293,12 @@ export async function createPortalSession(
     customerId: string;
     returnUrl: string;
     flowData?: Stripe.BillingPortal.SessionCreateParams.FlowData;
+    /**
+     * Seat sessions pass the seat configuration. The annual confirm session
+     * passes the annual configuration. A rejected deep link retries without
+     * either, on the default configuration.
+     */
+    configuration?: string;
   },
 ): Promise<Stripe.BillingPortal.Session> {
   const base = {
@@ -174,6 +311,7 @@ export async function createPortalSession(
       return await stripe.billingPortal.sessions.create({
         ...base,
         flow_data: params.flowData,
+        ...(params.configuration ? { configuration: params.configuration } : {}),
       });
     } catch (error) {
       console.error(
@@ -183,5 +321,10 @@ export async function createPortalSession(
     }
   }
 
-  return stripe.billingPortal.sessions.create(base);
+  return stripe.billingPortal.sessions.create({
+    ...base,
+    ...(params.flowData || !params.configuration
+      ? {}
+      : { configuration: params.configuration }),
+  });
 }

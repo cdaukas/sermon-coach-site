@@ -3,10 +3,15 @@ import { describe, it } from "node:test";
 import type Stripe from "stripe";
 import { COACH_STRIPE_PRICE_IDS } from "./checkout";
 import {
+  annualSwitchButtonVisible,
+  ANNUAL_PORTAL_CONFIGURATION_ENV,
   buildAnnualSwitchFlow,
   createPortalSession,
   parsePortalIntent,
+  PORTAL_INTENT_MANAGE_SEATS,
   PORTAL_INTENT_SWITCH_TO_ANNUAL,
+  readOptionalPortalConfiguration,
+  SEAT_PORTAL_CONFIGURATION_ENV,
   type PortalSessionCreator,
   type SubscriptionLister,
 } from "./portal-flow";
@@ -75,10 +80,14 @@ function listerFor(
 }
 
 describe("parsePortalIntent", () => {
-  it("accepts the one intent it knows", () => {
+  it("accepts the intents it knows", () => {
     assert.equal(
       parsePortalIntent({ intent: "switch_to_annual" }),
       PORTAL_INTENT_SWITCH_TO_ANNUAL,
+    );
+    assert.equal(
+      parsePortalIntent({ intent: "manage_seats" }),
+      PORTAL_INTENT_MANAGE_SEATS,
     );
   });
 
@@ -141,6 +150,35 @@ describe("buildAnnualSwitchFlow, happy path", () => {
     assert.equal(calls.length, 1);
     assert.equal(calls[0].customer, "cus_scoped");
     assert.equal(calls[0].status, "active");
+    assert.equal(calls[0].limit, 100);
+  });
+
+  it("selects the Coach monthly subscription when a newer seat subscription is listed first", async () => {
+    const { stripe } = listerFor([
+      subscriptionStub({
+        id: "sub_seat_newer",
+        items: [{ id: "si_seat", priceId: "price_apprentice" }],
+      }),
+      subscriptionStub({
+        id: "sub_coach_older",
+        items: [{ id: "si_coach", priceId: MONTHLY_PRICE }],
+      }),
+    ]);
+
+    const result = await buildAnnualSwitchFlow(stripe, "cus_both");
+    assert.ok("flowData" in result, "expected a flow, got a fallback");
+    assert.equal(
+      result.flowData.subscription_update_confirm?.subscription,
+      "sub_coach_older",
+    );
+    assert.equal(
+      result.flowData.subscription_update_confirm?.items[0]?.id,
+      "si_coach",
+    );
+    assert.equal(
+      result.flowData.subscription_update_confirm?.items[0]?.price,
+      ANNUAL_PRICE,
+    );
   });
 
   it("targets the annual price, not the monthly one it came from", async () => {
@@ -303,6 +341,102 @@ function sessionCreatorThatRejectsFlows(options: { rejectFlow: boolean }) {
   return { stripe, calls };
 }
 
+describe("annualSwitchButtonVisible", () => {
+  it("hides Switch to annual for a seat-only account", () => {
+    assert.equal(
+      annualSwitchButtonVisible({
+        planOffersAnnualSwitch: false,
+        coachMonthlySubscriptionFound: false,
+      }),
+      false,
+    );
+  });
+
+  it("shows Switch to annual for a Coach-only monthly account", () => {
+    assert.equal(
+      annualSwitchButtonVisible({
+        planOffersAnnualSwitch: true,
+        coachMonthlySubscriptionFound: true,
+      }),
+      true,
+    );
+  });
+
+  it("shows Switch to annual for a Coach monthly account that also has seats", () => {
+    assert.equal(
+      annualSwitchButtonVisible({
+        planOffersAnnualSwitch: true,
+        coachMonthlySubscriptionFound: true,
+      }),
+      true,
+    );
+  });
+
+  it("hides Switch to annual when no Coach monthly subscription exists", () => {
+    assert.equal(
+      annualSwitchButtonVisible({
+        planOffersAnnualSwitch: true,
+        coachMonthlySubscriptionFound: false,
+      }),
+      false,
+    );
+  });
+
+  it("keeps the button when the subscription lookup failed", () => {
+    assert.equal(
+      annualSwitchButtonVisible({
+        planOffersAnnualSwitch: true,
+        coachMonthlySubscriptionFound: null,
+      }),
+      true,
+    );
+  });
+});
+
+describe("readOptionalPortalConfiguration", () => {
+  it("returns a trimmed id when the variable is set", () => {
+    const previous = process.env[SEAT_PORTAL_CONFIGURATION_ENV];
+    process.env[SEAT_PORTAL_CONFIGURATION_ENV] = "  bpc_seat  ";
+    try {
+      assert.equal(
+        readOptionalPortalConfiguration(SEAT_PORTAL_CONFIGURATION_ENV),
+        "bpc_seat",
+      );
+    } finally {
+      if (previous === undefined) {
+        delete process.env[SEAT_PORTAL_CONFIGURATION_ENV];
+      } else {
+        process.env[SEAT_PORTAL_CONFIGURATION_ENV] = previous;
+      }
+    }
+  });
+
+  it("warns and returns undefined when the variable is missing", () => {
+    const previous = process.env[ANNUAL_PORTAL_CONFIGURATION_ENV];
+    delete process.env[ANNUAL_PORTAL_CONFIGURATION_ENV];
+    const warnings: unknown[][] = [];
+    const original = console.warn;
+    console.warn = (...args: unknown[]) => {
+      warnings.push(args);
+    };
+    try {
+      assert.equal(
+        readOptionalPortalConfiguration(ANNUAL_PORTAL_CONFIGURATION_ENV),
+        undefined,
+      );
+      assert.equal(warnings.length, 1);
+      assert.match(String(warnings[0]?.[0]), /STRIPE_ANNUAL_PORTAL_CONFIGURATION_ID/);
+    } finally {
+      console.warn = original;
+      if (previous === undefined) {
+        delete process.env[ANNUAL_PORTAL_CONFIGURATION_ENV];
+      } else {
+        process.env[ANNUAL_PORTAL_CONFIGURATION_ENV] = previous;
+      }
+    }
+  });
+});
+
 describe("createPortalSession", () => {
   it("deep-links when the flow is accepted", async () => {
     const { stripe, calls } = sessionCreatorThatRejectsFlows({ rejectFlow: false });
@@ -317,6 +451,46 @@ describe("createPortalSession", () => {
     assert.deepEqual(calls[0].flow_data, FLOW_DATA);
     assert.equal(calls[0].customer, "cus_ok");
     assert.equal(calls[0].return_url, "https://example.test/dashboard/buy");
+    assert.equal(calls[0].configuration, undefined);
+  });
+
+  it("passes the annual configuration only on the confirm session", async () => {
+    const { stripe, calls } = sessionCreatorThatRejectsFlows({ rejectFlow: false });
+    await createPortalSession(stripe, {
+      customerId: "cus_annual",
+      returnUrl: "https://example.test/dashboard/buy",
+      flowData: FLOW_DATA,
+      configuration: "bpc_annual",
+    });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].configuration, "bpc_annual");
+    assert.deepEqual(calls[0].flow_data, FLOW_DATA);
+  });
+
+  it("drops the annual configuration when the deep link is rejected", async () => {
+    const { stripe, calls } = sessionCreatorThatRejectsFlows({ rejectFlow: true });
+    await createPortalSession(stripe, {
+      customerId: "cus_rejected",
+      returnUrl: "https://example.test/dashboard/buy",
+      flowData: FLOW_DATA,
+      configuration: "bpc_annual",
+    });
+    assert.equal(calls.length, 2);
+    assert.equal(calls[0].configuration, "bpc_annual");
+    assert.equal(calls[1].configuration, undefined);
+    assert.equal(calls[1].flow_data, undefined);
+  });
+
+  it("passes the seat configuration on a plain session", async () => {
+    const { stripe, calls } = sessionCreatorThatRejectsFlows({ rejectFlow: false });
+    await createPortalSession(stripe, {
+      customerId: "cus_seats",
+      returnUrl: "https://example.test/dashboard/buy",
+      configuration: "bpc_seats",
+    });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].configuration, "bpc_seats");
+    assert.equal(calls[0].flow_data, undefined);
   });
 
   it("falls back to a plain session when the flow session throws", async () => {

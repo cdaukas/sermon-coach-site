@@ -13,20 +13,9 @@ export function seatSubscriptionOpensPortal(status: string): boolean {
 }
 
 /**
- * The Coach "Manage subscription" button is on the billing card whenever the
- * account is an active, non-comped Coach subscriber. Seat portal is hidden
- * then so the same portal is not offered twice.
- */
-export function coachManageSubscriptionShowing(profile: {
-  isComped: boolean;
-  subscriptionActive: boolean;
-}): boolean {
-  return profile.subscriptionActive && !profile.isComped;
-}
-
-/**
- * Seat-only portal control. Requires a Stripe customer, at least one open
- * mentor-seat subscription, and no Coach manage button already on the page.
+ * Seat portal control. Requires a Stripe customer and at least one open
+ * mentor-seat subscription. A Coach subscriber with a seat sees it beside
+ * Manage subscription; each button opens its own portal session.
  */
 export type BillingSeatPortalPlacement = "hidden" | "on-card" | "standalone";
 
@@ -49,14 +38,13 @@ export function billingSeatPortalPlacement(input: {
 
 export function showSeatBillingPortalButton(input: {
   stripeCustomerId: string | null | undefined;
-  coachManageShowing: boolean;
   seatSubscriptionStatuses: readonly string[];
 }): boolean {
   const customerId =
     typeof input.stripeCustomerId === "string"
       ? input.stripeCustomerId.trim()
       : "";
-  if (!customerId || input.coachManageShowing) {
+  if (!customerId) {
     return false;
   }
   return input.seatSubscriptionStatuses.some(seatSubscriptionOpensPortal);
@@ -124,13 +112,12 @@ export async function listMentorSeatSubscriptionStatuses(
  */
 export async function loadSeatBillingPortalVisible(input: {
   stripeCustomerId: string | null | undefined;
-  coachManageShowing: boolean;
 }): Promise<boolean> {
   const customerId =
     typeof input.stripeCustomerId === "string"
       ? input.stripeCustomerId.trim()
       : "";
-  if (!customerId || input.coachManageShowing) {
+  if (!customerId) {
     return false;
   }
 
@@ -147,7 +134,6 @@ export async function loadSeatBillingPortalVisible(input: {
     );
     return showSeatBillingPortalButton({
       stripeCustomerId: customerId,
-      coachManageShowing: input.coachManageShowing,
       seatSubscriptionStatuses: statuses,
     });
   } catch (error) {

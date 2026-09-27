@@ -2,19 +2,22 @@
 // Creates a Stripe Billing Portal session for the signed-in user.
 // stripe_customer_id is always read from the user's profile — never from the request.
 //
-// An optional { intent: "switch_to_annual" } body deep-links a Coach monthly
-// subscriber to a "confirm Coach annual" screen instead of the portal front
-// page. The subscription, item and target price are all derived server-side
-// from that customer id; the request never supplies them. Any guard that does
-// not hold falls back to a plain session, which is the behaviour that shipped
-// before the deep link and is always safe.
+// An optional { intent: "switch_to_annual" } body deep-links the Coach monthly
+// subscription to a "confirm Coach annual" screen. { intent: "manage_seats" }
+// opens the seat portal configuration. The subscription, item, target price,
+// and configuration id are all derived server-side; the request never supplies
+// them. A missing configuration id uses the default portal and logs a warning.
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  ANNUAL_PORTAL_CONFIGURATION_ENV,
   buildAnnualSwitchFlow,
   createPortalSession,
   parsePortalIntent,
+  PORTAL_INTENT_MANAGE_SEATS,
   PORTAL_INTENT_SWITCH_TO_ANNUAL,
+  readOptionalPortalConfiguration,
+  SEAT_PORTAL_CONFIGURATION_ENV,
 } from "@/lib/billing/portal-flow";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -89,11 +92,19 @@ export async function POST(request: Request) {
     let flowData:
       | Stripe.BillingPortal.SessionCreateParams.FlowData
       | undefined;
+    let configuration: string | undefined;
 
-    if (intent === PORTAL_INTENT_SWITCH_TO_ANNUAL) {
+    if (intent === PORTAL_INTENT_MANAGE_SEATS) {
+      configuration = readOptionalPortalConfiguration(
+        SEAT_PORTAL_CONFIGURATION_ENV,
+      );
+    } else if (intent === PORTAL_INTENT_SWITCH_TO_ANNUAL) {
       const result = await buildAnnualSwitchFlow(stripe, customerId);
       if ("flowData" in result) {
         flowData = result.flowData;
+        configuration = readOptionalPortalConfiguration(
+          ANNUAL_PORTAL_CONFIGURATION_ENV,
+        );
       } else {
         console.info(
           "Billing portal: switch_to_annual fell back to a plain session",
@@ -106,6 +117,7 @@ export async function POST(request: Request) {
       customerId,
       returnUrl: `${origin}/dashboard/buy`,
       flowData,
+      configuration,
     });
 
     if (!session.url) {
