@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+scripts/agency-probe/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
