@@ -13,6 +13,7 @@ import {
   type MentorSeatBreakdown,
   type PlanCopy,
 } from "@/lib/billing/plan-summary";
+import { developingOthersReleaseLine } from "@/lib/billing/seat-portal";
 import {
   SEAT_BILLING_PORTAL_LABEL,
   SEAT_END_RELEASE_NOTICE,
@@ -190,6 +191,7 @@ function SeatBreakdownRow({
 }
 
 export function OpenSeatsCard({ summaryLines }: { summaryLines: string[] }) {
+  const releaseLine = developingOthersReleaseLine("open-seats");
   return (
     <BillingCard aria-label="Developing others" icon={<MentoringCardIcon />}>
       <div className="min-w-0">
@@ -223,12 +225,14 @@ export function OpenSeatsCard({ summaryLines }: { summaryLines: string[] }) {
             label={SEAT_BILLING_PORTAL_LABEL}
             intent="manage_seats"
           />
-          <p
-            className="mt-2 mb-0 leading-relaxed"
-            style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
-          >
-            {SEAT_END_RELEASE_NOTICE}
-          </p>
+          {releaseLine ? (
+            <p
+              className="mt-2 mb-0 leading-relaxed"
+              style={{ ...uiFont, fontSize: 13, color: "#4a5568" }}
+            >
+              {releaseLine}
+            </p>
+          ) : null}
         </div>
       </div>
     </BillingCard>

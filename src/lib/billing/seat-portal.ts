@@ -3,6 +3,7 @@ import { getMentorSeatTypeFromMetadata } from "@/lib/billing/stripe-webhook";
 import type { MentorSeatCapacity } from "@/lib/mentor/capacity-parse";
 import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
 import type { MentorSeatType } from "@/lib/mentor/relationships";
+import { SEAT_END_RELEASE_NOTICE } from "@/lib/mentor/seat-end-notice";
 
 /** Statuses on which a seat subscription can still be managed in the portal. */
 const OPEN_SEAT_SUBSCRIPTION_STATUSES = new Set([
@@ -41,6 +42,16 @@ export function developingOthersBillingSection(input: {
     return "upsell";
   }
   return null;
+}
+
+/**
+ * The release line belongs on a relationship that can end. An empty seat
+ * has nobody to release an evaluation to.
+ */
+export function developingOthersReleaseLine(
+  section: DevelopingOthersBillingSection,
+): string | null {
+  return section === "relationships" ? SEAT_END_RELEASE_NOTICE : null;
 }
 
 /**
