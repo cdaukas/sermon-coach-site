@@ -36,6 +36,8 @@ type EvaluateButtonProps = {
   disabled?: boolean;
   isMentoredMentee?: boolean;
   outputLanguage?: OutputLanguage;
+  /** Report offer is already showing the no-credits pitch. */
+  suppressNoCreditsNotice?: boolean;
 };
 
 export function EvaluateButton({
@@ -50,6 +52,7 @@ export function EvaluateButton({
   disabled = false,
   isMentoredMentee = false,
   outputLanguage = "en",
+  suppressNoCreditsNotice = false,
 }: EvaluateButtonProps) {
   const copy = evaluationReportCopy(outputLanguage);
   const [pending, startTransition] = useTransition();
@@ -123,6 +126,13 @@ export function EvaluateButton({
   const showCoachCreditLines = !hideCreditLine && !isMentoredMentee;
 
   if (!mayRunEvaluation) {
+    if (
+      suppressNoCreditsNotice &&
+      entitlement?.blockedReason === "no_credits"
+    ) {
+      return null;
+    }
+
     return (
       <div className={rootClassName}>
         <EvaluationAccessGate

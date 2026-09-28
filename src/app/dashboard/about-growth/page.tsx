@@ -34,6 +34,12 @@ export default async function AboutGrowthPage() {
       className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 md:px-8"
     >
       <GrowthLockedView />
+      <p
+        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em]"
+        style={{ ...uiFont, color: "var(--sc-accent)" }}
+      >
+        Dashboard
+      </p>
       <h1
         className="text-[32px] font-semibold leading-tight tracking-tight md:text-[36px]"
         style={{ ...serifFont, color: "var(--sc-ink)" }}
