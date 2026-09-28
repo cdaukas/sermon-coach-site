@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { track } from "@vercel/analytics";
 
 const NAV_ITEMS = [
   { label: "How It's Scored", href: "/how-its-scored.html" },
   { label: "Sketch — Free", href: "/sketch" },
   { label: "Blog", href: "/blog" },
+  { label: "Mentoring", href: "/mentoring" },
   { label: "Pricing", href: "/pricing.html" },
   { label: "FAQ", href: "/faq.html" },
   { label: "Story", href: "/story.html" },
@@ -14,6 +17,7 @@ const NAV_ITEMS = [
 
 export function HomeV2Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <nav>
@@ -39,11 +43,25 @@ export function HomeV2Header() {
             out as three flex children. Becomes the dropdown panel at ≤720px. */}
         <div className="navmenu" id="nav-menu">
           <div className="navlinks">
-            {NAV_ITEMS.map((item) => (
-              <a key={item.label} href={item.href}>
-                {item.label}
-              </a>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const active = item.href === "/mentoring" && pathname === "/mentoring";
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  onClick={
+                    item.href === "/mentoring"
+                      ? () => {
+                          track("nav_mentoring_click");
+                        }
+                      : undefined
+                  }
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </div>
           <div className="navactions">
             <Link href="/login" className="navlogin">
