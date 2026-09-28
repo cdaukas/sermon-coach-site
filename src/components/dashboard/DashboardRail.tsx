@@ -189,7 +189,25 @@ export function DashboardRail({
               <NavLink key={item.href} item={item} pathname={pathname} />
             ))}
           </>
-        ) : null}
+        ) : (
+          <Link
+            href="/dashboard/about-growth"
+            className={`dashboard-rail-link${
+              pathname.startsWith("/dashboard/about-growth") ? " is-active" : ""
+            }`}
+            style={uiFont}
+            aria-current={
+              pathname.startsWith("/dashboard/about-growth") ? "page" : undefined
+            }
+            aria-label="Growth (included with Coach)"
+          >
+            <span className="dashboard-rail-label-full">Growth</span>
+            <span className="dashboard-rail-label-short">Growth</span>
+            <span className="dashboard-rail-free-tag" aria-hidden="true">
+              Coach
+            </span>
+          </Link>
+        )}
         <p className="dashboard-rail-group-label" style={uiFont}>
           Developing others
         </p>
