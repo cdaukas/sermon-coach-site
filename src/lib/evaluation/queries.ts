@@ -187,6 +187,8 @@ export async function getEvaluationById(
     return null;
   }
 
+  const mentorRelationshipId = mentorRelationshipIdFromRow(row);
+
   const { data: version, error: versionError } = await supabase
     .from("sermon_versions")
     .select("sermon_id, content")
@@ -257,7 +259,20 @@ export async function getEvaluationById(
     resolvedVia = "mentored_context";
   }
 
-  return { evaluation, sermon, manuscriptContent, resolvedVia };
+  return {
+    evaluation,
+    sermon,
+    manuscriptContent,
+    resolvedVia,
+    mentorRelationshipId,
+  };
+}
+
+function mentorRelationshipIdFromRow(row: Record<string, unknown>): string | null {
+  const value = row.mentor_relationship_id;
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 export async function listRecentCompleteEvaluations(

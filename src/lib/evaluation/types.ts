@@ -53,6 +53,12 @@ export type EvaluationWithSermon = {
   manuscriptContent: string | null;
   /** Navigation hint only. Not a permission check. */
   resolvedVia: EvaluationSermonResolvedVia;
+  /**
+   * Seat submission stamp from sermon_evaluations.mentor_relationship_id.
+   * Null on a personal evaluation. Returned beside resolvedVia so the row
+   * mapper stays unchanged.
+   */
+  mentorRelationshipId: string | null;
 };
 
 export type RequestEvaluationResult =

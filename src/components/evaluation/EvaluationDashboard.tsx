@@ -14,6 +14,10 @@ import { HowItPreachesSection } from "./HowItPreachesSection";
 import { MelodicLineSection } from "./MelodicLineSection";
 import { MethodologySection } from "./MethodologySection";
 import { EvaluationReturnNote } from "./EvaluationReturnNote";
+import {
+  ReportOfferBlock,
+  type ReportOffer,
+} from "./ReportOfferBlock";
 import { PrioritiesSection } from "./PrioritiesSection";
 import { RewritesSection } from "./RewritesSection";
 import { EvaluationPrintButtons } from "@/components/evaluation/EvaluationPrintButtons";
@@ -47,6 +51,11 @@ type EvaluationDashboardProps = {
    * and PDF capture.
    */
   returnNoteLines?: readonly string[] | null;
+  /**
+   * Owner scores view only. Null on the public sample, a mentored or seat
+   * evaluation, PDF capture, and any account on Coach or comped.
+   */
+  offer?: ReportOffer | null;
 };
 
 export function EvaluationDashboard({
@@ -61,6 +70,7 @@ export function EvaluationDashboard({
   criterion2SwitcherHrefs,
   showMethodology = true,
   returnNoteLines = null,
+  offer = null,
 }: EvaluationDashboardProps) {
   const { meta } = result;
   const copy = evaluationReportCopy(outputLanguage);
@@ -216,6 +226,8 @@ export function EvaluationDashboard({
       ) : null}
 
       <RewritesSection rewrites={result.rewrites} outputLanguage={outputLanguage} />
+
+      {offer ? <ReportOfferBlock offer={offer} /> : null}
 
       {showMethodology ? (
         <MethodologySection
