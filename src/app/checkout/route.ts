@@ -14,6 +14,11 @@ import {
 import { getOrCreateStripeCustomer } from "@/lib/billing/stripe-customer";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  CHECKOUT_RETURN_COOKIE,
+  MENTOR_SEAT_CHECKOUT_RETURN,
+  checkoutReturnCookieOptions,
+} from "@/lib/billing/checkout-return";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -97,7 +102,15 @@ export async function GET(request: Request) {
       throw new Error("Stripe checkout session missing url");
     }
 
-    return NextResponse.redirect(session.url);
+    const redirect = NextResponse.redirect(session.url);
+    if (seatParams) {
+      redirect.cookies.set(
+        CHECKOUT_RETURN_COOKIE,
+        MENTOR_SEAT_CHECKOUT_RETURN,
+        checkoutReturnCookieOptions(),
+      );
+    }
+    return redirect;
   } catch (error) {
     // A missing seat price is a config gap, not a Stripe failure. Name the
     // variable so the log says what to set rather than reporting a 404 for an

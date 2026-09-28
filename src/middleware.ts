@@ -4,6 +4,10 @@ import {
   isDashboardPath,
   needsAcquisitionAttribution,
 } from "@/lib/auth/acquisition-gate";
+import {
+  CHECKOUT_RETURN_COOKIE,
+  checkoutReturnMatches,
+} from "@/lib/billing/checkout-return";
 import { START_PATH } from "@/lib/auth/start";
 
 /** Request header so Server Components can omit dashboard chrome for PDF export. */
@@ -86,6 +90,21 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && isDashboardPath(pathname)) {
+    // Seat Checkout sets this cookie before Stripe. Honor it once so payment
+    // returns to /dashboard/develop instead of the attribution prompt.
+    if (
+      checkoutReturnMatches(
+        pathname,
+        request.cookies.get(CHECKOUT_RETURN_COOKIE)?.value,
+      )
+    ) {
+      supabaseResponse.cookies.set(CHECKOUT_RETURN_COOKIE, "", {
+        path: "/",
+        maxAge: 0,
+      });
+      return supabaseResponse;
+    }
+
     const needsAttribution = await needsAcquisitionAttribution(supabase);
     if (needsAttribution) {
       const url = request.nextUrl.clone();
