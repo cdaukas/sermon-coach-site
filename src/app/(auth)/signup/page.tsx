@@ -29,6 +29,7 @@ import {
   buildMentorSeatCheckoutPath,
   buildPackCheckoutPath,
   buildPackLoginPath,
+  mentorSeatSignupContext,
   parseCoachCheckoutParams,
   parseMentorSeatCheckoutParams,
   parsePackCheckoutParams,
@@ -217,7 +218,7 @@ function SignupForm() {
           : packParams
             ? "Create your account, then continue to pack checkout."
             : seatParams
-              ? "Create your account, then continue to mentoring seat checkout."
+              ? mentorSeatSignupContext(seatParams.seat)
               : "Start building your private sermon library."
       }
       footer={

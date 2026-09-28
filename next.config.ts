@@ -11,12 +11,13 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        // Bare /signup bookmarks → /start. Keep /signup?plan=… and /signup?pack=…
-        // on the signup page for checkout flows.
+        // Bare /signup bookmarks → /start. Keep /signup?plan=…, /signup?pack=…,
+        // and /signup?seat=… on the signup page for checkout flows.
         source: "/signup",
         missing: [
           { type: "query", key: "plan" },
           { type: "query", key: "pack" },
+          { type: "query", key: "seat" },
         ],
         destination: "/start",
         statusCode: 301,

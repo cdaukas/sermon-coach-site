@@ -8,6 +8,7 @@ import {
   COACH_STRIPE_PRICE_IDS,
   getCoachPriceId,
   MentorSeatPriceNotConfiguredError,
+  mentorSeatSignupContext,
   getMentorSeatPriceId,
   getPackPriceId,
   PACK_STRIPE_PRICE_IDS,
@@ -172,6 +173,17 @@ describe("checkout params", () => {
         process.env.STRIPE_PRICE_MENTOR_EVALUATION = prevEval;
       }
     }
+  });
+
+  it("describes the seat being purchased above signup", () => {
+    assert.equal(
+      mentorSeatSignupContext("debrief"),
+      "Create your account to add an Apprentice seat ($12 per seat/month).",
+    );
+    assert.equal(
+      mentorSeatSignupContext("evaluation"),
+      "Create your account to add a Colleague seat ($25 per seat/month).",
+    );
   });
 
   it("builds mentor seat checkout path", () => {
