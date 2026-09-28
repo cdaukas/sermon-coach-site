@@ -14,7 +14,9 @@ import { EarlierEvaluations } from "@/components/evaluation/EarlierEvaluations";
 import { ReportEvaluationRerun } from "@/components/evaluation/ReportEvaluationRerun";
 import { ReportManuscriptDisclosure } from "@/components/evaluation/ReportManuscriptDisclosure";
 import { TuesdayNudgeOffer } from "@/components/evaluation/TuesdayNudgeOffer";
+import { hasActiveCoach } from "@/lib/billing/coach-access";
 import { viewerIncludesMethodologyInReports } from "@/lib/auth/report-preferences";
+import type { ReportOffer } from "@/components/evaluation/ReportOfferBlock";
 import { toCoachingReportPresentation } from "@/lib/evaluation/coaching-report";
 import {
   getEvaluation,
@@ -133,7 +135,13 @@ export default async function EvaluationPage({
     notFound();
   }
 
-  const { evaluation, sermon, manuscriptContent, resolvedVia } = data;
+  const {
+    evaluation,
+    sermon,
+    manuscriptContent,
+    resolvedVia,
+    mentorRelationshipId,
+  } = data;
   const outputLanguage = parseOutputLanguage(evaluation.output_language);
   const reportCopy = evaluationReportCopy(outputLanguage);
   // Live read of the viewer's own preference. Deliberately not stored on the
@@ -171,6 +179,11 @@ export default async function EvaluationPage({
   let entitlement = null;
   let hasActiveEvaluation = false;
   let isMentoredMentee = false;
+  let offerProfile: {
+    subscription_status: string | null;
+    plan_tier: string | null;
+    is_comped: boolean | null;
+  } | null = null;
   /** Screen-only: owner + not opted in + never acted on the offer. */
   let tuesdayNudgeOffer: { newsletterOptedIn: boolean } | null = null;
 
@@ -184,7 +197,7 @@ export default async function EvaluationPage({
       const profilePromise = supabase
         .from("profiles")
         .select(
-          "newsletter_opted_in, tuesday_nudge_opted_in, tuesday_nudge_offer_seen_at",
+          "newsletter_opted_in, tuesday_nudge_opted_in, tuesday_nudge_offer_seen_at, subscription_status, plan_tier, is_comped",
         )
         .eq("id", user.id)
         .maybeSingle();
@@ -202,6 +215,7 @@ export default async function EvaluationPage({
         isMentoredMentee = nextIsMentored;
 
         const profile = profileResult.data;
+        offerProfile = profile;
         if (
           profile &&
           profile.tuesday_nudge_opted_in !== true &&
@@ -225,6 +239,13 @@ export default async function EvaluationPage({
       }
     }
   }
+
+  const reportOffer = resolveReportOffer({
+    showOwnerReportActions,
+    mentorRelationshipId,
+    entitlement,
+    profile: offerProfile,
+  });
 
   const debriefReady = isDebriefMode && hasCoachingNarrative;
   const diagnosticReady = !isDebriefMode && hasScoredResult;
@@ -350,6 +371,7 @@ export default async function EvaluationPage({
               ? evaluationReturnNoteLines(entitlement, outputLanguage)
               : null
           }
+          offer={pdfCapture ? null : reportOffer}
           criterion2Wording={criterion2Wording}
           criterion2SwitcherHrefs={
             pdfCapture || outputLanguage !== "es"
@@ -409,4 +431,32 @@ export default async function EvaluationPage({
       ) : null}
     </main>
   );
+}
+
+function resolveReportOffer(input: {
+  showOwnerReportActions: boolean;
+  mentorRelationshipId: string | null;
+  entitlement: { packRemaining: number } | null;
+  profile: {
+    subscription_status?: string | null;
+    plan_tier?: string | null;
+    is_comped?: boolean | null;
+  } | null;
+}): ReportOffer | null {
+  if (!input.showOwnerReportActions || input.mentorRelationshipId != null) {
+    return null;
+  }
+  if (!input.profile || !input.entitlement) {
+    return null;
+  }
+  if (hasActiveCoach(input.profile) || input.profile.is_comped === true) {
+    return null;
+  }
+  if (input.entitlement.packRemaining > 0) {
+    return {
+      kind: "remaining",
+      packRemaining: input.entitlement.packRemaining,
+    };
+  }
+  return { kind: "zero" };
 }
