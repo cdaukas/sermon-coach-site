@@ -30,7 +30,6 @@ export function TuesdayNudgeOffer({
 }: TuesdayNudgeOfferProps) {
   const copy = evaluationReportCopy(outputLanguage);
   const router = useRouter();
-  const [checked, setChecked] = useState(true);
   const [pending, setPending] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,44 +77,22 @@ export function TuesdayNudgeOffer({
     >
       {error ? <AuthMessage variant="error">{error}</AuthMessage> : null}
 
-      <label
-        className="mt-0 flex cursor-pointer items-start gap-3 text-[14px] leading-relaxed"
+      <p
+        className="text-[13px] leading-relaxed"
         style={{
           ...uiFont,
-          color: "var(--sc-ink-mid)",
-          opacity: pending ? 0.7 : 1,
+          color: "var(--sc-ink-soft)",
           marginTop: error ? "1rem" : 0,
         }}
       >
-        <input
-          type="checkbox"
-          name="tuesdayNudgeOffer"
-          checked={checked}
-          disabled={pending}
-          onChange={(event) => setChecked(event.target.checked)}
-          className="mt-1 h-4 w-4 shrink-0"
-        />
-        <span className="min-w-0">
-          <span
-            className="block font-medium"
-            style={{ color: "var(--sc-ink)" }}
-          >
-            {copy.tuesdayNudgeTitle}
-          </span>
-          <span
-            className="mt-1 block text-[13px] leading-relaxed"
-            style={{ color: "var(--sc-ink-soft)" }}
-          >
-            {copy.tuesdayNudgeBody}
-          </span>
-        </span>
-      </label>
+        {copy.tuesdayNudgeBody}
+      </p>
 
       <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
         <button
           type="button"
           disabled={pending}
-          onClick={() => void complete(checked)}
+          onClick={() => void complete(true)}
           className="cursor-pointer rounded border px-4 py-2 text-[13px] font-semibold disabled:cursor-wait disabled:opacity-70"
           style={{
             ...uiFont,
@@ -124,7 +101,7 @@ export function TuesdayNudgeOffer({
             color: "var(--sc-ink)",
           }}
         >
-          {pending ? copy.saving : copy.confirm}
+          {pending ? copy.saving : copy.tuesdayNudgeTitle}
         </button>
         <button
           type="button"

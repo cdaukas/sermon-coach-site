@@ -14,6 +14,8 @@ type ReportEvaluationRerunProps = {
   hasActiveEvaluation: boolean;
   isMentoredMentee?: boolean;
   outputLanguage?: OutputLanguage;
+  /** True only while the report offer block is on the page. */
+  suppressNoCreditsNotice?: boolean;
 };
 
 /**
@@ -28,6 +30,7 @@ export function ReportEvaluationRerun({
   hasActiveEvaluation,
   isMentoredMentee = false,
   outputLanguage = "en",
+  suppressNoCreditsNotice = false,
 }: ReportEvaluationRerunProps) {
   const copy = evaluationReportCopy(outputLanguage);
   return (
@@ -42,6 +45,7 @@ export function ReportEvaluationRerun({
         buttonLabel={copy.runEvaluationAgain}
         isMentoredMentee={isMentoredMentee}
         outputLanguage={outputLanguage}
+        suppressNoCreditsNotice={suppressNoCreditsNotice}
       />
       {!isMentoredMentee ? (
         <EvaluationCreditLine

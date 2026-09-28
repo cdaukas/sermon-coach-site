@@ -410,6 +410,7 @@ export default async function EvaluationPage({
           hasActiveEvaluation={hasActiveEvaluation}
           isMentoredMentee={isMentoredMentee}
           outputLanguage={outputLanguage}
+          suppressNoCreditsNotice={reportOffer != null}
         />
       ) : null}
 

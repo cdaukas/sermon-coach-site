@@ -79,7 +79,7 @@ function ZeroPackOffer() {
       <a
         href={COACH_HREF}
         onClick={() => {
-          track("report_offer_coach_click");
+          track("report_offer_coach_click", { variant: "zero" });
         }}
         className="mt-6"
         style={buttonStyle}
@@ -141,7 +141,7 @@ function RemainingPackOffer({ packRemaining }: { packRemaining: number }) {
       <a
         href={COACH_FROM_PACK_HREF}
         onClick={() => {
-          track("report_offer_coach_click");
+          track("report_offer_coach_click", { variant: "remaining" });
         }}
         className="mt-2 inline-block text-[14px] font-semibold no-underline hover:underline"
         style={{ ...uiFont, color: "var(--sc-accent)" }}
