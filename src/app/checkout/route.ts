@@ -88,7 +88,7 @@ export async function GET(request: Request) {
               quantity: seatParams!.quantity,
               userId: user.id,
               customerId,
-              successUrl: `${origin}/dashboard/develop?purchased=1`,
+              successUrl: `${origin}/dashboard/develop`,
               cancelUrl: `${origin}/dashboard/mentoring`,
             },
     );

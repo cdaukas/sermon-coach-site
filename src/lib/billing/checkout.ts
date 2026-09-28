@@ -1,3 +1,6 @@
+import { MENTOR_SEAT_MONTHLY_USD } from "@/lib/billing/plan-summary";
+import { mentorSeatDisplayName } from "@/lib/mentor/seat-labels";
+
 /** Coach subscription Stripe price IDs for Checkout Sessions. */
 export const COACH_STRIPE_PRICE_IDS = {
   monthly: "price_1Tdz8n2Ea1b3J5pTJDPg4g4D",
@@ -141,6 +144,14 @@ export function buildMentorSeatSignupPath(
 ): string {
   const q = quantity === 1 ? "" : `&quantity=${quantity}`;
   return `/signup?seat=${seat}${q}`;
+}
+
+/** Copy shown above the account form when signup is carrying a seat purchase. */
+export function mentorSeatSignupContext(seat: MentorSeatSku): string {
+  const article = seat === "debrief" ? "an" : "a";
+  const name = mentorSeatDisplayName(seat);
+  const price = MENTOR_SEAT_MONTHLY_USD[seat];
+  return `Create your account to add ${article} ${name} seat ($${price} per seat/month).`;
 }
 
 export function getCoachPriceId(cadence: CoachCadence): string {

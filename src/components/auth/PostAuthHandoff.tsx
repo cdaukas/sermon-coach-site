@@ -5,7 +5,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { START_PATH } from "@/lib/auth/start";
 import {
   buildCheckoutPath,
+  buildMentorSeatCheckoutPath,
   parseCoachCheckoutParams,
+  parseMentorSeatCheckoutParams,
   parsePackCheckoutParams,
   buildPackCheckoutPath,
 } from "@/lib/billing/checkout";
@@ -17,8 +19,12 @@ function destinationFromSearch(
 ): string {
   const checkoutParams = parseCoachCheckoutParams(searchParams);
   const packParams = parsePackCheckoutParams(searchParams);
+  const seatParams = parseMentorSeatCheckoutParams(searchParams);
   if (checkoutParams) return buildCheckoutPath(checkoutParams.cadence);
   if (packParams) return buildPackCheckoutPath(packParams.pack);
+  if (seatParams) {
+    return buildMentorSeatCheckoutPath(seatParams.seat, seatParams.quantity);
+  }
   const next = searchParams.get("next");
   if (next && next.startsWith("/") && !next.startsWith("//")) {
     return next;
