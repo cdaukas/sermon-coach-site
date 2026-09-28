@@ -259,6 +259,16 @@ html:has(.mentoring-page) {
   justify-self: start;
 }
 
+.home-v2 .mentoring-checkout-note {
+  max-width: 40em;
+  margin: 28px auto 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--sc-ink-soft);
+}
+
 .home-v2 .mentoring-classroom {
   max-width: 40em;
   margin: 28px auto 0;
@@ -268,6 +278,7 @@ html:has(.mentoring-page) {
   line-height: 1.65;
 }
 
+.home-v2 .mentoring-checkout-note a,
 .home-v2 .mentoring-classroom a,
 .home-v2 .mentoring-trust-intro a,
 .home-v2 .mentoring-page .mentoring-inline-link {
@@ -278,6 +289,7 @@ html:has(.mentoring-page) {
   text-underline-offset: 3px;
 }
 
+.home-v2 .mentoring-checkout-note a:hover,
 .home-v2 .mentoring-classroom a:hover,
 .home-v2 .mentoring-trust-intro a:hover,
 .home-v2 .mentoring-page .mentoring-inline-link:hover {

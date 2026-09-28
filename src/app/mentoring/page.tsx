@@ -326,6 +326,12 @@ export default function MentoringPage() {
               button="Add a Colleague seat"
             />
           </div>
+          <p className="mentoring-checkout-note">
+            You&apos;ll create your account, then check out securely with
+            Stripe. Already have an account?{" "}
+            <a href="/login?redirectTo=%2Fdashboard%2Fbuy">Sign in</a> and add
+            a seat from Billing.
+          </p>
           <p className="mentoring-classroom">
             Training a seminary class or a church-planting cohort?{" "}
             <a href={CLASSROOM_PATH}>See Classroom</a>, billed by the term
