@@ -17,6 +17,7 @@ import {
   isDuplicateSignupError,
 } from "@/lib/auth/signup-errors";
 import { withCaptchaToken } from "@/lib/auth/captcha";
+import { readSignupUtm } from "@/lib/auth/utm-capture";
 import { assertSignupBotAllowed } from "@/lib/auth/signup-bot-guard";
 import { setEmailPreferencesAtSignup } from "@/lib/auth/newsletter-opt-in";
 import { START_PATH, startPathWithClaim } from "@/lib/auth/start";
@@ -164,6 +165,7 @@ function SignupForm() {
           data: {
             newsletter_opted_in: newsletterOptedIn,
             tuesday_nudge_opted_in: tuesdayNudgeOptedIn,
+            ...readSignupUtm(document.cookie),
           },
         },
         captcha.token,

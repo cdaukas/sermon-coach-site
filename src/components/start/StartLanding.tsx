@@ -13,6 +13,7 @@ import {
 import { AuthCaptcha, useAuthCaptcha } from "@/components/auth/AuthCaptcha";
 import { SignupHoneypotField } from "@/components/auth/SignupHoneypotField";
 import { withCaptchaToken } from "@/lib/auth/captcha";
+import { readSignupUtm } from "@/lib/auth/utm-capture";
 import { assertSignupBotAllowed } from "@/lib/auth/signup-bot-guard";
 import {
   EmailExistsMessage,
@@ -146,6 +147,7 @@ export function StartLanding({
           data: {
             newsletter_opted_in: newsletterOptedIn,
             tuesday_nudge_opted_in: tuesdayNudgeOptedIn,
+            ...readSignupUtm(document.cookie),
           },
         },
         captcha.token,
