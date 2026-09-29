@@ -7,6 +7,7 @@ import {
   getCoachPriceId,
   getMentorSeatPriceId,
   getPackPriceId,
+  isRetiredPackCheckout,
   parseCoachCheckoutParams,
   parseMentorSeatCheckoutParams,
   parsePackCheckoutParams,
@@ -24,6 +25,10 @@ import Stripe from "stripe";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
+  if (isRetiredPackCheckout(requestUrl.searchParams)) {
+    return NextResponse.redirect(new URL("/pricing", requestUrl.origin));
+  }
+
   const coachParams = parseCoachCheckoutParams(requestUrl.searchParams);
   const packParams = parsePackCheckoutParams(requestUrl.searchParams);
   const seatParams = parseMentorSeatCheckoutParams(requestUrl.searchParams);
